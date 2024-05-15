@@ -22,8 +22,14 @@ header {
     padding: 8px 16px;
     color: #ffffff;
     font-weight: 500;
-    font-size: 32px;
-    text-align: right;
+    font-size: 24px;
+    text-align: center;
+}
+
+.description {
+    font-weight: 300;
+    color: #e3e3e3;
+    margin: 8px auto;
 }
 
 .container {
