@@ -82,6 +82,8 @@ body {
     font-style: normal;
     background-color: #D1BB9E;
     width: 100%;
+    max-width: 735px;
+    margin: 0 auto;
     overflow-x: hidden;
 }
 
@@ -175,7 +177,7 @@ header h1 {
     right: 16px;
 }
 
-body > footer {
+body>footer {
     font-weight: 100;
     font-size: 20px;
     color: #2C2A2A;
@@ -241,7 +243,7 @@ body > footer {
     gap: 16px;
     overflow-y: auto;
     overflow-x: hidden;
-    box-shadow: rgba(0, 0, 0,.25) 0 4px 4px;
+    box-shadow: rgba(0, 0, 0, .25) 0 4px 4px;
 }
 
 .content-top-bar {
@@ -273,7 +275,7 @@ body > footer {
     border-radius: 0 0 8px 8px;
 }
 
-.bottom-nav-bar{
+.bottom-nav-bar {
     position: relative;
     margin: 32px 16px 24px 16px;
     padding: 0 16px;
@@ -285,13 +287,13 @@ body > footer {
     align-items: center;
 }
 
-.bottom-nav-bar span{
+.bottom-nav-bar span {
     font-size: 22px;
     font-weight: 200;
     color: #D7D7D7;
 }
 
-.bottom-nav-bar .counter-button{
+.bottom-nav-bar .counter-button {
     width: 70px;
     height: 70px;
     border-radius: 50%;
@@ -309,4 +311,14 @@ body > footer {
 
 .hidden {
     display: none;
+}
+
+@media screen and (min-width:735px) {
+    header{
+        margin-top: 24px;
+        border-radius: 8px;
+    }
+    .container {
+        padding: 16px 0;
+    }
 }
