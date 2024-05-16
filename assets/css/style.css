@@ -189,10 +189,11 @@ body>footer {
 .modal {
     height: 100svh;
     width: 100vw;
+    max-width: 735px;
+    margin: auto;
     z-index: 2;
     position: fixed;
     top: 0;
-    left: 0;
     background-color: #D1BB9E;
     display: grid;
     padding-bottom: 16px;
@@ -309,15 +310,20 @@ body>footer {
 
 /* End Modal */
 
+*[onclick] {
+    cursor: pointer;
+}
+
 .hidden {
     display: none;
 }
 
 @media screen and (min-width:735px) {
-    header{
+    header {
         margin-top: 24px;
         border-radius: 8px;
     }
+
     .container {
         padding: 16px 0;
     }

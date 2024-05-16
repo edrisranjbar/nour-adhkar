@@ -49,6 +49,7 @@ const gotoNextDhikr = () => {
         updateTotalProgress();
     }
     else{
+        dhikrIndex = 0;
         closeModal();
     }
 }
@@ -62,6 +63,7 @@ const openModal = (collection) => {
     openedCollection = collection;
     openedDhikr = collection.adhkar[dhikrIndex];
     counter = 0;
+    updateTotalProgress();
     injectCollectionDataIntoModal(collection);
     modal.classList.remove('hidden');
 };
