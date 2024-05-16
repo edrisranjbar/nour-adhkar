@@ -1,12 +1,14 @@
 const modal = document.querySelector('.modal');
 const modalTitle = document.querySelector('#modal-title');
 const dhikrTitle = document.querySelector('#dhikr-title');
+const progressIndicator = document.querySelector('.progressbar-fill');
 const dhikrText = document.querySelector('#dhikr-text');
 const dhikrCount = document.querySelector('#dhikr-count');
 const dhikrProgressDetails = document.querySelector('#dhikr-progress-details');
 const dhikrTranslation = document.querySelector('#dhikr-translation');
 const counterButton = document.querySelector('.counter-button');
 
+let totalProgress = 0;
 let openedCollection = null;
 let openedDhikr = null;
 let counter = 0;
@@ -44,6 +46,7 @@ const gotoNextDhikr = () => {
         openedDhikr = openedCollection.adhkar[++dhikrIndex];
         updateCounterLabelValue();
         injectDhikrDataIntoModal();
+        updateTotalProgress();
     }
     else{
         closeModal();
@@ -67,3 +70,12 @@ const closeModal = () => {
     modal.classList.add('hidden');
 };
 
+const updateTotalProgress = () => {
+    progressIndicator.style.width = `${calculateTotalProgress()}%`;
+}
+
+const calculateTotalProgress = () => {
+    const total = openedCollection.adhkar.length;
+    const currentDhikrIndex = openedCollection.adhkar.findIndex((element) => element === openedDhikr) + 1;
+    return totalProgress = Math.max((currentDhikrIndex / total) * 100, 5);
+}
