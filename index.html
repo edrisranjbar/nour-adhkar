@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="fa">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>اذکار نور - اذکار صبحگاه، اذکار شامگاه به فارسی</title>
     <meta name="description" content="اذکار نور، پلتفرم فارسی اذکار و ادعیه اسلامی">
-    <meta name="keywords" content="اذکار و دعاهای اسلامی, اذکار, اذکار نور, اذکار فارسی, اذکار شامگاه, اذکار صبحگاه, اهل سنت و جماعت">
+    <meta name="keywords"
+        content="اذکار و دعاهای اسلامی, اذکار, اذکار نور, اذکار فارسی, اذکار شامگاه, اذکار صبحگاه, اهل سنت و جماعت">
     <meta name="author" content="ادریس رنجبر">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
@@ -29,13 +31,15 @@
 
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body dir="rtl">
     <header>
         <h1>اذکار نور</h1>
         <p class="description">پلتفرم فارسی اذکار و ادعیه اسلامی</p>
     </header>
     <main class="container">
-        <div class="category-card" style="background-image: url('assets/images/morning.png')">
+        <div class="category-card" style="background-image: url('assets/images/morning.png')"
+        onclick="openModal();">
             <span class="card-text-right">اذکار صبحگاه</span>
         </div>
         <div class="category-card" style="background-image: url('assets/images/night.png')">
@@ -53,5 +57,47 @@
     <footer>
         نسخه آزمایشی ۰.۱
     </footer>
+
+    <section id="morning" class="modal hidden">
+        <header>
+            <div class="d-flex">
+                <img class="appbar-action-button" src="assets/icons/back-button.svg"
+                alt="برگشتن" onclick="closeModal();">
+                <h1>اذکار صبحگاه</h1>
+            </div>
+            <span class="progressbar-container">
+                <span class="progressbar-fill" style="width:80%;"></span>
+            </span>
+        </header>
+        <main class="modal-container">
+            <span class="fade-out"></span>
+            <div class="content-top-bar">
+                <h2>آیة الکرسی</h2>
+                <img class="share-button" src="assets/icons/share.svg"
+                alt="اشتراک گذاری" onclick="share();">
+            </div>
+            <p>
+                اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا
+                فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ
+                يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالأَرْضَ وَلاَ يَؤُودُهُ
+                حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ.
+            </p>
+            <p>
+                خدائی بجز الله وجود ندارد و او زنده‌ی پایدار (و جهان هستی را) نگهدار است. او را نه چرتی و نه خوابی فرا نمی‌گیرد (و
+                همواره بیدار است و سستی و رخوت بدو راه ندارد). از آنِ او است آنچه در آسمانها و آنچه در زمین است (و در ملک کائنات، او را
+                انبازی نیست). کیست آن که در پیشگاه او میانجیگری کند مگر با اجازه‌ی او؟ می‌داند آنچه را که در پیش روی مردمان است و آنچه
+                را که در پشت سر آنان است (و مطّلع بر گذشته و حال و آینده، و آگاه بر بود و نبود جهان است و اصلاً همه‌ی زمانها و مکانها در
+                پیشگاه علم او یکسان است. مردمان) چیزی از علم او را فراچنگ نمی‌آورند جز آن مقداری را که وی بخواهد....
+            </p>
+        </main>
+        <footer class="bottom-nav-bar">
+            <span>۱۰۰ مرتبه</span>
+            <span class="counter-button">۱۰</span>
+            <span>ذکر ۱ از ۲۳</span>
+        </footer>
+    </section>
+
+    <script src="assets/js/script.js"></script>
 </body>
+
 </html>

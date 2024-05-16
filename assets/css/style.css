@@ -29,6 +29,10 @@ header {
     background-size: cover;
 }
 
+header h1 {
+    display: inline-block;
+}
+
 .description {
     font-weight: 300;
     color: #e3e3e3;
@@ -74,6 +78,10 @@ header {
     gap: 8px;
 }
 
+.d-flex {
+    display: flex;
+}
+
 .card-sm {
     width: 100%;
     background-color: #A79277;
@@ -97,10 +105,136 @@ header {
     right: 16px;
 }
 
-footer {
+body > footer {
     font-weight: 100;
     font-size: 20px;
     color: #2C2A2A;
     text-align: center;
     margin-bottom: 16px;
+}
+
+/* Modal */
+.modal {
+    height: 100svh;
+    width: 100vw;
+    z-index: 2;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #D1BB9E;
+    display: grid;
+    padding-bottom: 16px;
+}
+
+.modal>header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: right;
+}
+
+.appbar-action-button {
+    margin-left: 8px;
+}
+
+.modal>header h1 {
+    font-size: 24px;
+}
+
+.progressbar-container {
+    display: inline-block;
+    width: 178px;
+    height: 20px;
+    border-radius: 8px;
+    background-color: #9C8466;
+    position: relative;
+}
+
+.progressbar-fill {
+    display: inline-block;
+    height: 100%;
+    background-color: #D1BB9E;
+    border-radius: 8px;
+    position: absolute;
+    left: 0px;
+}
+
+.modal-container {
+    position: relative;
+    margin: 24px 16px 0 16px;
+    padding: 16px;
+    background-color: rgba(240, 240, 240, .67);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    box-shadow: rgba(0, 0, 0,.25) 0 4px 4px;
+}
+
+.content-top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content-top-bar h2 {
+    font-size: 24px;
+    font-weight: 500;
+    color: #9C8466;
+}
+
+.modal-container>p {
+    font-size: 20px;
+    font-weight: 300;
+    color: #1E1E1E;
+}
+
+.modal .fade-out {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    height: 100px;
+    background-image: linear-gradient(to bottom, #f0f0f000, rgba(240, 240, 240, .67));
+    filter: blur(4px);
+    border-radius: 0 0 8px 8px;
+}
+
+.bottom-nav-bar{
+    position: relative;
+    margin: 32px 16px 24px 16px;
+    padding: 0 16px;
+    height: 50px;
+    background-color: #9C8466;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bottom-nav-bar span{
+    font-size: 22px;
+    font-weight: 200;
+    color: #D7D7D7;
+}
+
+.bottom-nav-bar .counter-button{
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    font-size: 32px;
+    font-weight: 700;
+    outline: 2px solid #A79277;
+    background-color: #D1BB9E;
+    color: #9C8466;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* End Modal */
+
+.hidden {
+    display: none;
 }
