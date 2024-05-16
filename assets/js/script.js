@@ -2,6 +2,8 @@ const modal = document.querySelector('.modal');
 const modalTitle = document.querySelector('#modal-title');
 const dhikrTitle = document.querySelector('#dhikr-title');
 const dhikrText = document.querySelector('#dhikr-text');
+const dhikrCount = document.querySelector('#dhikr-count');
+const dhikrProgressDetails = document.querySelector('#dhikr-progress-details');
 const dhikrTranslation = document.querySelector('#dhikr-translation');
 const counterButton = document.querySelector('.counter-button');
 
@@ -17,6 +19,8 @@ const injectCollectionDataIntoModal = (collection) => {
 }
 
 const injectDhikrDataIntoModal = () => {
+    dhikrCount.textContent = `${openedDhikr.count} مرتبه`;
+    dhikrProgressDetails.textContent = `${counter} از ${openedDhikr.count} مرتبه`;
     dhikrTitle.textContent = openedDhikr.name;
     dhikrText.textContent = openedDhikr.text;
     dhikrTranslation.textContent = openedDhikr.translation;
@@ -48,6 +52,7 @@ const gotoNextDhikr = () => {
 
 const updateCounterLabelValue = () => {
     counterButton.textContent = counter;
+    dhikrProgressDetails.textContent = `${counter} از ${openedDhikr.count} مرتبه`;
 }
 
 const openModal = (collection) => {
