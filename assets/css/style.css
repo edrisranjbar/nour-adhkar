@@ -24,6 +24,9 @@ header {
     font-weight: 500;
     font-size: 24px;
     text-align: center;
+    background-image: url('../images/pattern.svg');
+    background-repeat: repeat;
+    background-size: cover;
 }
 
 .description {
@@ -74,6 +77,16 @@ header {
 .card-sm {
     width: 100%;
     background-color: #A79277;
+}
+
+.card-text-top {
+    top: 8px;
+    bottom: unset;
+}
+
+.card-text-bottom {
+    bottom: 8px;
+    top: unset;
 }
 
 .card-text-left {
