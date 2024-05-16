@@ -157,6 +157,7 @@ body > footer {
     border-radius: 8px;
     position: absolute;
     left: 0px;
+    transition: width 1s ease-in-out;
 }
 
 .modal-container {
