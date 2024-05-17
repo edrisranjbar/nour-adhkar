@@ -303,6 +303,10 @@ body>footer {
     outline: 2px solid #A79277;
     background-color: #D1BB9E;
     color: #9C8466;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    margin: auto;
     display: flex;
     align-items: center;
     justify-content: center;
