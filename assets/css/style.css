@@ -267,16 +267,6 @@ body>footer {
     color: #1E1E1E;
 }
 
-.modal .fade-out {
-    position: absolute;
-    bottom: 0px;
-    width: 100%;
-    height: 100px;
-    background-image: linear-gradient(to bottom, #f0f0f000, rgba(240, 240, 240, .67));
-    filter: blur(4px);
-    border-radius: 0 0 8px 8px;
-}
-
 .bottom-nav-bar {
     position: relative;
     margin: 32px 16px 24px 16px;

@@ -72,10 +72,12 @@ const openModal = (collection) => {
     updateTotalProgress();
     injectCollectionDataIntoModal(collection);
     modal.classList.remove('hidden');
+    document.body.style.overflowY = 'hidden';
 }
 
 const closeModal = () => {
     modal.classList.add('hidden');
+    document.body.style.overflowY = 'unset';
 }
 
 const share = () => {
