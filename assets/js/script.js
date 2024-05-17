@@ -4,6 +4,7 @@ const modalTitle = document.querySelector('#modal-title');
 const dhikrTitle = document.querySelector('#dhikr-title');
 const progressIndicator = document.querySelector('.progressbar-fill');
 const dhikrText = document.querySelector('#dhikr-text');
+const dhikrPrefix = document.querySelector('#dhikr-prefix');
 const dhikrCount = document.querySelector('#dhikr-count');
 const dhikrProgressDetails = document.querySelector('#dhikr-progress-details');
 const dhikrTranslation = document.querySelector('#dhikr-translation');
@@ -27,6 +28,7 @@ const injectDhikrDataIntoModal = () => {
     dhikrCount.textContent = `${openedDhikr.count} مرتبه`;
     dhikrProgressDetails.textContent = `${counter} از ${openedDhikr.count} مرتبه`;
     dhikrTitle.textContent = openedDhikr.name;
+    dhikrPrefix.textContent = openedDhikr.prefix;
     dhikrText.innerHTML = openedDhikr.text;
     dhikrTranslation.textContent = openedDhikr.translation;
 }
@@ -100,7 +102,7 @@ const playAudio = (audioPath) => {
 }
 
 const vibrate = () => {
-    window.navigator.vibrate([400])
+    window.navigator.vibrate([200])
 }
 
 // Event listener
