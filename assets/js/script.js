@@ -8,6 +8,8 @@ const dhikrProgressDetails = document.querySelector('#dhikr-progress-details');
 const dhikrTranslation = document.querySelector('#dhikr-translation');
 const counterButton = document.querySelector('.counter-button');
 
+const tapSoundAudioPath = 'assets/audios/click.mp3';
+
 let totalProgress = 0;
 let openedCollection = null;
 let openedDhikr = null;
@@ -34,6 +36,7 @@ const count = () => {
     if (counter >= openedDhikr.count) {
         gotoNextDhikr();
     }
+    playAudio(tapSoundAudioPath);
 }
 
 const thereIsANextDhikr = () => {
@@ -80,4 +83,9 @@ const calculateTotalProgress = () => {
     const total = openedCollection.adhkar.length;
     const currentDhikrIndex = openedCollection.adhkar.findIndex((element) => element === openedDhikr) + 1;
     return totalProgress = Math.max((currentDhikrIndex / total) * 100, 5);
+}
+
+const playAudio = (audioPath) => {
+    const audio = new Audio(audioPath);
+    audio.play();
 }
