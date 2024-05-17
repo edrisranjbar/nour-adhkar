@@ -92,5 +92,5 @@ const playAudio = (audioPath) => {
 }
 
 const vibrate = () => {
-    window.navigator.vibrate([500])
+    window.navigator.vibrate([400])
 }
