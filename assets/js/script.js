@@ -32,7 +32,7 @@ const injectDhikrDataIntoModal = () => {
 }
 
 const count = (event) => {
-    if (event.target.id == 'share-button') { return }
+    if (event && event.target.id == 'share-button') { return }
     counter++;
     updateCounterLabelValue();
     if (counter >= openedDhikr.count) {
