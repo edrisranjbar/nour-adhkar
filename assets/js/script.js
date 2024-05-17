@@ -83,7 +83,7 @@ const closeModal = () => {
 }
 
 const share = () => {
-    console.log('Copy text');
+    copyDhikr(openedDhikr);
 }
 
 const updateTotalProgress = () => {
@@ -103,6 +103,16 @@ const playAudio = (audioPath) => {
 
 const vibrate = () => {
     window.navigator.vibrate([200])
+}
+
+const copyDhikr = async (openedDhikr) => {
+    const text = `${openedDhikr.name}\n
+    ${openedDhikr.prefix}\n
+    ${openedDhikr.text}\n
+    ${openedDhikr.translation}\n
+    منبع: ${window.location.href}
+    `;
+    navigator.clipboard.writeText(text).then(()=> console.log('Dhikr copied!'));
 }
 
 // Event listener
