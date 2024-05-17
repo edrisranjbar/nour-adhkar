@@ -26,7 +26,7 @@ const injectDhikrDataIntoModal = () => {
     dhikrCount.textContent = `${openedDhikr.count} مرتبه`;
     dhikrProgressDetails.textContent = `${counter} از ${openedDhikr.count} مرتبه`;
     dhikrTitle.textContent = openedDhikr.name;
-    dhikrText.textContent = openedDhikr.text;
+    dhikrText.innerHTML = openedDhikr.text;
     dhikrTranslation.textContent = openedDhikr.translation;
 }
 
