@@ -1,4 +1,5 @@
 const modal = document.querySelector('.modal');
+const modalContent = document.querySelector('.modal-container');
 const modalTitle = document.querySelector('#modal-title');
 const dhikrTitle = document.querySelector('#dhikr-title');
 const progressIndicator = document.querySelector('.progressbar-fill');
@@ -30,7 +31,8 @@ const injectDhikrDataIntoModal = () => {
     dhikrTranslation.textContent = openedDhikr.translation;
 }
 
-const count = () => {
+const count = (event) => {
+    if (event.target.id == 'share-button') { return }
     counter++;
     updateCounterLabelValue();
     if (counter >= openedDhikr.count) {
@@ -45,14 +47,14 @@ const thereIsANextDhikr = () => {
 
 const gotoNextDhikr = () => {
     counter = 0;
-    if (thereIsANextDhikr()){
+    if (thereIsANextDhikr()) {
         vibrate();
         openedDhikr = openedCollection.adhkar[++dhikrIndex];
         updateCounterLabelValue();
         injectDhikrDataIntoModal();
         updateTotalProgress();
     }
-    else{
+    else {
         dhikrIndex = 0;
         closeModal();
     }
@@ -70,11 +72,15 @@ const openModal = (collection) => {
     updateTotalProgress();
     injectCollectionDataIntoModal(collection);
     modal.classList.remove('hidden');
-};
+}
 
 const closeModal = () => {
     modal.classList.add('hidden');
-};
+}
+
+const share = () => {
+    console.log('Copy text');
+}
 
 const updateTotalProgress = () => {
     progressIndicator.style.width = `${calculateTotalProgress()}%`;
@@ -94,3 +100,6 @@ const playAudio = (audioPath) => {
 const vibrate = () => {
     window.navigator.vibrate([400])
 }
+
+// Event listener
+modalContent.addEventListener('click', (event) => { count(event) });
