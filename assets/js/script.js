@@ -46,6 +46,7 @@ const thereIsANextDhikr = () => {
 const gotoNextDhikr = () => {
     counter = 0;
     if (thereIsANextDhikr()){
+        vibrate();
         openedDhikr = openedCollection.adhkar[++dhikrIndex];
         updateCounterLabelValue();
         injectDhikrDataIntoModal();
@@ -88,4 +89,8 @@ const calculateTotalProgress = () => {
 const playAudio = (audioPath) => {
     const audio = new Audio(audioPath);
     audio.play();
+}
+
+const vibrate = () => {
+    window.navigator.vibrate([500])
 }
