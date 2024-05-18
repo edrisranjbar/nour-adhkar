@@ -113,6 +113,7 @@ const copyDhikr = async (openedDhikr) => {
     منبع: ${window.location.href}
     `;
     navigator.clipboard.writeText(text).then(()=> console.log('Dhikr copied!'));
+    // todo: show a success snackbar to say this dhikr has been copied.
 }
 
 // Event listener

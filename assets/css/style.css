@@ -131,6 +131,7 @@ header h1 {
     position: relative;
     cursor: pointer;
     transition: all .3s ease-in-out;
+    user-select: none;
 }
 
 .category-card:hover {
