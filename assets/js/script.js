@@ -80,6 +80,7 @@ const openModal = (collection) => {
 const closeModal = () => {
     modal.classList.add('hidden');
     document.body.style.overflowY = 'unset';
+    openedCollection = null;
 }
 
 const share = () => {
@@ -118,3 +119,8 @@ const copyDhikr = async (openedDhikr) => {
 
 // Event listener
 modalContent.addEventListener('click', (event) => { count(event) });
+document.body.addEventListener('keypress', (e) => {
+    if (openedCollection !== null && e.code === 'Space'){
+        count();
+    }
+})
