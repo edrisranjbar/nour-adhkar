@@ -6,13 +6,17 @@
 
   <main class="container">
 
-    <CategoryCard image-src="src/assets/images/morning.png">
-      <h2 class="card-text-right">اذکار صبحگاه</h2>
-    </CategoryCard>
+    <RouterLink to="morning">
+      <CategoryCard image-src="src/assets/images/morning.png">
+        <h2 class="card-text-right">اذکار صبحگاه</h2>
+      </CategoryCard>
+    </RouterLink>
 
-    <CategoryCard image-src="src/assets/images/night.png">
-      <h2 class="card-text-left">اذکار شامگاه</h2>
-    </CategoryCard>
+    <RouterLink to="night">
+      <CategoryCard image-src="src/assets/images/night.png">
+        <h2 class="card-text-left">اذکار شامگاه</h2>
+      </CategoryCard>
+    </RouterLink>
 
     <section class="row">
       <CategoryCard
@@ -31,7 +35,7 @@
 
   </main>
 
-  <Footer />
+  <Footer/>
 </template>
 
 <script>

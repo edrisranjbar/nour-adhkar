@@ -86,6 +86,7 @@ body {
     max-width: 735px;
     margin: 0 auto;
     overflow-x: hidden;
+    direction: rtl;
 }
 
 header {
