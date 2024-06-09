@@ -17,7 +17,7 @@
       </span>
     </header>
 
-    <main class="modal-container">
+    <main class="modal-container" @click="handleDhikrBodyClick">
       <div class="content-top-bar">
         <h2 id="dhikr-title"></h2>
         <img id="share-button" class="share-button" src="@/assets/icons/share.svg"
@@ -114,6 +114,11 @@ export default {
         this.gotoNextDhikr();
       } else if (event.code === 'Period' || event.code === 'ArrowRight') {
         this.gotoPrevDhikr();
+      }
+    },
+    handleDhikrBodyClick(event) {
+      if (event.target.id !== 'share-button') {
+        this.count();
       }
     },
   },
