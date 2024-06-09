@@ -1,4 +1,7 @@
-const morningCollection = new Collection('اذکار صبحگاه', [
+import Collection from "@/models/collection.js";
+import Dhikr from "@/models/dhikr.js";
+
+export const morningCollection = new Collection('اذکار صبحگاه', [
     new Dhikr(
         'آیة الکرسی',
         'أَعُوذُ بِاللهِ مِنْ الشَّيْطَانِ الرَّجِيمِ',
@@ -216,7 +219,7 @@ const morningCollection = new Collection('اذکار صبحگاه', [
     ),
 ]);
 
-const nightCollection = new Collection('اذکار شامگاه', [
+export const nightCollection = new Collection('اذکار شامگاه', [
     new Dhikr(
         'آیة الکرسی',
         'أَعُوذُ بِاللهِ مِنْ الشَّيْطَانِ الرَّجِيمِ',

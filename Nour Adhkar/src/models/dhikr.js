@@ -1,4 +1,4 @@
-class Dhikr {
+export default class Dhikr {
     constructor(name, prefix, text, translation, count) {
         this.name = name;
         this.prefix = prefix;

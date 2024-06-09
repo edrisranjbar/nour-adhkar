@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import HomeView from '@/views/HomeView.vue'
 import DhikrView from "@/views/DhikrView.vue";
+import {morningCollection, nightCollection} from "@/assets/js/data.js";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,7 +16,8 @@ const router = createRouter({
       name: 'morning',
       component: DhikrView,
       props: {
-        title: 'اذکار صبحگاه'
+        title: 'اذکار صبحگاه',
+        openedCollection: morningCollection
       }
     },
     {
@@ -23,7 +25,8 @@ const router = createRouter({
       name: 'night',
       component: DhikrView,
       props: {
-        title: 'اذکار شامگاه'
+        title: 'اذکار شامگاه',
+        openedCollection: nightCollection
       }
     },
   ]
