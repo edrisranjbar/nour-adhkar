@@ -128,13 +128,34 @@ export default {
       dhikrIndex: 0,
       openedDhikr: this.openedCollection.adhkar[0],
       tapSoundAudioPath: tapSound,
+      touchstartX: 0,
+      touchendX: 0,
     }
   },
   mounted() {
     window.addEventListener('keydown', this.handleKeydown);
+    document.addEventListener('touchstart', e => {
+      this.touchstartX = e.changedTouches[0].screenX
+    })
+
+    document.addEventListener('touchend', e => {
+      this.touchendX = e.changedTouches[0].screenX
+      this.checkDirection()
+    })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeydown);
+    document.removeEventListener('touchstart', (e) => {
+      this.touchstartX = e.changedTouches[0].screenX
+    });
+    document.removeEventListener('touchend', e => {
+      this.touchendX = e.changedTouches[0].screenX
+      this.checkDirection()
+    })
+  },
+  checkDirection() {
+    if (this.touchendX < this.touchstartX) this.gotoNextDhikr();
+    if (this.touchendX > this.touchstartX) this.gotoPrevDhikr();
   },
 }
 </script>
