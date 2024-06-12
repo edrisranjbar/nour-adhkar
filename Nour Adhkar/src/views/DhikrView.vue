@@ -121,6 +121,10 @@ export default {
         this.count();
       }
     },
+    checkDirection() {
+      if (this.touchendX < this.touchstartX) this.gotoNextDhikr();
+      if (this.touchendX > this.touchstartX) this.gotoPrevDhikr();
+    },
   },
   data() {
     return {
@@ -135,7 +139,7 @@ export default {
   mounted() {
     window.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('touchstart', e => {
-      this.touchstartX = e.changedTouches[0].screenX
+      this.touchstartX = e.changedTouches[0].screenX;
     })
 
     document.addEventListener('touchend', e => {
@@ -152,10 +156,6 @@ export default {
       this.touchendX = e.changedTouches[0].screenX
       this.checkDirection()
     })
-  },
-  checkDirection() {
-    if (this.touchendX < this.touchstartX) this.gotoNextDhikr();
-    if (this.touchendX > this.touchstartX) this.gotoPrevDhikr();
   },
 }
 </script>
