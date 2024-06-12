@@ -121,9 +121,16 @@ export default {
         this.count();
       }
     },
+    handleTouchStart(event) {
+      this.touchstartX = event.changedTouches[0].screenX;
+    },
+    handleTouchEnd(event) {
+      this.touchendX = event.changedTouches[0].screenX;
+      this.checkDirection();
+    },
     checkDirection() {
-      if (this.touchendX < this.touchstartX) this.gotoNextDhikr();
-      if (this.touchendX > this.touchstartX) this.gotoPrevDhikr();
+      if (this.touchendX < this.touchstartX) this.gotoPrevDhikr();
+      if (this.touchendX > this.touchstartX) this.gotoNextDhikr();
     },
   },
   data() {
@@ -138,24 +145,13 @@ export default {
   },
   mounted() {
     window.addEventListener('keydown', this.handleKeydown);
-    document.addEventListener('touchstart', e => {
-      this.touchstartX = e.changedTouches[0].screenX;
-    })
-
-    document.addEventListener('touchend', e => {
-      this.touchendX = e.changedTouches[0].screenX
-      this.checkDirection()
-    })
+    document.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+    document.addEventListener('touchend', e => this.handleTouchEnd(e));
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeydown);
-    document.removeEventListener('touchstart', (e) => {
-      this.touchstartX = e.changedTouches[0].screenX
-    });
-    document.removeEventListener('touchend', e => {
-      this.touchendX = e.changedTouches[0].screenX
-      this.checkDirection()
-    })
+    document.removeEventListener('touchstart', (e) => this.handleTouchStart(e));
+    document.removeEventListener('touchend', (e) => this.handleTouchEnd(e));
   },
 }
 </script>
