@@ -1,8 +1,5 @@
 <template>
-  <Header
-      title="اذکار نور"
-      description="پلتفرم فارسی اذکار و ادعیه اسلامی"
-  />
+  <Header title="اذکار نور" description="پلتفرم فارسی اذکار و ادعیه اسلامی" />
 
   <main class="container">
 
@@ -25,17 +22,16 @@
       >
         <h2 class="card-text-top card-text-right">دعاء قبل خواب</h2>
       </CategoryCard>
-      <CategoryCard
-          image-src="src/assets/images/prayer.png"
-          size="small"
-      >
-        <h2 class="cart-text-bottom card-text-left">دعاء استخاره</h2>
-      </CategoryCard>
+      <RouterLink to="istikhara" class="card-sm">
+        <CategoryCard image-src="src/assets/images/prayer.png">
+          <h2 class="cart-text-bottom card-text-left">دعاء استخاره</h2>
+        </CategoryCard>
+      </RouterLink>
     </section>
 
   </main>
 
-  <Footer/>
+  <Footer />
 </template>
 
 <script>

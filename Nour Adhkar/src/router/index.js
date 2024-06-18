@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import DhikrView from "@/views/DhikrView.vue";
-import {morningCollection, nightCollection} from "@/assets/js/data.js";
+import { morningCollection, nightCollection, istikharaCollection } from "@/assets/js/data.js";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +29,15 @@ const router = createRouter({
         openedCollection: nightCollection
       }
     },
+    {
+      path: '/istikhara',
+      name: 'istikhara',
+      component: DhikrView,
+      props: {
+        title: 'دعاء استخاره',
+        openedCollection: istikharaCollection
+      }
+    }
   ]
 })
 
