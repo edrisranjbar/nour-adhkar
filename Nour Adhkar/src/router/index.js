@@ -1,7 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import DhikrView from "@/views/DhikrView.vue";
-import { morningCollection, nightCollection, istikharaCollection } from "@/assets/js/data.js";
+import { morningCollection } from '@/assets/js/collections/morning';
+import { nightCollection } from '@/assets/js/collections/night';
+import { istikharaCollection } from '@/assets/js/collections/istikhara';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
