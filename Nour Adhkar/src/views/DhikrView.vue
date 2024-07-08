@@ -84,7 +84,7 @@ export default {
         this.vibrate();
         this.openedDhikr = this.openedCollection.adhkar[++this.dhikrIndex];
       } else {
-        // todo: Go to home View
+        this.$router.push('/congrats');
       }
     },
     share: function () {
