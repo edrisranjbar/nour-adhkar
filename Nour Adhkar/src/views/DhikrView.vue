@@ -1,3 +1,10 @@
+<style scoped>
+.container {
+  position: unset;
+  top: unset;
+  transform: unset;
+}
+</style>
 <template>
   <section id="morning" class="modal">
 
