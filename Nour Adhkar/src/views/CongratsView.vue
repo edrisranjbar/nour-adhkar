@@ -14,6 +14,7 @@ a {
     border-radius: 16px;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
     width: 100%;
+    max-width: calc(100vw - 32px);
     min-height: 50vh;
     max-height: 550px;
     padding: 66px 16px 16px 16px;
