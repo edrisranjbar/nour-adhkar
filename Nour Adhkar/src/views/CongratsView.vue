@@ -15,7 +15,7 @@ a {
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
     width: 100%;
     min-height: 50vh;
-    max-height: 461px;
+    max-height: 550px;
     padding: 66px 16px 16px 16px;
     text-align: center;
     position: relative;
