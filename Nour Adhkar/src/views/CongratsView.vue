@@ -4,9 +4,9 @@ a {
 }
 
 .container {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
 }
 
 #congrats-card {
@@ -75,13 +75,6 @@ a {
 </style>
 
 <template>
-    <header>
-        <div class="d-flex  align-items-center">
-            <RouterLink to="/" class="appbar-action-button-wrapper">
-                <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
-            </RouterLink>
-        </div>
-    </header>
 
     <main class="container">
         <section id="congrats-card">
