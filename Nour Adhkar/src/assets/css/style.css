@@ -159,6 +159,10 @@ header h1 {
     display: flex;
 }
 
+.align-items-center {
+    align-items: center;
+}
+
 .card-sm {
     width: 100%;
     background-color: #A79277;
@@ -209,6 +213,13 @@ header h1 {
     align-items: center;
     justify-content: space-between;
     text-align: right;
+}
+
+.appbar-action-button-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
 }
 
 .appbar-action-button {
