@@ -32,6 +32,7 @@
       </div>
       <p id="dhikr-prefix">{{ openedDhikr.prefix }}</p>
       <p id="dhikr-text">{{ openedDhikr.text }}</p>
+      <hr>
       <p id="dhikr-translation">{{ openedDhikr.translation }}</p>
     </main>
 
