@@ -131,14 +131,27 @@ export default {
     },
     handleTouchStart(event) {
       this.touchstartX = event.changedTouches[0].screenX;
+      this.touchstartY = event.changedTouches[0].screenY;
     },
     handleTouchEnd(event) {
       this.touchendX = event.changedTouches[0].screenX;
+      this.touchendY = event.changedTouches[0].screenY;
       this.checkDirection();
     },
     checkDirection() {
-      if (this.touchendX < this.touchstartX) this.gotoPrevDhikr();
-      if (this.touchendX > this.touchstartX) this.gotoNextDhikr();
+      const swipeThreshold = 30; // Minimum distance (in pixels) for a swipe to be considered valid
+      const verticalThreshold = 50; // Maximum vertical movement allowed
+
+      const diffX = this.touchendX - this.touchstartX;
+      const diffY = this.touchendY - this.touchstartY;
+
+      if (Math.abs(diffX) > swipeThreshold && Math.abs(diffY) < verticalThreshold) {
+        if (diffX < 0) {
+          this.gotoPrevDhikr();
+        } else if (diffX > 0) {
+          this.gotoNextDhikr();
+        }
+      }
     },
   },
   data() {
