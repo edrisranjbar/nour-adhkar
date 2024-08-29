@@ -89,7 +89,12 @@ export default {
     gotoNextDhikr: function () {
       this.counter = 0;
       if (this.isThereANextDhikr) {
-        this.vibrate();
+        try {
+          if ("vibrate" in navigator) this.vibrate();
+        }
+        catch {
+          console.error('Can not vibrate!');
+        }
         this.openedDhikr = this.openedCollection.adhkar[++this.dhikrIndex];
       } else {
         this.$router.push('/congrats');
