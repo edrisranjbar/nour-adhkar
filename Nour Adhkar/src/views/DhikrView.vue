@@ -6,16 +6,15 @@
 }
 </style>
 <template>
-  <section id="morning" class="modal">
+
+  <CongratsModal v-if="showCongratsModal" />
+
+  <section id="morning" class="modal" v-if="!showCongratsModal">
 
     <header>
       <div class="d-flex">
         <RouterLink to="/">
-          <img
-              class="appbar-action-button"
-              src="@/assets/icons/back-button.svg"
-              alt="برگشتن"
-          >
+          <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
         </RouterLink>
         <h1 id="modal-title">{{ title }}</h1>
       </div>
@@ -27,8 +26,7 @@
     <main class="modal-container" @click="handleDhikrBodyClick">
       <div class="content-top-bar">
         <h2 id="dhikr-title"></h2>
-        <img id="share-button" class="share-button" src="@/assets/icons/share.svg"
-             alt="اشتراک گذاری" @click="share()">
+        <img id="share-button" class="share-button" src="@/assets/icons/share.svg" alt="اشتراک گذاری" @click="share()">
       </div>
       <p id="dhikr-prefix">{{ openedDhikr.prefix }}</p>
       <p id="dhikr-text">{{ openedDhikr.text }}</p>
@@ -46,10 +44,14 @@
 </template>
 
 <script>
+import CongratsModal from "@/components/Congrats.vue";
 import Collection from "@/models/collection.js";
 import tapSound from "@/assets/audios/click.mp3"
 
 export default {
+  components: {
+    CongratsModal
+  },
   props: {
     title: String,
     openedCollection: Collection
@@ -67,6 +69,9 @@ export default {
           (element) => element.text === this.openedDhikr.text
       ) + 1;
       return Math.max((currentDhikrIndex / total) * 100, 5);
+    },
+    showCongratsModal: function () {
+      return !this.isThereANextDhikr && this.counter == this.openedDhikr.count;
     }
   },
   methods: {
@@ -74,8 +79,9 @@ export default {
       if (event && event.target.id === 'share-button') {
         return
       }
+      if (this.counter == this.openedDhikr.count) { return }
       this.counter++;
-      if (this.counter >= this.openedDhikr.count) {
+      if (this.counter >= this.openedDhikr.count && this.isThereANextDhikr) {
         this.gotoNextDhikr();
       }
       this.playAudio(this.tapSoundAudioPath);
@@ -87,8 +93,8 @@ export default {
       }
     },
     gotoNextDhikr: function () {
-      this.counter = 0;
       if (this.isThereANextDhikr) {
+        this.counter = 0;
         try {
           if ("vibrate" in navigator) this.vibrate();
         }
@@ -96,8 +102,6 @@ export default {
           console.error('Can not vibrate!');
         }
         this.openedDhikr = this.openedCollection.adhkar[++this.dhikrIndex];
-      } else {
-        this.$router.push('/congrats');
       }
     },
     share: function () {
