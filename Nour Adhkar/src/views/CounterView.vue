@@ -53,16 +53,21 @@
 
   </div>
 
+  <br>
+  <Footer />
+
 
 </template>
 
 <script>
 import CounterButton from '@/components/CounterButton.vue';
+import Footer from '@/components/Footer.vue';
 
 
 export default {
   components: {
-    CounterButton
+    CounterButton,
+    Footer,
   },
 }
 </script>

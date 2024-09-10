@@ -16,10 +16,7 @@
     </RouterLink>
 
     <section class="row">
-      <CategoryCard
-          image-src="src/assets/images/sleep.jpg"
-          size="small"
-      >
+      <CategoryCard image-src="src/assets/images/sleep.jpg" size="small">
         <h2 class="card-text-top card-text-right">دعاء قبل خواب</h2>
       </CategoryCard>
       <RouterLink to="istikhara" class="card-sm">
@@ -28,6 +25,10 @@
         </CategoryCard>
       </RouterLink>
     </section>
+
+    <RouterLink to="counter">
+      <CategoryCard image-src="src/assets/images/counter.svg" style="background-position: center;" />
+    </RouterLink>
 
   </main>
 

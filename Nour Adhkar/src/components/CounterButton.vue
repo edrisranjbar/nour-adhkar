@@ -1,6 +1,6 @@
 <style scoped>
 .counter-button {
-    width: max(280px, 70%);
+    width: 280px;
     aspect-ratio: 1/1;
     background-color: #9C8466;
     background-image: url("../assets/images/counterButton.svg");
