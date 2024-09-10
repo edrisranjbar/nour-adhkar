@@ -4,6 +4,7 @@
   top: unset;
   transform: unset;
 }
+header { height: 60px; }
 </style>
 <template>
 

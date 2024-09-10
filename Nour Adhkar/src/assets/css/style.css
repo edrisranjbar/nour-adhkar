@@ -91,7 +91,7 @@ body {
 
 header {
     width: 100%;
-    min-height: 66px;
+    min-height: 44px;
     background-color: #A79277;
     padding: 8px 16px;
     color: #ffffff;
@@ -208,7 +208,8 @@ header h1 {
     position: fixed;
     top: 0;
     background-color: #D1BB9E;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     padding-bottom: 16px;
 }
 
@@ -230,7 +231,7 @@ header h1 {
     margin-left: 8px;
 }
 
-.modal>header h1 {
+.modal>header h1,#modal-title {
     font-size: 24px;
 }
 
