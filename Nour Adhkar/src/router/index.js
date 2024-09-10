@@ -4,6 +4,7 @@ import DhikrView from "@/views/DhikrView.vue";
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
 import { istikharaCollection } from '@/assets/js/collections/istikhara';
+import CounterView from '@/views/CounterView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,6 +13,11 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView
+    },
+    {
+      path: '/counter',
+      name: 'counter',
+      component: CounterView
     },
     {
       path: '/morning',
