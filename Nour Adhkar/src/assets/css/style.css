@@ -227,12 +227,9 @@ header h1 {
     height: 50px;
 }
 
-.appbar-action-button {
-    margin-left: 8px;
-}
-
 .modal>header h1,#modal-title {
     font-size: 24px;
+    margin-right: 8px;
 }
 
 .progressbar-container {
