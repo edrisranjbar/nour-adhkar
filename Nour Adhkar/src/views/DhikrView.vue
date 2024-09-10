@@ -4,7 +4,7 @@
   top: unset;
   transform: unset;
 }
-header { height: 60px; }
+header { height: 80px; }
 </style>
 <template>
 
@@ -14,7 +14,7 @@ header { height: 60px; }
 
     <header>
       <div class="d-flex">
-        <RouterLink to="/">
+        <RouterLink to="/" class="align-items-center">
           <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
         </RouterLink>
         <h1 id="modal-title">{{ title }}</h1>
