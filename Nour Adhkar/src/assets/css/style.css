@@ -341,4 +341,8 @@ header h1 {
     .container {
         padding: 16px 0;
     }
+
+    .modal-container {
+        margin: 16px auto;
+    }
 }
