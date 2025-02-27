@@ -19,7 +19,7 @@ header { height: 80px; }
         </RouterLink>
         <h1 id="modal-title">{{ title }}</h1>
       </div>
-      <span class="progressbar-container">
+      <span class="progressbar-container" v-if="openedCollection.adhkar.length > 1">
         <span class="progressbar-fill" :style="{ width: totalProgress + '%' }"></span>
       </span>
     </header>
