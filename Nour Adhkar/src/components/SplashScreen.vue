@@ -9,6 +9,9 @@
             <div class="progress-container">
                 <div class="progress-bar" :style="{ width: progress + '%' }"></div>
             </div>
+            <p class="loading-text">
+                درحال بارگذاری<span class="dots">...</span>
+            </p>
         </div>
         <div>
             <p class="version-number">
@@ -61,12 +64,42 @@ export default {
     background-color: #b09b81;
     border-radius: 16px;
     overflow: hidden;
+    margin-bottom: 8px;
 }
 
 .progress-bar {
     height: 100%;
     background-color: #907554;
     transition: width 0.1s ease;
+}
+
+.loading-text {
+    font-size: 24px;
+    color: #9c8466;
+    margin-bottom: 40px;
+}
+
+.dots {
+    display: inline-block;
+    width: 0.75em;
+    overflow: hidden;
+    vertical-align: bottom;
+    animation: typing 6s 3;
+    animation-fill-mode: both;
+}
+
+@keyframes typing {
+    0% {
+        width: 0;
+    }
+
+    50% {
+        width: 0.75em;
+    }
+
+    100% {
+        width: 0;
+    }
 }
 
 .version-number {
