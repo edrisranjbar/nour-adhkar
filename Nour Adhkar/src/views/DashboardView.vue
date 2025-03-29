@@ -66,13 +66,28 @@ export default {
     },
     computed: {
         heartIconStyle() {
-            // Returns CSS filters to color the emoji
-            if (this.user.heartScore < 30) {
-                return { filter: 'grayscale(100%) brightness(0.5)' }; // Black
-            } else if (this.user.heartScore < 70) {
-                return { filter: 'sepia(100%) saturate(300%) hue-rotate(-10deg)' }; // Orange
+            const score = this.user.heartScore;
+            // Gradient of states from black (0) to bright red (100)
+            if (score < 10) {
+                return { filter: 'grayscale(100%) brightness(0.3)' }; // Darkest black
+            } else if (score < 20) {
+                return { filter: 'grayscale(80%) brightness(0.4)' }; // Slightly lighter black
+            } else if (score < 30) {
+                return { filter: 'grayscale(60%) brightness(0.6)' }; // Medium gray
+            } else if (score < 40) {
+                return { filter: 'sepia(100%) brightness(0.7) hue-rotate(30deg)' }; // Dark brown
+            } else if (score < 50) {
+                return { filter: 'sepia(100%) brightness(0.8) hue-rotate(20deg)' }; // Medium brown
+            } else if (score < 60) {
+                return { filter: 'sepia(80%) saturate(200%) brightness(0.9) hue-rotate(10deg)' }; // Light orange-brown
+            } else if (score < 70) {
+                return { filter: 'sepia(60%) saturate(300%) brightness(1) hue-rotate(-5deg)' }; // Dark orange
+            } else if (score < 80) {
+                return { filter: 'sepia(40%) saturate(400%) brightness(1.1)' }; // Orange-red
+            } else if (score < 90) {
+                return { filter: 'sepia(20%) saturate(600%) brightness(1.1)' }; // Bright red-orange
             } else {
-                return { filter: 'saturate(200%) brightness(1.1)' }; // Vibrant Red
+                return { filter: 'saturate(1000%) brightness(1.2) contrast(1.5)' }; // Vibrant glowing red
             }
         }
     },

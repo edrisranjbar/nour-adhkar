@@ -11,6 +11,21 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+
+    public function get(Request $request) {
+        response()->json([
+            'user' => [
+                'id' => $request->user()->id,
+                'name' => $request->user()->name,
+                'email' => $request->user()->email,
+                'avatar' => $request->user()->avatar,
+                'heart_score' => $request->user()->heart_score,
+                'score' => $request->user()->score,
+                'created_at' => $request->user()->created_at,
+            ]
+        ]);
+    }
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
