@@ -1,16 +1,18 @@
 <template>
-  <div class="login-form">
-    <h2>Login</h2>
-    <form @submit.prevent="login">
+  <div>
+    <h1>Login</h1>
+    <form @submit.prevent="requestLogin">
       <input v-model="email" type="email" placeholder="Email" required />
       <input v-model="password" type="password" placeholder="Password" required />
       <button type="submit">Login</button>
+      <div v-if="error">{{ error }}</div>
     </form>
-    <p v-if="error" class="error">{{ error }}</p>
   </div>
 </template>
 
 <script>
+
+import { mapActions } from 'vuex'; // Import mapActions to bind Vuex actions
 import axios from 'axios';
 
 export default {
@@ -22,7 +24,9 @@ export default {
     };
   },
   methods: {
-    async login() {
+    ...mapActions(['login']), // Bind the login action from Vuex
+
+    async requestLogin() {
       try {
         const response = await axios.post('http://localhost:8000/api/login', {
           email: this.email,
@@ -30,25 +34,24 @@ export default {
         });
 
         if (response.data.success) {
+          // Directly commit mutations to update Vuex store
+          this.$store.commit('setUser', response.data.user);
+          this.$store.commit('setToken', response.data.token);
+
+          // Store in localStorage for persistence
           localStorage.setItem('token', response.data.token);
           localStorage.setItem('user', JSON.stringify(response.data.user));
+
+          // Redirect to dashboard
           this.$router.push('/dashboard');
+        } else {
+          this.error = response.data.message || 'Login failed';
         }
       } catch (err) {
-        this.error = err.response?.data?.error || 'Login failed';
+        this.error = err.response?.data?.error || 'An error occurred';
+        console.error(err);
       }
-    },
+    }
   },
 };
 </script>
-
-<style scoped>
-.login-form {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-}
-.error {
-  color: red;
-}
-</style>

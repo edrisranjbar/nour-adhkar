@@ -59,20 +59,11 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
-
-  // If user is logged in and tries to access login or register pages
-  if ((to.path === '/login' || to.path === '/register') && token) {
-    next('/dashboard');
-    return;
-  }
-
-  // If user is not logged in and tries to access protected routes
   if (to.path !== '/login' && to.path !== '/register' && !token) {
     next('/login');
-    return;
+  } else {
+    next();
   }
-
-  next();
 });
 
 export default router

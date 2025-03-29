@@ -4,11 +4,18 @@
   top: unset;
   transform: unset;
 }
-header { height: 80px; }
+
+header {
+  height: 80px;
+}
 </style>
 <template>
 
-  <CongratsModal v-if="showCongratsModal" />
+    <CongratsModal 
+    v-if="showCongratsModal"
+    :scoreIncrease="10"
+    :newScore="user.heartScore + 10"
+  />
 
   <section id="morning" class="modal" v-if="!showCongratsModal">
 
@@ -45,6 +52,8 @@ header { height: 80px; }
 </template>
 
 <script>
+import { mapState } from 'vuex';
+import axios from 'axios';
 import CongratsModal from "@/components/Congrats.vue";
 import Collection from "@/models/collection.js";
 import tapSound from "@/assets/audios/click.mp3"
@@ -57,81 +66,125 @@ export default {
     title: String,
     openedCollection: Collection
   },
+  data() {
+    return {
+      counter: 0,
+      dhikrIndex: 0,
+      openedDhikr: this.openedCollection.adhkar[0],
+      tapSoundAudioPath: tapSound,
+      touchstartX: 0,
+      touchendX: 0,
+      touchstartY: 0,
+      touchendY: 0 // Added missing Y coordinates
+    }
+  },
   computed: {
-    isFirstDhikr: function () {
+    ...mapState(['user']),
+    isFirstDhikr() {
       return this.openedCollection.adhkar[0].text === this.openedDhikr.text;
     },
-    isThereANextDhikr: function () {
+    isThereANextDhikr() {
       return this.openedCollection.adhkar[this.dhikrIndex + 1] !== undefined;
     },
-    totalProgress: function () {
+    totalProgress() {
       const total = this.openedCollection.adhkar.length;
       const currentDhikrIndex = this.openedCollection.adhkar.findIndex(
-          (element) => element.text === this.openedDhikr.text
+        (element) => element.text === this.openedDhikr.text
       ) + 1;
       return Math.max((currentDhikrIndex / total) * 100, 5);
     },
-    showCongratsModal: function () {
+    showCongratsModal() {
       return !this.isThereANextDhikr && this.counter == this.openedDhikr.count;
     }
   },
   methods: {
-    count: function (event) {
+    count(event) {
       if (event && event.target.id === 'share-button') {
-        return
+        return;
       }
-      if (this.counter == this.openedDhikr.count) { return }
+      if (this.counter == this.openedDhikr.count) {
+        return;
+      }
       this.counter++;
       if (this.counter >= this.openedDhikr.count && this.isThereANextDhikr) {
         this.gotoNextDhikr();
       }
       this.playAudio(this.tapSoundAudioPath);
     },
-    gotoPrevDhikr: function () {
+    gotoPrevDhikr() {
       if (!this.isFirstDhikr) {
         this.counter = 0;
         this.openedDhikr = this.openedCollection.adhkar[--this.dhikrIndex];
       }
     },
-    gotoNextDhikr: function () {
+    gotoNextDhikr() {
       if (this.isThereANextDhikr) {
         this.counter = 0;
         try {
           if ("vibrate" in navigator) this.vibrate();
-        }
-        catch {
-          console.error('Can not vibrate!');
+        } catch {
+          console.error('Cannot vibrate!');
         }
         this.openedDhikr = this.openedCollection.adhkar[++this.dhikrIndex];
+      } else {
+        // Only update score when completing the last dhikr
+        this.updateHeartScore();
       }
     },
-    share: function () {
+    async updateHeartScore() {
+      try {
+        const response = await axios.post('http://localhost:8000/api/user/heart-score', {
+          increment: 10
+        }, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        // Update local state
+        if (response.data.success) {
+          this.$store.commit('updateHeartScore', response.data.newScore);
+          localStorage.setItem('user', JSON.stringify({
+            ...JSON.parse(localStorage.getItem('user')),
+            heart_score: response.data.newScore
+          }));
+        }
+      } catch (error) {
+        console.error('Error updating heart score:', error);
+      }
+    },
+    share() {
       this.copyDhikr(this.openedDhikr);
     },
-    copyDhikr: function async(openedDhikr) {
+    async copyDhikr(openedDhikr) {
       const text = `${openedDhikr.name}\n
-    ${openedDhikr.prefix}\n
-    ${openedDhikr.text}\n
-    ${openedDhikr.translation}\n
-    منبع: ${window.location.href}
-    `;
-      navigator.clipboard.writeText(text).then(() => console.log('Dhikr copied!'));
-      // todo: show a success snackbar to say this dhikr has been copied.
+      ${openedDhikr.prefix}\n
+      ${openedDhikr.text}\n
+      ${openedDhikr.translation}\n
+      منبع: ${window.location.href}`;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        console.log('Dhikr copied!');
+        // Consider adding toast/notification here
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
     },
-    vibrate: function () {
+    vibrate() {
       window.navigator.vibrate([200]);
     },
-    playAudio: function (audioPath) {
+    playAudio(audioPath) {
       const audio = new Audio(audioPath);
-      audio.play();
+      audio.play().catch(e => console.error('Audio play failed:', e));
     },
-    handleKeydown: function (event) {
+    handleKeydown(event) {
       if (event.code === 'Space') {
         this.count();
       } else if (event.code === 'Comma' || event.code === 'ArrowLeft') {
-        this.gotoNextDhikr();
-      } else if (event.code === 'Period' || event.code === 'ArrowRight') {
         this.gotoPrevDhikr();
+      } else if (event.code === 'Period' || event.code === 'ArrowRight') {
+        this.gotoNextDhikr();
       }
     },
     handleDhikrBodyClick(event) {
@@ -149,8 +202,8 @@ export default {
       this.checkDirection();
     },
     checkDirection() {
-      const swipeThreshold = 30; // Minimum distance (in pixels) for a swipe to be considered valid
-      const verticalThreshold = 50; // Maximum vertical movement allowed
+      const swipeThreshold = 30;
+      const verticalThreshold = 50;
 
       const diffX = this.touchendX - this.touchstartX;
       const diffY = this.touchendY - this.touchstartY;
@@ -162,27 +215,17 @@ export default {
           this.gotoNextDhikr();
         }
       }
-    },
-  },
-  data() {
-    return {
-      counter: 0,
-      dhikrIndex: 0,
-      openedDhikr: this.openedCollection.adhkar[0],
-      tapSoundAudioPath: tapSound,
-      touchstartX: 0,
-      touchendX: 0,
     }
   },
   mounted() {
     window.addEventListener('keydown', this.handleKeydown);
-    document.addEventListener('touchstart', (e) => this.handleTouchStart(e));
-    document.addEventListener('touchend', e => this.handleTouchEnd(e));
+    document.addEventListener('touchstart', this.handleTouchStart);
+    document.addEventListener('touchend', this.handleTouchEnd);
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeydown);
-    document.removeEventListener('touchstart', (e) => this.handleTouchStart(e));
-    document.removeEventListener('touchend', (e) => this.handleTouchEnd(e));
-  },
+    document.removeEventListener('touchstart', this.handleTouchStart);
+    document.removeEventListener('touchend', this.handleTouchEnd);
+  }
 }
 </script>
