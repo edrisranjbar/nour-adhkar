@@ -62,4 +62,38 @@ class AuthController extends Controller
             return response()->json(['success' => false, 'error' => 'Logout failed'], 500);
         }
     }
+
+    public function changeName(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+
+        $user = Auth::user();
+        $user->name = $request->name;
+        $user->save();
+
+        return response()->json(['success' => true, 'user' => $user]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate(['password' => 'required|string|min:6']);
+
+        $user = Auth::user();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function updateHeartScore(Request $request)
+    {
+        $request->validate(['score' => 'required|integer|between:0,100']);
+
+        $user = Auth::user();
+        $user->heart_score = $request->score;
+        $user->save();
+
+        return response()->json(['success' => true]);
+    }
+
 }
