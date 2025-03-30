@@ -69,7 +69,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = store.state.token;
-  if (to.path !== '/login' && to.path !== '/register' && !token) {
+  if (to.path == '/dashboard' && !token) {
     next('/login');
   } else {
     next();
