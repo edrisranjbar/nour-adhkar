@@ -21,7 +21,7 @@ const store = createStore({
         },
         updateHeartScore(state, score) {
             if (state.user) {
-                state.user.heartScore = score; // Update heart score in user state
+                state.user.heart_score = score; // Update heart score in user state
             }
         },
     },
