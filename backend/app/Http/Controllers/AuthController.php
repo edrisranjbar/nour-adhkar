@@ -102,6 +102,7 @@ class AuthController extends Controller
 
     public function updateHeartScore(Request $request)
     {
+
         $request->validate(['score' => 'required|integer|between:0,100']);
 
         $user = Auth::user();

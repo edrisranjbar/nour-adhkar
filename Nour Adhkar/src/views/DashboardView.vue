@@ -11,11 +11,8 @@
                 <div class="user-details">
                     <p class="email">{{ user.email }}</p>
                     <p class="name">{{ user.name }}</p>
-                    <p class="score">نمره: {{ user.heartScore }}/100</p>
+                    <p class="score">نمره: {{ user.heart_score }}/100</p>
                     <span class="heart-icon" :style="heartIconStyle">❤️</span>
-                    <button @click="increaseHeartScore" class="btn-adhkar">
-                        خواندن ذکر (+5)
-                    </button>
                 </div>
             </div>
             <div class="actions">
@@ -47,17 +44,13 @@
 </template>
 
 <script>
+import store from '@/store';
 import axios from 'axios';
 
 export default {
     data() {
         return {
-            user: {
-                name: "کاربر",
-                email: "user@example.com",
-                avatar: '',
-                heartScore: Number(localStorage.getItem('heartScore')) || 30, // Default score
-            },
+            user: store.state.user,
             isChangeNameModalOpen: false,
             isChangePasswordModalOpen: false,
             newName: '',
@@ -91,59 +84,20 @@ export default {
             }
         }
     },
-    created() {
-        this.fetchUserData();
-    },
     methods: {
-        async fetchUserData() {
-            try {
-                const response = await axios.get('http://localhost:8000/api/user', {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-                });
-
-                if (response.data.user) {
-                    this.user = response.data.user;
-                    localStorage.setItem('heartScore', this.user.heart_score);
-                }
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        },
         async logout() {
             try {
                 await axios.post('http://localhost:8000/api/logout', {}, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        Authorization: `Bearer ${this.$store.state.token}`,
                     },
                 });
             } catch (error) {
                 console.error('Logout error:', error);
             }
 
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            localStorage.removeItem('heartScore');
+            this.$store.commit('clearUser'); // Clear user from Vuex
             this.$router.push('/login');
-        },
-        increaseHeartScore() {
-            if (this.user.heartScore < 100) {
-                this.user.heartScore = Math.min(this.user.heartScore + 5, 100);
-                localStorage.setItem('heartScore', this.user.heartScore);
-
-                // Optionally send the updated heart score to the backend
-                this.updateHeartScoreOnServer();
-            }
-        },
-        async updateHeartScoreOnServer() {
-            try {
-                await axios.patch('http://localhost:8000/api/user/heart', {
-                    score: this.user.heartScore
-                }, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                });
-            } catch (err) {
-                console.error("Error updating heart score:", err);
-            }
         },
         openChangeNameModal() {
             this.isChangeNameModalOpen = true;
@@ -156,14 +110,14 @@ export default {
                         { name: this.newName },
                         {
                             headers: {
-                                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                                Authorization: `Bearer ${this.$store.state.token}`,
                             },
                         }
                     );
 
                     if (response.data.success) {
                         this.user.name = this.newName;
-                        localStorage.setItem('user', JSON.stringify(this.user));
+                        this.$store.commit('setUser', this.user); // Commit updated user to Vuex store
                         this.isChangeNameModalOpen = false; // Close the modal
                         this.newName = ''; // Clear the input
                     }
@@ -183,7 +137,7 @@ export default {
                         { password: this.newPassword },
                         {
                             headers: {
-                                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                                Authorization: `Bearer ${this.$store.state.token}`,
                             },
                         }
                     );

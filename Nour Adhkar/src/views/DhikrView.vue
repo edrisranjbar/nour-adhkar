@@ -11,11 +11,7 @@ header {
 </style>
 <template>
 
-    <CongratsModal 
-    v-if="showCongratsModal"
-    :scoreIncrease="10"
-    :newScore="user.heartScore + 10"
-  />
+  <CongratsModal v-if="showCongratsModal"/>
 
   <section id="morning" class="modal" v-if="!showCongratsModal">
 
@@ -94,7 +90,9 @@ export default {
       return Math.max((currentDhikrIndex / total) * 100, 5);
     },
     showCongratsModal() {
-      return !this.isThereANextDhikr && this.counter == this.openedDhikr.count;
+      const result = !this.isThereANextDhikr && this.counter == this.openedDhikr.count;
+      if (result) this.updateHeartScore();
+      return result;
     }
   },
   methods: {
@@ -126,29 +124,23 @@ export default {
           console.error('Cannot vibrate!');
         }
         this.openedDhikr = this.openedCollection.adhkar[++this.dhikrIndex];
-      } else {
-        // Only update score when completing the last dhikr
-        this.updateHeartScore();
       }
     },
     async updateHeartScore() {
       try {
-        const response = await axios.post('http://localhost:8000/api/user/heart-score', {
-          increment: 10
+        const response = await axios.patch('http://localhost:8000/api/user/heart', {
+          score: this.$store.state.user.heart_score + 10,
         }, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${this.$store.state.token}`
           }
         });
 
         // Update local state
         if (response.data.success) {
           this.$store.commit('updateHeartScore', response.data.newScore);
-          localStorage.setItem('user', JSON.stringify({
-            ...JSON.parse(localStorage.getItem('user')),
-            heart_score: response.data.newScore
-          }));
         }
+
       } catch (error) {
         console.error('Error updating heart score:', error);
       }

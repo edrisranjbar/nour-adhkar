@@ -37,10 +37,7 @@ export default {
           // Directly commit mutations to update Vuex store
           this.$store.commit('setUser', response.data.user);
           this.$store.commit('setToken', response.data.token);
-
-          // Store in localStorage for persistence
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
+          this.$store.commit('updateHeartScore', response.data.heart_score);
 
           // Redirect to dashboard
           this.$router.push('/dashboard');
