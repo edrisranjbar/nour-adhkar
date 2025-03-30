@@ -18,7 +18,9 @@ body {
   margin: 0;
   font-family: "Vazirmatn FD", sans-serif !important;
 }
-
+button,a,input {
+  font-family: "Vazirmatn FD", sans-serif !important;
+}
 .login-container {
   display: flex;
   flex-direction: column;
