@@ -1,38 +1,40 @@
 <template>
 
   <SplashScreen v-if="showSplash" :progress="progress" />
-    <div v-if="!showSplash">
-      <Header title="اذکار نور" description="پلتفرم فارسی اذکار و ادعیه اسلامی" />
-      <main class="container">
-        <RouterLink to="morning">
-          <CategoryCard image-src="src/assets/images/morning.png">
-            <h2 class="card-text-right">اذکار صبحگاه</h2>
-          </CategoryCard>
-        </RouterLink>
+  <div v-if="!showSplash">
+    <Header title="اذکار نور" description="پلتفرم فارسی اذکار و ادعیه اسلامی" />
+    <main class="container">
+      <RouterLink to="morning">
+        <CategoryCard image-src="src/assets/images/morning.png">
+          <h2 class="card-text-right">اذکار صبحگاه</h2>
+        </CategoryCard>
+      </RouterLink>
 
-        <RouterLink to="night">
-          <CategoryCard image-src="src/assets/images/night.png">
-            <h2 class="card-text-left">اذکار شامگاه</h2>
-          </CategoryCard>
-        </RouterLink>
+      <RouterLink to="night">
+        <CategoryCard image-src="src/assets/images/night.png">
+          <h2 class="card-text-left">اذکار شامگاه</h2>
+        </CategoryCard>
+      </RouterLink>
 
-        <section class="row">
+      <section class="row">
+        <RouterLink to="sleep" class="card-sm">
           <CategoryCard image-src="src/assets/images/sleep.jpg" size="small">
             <h2 class="card-text-top card-text-right">دعاء قبل خواب</h2>
           </CategoryCard>
-          <RouterLink to="istikhara" class="card-sm">
-            <CategoryCard image-src="src/assets/images/prayer.png">
-              <h2 class="cart-text-bottom card-text-left">دعاء استخاره</h2>
-            </CategoryCard>
-          </RouterLink>
-        </section>
-
-        <RouterLink to="counter">
-          <CategoryCard image-src="src/assets/images/counter.svg" style="background-position: center;" />
         </RouterLink>
-      </main>
-      <Footer />
-    </div>
+        <RouterLink to="istikhara" class="card-sm">
+          <CategoryCard image-src="src/assets/images/prayer.png">
+            <h2 class="cart-text-bottom card-text-left">دعاء استخاره</h2>
+          </CategoryCard>
+        </RouterLink>
+      </section>
+
+      <RouterLink to="counter">
+        <CategoryCard image-src="src/assets/images/counter.svg" style="background-position: center;" />
+      </RouterLink>
+    </main>
+    <Footer />
+  </div>
 </template>
 
 <script>

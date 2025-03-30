@@ -9,6 +9,7 @@ import DhikrView from "@/views/DhikrView.vue";
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
 import { istikharaCollection } from '@/assets/js/collections/istikhara';
+import { sleepCollection } from '@/assets/js/collections/sleep';
 import CounterView from '@/views/CounterView.vue';
 
 const router = createRouter({
@@ -52,6 +53,15 @@ const router = createRouter({
       props: {
         title: 'دعاء استخاره',
         openedCollection: istikharaCollection
+      }
+    },
+    {
+      path: '/sleep',
+      name: 'sleep',
+      component: DhikrView,
+      props: {
+        title: 'دعاء قبل خواب',
+        openedCollection: sleepCollection
       }
     }
   ]
