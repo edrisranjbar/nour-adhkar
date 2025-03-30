@@ -9,8 +9,8 @@ class AddScoreFieldsToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->integer('heart_score')->default(30)->after('password');
-            $table->integer('score')->default(0)->after('heart_score');
+            $table->integer('heart_score')->default(0);
+            $table->integer('score')->default(0);
         });
     }
 

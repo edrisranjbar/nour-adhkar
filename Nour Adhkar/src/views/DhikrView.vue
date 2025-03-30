@@ -127,10 +127,10 @@ export default {
       }
     },
     async updateHeartScore() {
-      const new_score = Math.min(this.$store.state.user.heart_score + 10, 100);
+      let heart_score = Math.min(this.$store.state.user.heart_score + 10, 100);
       try {
         const response = await axios.patch('http://localhost:8000/api/user/heart', {
-          score: new_score,
+          heart_score: heart_score,
         }, {
           headers: {
             Authorization: `Bearer ${this.$store.state.token}`
@@ -139,7 +139,7 @@ export default {
 
         // Update local state
         if (response.data.success) {
-          this.$store.commit('updateHeartScore', new_score);
+          this.$store.commit('updateHeartScore', heart_score);
         }
 
       } catch (error) {

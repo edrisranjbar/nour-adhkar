@@ -4,9 +4,8 @@ import createPersistedState from 'vuex-persistedstate';
 
 const store = createStore({
     state: {
-        user: null,
+        user: {heart_score:0},
         token: null,
-        heartScore: 0,
     },
     mutations: {
         setUser(state, user) {

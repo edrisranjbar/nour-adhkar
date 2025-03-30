@@ -11,7 +11,7 @@
                 <div class="user-details">
                     <p class="email">{{ user.email }}</p>
                     <p class="name">{{ user.name }}</p>
-                    <p class="score">نمره: {{ user.heart_score }}/100</p>
+                    <p class="score">نمره: {{ user.heart_score ?? 0 }}/100</p>
                     <span class="heart-icon" :style="heartIconStyle">❤️</span>
                 </div>
             </div>

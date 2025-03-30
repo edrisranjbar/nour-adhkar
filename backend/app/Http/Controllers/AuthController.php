@@ -103,10 +103,10 @@ class AuthController extends Controller
     public function updateHeartScore(Request $request)
     {
 
-        $request->validate(['score' => 'required|integer|min:0']);
+        $request->validate(['heart_score' => 'required|integer|min:0']);
 
         $user = Auth::user();
-        $new_score = min((int)$request->score, 100);
+        $new_score = min((int)$request->heart_score, 100);
         $user->heart_score = $new_score;
         $user->save();
 

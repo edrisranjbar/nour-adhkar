@@ -38,16 +38,4 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    // Add these methods for score management
-    public function increaseHeartScore($points = 5)
-    {
-        $this->heart_score = min($this->heart_score + $points, 100);
-        return $this->save();
-    }
-
-    public function increaseScore($points = 1)
-    {
-        $this->score += $points;
-        return $this->save();
-    }
 }
