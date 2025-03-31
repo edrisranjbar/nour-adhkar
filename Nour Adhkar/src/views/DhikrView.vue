@@ -93,7 +93,10 @@ export default {
     },
     showCongratsModal() {
       const result = !this.isThereANextDhikr && this.counter == this.openedDhikr.count;
-      if (result) this.updateHeartScore();
+      if (result) {
+        this.updateHeartScore();
+        this.storeDhikr();
+      }
       return result;
     }
   },
@@ -151,6 +154,23 @@ export default {
 
       } catch (error) {
         console.error('Error updating heart score:', error);
+      }
+    },
+    async storeDhikr() {
+      if (!this.isAuthenticated) return;
+      
+      try {
+        const response = await axios.post(`${BASE_API_URL}/dhikr`, {}, {
+          headers: {
+            Authorization: `Bearer ${this.$store.state.token}`
+          }
+        });
+
+        if (response.data.success) {
+          this.$store.commit('setUser', response.data.user);
+        }
+      } catch (error) {
+        console.error('Error storing dhikr:', error);
       }
     },
     share() {

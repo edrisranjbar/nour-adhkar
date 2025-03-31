@@ -22,6 +22,8 @@ class DhikrController extends Controller
         
         // Update user statistics
         $user->total_dhikrs++;
+        $user->save();
+        
         $this->badgeService->updateStreak($user);
         
         // Check and award badges
