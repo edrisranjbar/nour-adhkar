@@ -91,7 +91,6 @@ body {
 #app {
     max-width: 735px;
     margin: auto;
-    text-align: center;
 }
 
 header {
@@ -195,7 +194,7 @@ header h1 {
     right: 16px;
 }
 
-#app>footer {
+#app>div>footer {
     font-weight: 100;
     font-size: 20px;
     color: #2C2A2A;

@@ -1,22 +1,6 @@
 <template>
     <div class="dashboard">
-        <!-- Top Bar -->
-        <div class="top-bar">
-            <div class="user-brief">
-                <img :src="user.avatar || defaultAvatar" :key="user.avatar" @error="handleImageError" class="mini-avatar" />
-                <span class="user-name">{{ user.name }}</span>
-            </div>
-            <div class="stats">
-                <div class="stat-item">
-                    <Heart3D :score="user.heart_score || 0" />
-                    <span>{{ user.heart_score ?? 0 }}</span>
-                </div>
-                <button @click="openLogoutModal" class="logout-button">
-                    <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
-                    <span>خروج</span>
-                </button>
-            </div>
-        </div>
+        <TopBar :user="user" />
 
         <!-- Main Content -->
         <div class="main-content">
@@ -64,7 +48,7 @@
                         />
                     </div>
                     <div class="level-indicator">
-                        <span class="level">سطح {{ Math.floor((user.heart_score || 0) / 10) + 1 }}</span>
+                        <span class="level">سطح {{ Math.floor((user.score || 0) / 10) + 1 }}</span>
                     </div>
                 </div>
                 
@@ -181,14 +165,14 @@
 import store from '@/store';
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
-import Heart3D from '@/components/Heart3D.vue';
 import { useToast } from "vue-toastification";
+import TopBar from '@/components/Admin/TopBar.vue';
 import Badge from '@/components/Badge.vue';
 
 export default {
     components: {
-        Heart3D,
-        Badge
+        TopBar,
+        Badge,
     },
     setup() {
         const toast = useToast();
@@ -239,20 +223,6 @@ export default {
         }
     },
     methods: {
-        async logout() {
-            try {
-                await axios.post(`${BASE_API_URL}/logout`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${this.$store.state.token}`,
-                    },
-                });
-            } catch (error) {
-                console.error('Logout error:', error);
-            }
-
-            this.$store.commit('clearUser'); // Clear user from Vuex
-            this.$router.push('/login');
-        },
         openChangeNameModal() {
             this.isChangeNameModalOpen = true;
         },
@@ -366,30 +336,12 @@ export default {
         handleImageError(e) {
             e.target.src = this.defaultAvatar;
         },
-        openLogoutModal() {
-            this.isLogoutModalOpen = true;
-        },
-        async confirmLogout() {
-            try {
-                await axios.post(`${BASE_API_URL}/logout`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${this.$store.state.token}`,
-                    },
-                });
-                this.$store.commit('clearUser');
-                this.toast.success('با موفقیت خارج شدید');
-                this.$router.push('/login');
-            } catch (error) {
-                console.error('Logout error:', error);
-                this.toast.error('خطا در خروج از حساب کاربری');
-            }
-        },
     },
 };
 </script>
 
 <style scoped>
-button {
+:global(button) {
     font-family: "Vazirmatn FD", sans-serif !important;
 }
 .dashboard {
@@ -400,45 +352,6 @@ button {
     width: 100vw;
     padding: 0;
     background: #f5f7fa;
-}
-
-.top-bar {
-    background: white;
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.user-brief {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.mini-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.stats {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    color: #1cb0f6;
 }
 
 .main-content {
@@ -726,87 +639,6 @@ button {
     .badges-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
-    }
-}
-
-.logout-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #fff1f1;
-    color: #ff4b4b;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.logout-button:hover {
-    background: #ffe5e5;
-    transform: translateY(-1px);
-}
-
-.logout-button svg {
-    font-size: 1.1em;
-}
-
-.logout-modal {
-    max-width: 360px;
-}
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.logout-icon {
-    font-size: 1.5rem;
-    color: #ff4b4b;
-}
-
-.modal-header h2 {
-    color: #ff4b4b;
-    margin: 0;
-}
-
-.logout-modal p {
-    color: #666;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
-}
-
-.btn-danger {
-    background: #ff4b4b;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-}
-
-.btn-danger:hover {
-    background: #ff3333;
-    transform: translateY(-1px);
-}
-
-.btn-danger svg {
-    font-size: 1.1em;
-}
-
-@media (max-width: 768px) {
-    .logout-button span {
-        display: none;
-    }
-    
-    .logout-button {
-        padding: 0.5rem;
     }
 }
 </style>
