@@ -7,6 +7,9 @@ const store = createStore({
         user: {heart_score:0},
         token: null,
     },
+    getters: {
+        isAuthenticated: state => !!state.token
+    },
     mutations: {
         setUser(state, user) {
             state.user = user;

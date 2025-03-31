@@ -48,7 +48,7 @@ header {
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import axios from 'axios';
 import CongratsModal from "@/components/Congrats.vue";
 import Collection from "@/models/collection.js";
@@ -77,6 +77,7 @@ export default {
   },
   computed: {
     ...mapState(['user']),
+    ...mapGetters(['isAuthenticated']),
     isFirstDhikr() {
       return this.openedCollection.adhkar[0].text === this.openedDhikr.text;
     },
@@ -128,6 +129,9 @@ export default {
       }
     },
     async updateHeartScore() {
+      if (!this.isAuthenticated) {
+        return;
+      }
       let heart_score = Math.min(this.$store.state.user.heart_score + 10, 100);
       try {
         const response = await axios.patch(`${BASE_API_URL}/user/heart`, {
