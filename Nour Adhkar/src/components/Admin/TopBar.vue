@@ -7,6 +7,10 @@
             <span class="user-name">{{ user.name }}</span>
         </div>
         <div class="stats">
+            <div class="stat-item score-item">
+                <font-awesome-icon icon="fa-solid fa-trophy" class="trophy-icon" />
+                <span class="score-value">{{ user.score || 0 }}</span>
+            </div>
             <div class="stat-item">
                 <Heart3D :score="user.heart_score || 0" />
                 <span>{{ user.heart_score ?? 0 }}</span>
@@ -58,6 +62,24 @@
     font-weight: 600;
     color: #1cb0f6;
 }
+
+.score-item {
+    color: #ffc107;
+    /* Gold color for score */
+    background: rgba(255, 193, 7, 0.1);
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+}
+
+.trophy-icon {
+    font-size: 1.1em;
+    color: #ffc107;
+}
+
+.score-value {
+    color: #333;
+}
+
 .logout-button {
     display: flex;
     align-items: center;

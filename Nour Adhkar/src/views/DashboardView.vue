@@ -341,7 +341,7 @@ export default {
 </script>
 
 <style scoped>
-:global(button) {
+:global(button), :global(input) {
     font-family: "Vazirmatn FD", sans-serif !important;
 }
 .dashboard {
