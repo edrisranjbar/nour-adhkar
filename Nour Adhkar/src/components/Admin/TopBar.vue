@@ -11,7 +11,7 @@
                 <font-awesome-icon icon="fa-solid fa-trophy" class="trophy-icon" />
                 <span class="score-value">{{ user.score || 0 }}</span>
             </div>
-            <div class="stat-item">
+            <div class="stat-item text-danger">
                 <Heart3D :score="user.heart_score || 0" />
                 <span>{{ user.heart_score ?? 0 }}</span>
             </div>
@@ -60,7 +60,7 @@
     align-items: center;
     gap: 0.5rem;
     font-weight: 600;
-    color: #1cb0f6;
+    color: #e70b28;
 }
 
 .score-item {
