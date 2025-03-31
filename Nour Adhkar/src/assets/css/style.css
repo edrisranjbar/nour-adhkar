@@ -69,6 +69,9 @@
     font-style: normal;
     font-display: swap;
 }
+.vazirmatn-font {
+    font-family: "Vazirmatn FD", sans-serif !important;
+}
 
 * {
     box-sizing: border-box;

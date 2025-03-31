@@ -1,8 +1,8 @@
 <template>
     <div class="dashboard">
-        <TopBar :user="user" />
+        <TopBar :user="user" @open-logout-modal="isLogoutModalOpen = true" />
         <div class="main-content">
-            
+
             <ProfileCard :user="user" />
 
             <BadgesSection :user="user" />
@@ -33,9 +33,20 @@
             <div class="modal-content" @click.stop>
                 <template v-if="isChangeNameModalOpen">
                     <h2>تغییر نام</h2>
-                    <input v-model="newName" type="text" placeholder="نام جدید" />
+                    <input 
+                        v-model.trim="newName" 
+                        type="text" 
+                        placeholder="نام جدید"
+                        @keyup.enter="changeName"
+                    />
                     <div class="modal-actions">
-                        <button @click="changeName" class="btn-primary">ذخیره</button>
+                        <button 
+                            @click="changeName" 
+                            class="btn-primary"
+                            :disabled="!newName.trim()"
+                        >
+                            ذخیره
+                        </button>
                         <button @click="closeModals" class="btn-secondary">انصراف</button>
                     </div>
                 </template>
@@ -130,61 +141,76 @@ export default {
         openChangeNameModal() {
             this.isChangeNameModalOpen = true;
         },
-        async changeName() {
-            if (this.newName) {
-                try {
-                    const response = await axios.patch(
-                        `${BASE_API_URL}/user/name`,
-                        { name: this.newName },
-                        {
-                            headers: {
-                                Authorization: `Bearer ${this.$store.state.token}`,
-                            },
-                        }
-                    );
-
-                    if (response.data.success) {
-                        this.user.name = this.newName;
-                        this.$store.commit('setUser', this.user); // Commit updated user to Vuex store
-                        this.isChangeNameModalOpen = false; // Close the modal
-                        this.newName = ''; // Clear the input
-                    }
-                } catch (error) {
-                    console.error('Error updating name:', error);
-                }
-            }
-        },
         openChangePasswordModal() {
             this.isChangePasswordModalOpen = true;
-        },
-        async changePassword() {
-            if (this.newPassword) {
-                try {
-                    const response = await axios.patch(
-                        `${BASE_API_URL}/user/password`,
-                        { password: this.newPassword },
-                        {
-                            headers: {
-                                Authorization: `Bearer ${this.$store.state.token}`,
-                            },
-                        }
-                    );
-
-                    if (response.data.success) {
-                        this.isChangePasswordModalOpen = false; // Close the modal
-                        this.newPassword = ''; // Clear the input
-                    }
-                } catch (error) {
-                    console.error('Error updating password:', error);
-                }
-            }
         },
         closeModals() {
             this.isChangeNameModalOpen = false;
             this.isChangePasswordModalOpen = false;
             this.isLogoutModalOpen = false;
+            this.newName = '';
+            this.newPassword = '';
         },
-    },
+        async confirmLogout() {
+            try {
+                await axios.post(`${BASE_API_URL}/logout`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${this.$store.state.token}`,
+                    },
+                });
+                this.$store.commit('clearUser');
+                this.toast.success('با موفقیت خارج شدید');
+                this.$router.push('/login');
+            } catch (error) {
+                console.error('Logout error:', error);
+                this.toast.error('خطا در خروج از حساب کاربری');
+            }
+            this.closeModals();
+        },
+        async changeName() {
+            if (!this.$store.state.token) {
+                this.toast.error('لطفا دوباره وارد شوید');
+                this.$router.push('/login');
+                return;
+            }
+
+            if (!this.newName.trim()) {
+                this.toast.error('لطفا نام جدید را وارد کنید');
+                return;
+            }
+
+            try {
+                const response = await axios.patch(`${BASE_API_URL}/user/name`, {
+                    name: this.newName
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${this.$store.state.token}`,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.data.success) {
+                    // Update local user state
+                    this.user = response.data.user;
+                    // Update Vuex store
+                    this.$store.commit('setUser', response.data.user);
+                    
+                    this.toast.success('نام با موفقیت تغییر کرد');
+                    this.closeModals();
+                }
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    this.toast.error('لطفا دوباره وارد شوید');
+                    this.$store.commit('clearUser');
+                    this.$router.push('/login');
+                } else {
+                    console.error('Change name error:', error);
+                    this.toast.error(error.response?.data?.message || 'خطا در تغییر نام');
+                }
+            }
+        },
+    }
 };
 </script>
 

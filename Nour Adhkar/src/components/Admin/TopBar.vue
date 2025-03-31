@@ -15,7 +15,7 @@
                 <Heart3D :score="user.heart_score || 0" />
                 <span>{{ user.heart_score ?? 0 }}</span>
             </div>
-            <button @click="openLogoutModal" class="logout-button">
+            <button @click="$emit('open-logout-modal')" class="logout-button">
                 <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
                 <span>خروج</span>
             </button>
@@ -163,8 +163,6 @@
 </style>
 
 <script>
-import axios from 'axios';
-import { BASE_API_URL } from '@/config';
 import Heart3D from '@/components/Heart3D.vue';
 
 export default {
@@ -179,42 +177,15 @@ export default {
         },
         defaultAvatar: {
             type: String,
-            default: 'path/to/default/avatar.png' // Set your default avatar path here
+            default: 'path/to/default/avatar.png'
         }
     },
+    emits: ['open-logout-modal'], // Define the emit
     methods: {
-        async logout() {
-            try {
-                await axios.post(`${BASE_API_URL}/logout`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${this.$store.state.token}`,
-                    },
-                });
-            } catch (error) {
-                console.error('Logout error:', error);
-            }
-
-            this.$store.commit('clearUser'); // Clear user from Vuex
-            this.$router.push('/login');
-        },
-        openLogoutModal() {
-            this.isLogoutModalOpen = true;
-        },
-        async confirmLogout() {
-            try {
-                await axios.post(`${BASE_API_URL}/logout`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${this.$store.state.token}`,
-                    },
-                });
-                this.$store.commit('clearUser');
-                this.toast.success('با موفقیت خارج شدید');
-                this.$router.push('/login');
-            } catch (error) {
-                console.error('Logout error:', error);
-                this.toast.error('خطا در خروج از حساب کاربری');
-            }
-        },
+        // Remove openLogoutModal method as we're now emitting an event
+        handleImageError(e) {
+            e.target.src = this.defaultAvatar;
+        }
     }
 }
 </script>

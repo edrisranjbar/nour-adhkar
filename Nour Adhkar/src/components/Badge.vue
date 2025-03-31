@@ -92,12 +92,14 @@ export default {
 .badge.earned {
     border-color: #58cc02;
     background: linear-gradient(to right, #ffffff, #f0fff4);
-    box-shadow: 0 4px 12px rgba(88, 204, 2, 0.1);
+    box-shadow: 0 4px 12px rgba(88, 204, 2, 0.15);
+    opacity: 1;
+    transform: translateZ(0); /* For better performance */
 }
 
 .badge.earned:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(88, 204, 2, 0.15);
+    transform: translateY(-2px) translateZ(0);
+    box-shadow: 0 8px 20px rgba(88, 204, 2, 0.25);
 }
 
 .badge-icon {
@@ -117,8 +119,9 @@ export default {
 }
 
 .badge.earned .badge-icon {
-    background: #58cc02;
-    box-shadow: 0 0 20px rgba(88, 204, 2, 0.2);
+    background: linear-gradient(45deg, #58cc02, #7ed957);
+    box-shadow: 0 0 25px rgba(88, 204, 2, 0.3);
+    animation: pulse 2s infinite;
 }
 
 .badge-icon svg {
@@ -130,6 +133,7 @@ export default {
 
 .badge.earned .badge-icon svg {
     color: white;
+    animation: iconPop 0.3s ease-out;
 }
 
 /* Shine effect */
@@ -140,28 +144,28 @@ export default {
 
 .shine {
     position: absolute;
-    top: -100%;
-    left: -100%;
-    width: 250%;
-    height: 250%;
+    top: -150%;
+    left: -150%;
+    width: 400%;
+    height: 400%;
     background: linear-gradient(
         45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.4) 40%,
-        rgba(255, 255, 255, 0.6) 50%,
-        rgba(255, 255, 255, 0.4) 60%,
-        transparent 70%
+        transparent 0%,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.8) 50%,
+        rgba(255, 255, 255, 0) 70%,
+        transparent 100%
     );
     transform: rotate(45deg);
-    animation: shine 3s infinite;
+    animation: shine 4s infinite ease-in-out;
 }
 
 @keyframes shine {
     0% {
-        top: -100%;
-        left: -100%;
+        top: -150%;
+        left: -150%;
     }
-    20% {
+    25% {
         top: 100%;
         left: 100%;
     }
@@ -184,6 +188,7 @@ export default {
 
 .badge.earned .badge-info h4 {
     color: #58cc02;
+    text-shadow: 0 1px 2px rgba(88, 204, 2, 0.1);
 }
 
 .badge-info p {
@@ -223,11 +228,25 @@ export default {
     margin-top: 0.75rem;
     font-size: 0.85rem;
     color: #58cc02;
-    font-weight: 500;
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(88, 204, 2, 0.1);
 }
 
 .check-icon {
-    font-size: 1em;
+    font-size: 1.1em;
+    animation: checkmark 0.5s ease-out;
+}
+
+@keyframes checkmark {
+    0% {
+        transform: scale(0) rotate(-45deg);
+    }
+    70% {
+        transform: scale(1.2) rotate(10deg);
+    }
+    100% {
+        transform: scale(1) rotate(0);
+    }
 }
 
 /* Hover effects */

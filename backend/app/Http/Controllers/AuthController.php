@@ -118,7 +118,6 @@ class AuthController extends Controller
 
     public function updateHeartScore(Request $request)
     {
-
         $request->validate(['heart_score' => 'required|integer|min:0']);
 
         $user = Auth::user();
@@ -126,7 +125,19 @@ class AuthController extends Controller
         $user->heart_score = $new_score;
         $user->save();
 
-        return response()->json(['success' => true]);
+        // Check for golden heart badge when score reaches 100
+        if ($new_score >= 100) {
+            $this->badgeService->awardBadge($user, 'golden_heart');
+        }
+
+        // Get updated user data with badges
+        $user->refresh();
+
+        return response()->json([
+            'success' => true,
+            'user' => $user,
+            'badges' => $user->badges
+        ]);
     }
 
     public function updateAvatar(Request $request)

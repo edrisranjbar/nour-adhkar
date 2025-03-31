@@ -103,4 +103,18 @@ class BadgeService
         $user->last_dhikr_date = $today;
         $user->save();
     }
+
+    public function awardBadge(User $user, string $badgeName)
+    {
+        if (!$user->badges) {
+            $user->badges = new \stdClass();
+        }
+
+        // Only award if not already earned
+        if (empty($user->badges->{$badgeName})) {
+            $user->badges->{$badgeName} = true;
+            $user->badges->{$badgeName . '_date'} = now();
+            $user->save();
+        }
+    }
 } 

@@ -6,6 +6,7 @@ import { BASE_API_URL } from './config'
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import FontAwesomeIcon from './plugins/fontawesome'
+import axios from 'axios';
 
 
 const app = createApp(App)
@@ -19,6 +20,7 @@ app.use(Toast, {
     pauseOnFocusLoss: true,
     pauseOnHover: true,
     rtl: true,
+    bodyClassName: "vazirmatn-font",
 });
 
 // Make BASE_API_URL available globally
@@ -29,5 +31,32 @@ app.provide('BASE_API_URL', BASE_API_URL)
 
 // Register Font Awesome component globally
 app.component('font-awesome-icon', FontAwesomeIcon);
+
+// Add this to your main.js or a separate axios config file
+axios.interceptors.request.use(
+    config => {
+        const token = store.state.token;
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+            config.headers['Accept'] = 'application/json';
+            config.headers['Content-Type'] = 'application/json';
+        }
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+);
+
+axios.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response?.status === 401) {
+            store.commit('clearUser');
+            router.push('/login');
+        }
+        return Promise.reject(error);
+    }
+);
 
 app.mount('#app')
