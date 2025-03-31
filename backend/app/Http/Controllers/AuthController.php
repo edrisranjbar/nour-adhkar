@@ -9,9 +9,16 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Storage;
+use App\Services\BadgeService;
 
 class AuthController extends Controller
 {
+    protected $badgeService;
+
+    public function __construct(BadgeService $badgeService)
+    {
+        $this->badgeService = $badgeService;
+    }
 
     public function get(Request $request) {
         response()->json([
@@ -47,7 +54,14 @@ class AuthController extends Controller
         ]);
 
         $token = JWTAuth::fromUser($user);
+        
+        $this->badgeService->initializeBadges($user);
 
+        return response()->json([
+            'success' => true,
+            'user' => $user,
+            'token' => $user->createToken('auth_token')->plainTextToken
+        ]);
         return response()->json([
             'success' => true,
             'user' => $user,
@@ -70,7 +84,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
         try {
             JWTAuth::invalidate(JWTAuth::getToken());

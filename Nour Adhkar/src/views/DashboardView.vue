@@ -1,53 +1,139 @@
 <template>
     <div class="dashboard">
-        <div class="profile-section">
-            <div class="profile-photo-container" @click="triggerFileInput">
-                <img 
-                    :src="user.avatar || defaultAvatar" 
-                    :key="user.avatar"
-                    alt="تصویر پروفایل" 
-                    class="profile-photo" 
-                    @error="handleImageError"
-                />
-                <div class="photo-overlay" :class="{ 'uploading': isUploading }">
-                    <span v-if="!isUploading">تغییر تصویر</span>
-                    <div v-else class="upload-progress">
-                        <div class="spinner"></div>
-                        <span>در حال آپلود...</span>
-                    </div>
-                </div>
-                <input 
-                    type="file" 
-                    ref="fileInput" 
-                    @change="handlePhotoUpload" 
-                    accept="image/*" 
-                    class="hidden"
-                />
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="user-brief">
+                <img :src="user.avatar || defaultAvatar" :key="user.avatar" @error="handleImageError" class="mini-avatar" />
+                <span class="user-name">{{ user.name }}</span>
             </div>
-            
-            <div class="user-info">
-                <h1>{{ user.name }}</h1>
-                <p class="email">{{ user.email }}</p>
-                <div class="score-container">
-                    <span class="heart-icon" :style="heartIconStyle">❤️</span>
-                    <span class="score">{{ user.heart_score ?? 0 }}/100</span>
+            <div class="stats">
+                <div class="stat-item">
+                    <Heart3D :score="user.heart_score || 0" />
+                    <span>{{ user.heart_score ?? 0 }}</span>
                 </div>
+                <button @click="logout" class="icon-button">
+                    <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
+                </button>
             </div>
         </div>
 
-        <div class="actions-grid">
-            <button @click="openChangeNameModal" class="action-card">
-                <i class="fas fa-user"></i>
-                <span>تغییر نام</span>
-            </button>
-            <button @click="openChangePasswordModal" class="action-card">
-                <i class="fas fa-lock"></i>
-                <span>تغییر رمز عبور</span>
-            </button>
-            <button @click="logout" class="action-card logout">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>خروج</span>
-            </button>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-photo-container" @click="triggerFileInput">
+                        <div class="profile-photo-wrapper">
+                            <img 
+                                :src="user.avatar || defaultAvatar" 
+                                :key="user.avatar"
+                                alt="تصویر پروفایل" 
+                                class="profile-photo" 
+                                @error="handleImageError"
+                            />
+                            <div class="photo-overlay" :class="{ 'uploading': isUploading }">
+                                <template v-if="!isUploading">
+                                    <font-awesome-icon icon="fa-solid fa-camera" />
+                                    <span>تغییر تصویر</span>
+                                </template>
+                                <div v-else class="upload-progress">
+                                    <svg class="progress-ring" width="60" height="60">
+                                        <circle
+                                            class="progress-ring-circle"
+                                            :stroke-dasharray="circumference"
+                                            :stroke-dashoffset="dashOffset"
+                                            stroke-width="4"
+                                            stroke="#fff"
+                                            fill="transparent"
+                                            r="26"
+                                            cx="30"
+                                            cy="30"
+                                        />
+                                    </svg>
+                                    <span class="progress-text">{{ uploadProgress }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <input 
+                            type="file" 
+                            ref="fileInput" 
+                            @change="handlePhotoUpload" 
+                            accept="image/*" 
+                            class="hidden"
+                        />
+                    </div>
+                    <div class="level-indicator">
+                        <span class="level">سطح {{ Math.floor((user.heart_score || 0) / 10) + 1 }}</span>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress" :style="{ width: `${(user.heart_score || 0)}%` }"></div>
+                </div>
+            </div>
+
+            <!-- Badges Section -->
+            <div class="badges-section">
+                <h3 class="section-title">
+                    <font-awesome-icon icon="fa-solid fa-award" />
+                    نشان‌های من
+                </h3>
+                <div class="badges-grid">
+                    <Badge
+                        title="تازه‌کار"
+                        description="اولین ذکر را ثبت کنید"
+                        icon="fas fa-star"
+                        :earned="user.badges?.beginner"
+                        :earned-date="user.badges?.beginner_date"
+                    />
+                    <Badge
+                        title="پرتلاش"
+                        description="۱۰۰ ذکر ثبت کنید"
+                        icon="fas fa-fire"
+                        :earned="user.badges?.hardworker"
+                        :earned-date="user.badges?.hardworker_date"
+                        :progress="user.total_dhikrs || 0"
+                        :target="100"
+                    />
+                    <Badge
+                        title="مداوم"
+                        description="۷ روز پشت سر هم ذکر ثبت کنید"
+                        icon="fas fa-calendar-check"
+                        :earned="user.badges?.consistent"
+                        :earned-date="user.badges?.consistent_date"
+                        :progress="user.streak || 0"
+                        :target="7"
+                    />
+                    <Badge
+                        title="قلب طلایی"
+                        description="به امتیاز قلب ۱۰۰ برسید"
+                        icon="fas fa-heart"
+                        :earned="user.badges?.golden_heart"
+                        :earned-date="user.badges?.golden_heart_date"
+                        :progress="user.heart_score || 0"
+                        :target="100"
+                    />
+                </div>
+            </div>
+
+            <!-- Action Cards -->
+            <div class="action-cards">
+                <div class="action-card" @click="openChangeNameModal">
+                    <div class="card-icon">
+                        <font-awesome-icon icon="fa-solid fa-user" />
+                    </div>
+                    <h3>تغییر نام</h3>
+                    <p>نام خود را تغییر دهید</p>
+                </div>
+
+                <div class="action-card" @click="openChangePasswordModal">
+                    <div class="card-icon">
+                        <font-awesome-icon icon="fa-solid fa-lock" />
+                    </div>
+                    <h3>تغییر رمز عبور</h3>
+                    <p>رمز عبور خود را تغییر دهید</p>
+                </div>
+            </div>
         </div>
 
         <!-- Modals -->
@@ -79,8 +165,19 @@
 import store from '@/store';
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
+import Heart3D from '@/components/Heart3D.vue';
+import { useToast } from "vue-toastification";
+import Badge from '@/components/Badge.vue';
 
 export default {
+    components: {
+        Heart3D,
+        Badge
+    },
+    setup() {
+        const toast = useToast();
+        return { toast }
+    },
     data() {
         return {
             user: store.state.user,
@@ -90,6 +187,8 @@ export default {
             newPassword: '',
             defaultAvatar: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNFMkU4RjAiLz48cGF0aCBkPSJNMTAwIDEwNUM4NS4wMzggMTA1IDczIDkyLjk2MiA3MyA3OEM3MyA2My4wMzggODUuMDM4IDUxIDEwMCA1MUMxMTQuOTYyIDUxIDEyNyA2My4wMzggMTI3IDc4QzEyNyA5Mi45NjIgMTE0Ljk2MiAxMDUgMTAwIDEwNVoiIGZpbGw9IiM5NEEzQjgiLz48cGF0aCBkPSJNMTY1IDE2NS41QzE2NSAxNjUuNSAxNTQuNSAxMzUgMTAwIDEzNUM0NS41IDEzNSAzNSAxNjUuNSAzNSAxNjUuNVYxODBIMTY1VjE2NS41WiIgZmlsbD0iIzk0QTNCOCIvPjwvc3ZnPg==',
             isUploading: false,
+            uploadProgress: 0,
+            circumference: 2 * Math.PI * 26,
         };
     },
     computed: {
@@ -117,6 +216,9 @@ export default {
             } else {
                 return { filter: 'saturate(1000%) brightness(1.2) contrast(1.5)' }; // Vibrant glowing red
             }
+        },
+        dashOffset() {
+            return this.circumference * (1 - this.uploadProgress / 100);
         }
     },
     methods: {
@@ -195,16 +297,17 @@ export default {
 
             // Validate file type and size
             if (!file.type.startsWith('image/')) {
-                alert('لطفا یک تصویر انتخاب کنید');
+                this.toast.error('لطفا یک تصویر انتخاب کنید');
                 return;
             }
 
             if (file.size > 5 * 1024 * 1024) {
-                alert('حجم تصویر باید کمتر از ۵ مگابایت باشد');
+                this.toast.error('حجم تصویر باید کمتر از ۵ مگابایت باشد');
                 return;
             }
 
             this.isUploading = true;
+            this.uploadProgress = 0;
             const formData = new FormData();
             formData.append('avatar', file);
 
@@ -213,26 +316,29 @@ export default {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${this.$store.state.token}`,
+                    },
+                    onUploadProgress: (progressEvent) => {
+                        this.uploadProgress = Math.round(
+                            (progressEvent.loaded * 100) / progressEvent.total
+                        );
                     }
                 });
 
                 if (response.data.success) {
-                    // Update both local user and store
                     this.user = {
                         ...this.user,
                         avatar: response.data.avatar_url
                     };
                     this.$store.commit('setUser', this.user);
-                    
-                    // Force image refresh by adding timestamp
-                    this.user.avatar = `${response.data.avatar_url}?t=${new Date().getTime()}`;
+                    this.toast.success('تصویر پروفایل با موفقیت بروزرسانی شد');
                 }
             } catch (error) {
-                const errorMessage = error.response?.data?.message || error.message || 'خطا در آپلود تصویر';
-                alert(errorMessage);
+                const errorMessage = error.response?.data?.message || 'خطا در آپلود تصویر';
+                this.toast.error(errorMessage);
                 console.error('Error uploading avatar:', error);
             } finally {
                 this.isUploading = false;
+                this.uploadProgress = 0;
             }
         },
         closeModals() {
@@ -246,152 +352,161 @@ export default {
 };
 </script>
 
+<style>
+body {
+    background: #f5f7fa !important;
+    max-width: unset !important;
+}
+</style>
 <style scoped>
 .dashboard {
-    width: 100%;
-    padding: 2rem 1rem;
-    background: #ffffff;
-    direction: rtl;
+    min-height: 100vh;
+    width: 100vw;
+    padding: 0;
+    background: #f5f7fa;
+}
+
+.top-bar {
+    background: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.user-brief {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 1rem;
 }
 
-/* Add font-family to all buttons and interactive elements */
-button, 
-.action-card,
-.btn-primary,
-.btn-secondary,
-.modal-content input,
-.photo-overlay span {
-    font-family: "Vazirmatn FD", sans-serif;
-}
-
-/* Update action cards to maintain consistent font */
-.action-card span {
-    font-family: "Vazirmatn FD", sans-serif;
-    font-size: 0.9rem;
-}
-
-.profile-section {
-    width: 100%;
-    max-width: 800px; /* Or your preferred max-width */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem 1rem;
-    background: #f8f9fa;
-    border-radius: 16px;
-    margin: 0 auto; /* Center horizontally */
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
-
-.profile-photo-container {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    margin-bottom: 1.5rem;
-    cursor: pointer;
-}
-
-.profile-photo {
-    width: 100%;
-    height: 100%;
+.mini-avatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.photo-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    border-radius: 50%;
+.stats {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: white;
-    opacity: 0;
-    transition: opacity 0.3s;
+    gap: 2rem;
 }
 
-.profile-photo-container:hover .photo-overlay {
-    opacity: 1;
-}
-
-.user-info {
-    text-align: center;
-}
-
-.user-info h1 {
-    font-size: 1.5rem;
-    margin: 0;
-    color: #2c3e50;
-}
-
-.email {
-    color: #666;
-    margin: 0.5rem 0;
-}
-
-.score-container {
+.stat-item {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 0.5rem;
-    margin-top: 1rem;
+    font-weight: 600;
+    color: #1cb0f6;
 }
 
-.heart-icon {
-    font-size: 1.5rem;
+.main-content {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
 }
 
-.score {
-    font-size: 1.2rem;
-    color: #2c3e50;
-    font-weight: 500;
+.profile-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
 }
 
-.actions-grid {
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.level-indicator {
+    background: #1cb0f6;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.progress-bar {
+    height: 12px;
+    background: #e5e5e5;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    background: linear-gradient(90deg, #1cb0f6, #58cc02);
+    transition: width 0.3s ease;
+}
+
+.action-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-top: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
 }
 
 .action-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1.5rem;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 12px;
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    border: 2px solid #e5e5e5;
 }
 
 .action-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transform: translateY(-5px);
+    border-color: #1cb0f6;
+    box-shadow: 0 8px 20px rgba(28, 176, 246, 0.1);
 }
 
-.action-card i {
-    font-size: 1.5rem;
-    color: #3498db;
+.card-icon {
+    width: 60px;
+    height: 60px;
+    background: #f0f8ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
 }
 
-.action-card.logout i {
-    color: #e74c3c;
+.card-icon svg {
+    font-size: 24px;
+    color: #1cb0f6;
 }
 
-.hidden {
-    display: none;
+.action-card h3 {
+    color: #333;
+    margin: 0 0 0.5rem;
+}
+
+.action-card p {
+    color: #666;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.3s;
+}
+
+.icon-button:hover {
+    color: #1cb0f6;
 }
 
 /* Modal Styles */
@@ -453,40 +568,126 @@ button,
     cursor: pointer;
 }
 
-@media (min-width: 768px) {
-    .dashboard {
-        padding: 3rem 2rem;
+@media (max-width: 768px) {
+    .top-bar {
+        padding: 1rem;
     }
 
-    .profile-section {
-        padding: 3rem;
+    .main-content {
+        margin: 1rem auto;
+    }
+
+    .profile-card {
+        padding: 1.5rem;
     }
 }
 
-/* Add these new styles */
-.upload-progress {
+.profile-photo-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    color: white;
+    cursor: pointer;
 }
 
-.spinner {
-    width: 24px;
-    height: 24px;
-    border: 3px solid #ffffff;
-    border-top: 3px solid transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.photo-overlay svg {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.profile-photo-wrapper:hover .photo-overlay {
+    opacity: 1;
+}
+
+.profile-photo-wrapper:hover .profile-photo {
+    transform: scale(1.1);
+}
+
+.upload-progress {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+    transition: stroke-dashoffset 0.3s;
+}
+
+.progress-text {
+    position: absolute;
+    font-size: 14px;
+    font-weight: bold;
 }
 
 .photo-overlay.uploading {
-    opacity: 1 !important;
+    opacity: 1;
     background: rgba(0,0,0,0.7);
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+/* Override toast styles for RTL */
+:deep(.Vue-Toastification__toast) {
+    font-family: "Vazirmatn FD", sans-serif;
+}
+
+.badges-section {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1.5rem;
+    color: #2c3e50;
+}
+
+.section-title svg {
+    color: #f1c40f;
+}
+
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .badges-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
