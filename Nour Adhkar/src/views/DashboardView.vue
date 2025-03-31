@@ -7,6 +7,10 @@
 
             <BadgesSection :user="user" />
 
+            <div class="dashboard-section">
+                <StreakCalendar :user="user" />
+            </div>
+
             <!-- Action Cards -->
             <div class="action-cards">
                 <div class="action-card" @click="openChangeNameModal">
@@ -88,6 +92,7 @@ import TopBar from '@/components/Admin/TopBar.vue';
 import Badge from '@/components/Badge.vue';
 import ProfileCard from '@/components/Admin/ProfileCard.vue';
 import BadgesSection from '@/components/Admin/BadgesSection.vue';
+import StreakCalendar from '@/components/StreakCalendar.vue';
 
 export default {
     components: {
@@ -95,6 +100,7 @@ export default {
         Badge,
         ProfileCard,
         BadgesSection,
+        StreakCalendar
     },
     async mounted() {
         try {

@@ -20,6 +20,15 @@ class DhikrController extends Controller
         
         // Update user statistics
         $user->total_dhikrs++;
+        
+        // Track completion date
+        $today = now()->format('Y-m-d');
+        $completedDates = $user->completed_dates ?? [];
+        if (!in_array($today, $completedDates)) {
+            $completedDates[] = $today;
+            $user->completed_dates = $completedDates;
+        }
+        
         $user->save();
         
         $this->badgeService->updateStreak($user);

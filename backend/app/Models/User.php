@@ -37,7 +37,8 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'avatar',
         'heart_score',
-        'score'
+        'streak',
+        'completed_dates'
     ];
     protected $hidden = [
         'password',
@@ -47,6 +48,8 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
         'badges' => 'array',
         'last_dhikr_date' => 'date',
+        'password' => 'hashed',
+        'completed_dates' => 'array'
     ];
 
     public function getJWTIdentifier()
