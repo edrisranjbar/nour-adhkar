@@ -83,10 +83,15 @@ body {
     font-style: normal;
     background-color: #D1BB9E;
     width: 100%;
-    max-width: 735px;
     margin: 0 auto;
     overflow-x: hidden;
     direction: rtl;
+}
+
+#app {
+    max-width: 735px;
+    margin: auto;
+    text-align: center;
 }
 
 header {

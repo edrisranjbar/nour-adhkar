@@ -11,7 +11,8 @@ import {
     faStar,
     faFire,
     faCalendarCheck,
-    faHeart
+    faHeart,
+    faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to library
@@ -24,7 +25,8 @@ library.add(
     faStar,
     faFire,
     faCalendarCheck,
-    faHeart
+    faHeart,
+    faCheckCircle
 );
 
 export default FontAwesomeIcon; 

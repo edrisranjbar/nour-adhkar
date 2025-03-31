@@ -83,14 +83,14 @@
                     <Badge
                         title="تازه‌کار"
                         description="اولین ذکر را ثبت کنید"
-                        icon="fas fa-star"
+                        icon="fa-solid fa-star"
                         :earned="user.badges?.beginner"
                         :earned-date="user.badges?.beginner_date"
                     />
                     <Badge
                         title="پرتلاش"
                         description="۱۰۰ ذکر ثبت کنید"
-                        icon="fas fa-fire"
+                        icon="fa-solid fa-fire"
                         :earned="user.badges?.hardworker"
                         :earned-date="user.badges?.hardworker_date"
                         :progress="user.total_dhikrs || 0"
@@ -388,17 +388,14 @@ export default {
 };
 </script>
 
-<style>
-body {
-    background: #f5f7fa !important;
-    max-width: unset !important;
-}
-</style>
 <style scoped>
 button {
     font-family: "Vazirmatn FD", sans-serif !important;
 }
 .dashboard {
+    position: absolute;
+    left: 0;
+    right: 0;
     min-height: 100vh;
     width: 100vw;
     padding: 0;
@@ -720,13 +717,15 @@ button {
 
 .badges-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 @media (max-width: 768px) {
     .badges-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
 }
 

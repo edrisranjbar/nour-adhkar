@@ -131,36 +131,44 @@ class AuthController extends Controller
 
     public function updateAvatar(Request $request)
     {
-        $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120'
-        ]);
-
         try {
+            if (!$request->hasFile('avatar')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No avatar file provided'
+                ], 400);
+            }
+
             $user = auth()->user();
+            $file = $request->file('avatar');
             
-            // Delete old avatar if exists
-            if ($user->avatar && !str_contains($user->avatar, 'placeholder')) {
-                $oldPath = str_replace('/storage/', '', $user->avatar);
+            // Delete old avatar if exists and not default
+            if ($user->avatar && !str_contains($user->avatar, 'default-avatar')) {
+                $oldPath = str_replace(url('storage/'), '', $user->avatar);
                 Storage::disk('public')->delete($oldPath);
             }
 
             // Store new avatar
-            $path = $request->file('avatar')->store('avatars', 'public');
+            $path = $file->store('avatars', 'public');
             
-            // Update user record with full URL
-            $user->avatar = url('storage/' . $path); // This ensures we get the full URL
+            // Generate full URL for the avatar
+            $avatarUrl = url('storage/' . $path);
+
+            // Update user
+            $user->avatar = $avatarUrl;
             $user->save();
 
             return response()->json([
                 'success' => true,
-                'avatar_url' => $user->avatar
+                'message' => 'Avatar updated successfully',
+                'avatar_url' => $avatarUrl
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Avatar upload error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error uploading avatar',
-                'detail' => $e->getMessage()
+                'message' => 'Error uploading avatar'
             ], 500);
         }
     }
