@@ -13,17 +13,19 @@
         </div>
       </div>
     </div>
-    
+
     <div class="calendar-grid">
-      <div v-for="day in calendarDays" 
-           :key="day.date" 
-           class="calendar-day"
-           :class="{
-             'completed': day.completed,
-             'today': day.isToday,
-             'future': day.isFuture
-           }"
-           :title="day.date">
+      <!-- Day Labels -->
+      <div v-for="day in weekDays" :key="day" class="day-label">
+        {{ day }}
+      </div>
+
+      <!-- Calendar Days -->
+      <div v-for="day in calendarDays" :key="day.date" class="calendar-day" :class="{
+        'completed': day.completed,
+        'today': day.isToday,
+        'future': day.isFuture
+      }" :title="day.persianDate">
         <span class="day-number">{{ day.dayNumber }}</span>
         <div class="completion-indicator"></div>
       </div>
@@ -32,6 +34,8 @@
 </template>
 
 <script>
+import jalaali from 'jalaali-js';
+
 export default {
   name: 'StreakCalendar',
   props: {
@@ -43,7 +47,8 @@ export default {
   data() {
     return {
       currentDate: new Date(),
-      calendarDays: []
+      calendarDays: [],
+      weekDays: ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه']
     }
   },
   computed: {
@@ -55,39 +60,40 @@ export default {
     }
   },
   methods: {
+    toJalaali(date) {
+      return jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    },
+    formatJalaaliDate(jd) {
+      return `${jd.jd}/${jd.jm}/${jd.jy}`;
+    },
     generateCalendarDays() {
       const today = new Date();
-      const currentMonth = today.getMonth();
-      const currentYear = today.getFullYear();
-      
-      // Get the first day of the current month
-      const firstDay = new Date(currentYear, currentMonth, 1);
-      // Get the last day of the current month
-      const lastDay = new Date(currentYear, currentMonth + 1, 0);
-      
+
       // Get the last 30 days for the calendar
       const days = [];
       for (let i = 29; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
-        
+
+        const jd = this.toJalaali(date);
         const isToday = date.toDateString() === today.toDateString();
         const isFuture = date > today;
-        
+
         // Check if this day has completed dhikrs
         const completed = this.user?.completed_dates?.includes(
           date.toISOString().split('T')[0]
         ) || false;
-        
+
         days.push({
           date: date.toISOString().split('T')[0],
-          dayNumber: date.getDate(),
+          persianDate: this.formatJalaaliDate(jd),
+          dayNumber: jd.jd,
           completed,
           isToday,
           isFuture
         });
       }
-      
+
       this.calendarDays = days;
     }
   },
@@ -128,19 +134,22 @@ export default {
   gap: 20px;
 }
 
-.current-streak, .total-days {
+.current-streak,
+.total-days {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.streak-count, .days-count {
+.streak-count,
+.days-count {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--primary-color);
 }
 
-.streak-label, .days-label {
+.streak-label,
+.days-label {
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
@@ -149,6 +158,14 @@ export default {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
+}
+
+.day-label {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  padding: 8px 0;
+  font-weight: 500;
 }
 
 .calendar-day {
@@ -202,13 +219,18 @@ export default {
   .streak-calendar {
     padding: 15px;
   }
-  
+
   .calendar-grid {
     gap: 4px;
   }
-  
+
   .day-number {
     font-size: 0.8rem;
   }
+
+  .day-label {
+    font-size: 0.8rem;
+    padding: 4px 0;
+  }
 }
-</style> 
+</style>
