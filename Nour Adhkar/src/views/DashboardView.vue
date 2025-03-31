@@ -4,54 +4,40 @@
 
         <!-- Main Content -->
         <div class="main-content">
+            
             <!-- Profile Card -->
             <div class="profile-card">
                 <div class="profile-header">
-                    <div class="profile-photo-container" @click="triggerFileInput">
-                        <div class="profile-photo-wrapper">
-                            <img 
-                                :src="user.avatar || defaultAvatar" 
-                                :key="user.avatar"
-                                alt="تصویر پروفایل" 
-                                class="profile-photo" 
-                                @error="handleImageError"
-                            />
-                            <div class="photo-overlay" :class="{ 'uploading': isUploading }">
-                                <template v-if="!isUploading">
-                                    <font-awesome-icon icon="fa-solid fa-camera" />
-                                    <span>تغییر تصویر</span>
-                                </template>
-                                <div v-else class="upload-progress">
-                                    <svg class="progress-ring" width="60" height="60">
-                                        <circle
-                                            class="progress-ring-circle"
-                                            :stroke-dasharray="circumference"
-                                            :stroke-dashoffset="dashOffset"
-                                            stroke-width="4"
-                                            stroke="#fff"
-                                            fill="transparent"
-                                            r="26"
-                                            cx="30"
-                                            cy="30"
-                                        />
-                                    </svg>
-                                    <span class="progress-text">{{ uploadProgress }}%</span>
+                    <div>
+                        <div class="profile-photo-container" @click="triggerFileInput">
+                            <div class="profile-photo-wrapper">
+                                <img :src="user.avatar || defaultAvatar" :key="user.avatar" alt="تصویر پروفایل"
+                                    class="profile-photo" @error="handleImageError" />
+                                <div class="photo-overlay" :class="{ 'uploading': isUploading }">
+                                    <template v-if="!isUploading">
+                                        <font-awesome-icon icon="fa-solid fa-camera" />
+                                        <span>تغییر تصویر</span>
+                                    </template>
+                                    <div v-else class="upload-progress">
+                                        <svg class="progress-ring" width="60" height="60">
+                                            <circle class="progress-ring-circle" :stroke-dasharray="circumference"
+                                                :stroke-dashoffset="dashOffset" stroke-width="4" stroke="#fff"
+                                                fill="transparent" r="26" cx="30" cy="30" />
+                                        </svg>
+                                        <span class="progress-text">{{ uploadProgress }}%</span>
+                                    </div>
                                 </div>
                             </div>
+                            <input type="file" ref="fileInput" @change="handlePhotoUpload" accept="image/*"
+                                class="hidden" />
                         </div>
-                        <input 
-                            type="file" 
-                            ref="fileInput" 
-                            @change="handlePhotoUpload" 
-                            accept="image/*" 
-                            class="hidden"
-                        />
                     </div>
+                    <h1>{{ user.name }}</h1>
                     <div class="level-indicator">
                         <span class="level">سطح {{ Math.floor((user.score || 0) / 10) + 1 }}</span>
                     </div>
                 </div>
-                
+
                 <div class="progress-bar">
                     <div class="progress" :style="{ width: `${(user.heart_score || 0)}%` }"></div>
                 </div>
@@ -64,40 +50,17 @@
                     نشان‌های من
                 </h3>
                 <div class="badges-grid">
-                    <Badge
-                        title="تازه‌کار"
-                        description="اولین ذکر را ثبت کنید"
-                        icon="fa-solid fa-star"
-                        :earned="user.badges?.beginner"
-                        :earned-date="user.badges?.beginner_date"
-                    />
-                    <Badge
-                        title="پرتلاش"
-                        description="۱۰۰ ذکر ثبت کنید"
-                        icon="fa-solid fa-fire"
-                        :earned="user.badges?.hardworker"
-                        :earned-date="user.badges?.hardworker_date"
-                        :progress="user.total_dhikrs || 0"
-                        :target="100"
-                    />
-                    <Badge
-                        title="مداوم"
-                        description="۷ روز پشت سر هم ذکر ثبت کنید"
-                        icon="fas fa-calendar-check"
-                        :earned="user.badges?.consistent"
-                        :earned-date="user.badges?.consistent_date"
-                        :progress="user.streak || 0"
-                        :target="7"
-                    />
-                    <Badge
-                        title="قلب طلایی"
-                        description="به امتیاز قلب ۱۰۰ برسید"
-                        icon="fas fa-heart"
-                        :earned="user.badges?.golden_heart"
-                        :earned-date="user.badges?.golden_heart_date"
-                        :progress="user.heart_score || 0"
-                        :target="100"
-                    />
+                    <Badge title="تازه‌کار" description="اولین ذکر را ثبت کنید" icon="fa-solid fa-star"
+                        :earned="user.badges?.beginner" :earned-date="user.badges?.beginner_date" />
+                    <Badge title="پرتلاش" description="۱۰۰ ذکر ثبت کنید" icon="fa-solid fa-fire"
+                        :earned="user.badges?.hardworker" :earned-date="user.badges?.hardworker_date"
+                        :progress="user.total_dhikrs || 0" :target="100" />
+                    <Badge title="مداوم" description="۷ روز پشت سر هم ذکر ثبت کنید" icon="fas fa-calendar-check"
+                        :earned="user.badges?.consistent" :earned-date="user.badges?.consistent_date"
+                        :progress="user.streak || 0" :target="7" />
+                    <Badge title="قلب طلایی" description="به امتیاز قلب ۱۰۰ برسید" icon="fas fa-heart"
+                        :earned="user.badges?.golden_heart" :earned-date="user.badges?.golden_heart_date"
+                        :progress="user.heart_score || 0" :target="100" />
                 </div>
             </div>
 
@@ -122,7 +85,8 @@
         </div>
 
         <!-- Modals -->
-        <div v-if="isChangeNameModalOpen || isChangePasswordModalOpen || isLogoutModalOpen" class="modal-backdrop" @click="closeModals">
+        <div v-if="isChangeNameModalOpen || isChangePasswordModalOpen || isLogoutModalOpen" class="modal-backdrop"
+            @click="closeModals">
             <div class="modal-content" @click.stop>
                 <template v-if="isChangeNameModalOpen">
                     <h2>تغییر نام</h2>
@@ -371,11 +335,16 @@ export default {
 .profile-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     margin-bottom: 1.5rem;
 }
 
+.profile-photo-container{
+    margin-left: 16px;
+}
+
 .level-indicator {
+    margin-right: 16px;
     background: #1cb0f6;
     color: white;
     padding: 0.5rem 1rem;
