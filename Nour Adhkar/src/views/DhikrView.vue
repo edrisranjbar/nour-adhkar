@@ -142,9 +142,11 @@ export default {
           }
         });
 
-        // Update local state
         if (response.data.success) {
           this.$store.commit('updateHeartScore', heart_score);
+          if (response.data.user) {
+            this.$store.commit('setUser', response.data.user);
+          }
         }
 
       } catch (error) {

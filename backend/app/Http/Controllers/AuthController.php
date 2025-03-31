@@ -61,11 +61,6 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'user' => $user,
-            'token' => $user->createToken('auth_token')->plainTextToken
-        ]);
-        return response()->json([
-            'success' => true,
-            'user' => $user,
             'token' => $token,
         ]);
     }
@@ -119,26 +114,33 @@ class AuthController extends Controller
 
     public function updateHeartScore(Request $request)
     {
-        $request->validate(['heart_score' => 'required|integer|min:0']);
+        try {
+            $request->validate(['heart_score' => 'required|integer|min:0']);
 
-        $user = Auth::user();
-        $new_score = min((int)$request->heart_score, 100);
-        $user->heart_score = $new_score;
-        $user->save();
+            $user = Auth::user();
+            $new_score = min((int)$request->heart_score, 100);
+            $user->heart_score = $new_score;
+            $user->save();
 
-        // Check for golden heart badge when score reaches 100
-        if ($new_score >= 100) {
-            $this->badgeService->awardBadge($user, 'golden_heart');
+            // Check and award badges
+            $badgeAwarded = $this->badgeService->checkAndAwardBadges($user);
+
+            // Get updated user data with badges
+            $user->refresh();
+
+            return response()->json([
+                'success' => true,
+                'user' => $user,
+                'badges' => $user->badges,
+                'badge_awarded' => $badgeAwarded
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating heart score',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Get updated user data with badges
-        $user->refresh();
-
-        return response()->json([
-            'success' => true,
-            'user' => $user,
-            'badges' => $user->badges
-        ]);
     }
 
     public function updateAvatar(Request $request)

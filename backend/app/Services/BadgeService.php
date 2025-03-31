@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Log\Logger;
 
 class BadgeService
 {
@@ -39,35 +40,48 @@ class BadgeService
 
     public function checkAndAwardBadges(User $user)
     {
-        $badges = $user->badges ?? [];
+        // Initialize badges if they don't exist
+        if (!$user->badges) {
+            $this->initializeBadges($user);
+        }
+        
+        $badges = $user->badges;
         $updated = false;
 
         // Check beginner badge
-        if (!$badges['beginner'] && $user->total_dhikrs >= $this->badges['beginner']['condition']) {
-            $badges['beginner'] = true;
-            $badges['beginner_date'] = now()->toDateString();
-            $updated = true;
+        if (!isset($badges['beginner']) || !$badges['beginner']) {
+            if ($user->total_dhikrs >= $this->badges['beginner']['condition']) {
+                $badges['beginner'] = true;
+                $badges['beginner_date'] = now()->toDateString();
+                $updated = true;
+            }
         }
 
         // Check hardworker badge
-        if (!$badges['hardworker'] && $user->total_dhikrs >= $this->badges['hardworker']['condition']) {
-            $badges['hardworker'] = true;
-            $badges['hardworker_date'] = now()->toDateString();
-            $updated = true;
+        if (!isset($badges['hardworker']) || !$badges['hardworker']) {
+            if ($user->total_dhikrs >= $this->badges['hardworker']['condition']) {
+                $badges['hardworker'] = true;
+                $badges['hardworker_date'] = now()->toDateString();
+                $updated = true;
+            }
         }
 
         // Check consistent badge
-        if (!$badges['consistent'] && $user->streak >= $this->badges['consistent']['condition']) {
-            $badges['consistent'] = true;
-            $badges['consistent_date'] = now()->toDateString();
-            $updated = true;
+        if (!isset($badges['consistent']) || !$badges['consistent']) {
+            if ($user->streak >= $this->badges['consistent']['condition']) {
+                $badges['consistent'] = true;
+                $badges['consistent_date'] = now()->toDateString();
+                $updated = true;
+            }
         }
 
         // Check golden heart badge
-        if (!$badges['golden_heart'] && $user->heart_score >= $this->badges['golden_heart']['condition']) {
-            $badges['golden_heart'] = true;
-            $badges['golden_heart_date'] = now()->toDateString();
-            $updated = true;
+        if (!isset($badges['golden_heart']) || !$badges['golden_heart']) {
+            if ($user->heart_score >= $this->badges['golden_heart']['condition']) {
+                $badges['golden_heart'] = true;
+                $badges['golden_heart_date'] = now()->toDateString();
+                $updated = true;
+            }
         }
 
         if ($updated) {
@@ -106,14 +120,13 @@ class BadgeService
 
     public function awardBadge(User $user, string $badgeName)
     {
-        if (!$user->badges) {
-            $user->badges = new \stdClass();
-        }
-
+        $badges = $user->badges ?? [];
+        
         // Only award if not already earned
-        if (empty($user->badges->{$badgeName})) {
-            $user->badges->{$badgeName} = true;
-            $user->badges->{$badgeName . '_date'} = now();
+        if (empty($badges[$badgeName])) {
+            $badges[$badgeName] = true;
+            $badges[$badgeName . '_date'] = now()->toDateString();
+            $user->badges = $badges;
             $user->save();
         }
     }
