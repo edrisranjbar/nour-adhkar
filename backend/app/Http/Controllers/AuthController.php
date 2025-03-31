@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -22,6 +23,7 @@ class AuthController extends Controller
                 'heart_score' => $request->user()->heart_score,
                 'score' => $request->user()->score,
                 'created_at' => $request->user()->created_at,
+                'avatar' => $request->user()->avatar
             ]
         ]);
     }
@@ -111,6 +113,42 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json(['success' => true]);
+    }
+
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120'
+        ]);
+
+        try {
+            $user = auth()->user();
+            
+            // Delete old avatar if exists
+            if ($user->avatar && !str_contains($user->avatar, 'placeholder')) {
+                $oldPath = str_replace('/storage/', '', $user->avatar);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            // Store new avatar
+            $path = $request->file('avatar')->store('avatars', 'public');
+            
+            // Update user record with full URL
+            $user->avatar = url('storage/' . $path); // This ensures we get the full URL
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'avatar_url' => $user->avatar
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error uploading avatar',
+                'detail' => $e->getMessage()
+            ], 500);
+        }
     }
 
 }
