@@ -96,6 +96,28 @@ export default {
         ProfileCard,
         BadgesSection,
     },
+    async mounted() {
+        try {
+            const response = await axios.get(`${BASE_API_URL}/user`, {
+                headers: {
+                    'Authorization': `Bearer ${this.$store.state.token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.data) {
+                this.user = response.data.user;
+                this.$store.commit('setUser', response.data.user);
+                this.$store.commit('setToken', this.$store.state.token);
+            }
+        } catch (error) {
+            if (error.response?.status === 401) {
+                this.toast.error('لطفا دوباره وارد شوید');
+                this.$store.commit('clearUser');
+                this.$router.push('/login');
+            }
+        }
+    },
     setup() {
         const toast = useToast();
         return { toast }

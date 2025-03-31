@@ -21,7 +21,7 @@ class AuthController extends Controller
     }
 
     public function get(Request $request) {
-        response()->json([
+        return response()->json([
             'user' => [
                 'id' => $request->user()->id,
                 'name' => $request->user()->name,
@@ -30,7 +30,8 @@ class AuthController extends Controller
                 'heart_score' => $request->user()->heart_score,
                 'score' => $request->user()->score,
                 'created_at' => $request->user()->created_at,
-                'avatar' => $request->user()->avatar
+                'avatar' => $request->user()->avatar,
+                'badges' => $request->user()->badges,
             ]
         ]);
     }
