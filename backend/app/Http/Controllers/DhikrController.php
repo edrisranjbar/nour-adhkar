@@ -18,8 +18,6 @@ class DhikrController extends Controller
     {
         $user = auth()->user();
         
-        // Your existing dhikr creation logic here
-        
         // Update user statistics
         $user->total_dhikrs++;
         $user->save();
