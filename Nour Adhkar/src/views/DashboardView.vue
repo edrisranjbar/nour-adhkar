@@ -5,26 +5,7 @@
             
             <ProfileCard :user="user" />
 
-            <!-- Badges Section -->
-            <div class="badges-section">
-                <h3 class="section-title">
-                    <font-awesome-icon icon="fa-solid fa-award" />
-                    نشان‌های من
-                </h3>
-                <div class="badges-grid">
-                    <Badge title="تازه‌کار" description="اولین ذکر را ثبت کنید" icon="fa-solid fa-star"
-                        :earned="user.badges?.beginner" :earned-date="user.badges?.beginner_date" />
-                    <Badge title="پرتلاش" description="۱۰۰ ذکر ثبت کنید" icon="fa-solid fa-fire"
-                        :earned="user.badges?.hardworker" :earned-date="user.badges?.hardworker_date"
-                        :progress="user.total_dhikrs || 0" :target="100" />
-                    <Badge title="مداوم" description="۷ روز پشت سر هم ذکر ثبت کنید" icon="fas fa-calendar-check"
-                        :earned="user.badges?.consistent" :earned-date="user.badges?.consistent_date"
-                        :progress="user.streak || 0" :target="7" />
-                    <Badge title="قلب طلایی" description="به امتیاز قلب ۱۰۰ برسید" icon="fas fa-heart"
-                        :earned="user.badges?.golden_heart" :earned-date="user.badges?.golden_heart_date"
-                        :progress="user.heart_score || 0" :target="100" />
-                </div>
-            </div>
+            <BadgesSection :user="user" />
 
             <!-- Action Cards -->
             <div class="action-cards">
@@ -95,12 +76,14 @@ import { useToast } from "vue-toastification";
 import TopBar from '@/components/Admin/TopBar.vue';
 import Badge from '@/components/Badge.vue';
 import ProfileCard from '@/components/Admin/ProfileCard.vue';
+import BadgesSection from '@/components/Admin/BadgesSection.vue';
 
 export default {
     components: {
         TopBar,
         Badge,
         ProfileCard,
+        BadgesSection,
     },
     setup() {
         const toast = useToast();
@@ -113,10 +96,6 @@ export default {
             isChangePasswordModalOpen: false,
             newName: '',
             newPassword: '',
-            defaultAvatar: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNFMkU4RjAiLz48cGF0aCBkPSJNMTAwIDEwNUM4NS4wMzggMTA1IDczIDkyLjk2MiA3MyA3OEM3MyA2My4wMzggODUuMDM4IDUxIDEwMCA1MUMxMTQuOTYyIDUxIDEyNyA2My4wMzggMTI3IDc4QzEyNyA5Mi45NjIgMTE0Ljk2MiAxMDUgMTAwIDEwNVoiIGZpbGw9IiM5NEEzQjgiLz48cGF0aCBkPSJNMTY1IDE2NS41QzE2NSAxNjUuNSAxNTQuNSAxMzUgMTAwIDEzNUM0NS41IDEzNSAzNSAxNjUuNSAzNSAxNjUuNVYxODBIMTY1VjE2NS41WiIgZmlsbD0iIzk0QTNCOCIvPjwvc3ZnPg==',
-            isUploading: false,
-            uploadProgress: 0,
-            circumference: 2 * Math.PI * 26,
             isLogoutModalOpen: false,
         };
     },
@@ -146,9 +125,6 @@ export default {
                 return { filter: 'saturate(1000%) brightness(1.2) contrast(1.5)' }; // Vibrant glowing red
             }
         },
-        dashOffset() {
-            return this.circumference * (1 - this.uploadProgress / 100);
-        }
     },
     methods: {
         openChangeNameModal() {
@@ -356,47 +332,5 @@ export default {
 /* Override toast styles for RTL */
 :deep(.Vue-Toastification__toast) {
     font-family: "Vazirmatn FD", sans-serif;
-}
-
-.badges-section {
-    background: white;
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    margin-bottom: 2rem;
-}
-
-.section-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0 0 1.5rem;
-    color: #2c3e50;
-}
-
-.section-title svg {
-    color: #f1c40f;
-}
-
-.badges-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-@media (max-width: 768px) {
-    .badges-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .top-bar {
-        padding: 1rem;
-    }
-
-    .main-content {
-        margin: 1rem auto;
-    }
 }
 </style>
