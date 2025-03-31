@@ -11,8 +11,9 @@
                     <Heart3D :score="user.heart_score || 0" />
                     <span>{{ user.heart_score ?? 0 }}</span>
                 </div>
-                <button @click="logout" class="icon-button">
+                <button @click="openLogoutModal" class="logout-button">
                     <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
+                    <span>خروج</span>
                 </button>
             </div>
         </div>
@@ -137,7 +138,7 @@
         </div>
 
         <!-- Modals -->
-        <div v-if="isChangeNameModalOpen || isChangePasswordModalOpen" class="modal-backdrop" @click="closeModals">
+        <div v-if="isChangeNameModalOpen || isChangePasswordModalOpen || isLogoutModalOpen" class="modal-backdrop" @click="closeModals">
             <div class="modal-content" @click.stop>
                 <template v-if="isChangeNameModalOpen">
                     <h2>تغییر نام</h2>
@@ -153,6 +154,21 @@
                     <input v-model="newPassword" type="password" placeholder="رمز عبور جدید" />
                     <div class="modal-actions">
                         <button @click="changePassword" class="btn-primary">ذخیره</button>
+                        <button @click="closeModals" class="btn-secondary">انصراف</button>
+                    </div>
+                </template>
+
+                <template v-if="isLogoutModalOpen">
+                    <div class="modal-header">
+                        <font-awesome-icon icon="fa-solid fa-sign-out-alt" class="logout-icon" />
+                        <h2>خروج از حساب کاربری</h2>
+                    </div>
+                    <p>آیا مطمئن هستید که می‌خواهید از حساب کاربری خود خارج شوید؟</p>
+                    <div class="modal-actions">
+                        <button @click="confirmLogout" class="btn-danger">
+                            <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
+                            خروج
+                        </button>
                         <button @click="closeModals" class="btn-secondary">انصراف</button>
                     </div>
                 </template>
@@ -189,6 +205,7 @@ export default {
             isUploading: false,
             uploadProgress: 0,
             circumference: 2 * Math.PI * 26,
+            isLogoutModalOpen: false,
         };
     },
     computed: {
@@ -344,9 +361,28 @@ export default {
         closeModals() {
             this.isChangeNameModalOpen = false;
             this.isChangePasswordModalOpen = false;
+            this.isLogoutModalOpen = false;
         },
         handleImageError(e) {
             e.target.src = this.defaultAvatar;
+        },
+        openLogoutModal() {
+            this.isLogoutModalOpen = true;
+        },
+        async confirmLogout() {
+            try {
+                await axios.post(`${BASE_API_URL}/logout`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${this.$store.state.token}`,
+                    },
+                });
+                this.$store.commit('clearUser');
+                this.toast.success('با موفقیت خارج شدید');
+                this.$router.push('/login');
+            } catch (error) {
+                console.error('Logout error:', error);
+                this.toast.error('خطا در خروج از حساب کاربری');
+            }
         },
     },
 };
@@ -359,6 +395,9 @@ body {
 }
 </style>
 <style scoped>
+button {
+    font-family: "Vazirmatn FD", sans-serif !important;
+}
 .dashboard {
     min-height: 100vh;
     width: 100vw;
@@ -688,6 +727,87 @@ body {
 @media (max-width: 768px) {
     .badges-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+.logout-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fff1f1;
+    color: #ff4b4b;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+    background: #ffe5e5;
+    transform: translateY(-1px);
+}
+
+.logout-button svg {
+    font-size: 1.1em;
+}
+
+.logout-modal {
+    max-width: 360px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.logout-icon {
+    font-size: 1.5rem;
+    color: #ff4b4b;
+}
+
+.modal-header h2 {
+    color: #ff4b4b;
+    margin: 0;
+}
+
+.logout-modal p {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.btn-danger {
+    background: #ff4b4b;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+    background: #ff3333;
+    transform: translateY(-1px);
+}
+
+.btn-danger svg {
+    font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+    .logout-button span {
+        display: none;
+    }
+    
+    .logout-button {
+        padding: 0.5rem;
     }
 }
 </style>
