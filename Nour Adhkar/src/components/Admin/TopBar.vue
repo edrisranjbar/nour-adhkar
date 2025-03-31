@@ -15,6 +15,9 @@
                 <Heart3D :score="user.heart_score || 0" />
                 <span>{{ user.heart_score ?? 0 }}</span>
             </div>
+            <div class="stat-item text-danger">
+                <StreakIndicator />
+            </div>
             <button @click="$emit('open-logout-modal')" class="logout-button">
                 <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
                 <span>خروج</span>
@@ -164,11 +167,13 @@
 
 <script>
 import Heart3D from '@/components/Heart3D.vue';
+import StreakIndicator from '@/components/Admin/StreakIndicator.vue';
 
 export default {
     name: 'TopBar',
     components: {
         Heart3D,
+        StreakIndicator
     },
     props: {
         user: {
