@@ -84,6 +84,7 @@ button,a,input {
 
 <script>
 import axios from 'axios';
+import { BASE_API_URL } from '@/config';
 
 export default {
     data() {
@@ -97,7 +98,7 @@ export default {
     methods: {
         async register() {
             try {
-                const response = await axios.post('http://localhost:8000/api/register', {
+                const response = await axios.post(`${BASE_API_URL}/register`, {
                     name: this.name,
                     email: this.email,
                     password: this.password,

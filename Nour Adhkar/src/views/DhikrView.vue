@@ -53,6 +53,7 @@ import axios from 'axios';
 import CongratsModal from "@/components/Congrats.vue";
 import Collection from "@/models/collection.js";
 import tapSound from "@/assets/audios/click.mp3"
+import { BASE_API_URL } from '@/config';
 
 export default {
   components: {
@@ -129,7 +130,7 @@ export default {
     async updateHeartScore() {
       let heart_score = Math.min(this.$store.state.user.heart_score + 10, 100);
       try {
-        const response = await axios.patch('http://localhost:8000/api/user/heart', {
+        const response = await axios.patch(`${BASE_API_URL}/user/heart`, {
           heart_score: heart_score,
         }, {
           headers: {

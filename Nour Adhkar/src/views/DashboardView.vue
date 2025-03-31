@@ -46,6 +46,7 @@
 <script>
 import store from '@/store';
 import axios from 'axios';
+import { BASE_API_URL } from '@/config';
 
 export default {
     data() {
@@ -87,7 +88,7 @@ export default {
     methods: {
         async logout() {
             try {
-                await axios.post('http://localhost:8000/api/logout', {}, {
+                await axios.post(`${BASE_API_URL}/logout`, {}, {
                     headers: {
                         Authorization: `Bearer ${this.$store.state.token}`,
                     },
@@ -106,7 +107,7 @@ export default {
             if (this.newName) {
                 try {
                     const response = await axios.patch(
-                        'http://localhost:8000/api/user/name',
+                        `${BASE_API_URL}/user/name`,
                         { name: this.newName },
                         {
                             headers: {
@@ -133,7 +134,7 @@ export default {
             if (this.newPassword) {
                 try {
                     const response = await axios.patch(
-                        'http://localhost:8000/api/user/password',
+                        `${BASE_API_URL}/user/password`,
                         { password: this.newPassword },
                         {
                             headers: {

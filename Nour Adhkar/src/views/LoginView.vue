@@ -98,9 +98,9 @@ button,a,input {
 </style>
 
 <script>
-
-import { mapActions } from 'vuex'; // Import mapActions to bind Vuex actions
 import axios from 'axios';
+import { BASE_API_URL } from '@/config';
+import { mapActions } from 'vuex'; // Import mapActions to bind Vuex actions
 
 export default {
   data() {
@@ -115,7 +115,7 @@ export default {
 
     async requestLogin() {
       try {
-        const response = await axios.post('http://localhost:8000/api/login', {
+        const response = await axios.post(`${BASE_API_URL}/login`, {
           email: this.email,
           password: this.password,
         });
