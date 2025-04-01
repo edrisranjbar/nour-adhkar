@@ -1,13 +1,13 @@
 <template>
   <div class="counter-view">
-    <header>
-      <div class="d-flex">
+  <header>
+    <div class="d-flex">
         <RouterLink to="/" class="d-flex align-items-center">
-          <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
-        </RouterLink>
+        <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
+      </RouterLink>
         <h1 id="modal-title">شمارنده اذکار</h1>
-      </div>
-    </header>
+    </div>
+  </header>
 
     <main class="counter-container">
       
