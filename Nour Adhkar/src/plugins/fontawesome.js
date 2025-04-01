@@ -13,7 +13,8 @@ import {
     faCalendarCheck,
     faHeart,
     faCheckCircle,
-    faTrophy
+    faTrophy,
+    faPlus
 } from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to library
@@ -28,7 +29,8 @@ library.add(
     faCalendarCheck,
     faHeart,
     faCheckCircle,
-    faTrophy
+    faTrophy,
+    faPlus
 );
 
 export default FontAwesomeIcon; 

@@ -16,7 +16,7 @@
                 <span>{{ user.heart_score ?? 0 }}</span>
             </div>
             <div class="stat-item text-danger">
-                <StreakIndicator />
+                <StreakIndicator :streak="userStreak" />
             </div>
             <button @click="$emit('open-logout-modal')" class="logout-button">
                 <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
