@@ -64,3 +64,40 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+# Nour Adhkar Backend
+
+## Migration from DefaultDhikr to Adhkar
+
+We've updated our database structure to use the more comprehensive `adhkars` table instead of the `default_dhikrs` table.
+
+### Migration Steps
+
+1. Run the migrations to create the new tables:
+```bash
+php artisan migrate
+```
+
+2. Run the Adhkar seeder to populate the new tables:
+```bash
+php artisan db:seed --class=AdhkarSeeder
+```
+
+3. If needed, you can manually migrate existing data using the following command:
+```bash
+php artisan dhikr:migrate-to-adhkar
+```
+
+### Database Structure
+
+The new structure consists of:
+
+- `adhkars` table: Contains dhikr content with Arabic text, translations, and counts
+- `collections` table: Organizes dhikr into categories like daily, morning, evening
+- `collection_adhkars` table: Maps the many-to-many relationship between collections and adhkars
+
+### API Endpoints
+
+- `/api/adhkars` - Get all adhkars
+- `/api/collections` - Get all collections
+- `/api/collections/{id}/adhkars` - Get adhkars for a specific collection

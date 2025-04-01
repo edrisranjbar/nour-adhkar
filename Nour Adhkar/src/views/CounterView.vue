@@ -1,27 +1,27 @@
 <template>
   <div class="counter-view">
-  <header>
-    <div class="d-flex">
+    <header>
+      <div class="d-flex">
         <RouterLink to="/" class="d-flex align-items-center">
-        <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
-      </RouterLink>
+          <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
+        </RouterLink>
         <h1 id="modal-title">شمارنده اذکار</h1>
-    </div>
-  </header>
+      </div>
+    </header>
 
     <main class="counter-container">
 
       <!-- Default Dhikrs Section -->
       <section class="default-dhikrs">
         <div class="section-header">
-          <h2>اذکار پیش‌فرض</h2>
+          <h2>اذکار</h2>
           <button class="add-dhikr-button" @click="showCustomDhikrModal = true">
             <font-awesome-icon icon="fa-solid fa-plus" />
             افزودن ذکر
           </button>
         </div>
-        <div v-if="defaultDhikrs.length > 0" class="dhikr-grid">
-          <div v-for="dhikr in defaultDhikrs" :key="dhikr.id" class="dhikr-card"
+        <div v-if="adhkars.length > 0" class="dhikr-grid">
+          <div v-for="dhikr in adhkars" :key="dhikr.id" class="dhikr-card"
             :class="{ 'active': currentDhikr.id === dhikr.id }" @click="selectDhikr(dhikr)">
             <h3>{{ dhikr.title }}</h3>
             <p class="translation">{{ dhikr.translation }}</p>
@@ -39,6 +39,7 @@
 
       <div class="counter-display">
         <h2 v-if="currentDhikr.title">{{ currentDhikr.title }}</h2>
+        <p v-if="currentDhikr.arabic_text" class="arabic-text">{{ currentDhikr.arabic_text }}</p>
         <p v-if="currentDhikr.translation" class="translation">{{ currentDhikr.translation }}</p>
         <div class="counter-number">{{ currentCount }}</div>
         <div class="counter-text">مرتبه</div>
@@ -56,7 +57,7 @@
 
         </div>
 
-  </div>
+      </div>
 
     </main>
 
@@ -74,17 +75,27 @@
       <div class="modal-container">
         <div class="custom-dhikr-form">
           <div class="form-group">
-            <label for="title">متن ذکر</label>
-            <input type="text" id="title" v-model="customDhikr.title" placeholder="متن ذکر را وارد کنید"
+            <label for="title">عنوان ذکر</label>
+            <input type="text" id="title" v-model="customDhikr.title" placeholder="عنوان ذکر را وارد کنید"
               class="form-control">
           </div>
           <div class="form-group">
-            <label for="translation">ترجمه</label>
-            <input type="text" id="translation" v-model="customDhikr.translation" placeholder="ترجمه را وارد کنید"
+            <label for="arabic_text">متن عربی</label>
+            <textarea id="arabic_text" v-model="customDhikr.arabic_text" placeholder="متن عربی ذکر را وارد کنید"
+              class="form-control" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="translation">ترجمه فارسی</label>
+            <input type="text" id="translation" v-model="customDhikr.translation" placeholder="ترجمه فارسی را وارد کنید"
               class="form-control">
           </div>
           <div class="form-group">
-            <label for="count">تعداد</label>
+            <label for="prefix">پیشوند</label>
+            <input type="text" id="prefix" v-model="customDhikr.prefix" placeholder="پیشوند ذکر (اختیاری)"
+              class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="count">تعداد تکرار</label>
             <input type="number" id="count" v-model="customDhikr.count" min="1" class="form-control">
           </div>
           <button class="btn-primary" @click="createCustomDhikr" :disabled="!isCustomDhikrValid">
@@ -105,11 +116,13 @@ export default {
   name: 'CounterView',
   data() {
     return {
-      defaultDhikrs: [],
+      adhkars: [],
       customDhikr: {
         title: '',
         translation: '',
-        count: 33
+        count: 33,
+        arabic_text: '',
+        prefix: ''
       },
       currentDhikr: {},
       currentCount: 0,
@@ -122,6 +135,7 @@ export default {
     ...mapGetters(['isAuthenticated']),
     isCustomDhikrValid() {
       return this.customDhikr.title.trim() &&
+        this.customDhikr.arabic_text.trim() &&
         this.customDhikr.translation.trim() &&
         this.customDhikr.count > 0;
     },
@@ -131,23 +145,23 @@ export default {
     }
   },
   methods: {
-    async fetchDefaultDhikrs() {
+    async fetchAdhkars() {
       try {
-        const response = await axios.get(`${BASE_API_URL}/default-dhikrs`, {
+        const response = await axios.get(`${BASE_API_URL}/adhkars`, {
           headers: {
             Authorization: `Bearer ${this.$store.state.token}`
           }
         });
-        this.defaultDhikrs = response.data;
+        this.adhkars = response.data.adhkar;
       } catch (error) {
-        console.error('Error fetching default dhikrs:', error);
+        console.error('Error fetching adhkars:', error);
       }
     },
     async createCustomDhikr() {
       if (!this.isCustomDhikrValid) return;
 
       try {
-        const response = await axios.post(`${BASE_API_URL}/default-dhikrs`,
+        const response = await axios.post(`${BASE_API_URL}/adhkars`,
           this.customDhikr,
           {
             headers: {
@@ -156,7 +170,7 @@ export default {
           }
         );
 
-        this.defaultDhikrs.push(response.data);
+        this.adhkars.push(response.data);
         this.resetCustomDhikr();
         this.showCustomDhikrModal = false;
       } catch (error) {
@@ -173,7 +187,9 @@ export default {
       this.customDhikr = {
         title: '',
         translation: '',
-        count: 33
+        count: 33,
+        arabic_text: '',
+        prefix: ''
       };
     },
     incrementCount() {
@@ -201,9 +217,7 @@ export default {
     }
   },
   mounted() {
-    if (this.isAuthenticated) {
-      this.fetchDefaultDhikrs();
-    }
+    this.fetchAdhkars();
   }
 }
 </script>
@@ -551,5 +565,14 @@ h2 {
   font-size: 16px;
   max-width: 300px;
   margin: 0 auto;
+}
+
+.arabic-text {
+  font-family: 'Traditional Arabic', 'Scheherazade New', serif;
+  font-size: 1.5rem;
+  line-height: 1.6;
+  text-align: center;
+  margin: 10px 0;
+  color: #2C2A2A;
 }
 </style>

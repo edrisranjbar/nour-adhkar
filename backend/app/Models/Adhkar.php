@@ -3,30 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Adhkar extends Model
 {
     protected $fillable = [
-        'user_id',
         'title',
         'count',
-        'category',
-        'description',
-        'completed_at',
+        'prefix',
+        'arabic_text',
+        'translation',
         'collection_id'
     ];
 
-    protected $casts = [
-        'completed_at' => 'datetime'
-    ];
-
-    public function user()
+    /**
+     * The collections that belong to the adhkar.
+     */
+    public function collections(): BelongsToMany
     {
-        return $this->belongsTo(User::class);
-    }
-
-    public function collection()
-    {
-        return $this->belongsTo(Collection::class);
+        return $this->belongsToMany(Collection::class, 'collection_adhkars');
     }
 } 

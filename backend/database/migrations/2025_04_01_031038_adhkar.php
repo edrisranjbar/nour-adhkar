@@ -27,6 +27,7 @@ return new class extends Migration
             $table->text('arabic_text');
             $table->text('translation');
             $table->integer('count');
+            $table->foreignId('collection_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
         });
 

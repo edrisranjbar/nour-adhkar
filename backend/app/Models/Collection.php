@@ -3,17 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Collection extends Model
 {
     protected $fillable = [
-        'title',
-        'description',
-        'category'
+        'name',
+        'type'
     ];
 
-    public function adhkar()
+    /**
+     * The adhkars that belong to the collection.
+     */
+    public function adhkars(): BelongsToMany
     {
-        return $this->hasMany(Adhkar::class);
+        return $this->belongsToMany(Adhkar::class, 'collection_adhkars');
     }
 } 
