@@ -14,7 +14,8 @@ import {
     faHeart,
     faCheckCircle,
     faTrophy,
-    faPlus
+    faPlus,
+    faBookOpen
 } from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to library
@@ -30,7 +31,8 @@ library.add(
     faHeart,
     faCheckCircle,
     faTrophy,
-    faPlus
+    faPlus,
+    faBookOpen
 );
 
 export default FontAwesomeIcon; 
