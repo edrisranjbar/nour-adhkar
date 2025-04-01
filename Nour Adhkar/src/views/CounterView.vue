@@ -55,7 +55,7 @@
         </div>
       </section>
 
-      <div class="counter-display">
+      <div class="counter-display" @click="handleCounterClick">
         <h2 v-if="currentDhikr.title">{{ currentDhikr.title }}</h2>
         <p v-if="currentDhikr.translation" class="translation">{{ currentDhikr.translation }}</p>
         <div class="counter-number">{{ currentCount }}</div>
@@ -64,16 +64,14 @@
           <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
         </div>
 
-        <div class="counter-controls">
+        <div class="counter-controls" @click.stop>
           <button class="counter-button count-button" @click="incrementCount">
             شمارش
           </button>
           <button class="counter-button reset-button" @click="resetCounter">
             بازنشانی
           </button>
-
         </div>
-
       </div>
 
     </main>
@@ -121,6 +119,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container">
+      <transition-group name="toast">
+        <div v-for="toast in toasts" :key="toast.id" class="toast" :class="toast.type">
+          <div class="toast-content">
+            <span class="toast-message">{{ toast.message }}</span>
+          </div>
+        </div>
+      </transition-group>
+    </div>
   </div>
 </template>
 
@@ -146,7 +155,8 @@ export default {
       currentDhikr: {},
       currentCount: 0,
       hasCompleted: false,
-      showCustomDhikrModal: false
+      showCustomDhikrModal: false,
+      toasts: []
     }
   },
   computed: {
@@ -233,8 +243,10 @@ export default {
         this.adhkars.push(response.data);
         this.resetCustomDhikr();
         this.showCustomDhikrModal = false;
+        this.addToast('ذکر جدید با موفقیت ایجاد شد', 'success');
       } catch (error) {
         console.error('Error creating custom dhikr:', error);
+        this.addToast('خطا در ایجاد ذکر جدید', 'error');
       }
     },
     selectDhikr(dhikr) {
@@ -251,9 +263,15 @@ export default {
         prefix: ''
       };
     },
+    handleCounterClick() {
+      // Only increment if we have a current dhikr selected
+      if (this.currentDhikr.id) {
+        this.incrementCount();
+      }
+    },
     incrementCount() {
       if (!this.currentDhikr.id) {
-        alert('لطفاً ابتدا یک ذکر انتخاب کنید');
+        this.addToast('لطفاً ابتدا یک ذکر انتخاب کنید', 'warning');
         return;
       }
 
@@ -272,7 +290,18 @@ export default {
     },
     completeCounter() {
       this.hasCompleted = true;
-      alert('تبریک! شما ذکر را به پایان رساندید.');
+      this.addToast('تبریک! شما ذکر را به پایان رساندید', 'success');
+    },
+    addToast(message, type) {
+      const toast = {
+        id: Date.now(),
+        message,
+        type
+      };
+      this.toasts.push(toast);
+      setTimeout(() => {
+        this.toasts = this.toasts.filter(t => t.id !== toast.id);
+      }, 3000);
     }
   },
   mounted() {
@@ -351,13 +380,16 @@ header {
   background: rgba(240, 240, 240, .67);
   border-radius: 8px;
   box-shadow: rgba(0, 0, 0, .25) 0 4px 4px;
+  cursor: pointer;
 }
 
 .counter-number {
+  margin-top: 16px;
   font-size: 72px;
   font-weight: 700;
   color: #9C8466;
   line-height: 1;
+  user-select: none;
 }
 
 .counter-text {
@@ -365,6 +397,7 @@ header {
   color: #2C2A2A;
   margin-top: 8px;
   font-weight: 300;
+  user-select: none;
 }
 
 .counter-controls {
@@ -373,6 +406,7 @@ header {
   gap: 20px;
   margin-top: 32px;
   margin-bottom: 32px;
+  user-select: none;
 }
 
 .counter-button {
@@ -725,5 +759,59 @@ h2 {
   text-align: center;
   margin: 10px 0;
   color: #2C2A2A;
+}
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  direction: rtl;
+}
+
+.toast {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  min-width: 250px;
+  max-width: 350px;
+  transform-origin: top right;
+}
+
+.toast.success {
+  background-color: #4caf50;
+  color: white;
+}
+
+.toast.warning {
+  background-color: #ff9800;
+  color: white;
+}
+
+.toast.error {
+  background-color: #f44336;
+  color: white;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+}
+
+.toast-message {
+  font-weight: 500;
+}
+
+.toast-enter-active, 
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from, 
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
 }
 </style>
