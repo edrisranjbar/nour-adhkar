@@ -20,13 +20,20 @@
             افزودن ذکر
           </button>
         </div>
-        <div class="dhikr-grid">
+        <div v-if="defaultDhikrs.length > 0" class="dhikr-grid">
           <div v-for="dhikr in defaultDhikrs" :key="dhikr.id" class="dhikr-card"
             :class="{ 'active': currentDhikr.id === dhikr.id }" @click="selectDhikr(dhikr)">
             <h3>{{ dhikr.title }}</h3>
             <p class="translation">{{ dhikr.translation }}</p>
             <span class="count">{{ dhikr.count }} مرتبه</span>
           </div>
+        </div>
+        <div v-else class="empty-state">
+          <div class="empty-icon">
+            <font-awesome-icon icon="fa-solid fa-book-open" size="3x" />
+          </div>
+          <h3>هیچ ذکری یافت نشد</h3>
+          <p>برای شروع، از دکمه «افزودن ذکر» استفاده کنید.</p>
         </div>
       </section>
 
@@ -512,5 +519,37 @@ h2 {
     padding: 12px 24px;
     font-size: 16px;
   }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(240, 240, 240, .67);
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: rgba(0, 0, 0, .25) 0 4px 4px;
+}
+
+.empty-icon {
+  color: #9C8466;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  color: #2C2A2A;
+  font-size: 20px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.empty-state p {
+  color: #666;
+  font-size: 16px;
+  max-width: 300px;
+  margin: 0 auto;
 }
 </style>
