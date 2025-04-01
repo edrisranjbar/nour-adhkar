@@ -33,15 +33,17 @@
       <div class="counter-display">
         <div class="counter-number">{{ currentCount }}</div>
         <div class="counter-text">مرتبه</div>
-      </div>
 
-      <div class="counter-controls">
-        <button class="counter-button count-button" @click="incrementCount">
-          شمارش
-        </button>
-        <button class="counter-button reset-button" @click="resetCounter">
-          بازنشانی
-        </button>
+        <div class="counter-controls">
+          <button class="counter-button count-button" @click="incrementCount">
+            شمارش
+          </button>
+          <button class="counter-button reset-button" @click="resetCounter">
+            بازنشانی
+          </button>
+
+        </div>
+
       </div>
 
       <div class="dhikr-info">
@@ -284,7 +286,8 @@ header {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 40px;
+  margin-top: 32px;
+  margin-bottom: 32px;
 }
 
 .counter-button {
