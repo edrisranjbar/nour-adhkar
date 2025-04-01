@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DhikrController;
 use App\Http\Controllers\DefaultDhikrController;
-
+use App\Http\Controllers\AdhkarController;
+use App\Http\Controllers\CollectionController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
@@ -17,4 +18,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/dhikr', [DhikrController::class, 'store']);
     Route::get('/default-dhikrs', [DefaultDhikrController::class, 'index']);
     Route::post('/default-dhikrs', [DefaultDhikrController::class, 'store']);
+    
 });
+
+// Adhkar routes
+Route::get('/adhkar', [AdhkarController::class, 'index']);
+Route::get('/collections', [CollectionController::class, 'index']);
