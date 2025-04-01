@@ -15,42 +15,42 @@ class DefaultDhikrSeeder extends Seeder
                 'count' => 33,
                 'prefix' => '',
                 'suffix' => '',
-                'translation' => 'Glory be to Allah'
+                'translation' => 'پاک و منزه است الله'
             ],
             [
                 'title' => 'الحمد لله',
                 'count' => 33,
                 'prefix' => '',
                 'suffix' => '',
-                'translation' => 'Praise be to Allah'
+                'translation' => 'ستایش مخصوص الله است'
             ],
             [
                 'title' => 'الله أكبر',
                 'count' => 33,
                 'prefix' => '',
                 'suffix' => '',
-                'translation' => 'Allah is the Greatest'
+                'translation' => 'الله بزرگ‌تر است'
             ],
             [
                 'title' => 'لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير',
                 'count' => 100,
                 'prefix' => '',
                 'suffix' => '',
-                'translation' => 'None has the right to be worshipped except Allah, alone, without any partner, to Him belongs the dominion and to Him belongs all praise, and He is over all things competent'
+                'translation' => 'هیچ معبودی جز الله نیست، یکتاست و شریکی ندارد، پادشاهی و ستایش از آن اوست و او بر هر چیزی تواناست'
             ],
             [
                 'title' => 'أستغفر الله',
                 'count' => 100,
                 'prefix' => '',
                 'suffix' => '',
-                'translation' => 'I seek forgiveness from Allah'
+                'translation' => 'از الله آمرزش می‌طلبم'
             ],
             [
                 'title' => 'اللهم صل على محمد وعلى آل محمد',
                 'count' => 100,
                 'prefix' => '',
                 'suffix' => '',
-                'translation' => 'O Allah, send prayers upon Muhammad and the family of Muhammad'
+                'translation' => 'خدایا بر محمد و خاندان محمد درود فرست'
             ]
         ];
 
