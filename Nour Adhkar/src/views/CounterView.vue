@@ -1,16 +1,16 @@
 <template>
   <div class="counter-view">
-  <header>
-    <div class="d-flex">
+    <header>
+      <div class="d-flex">
         <RouterLink to="/" class="d-flex align-items-center">
-        <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
-      </RouterLink>
+          <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
+        </RouterLink>
         <h1 id="modal-title">شمارنده اذکار</h1>
-    </div>
-  </header>
+      </div>
+    </header>
 
     <main class="counter-container">
-      
+
       <!-- Default Dhikrs Section -->
       <section class="default-dhikrs">
         <div class="section-header">
@@ -209,6 +209,7 @@ export default {
   min-height: 100vh;
   background: #D1BB9E;
 }
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -240,6 +241,7 @@ export default {
   transform: translateY(-2px);
   box-shadow: rgba(149, 157, 165, 0.5) 0 8px 24px;
 }
+
 header {
   height: 80px;
   padding: 0 20px;
