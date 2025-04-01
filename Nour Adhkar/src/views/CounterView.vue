@@ -11,8 +11,8 @@
 
     <main class="counter-container">
 
-      <!-- Default Dhikrs Section -->
-      <section class="default-dhikrs">
+      <!-- Adhkars Section -->
+      <section class="adhkars-section">
         <div class="section-header">
           <h2>اذکار</h2>
           <button class="add-dhikr-button" @click="showCustomDhikrModal = true">
@@ -20,13 +20,31 @@
             افزودن ذکر
           </button>
         </div>
-        <div v-if="adhkars.length > 0" class="dhikr-grid">
-          <div v-for="dhikr in adhkars" :key="dhikr.id" class="dhikr-card"
-            :class="{ 'active': currentDhikr.id === dhikr.id }" @click="selectDhikr(dhikr)">
-            <h3>{{ dhikr.title }}</h3>
-            <p class="translation">{{ dhikr.translation }}</p>
-            <span class="count">{{ dhikr.count }} مرتبه</span>
+        <div v-if="adhkars.length > 0" class="carousel-container">
+          <button class="carousel-button prev" @click="prevSlide" :disabled="currentPage === 0">
+            <font-awesome-icon icon="fa-solid fa-chevron-right" />
+          </button>
+
+          <div class="carousel-content">
+            <div class="carousel-slide">
+              <div v-for="dhikr in currentSlideItems" :key="dhikr.id" class="dhikr-card" 
+                   :class="{ 'active': currentDhikr.id === dhikr.id }" 
+                   @click="selectDhikr(dhikr)">
+                <h3>{{ dhikr.title }}</h3>
+                <p class="translation">{{ dhikr.translation }}</p>
+                <span class="count">{{ dhikr.count }} مرتبه</span>
+              </div>
+            </div>
+            <div class="carousel-indicators">
+              <span v-for="page in totalPages" :key="page - 1" 
+                    :class="['indicator-dot', { active: currentPage === page - 1 }]"
+                    @click="goToPage(page - 1)"></span>
+            </div>
           </div>
+
+          <button class="carousel-button next" @click="nextSlide" :disabled="currentPage >= totalPages - 1">
+            <font-awesome-icon icon="fa-solid fa-chevron-left" />
+          </button>
         </div>
         <div v-else class="empty-state">
           <div class="empty-icon">
@@ -39,7 +57,6 @@
 
       <div class="counter-display">
         <h2 v-if="currentDhikr.title">{{ currentDhikr.title }}</h2>
-        <p v-if="currentDhikr.arabic_text" class="arabic-text">{{ currentDhikr.arabic_text }}</p>
         <p v-if="currentDhikr.translation" class="translation">{{ currentDhikr.translation }}</p>
         <div class="counter-number">{{ currentCount }}</div>
         <div class="counter-text">مرتبه</div>
@@ -117,6 +134,8 @@ export default {
   data() {
     return {
       adhkars: [],
+      currentPage: 0,
+      itemsPerPage: 3,
       customDhikr: {
         title: '',
         translation: '',
@@ -142,6 +161,14 @@ export default {
     progressPercentage() {
       if (!this.currentDhikr.count) return 0;
       return (this.currentCount / this.currentDhikr.count) * 100;
+    },
+    totalPages() {
+      return Math.ceil(this.adhkars.length / this.itemsPerPage);
+    },
+    currentSlideItems() {
+      const start = this.currentPage * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.adhkars.slice(start, end);
     }
   },
   methods: {
@@ -152,9 +179,42 @@ export default {
             Authorization: `Bearer ${this.$store.state.token}`
           }
         });
-        this.adhkars = response.data.adhkar;
+        this.adhkars = response.data.adhkar || [];
+        
+        // Select the first dhikr by default if available
+        if (this.adhkars.length > 0 && !this.currentDhikr.id) {
+          this.selectDhikr(this.adhkars[0]);
+        }
+
+        // Update items per page based on screen width
+        this.updateItemsPerPage();
       } catch (error) {
         console.error('Error fetching adhkars:', error);
+      }
+    },
+    prevSlide() {
+      if (this.currentPage > 0) {
+        this.currentPage--;
+      }
+    },
+    nextSlide() {
+      if (this.currentPage < this.totalPages - 1) {
+        this.currentPage++;
+      }
+    },
+    goToPage(pageNumber) {
+      if (pageNumber >= 0 && pageNumber < this.totalPages) {
+        this.currentPage = pageNumber;
+      }
+    },
+    updateItemsPerPage() {
+      // Adjust items per page based on screen width
+      if (window.innerWidth < 480) {
+        this.itemsPerPage = 1;
+      } else if (window.innerWidth < 768) {
+        this.itemsPerPage = 2;
+      } else {
+        this.itemsPerPage = 3;
       }
     },
     async createCustomDhikr() {
@@ -181,7 +241,6 @@ export default {
       this.currentDhikr = dhikr;
       this.currentCount = 0;
       this.hasCompleted = false;
-      this.resetCounter();
     },
     resetCustomDhikr() {
       this.customDhikr = {
@@ -218,6 +277,12 @@ export default {
   },
   mounted() {
     this.fetchAdhkars();
+    // Add window resize listener
+    window.addEventListener('resize', this.updateItemsPerPage);
+  },
+  beforeUnmount() {
+    // Remove window resize listener
+    window.removeEventListener('resize', this.updateItemsPerPage);
   }
 }
 </script>
@@ -409,19 +474,88 @@ h2 {
   font-weight: 500;
 }
 
-.dhikr-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+.carousel-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.carousel-content {
+  width: 100%;
+  margin: 0 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.carousel-slide {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.carousel-button {
+  background: #9C8466;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.carousel-button:hover:not(:disabled) {
+  background: #A79277;
+  transform: translateY(-2px);
+  box-shadow: rgba(149, 157, 165, 0.5) 0 8px 24px;
+}
+
+.carousel-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.indicator-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #e6dfd5;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator-dot.active {
+  background-color: #9C8466;
+  transform: scale(1.2);
 }
 
 .dhikr-card {
   background: rgba(240, 240, 240, .67);
   border-radius: 8px;
-  padding: 20px;
+  padding: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: rgba(0, 0, 0, .25) 0 4px 4px;
+  flex: 1;
+  min-width: 0;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
 }
 
 .dhikr-card:hover {
@@ -512,13 +646,31 @@ h2 {
   cursor: not-allowed;
 }
 
+@media (max-width: 768px) {
+  .carousel-slide {
+    gap: 10px;
+  }
+  
+  .dhikr-card {
+    padding: 12px;
+  }
+  
+  .dhikr-card h3 {
+    font-size: 1rem;
+  }
+}
+
 @media (max-width: 480px) {
-  .counter-container {
-    padding: 15px;
+  .carousel-container {
+    padding: 0;
   }
 
-  .dhikr-grid {
-    grid-template-columns: 1fr;
+  .carousel-content {
+    margin: 0 8px;
+  }
+  
+  .counter-container {
+    padding: 15px;
   }
 
   .counter-number {
@@ -568,7 +720,6 @@ h2 {
 }
 
 .arabic-text {
-  font-family: 'Traditional Arabic', 'Scheherazade New', serif;
   font-size: 1.5rem;
   line-height: 1.6;
   text-align: center;
