@@ -23,8 +23,20 @@ import {
     faMinus,
     faSearch,
     faSun,
-    faMoon
+    faMoon,
+    faEnvelope,
+    faGlobe,
+    faPaperPlane,
+    faChevronUp,
+    faBookmark
 } from '@fortawesome/free-solid-svg-icons';
+
+// Import brand icons
+import {
+    faTelegram,
+    faInstagram,
+    faGithub
+} from '@fortawesome/free-brands-svg-icons';
 
 // Add icons to library
 library.add(
@@ -48,7 +60,15 @@ library.add(
     faMinus,
     faSearch,
     faSun,
-    faMoon
+    faMoon,
+    faEnvelope,
+    faGlobe,
+    faPaperPlane,
+    faChevronUp,
+    faBookmark,
+    faTelegram,
+    faInstagram,
+    faGithub
 );
 
 export default FontAwesomeIcon; 

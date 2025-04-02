@@ -226,7 +226,7 @@ body {
 }
 
 #app {
-    max-width: 735px;
+    max-width: 1000px;
     margin: auto;
 }
 
@@ -343,7 +343,7 @@ header h1 {
 .modal {
     height: 100svh;
     width: 100vw;
-    max-width: 735px;
+    max-width: 1000px;
     margin: auto;
     z-index: 2;
     position: fixed;

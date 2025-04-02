@@ -140,9 +140,9 @@
     
     <!-- Bottom Navigation -->
     <div class="bottom-navigation">
-      <RouterLink to="/settings" class="nav-icon">
+      <RouterLink to="/settings" class="nav-icon" aria-label="تنظیمات">
         <font-awesome-icon icon="fa-solid fa-gear" />
-        <span>تنظیمات</span>
+        <span class="sr-only">تنظیمات</span>
       </RouterLink>
     </div>
     
@@ -710,5 +710,16 @@ body.dark-mode .nav-icon {
 
 body.dark-mode .nav-icon:hover {
   background-color: #C5B192;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 </style>
