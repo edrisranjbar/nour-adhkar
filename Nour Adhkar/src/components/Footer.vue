@@ -24,7 +24,7 @@
             <li><RouterLink to="#" class="footer-link">درباره ما</RouterLink></li>
             <li><RouterLink to="/donation" class="footer-link">حمایت از ما</RouterLink></li>
             <li><RouterLink to="/contribution" class="footer-link">مشارکت در پروژه</RouterLink></li>
-            <li><a href="#" class="footer-link">گزارش مشکل</a></li>
+            <li><a href="https://github.com/edrisranjbar/nour-adhkar/issues" class="footer-link">گزارش مشکل</a></li>
           </ul>
         </div>
         
