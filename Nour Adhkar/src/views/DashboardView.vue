@@ -89,7 +89,6 @@ import axios from 'axios';
 import { BASE_API_URL } from '@/config';
 import { useToast } from "vue-toastification";
 import TopBar from '@/components/Admin/TopBar.vue';
-import Badge from '@/components/Badge.vue';
 import ProfileCard from '@/components/Admin/ProfileCard.vue';
 import BadgesSection from '@/components/Admin/BadgesSection.vue';
 import StreakCalendar from '@/components/StreakCalendar.vue';
@@ -97,7 +96,6 @@ import StreakCalendar from '@/components/StreakCalendar.vue';
 export default {
     components: {
         TopBar,
-        Badge,
         ProfileCard,
         BadgesSection,
         StreakCalendar

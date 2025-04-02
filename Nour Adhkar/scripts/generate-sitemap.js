@@ -20,6 +20,20 @@ const routes = [
     changefreq: 'daily',
     priority: '1.0'
   },
+  // Protected routes (not included in sitemap)
+  {
+    path: '/login',
+    noindex: true
+  },
+  {
+    path: '/register',
+    noindex: true
+  },
+  {
+    path: '/dashboard',
+    noindex: true
+  },
+  // Public routes
   {
     path: '/counter',
     changefreq: 'monthly',
@@ -90,13 +104,16 @@ function generateSitemap() {
   console.log('Generating sitemap...');
   
   try {
+    // Filter out routes that should not be indexed
+    const pages = routes.filter(route => !route.noindex);
+    
     // XML sitemap header
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
 
     // Add each page to the sitemap
-    routes.forEach(page => {
+    pages.forEach(page => {
       xml += `  <url>
     <loc>${siteUrl}${page.path}</loc>
     <lastmod>${getFormattedDate()}</lastmod>
@@ -113,7 +130,7 @@ function generateSitemap() {
     const outputPath = path.resolve(__dirname, '../public/sitemap.xml');
     fs.writeFileSync(outputPath, xml);
     
-    console.log(`Sitemap generated successfully with ${routes.length} URLs at ${outputPath}`);
+    console.log(`Sitemap generated successfully with ${pages.length} URLs at ${outputPath}`);
   } catch (error) {
     console.error('Error generating sitemap:', error);
     process.exit(1);
