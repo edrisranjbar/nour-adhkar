@@ -5,29 +5,34 @@
     <AppHeader title="اذکار نور" description="پلتفرم فارسی اذکار و ادعیه اسلامی" />
     <main class="container">
       <section class="collections-grid">
-        <RouterLink to="morning">
-          <CategoryCard image-src="src/assets/images/morning.png">
-            <h2 class="card-text-right">اذکار صبحگاه</h2>
-          </CategoryCard>
-        </RouterLink>
 
-        <RouterLink to="night">
-          <CategoryCard image-src="src/assets/images/night.png">
-            <h2 class="card-text-left">اذکار شامگاه</h2>
-          </CategoryCard>
-        </RouterLink>
+        <section class="small-cards-row">
+          <RouterLink to="morning" class="card-sm">
+            <CategoryCard image-src="src/assets/images/morning.png">
+              <h2 class="card-text-right">اذکار صبحگاه</h2>
+            </CategoryCard>
+          </RouterLink>
 
-        <RouterLink to="daily">
-          <CategoryCard image-src="src/assets/images/daily.svg">
-            <h2 class="card-text-right">اذکار روزانه</h2>
-          </CategoryCard>
-        </RouterLink>
+          <RouterLink to="night" class="card-sm">
+            <CategoryCard image-src="src/assets/images/night.png">
+              <h2 class="card-text-left">اذکار شامگاه</h2>
+            </CategoryCard>
+          </RouterLink>
+        </section>
 
-        <RouterLink to="ramadan">
-          <CategoryCard image-src="src/assets/images/ramadan.svg">
-            <h2 class="card-text-left">اذکار ماه رمضان</h2>
-          </CategoryCard>
-        </RouterLink>
+        <section class="small-cards-row">
+          <RouterLink to="daily" class="card-sm">
+            <CategoryCard image-src="src/assets/images/daily.svg">
+              <h2 class="card-text-right">اذکار روزانه</h2>
+            </CategoryCard>
+          </RouterLink>
+
+          <RouterLink to="ramadan" class="card-sm">
+            <CategoryCard image-src="src/assets/images/ramadan.svg">
+              <h2 class="card-text-left">اذکار ماه رمضان</h2>
+            </CategoryCard>
+          </RouterLink>
+        </section>
 
         <section class="small-cards-row">
           <RouterLink to="sleep" class="card-sm">
@@ -40,17 +45,20 @@
               <h2 class="cart-text-bottom card-text-left">دعای استخاره</h2>
             </CategoryCard>
           </RouterLink>
+        </section>
+        
+        <section class="small-cards-row">
           <RouterLink to="special" class="card-sm">
             <CategoryCard image-src="src/assets/images/special.svg" size="small">
               <h2 class="card-text-top card-text-center">مناسبت‌های خاص</h2>
             </CategoryCard>
           </RouterLink>
+          <RouterLink to="counter" class="card-sm">
+            <CategoryCard image-src="src/assets/images/counter.svg" style="background-position: center;" />
+          </RouterLink>
         </section>
-
-        <RouterLink to="counter">
-          <CategoryCard image-src="src/assets/images/counter.svg" style="background-position: center;" />
-        </RouterLink>
       </section>
+
     </main>
     <div class="bottom-navigation">
       <RouterLink to="/settings" class="nav-icon">
