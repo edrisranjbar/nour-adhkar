@@ -20,7 +20,10 @@ import {
     faChevronLeft,
     faSignInAlt,
     faGear,
-    faMinus
+    faMinus,
+    faSearch,
+    faSun,
+    faMoon
 } from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to library
@@ -42,7 +45,10 @@ library.add(
     faChevronLeft,
     faSignInAlt,
     faGear,
-    faMinus
+    faMinus,
+    faSearch,
+    faSun,
+    faMoon
 );
 
 export default FontAwesomeIcon; 
