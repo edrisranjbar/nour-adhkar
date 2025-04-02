@@ -55,14 +55,14 @@ button,a,input {
 }
 
 .register-form input:focus {
-    border-color: #007bff;
+    border-color: #A79277;
     outline: none;
 }
 
 .register-form button {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
+    background-color: #A79277;
     color: white;
     border: none;
     border-radius: 4px;
@@ -72,7 +72,7 @@ button,a,input {
 }
 
 .register-form button:hover {
-    background-color: #0056b3;
+    background-color: #9C8466;
 }
 
 .register-form .error {

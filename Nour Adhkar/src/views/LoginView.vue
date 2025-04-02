@@ -62,7 +62,7 @@ button,a,input {
 .login-button {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #A79277;
   color: white;
   border: none;
   border-radius: 4px;
@@ -72,7 +72,7 @@ button,a,input {
 }
 
 .login-button:hover {
-  background-color: #0056b3;
+  background-color: #9C8466;
 }
 
 .error-message {
@@ -88,7 +88,7 @@ button,a,input {
 }
 
 .footer a {
-  color: #007bff;
+  color: #A79277;
   text-decoration: none;
 }
 

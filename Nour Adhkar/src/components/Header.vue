@@ -238,7 +238,7 @@ body.dark-mode .stat-item:hover {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(167, 146, 119, 0.8);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -249,7 +249,7 @@ body.dark-mode .stat-item:hover {
 }
 
 .dashboard-button:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: #9C8466;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
@@ -259,7 +259,7 @@ body.dark-mode .stat-item:hover {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(167, 146, 119, 0.8);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -270,7 +270,7 @@ body.dark-mode .stat-item:hover {
 }
 
 .login-button:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: #9C8466;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
