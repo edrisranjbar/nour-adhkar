@@ -138,6 +138,8 @@ export default {
 <style scoped>
 .settings-view {
   min-height: 100vh;
+  max-width: 1000px;
+  margin: auto;
   background: #D1BB9E;
 }
 
@@ -156,7 +158,6 @@ header {
 
 .settings-container {
   padding: 20px;
-  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -189,6 +190,7 @@ header {
 
 .settings-item.clickable {
   cursor: pointer;
+  text-decoration: none;
 }
 
 .settings-item.clickable:hover {

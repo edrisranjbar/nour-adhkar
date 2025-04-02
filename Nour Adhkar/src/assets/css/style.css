@@ -226,10 +226,13 @@ body {
 }
 
 #app {
-    max-width: 1000px;
     margin: auto;
 }
 
+.home-container{
+    max-width: 1000px;
+    margin: auto;
+}
 header {
     width: 100%;
     min-height: 44px;
@@ -348,6 +351,8 @@ header h1 {
     z-index: 2;
     position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     background-color: #D1BB9E;
     display: flex;
     flex-direction: column;

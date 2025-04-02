@@ -319,6 +319,8 @@ export default {
 <style scoped>
 .counter-view {
   min-height: 100vh;
+  max-width: 1000px;
+  margin: auto;
   background: #D1BB9E;
 }
 
