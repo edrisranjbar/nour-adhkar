@@ -12,5 +12,8 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    allowedHosts: ['adhkar.ir', 'www.adhkar.ir']
   }
 })
