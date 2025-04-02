@@ -6,10 +6,31 @@ export default {
   components: {
     RouterView
   },
+  watch: {
+    $route(to) {
+      // Update meta tags when route changes
+      if (to.meta && (to.meta.title || to.meta.description)) {
+        this.$setMeta({
+          title: to.meta.title,
+          description: to.meta.description,
+          url: `https://nour-adhkar.ir${to.path}`
+        });
+      }
+    }
+  },
   mounted() {
     // Initialize settings from the Pinia store
     const settingsStore = useSettingsStore()
     settingsStore.init()
+
+    // Set initial meta tags
+    if (this.$route.meta && (this.$route.meta.title || this.$route.meta.description)) {
+      this.$setMeta({
+        title: this.$route.meta.title,
+        description: this.$route.meta.description,
+        url: `https://nour-adhkar.ir${this.$route.path}`
+      });
+    }
   }
 }
 </script>

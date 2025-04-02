@@ -7,6 +7,7 @@ import { BASE_API_URL } from './config'
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import FontAwesomeIcon from './plugins/fontawesome'
+import metaPlugin from './plugins/meta'
 import axios from 'axios';
 
 // Import CSS
@@ -33,6 +34,7 @@ app.use(Toast, {
     rtl: true,
     bodyClassName: "vazirmatn-font",
 });
+app.use(metaPlugin)
 
 // Make BASE_API_URL available globally
 app.config.globalProperties.$BASE_API_URL = BASE_API_URL

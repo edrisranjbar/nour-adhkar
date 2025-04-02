@@ -1,0 +1,13 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and auth pages
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /donation/success
+Disallow: /donation/failed
+
+# Sitemap
+Sitemap: https://nour-adhkar.ir/sitemap.xml 
