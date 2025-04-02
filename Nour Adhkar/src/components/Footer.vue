@@ -347,6 +347,22 @@ body.dark-mode .social-link:hover {
   gap: 1rem;
   flex: 1;
   min-width: 250px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.feature-item:hover {
+  transform: translateY(-5px);
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.feature-item:hover .feature-icon {
+  transform: scale(1.1) rotate(5deg);
+  background-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
 }
 
 .feature-icon {
@@ -359,6 +375,7 @@ body.dark-mode .social-link:hover {
   border-radius: 50%;
   color: white;
   font-size: 1.2rem;
+  transition: all 0.3s ease;
 }
 
 .feature-text h5 {
@@ -366,12 +383,24 @@ body.dark-mode .social-link:hover {
   color: white;
   font-size: 1rem;
   font-weight: 500;
+  transition: transform 0.3s ease, color 0.3s ease;
 }
 
 .feature-text p {
   margin: 0;
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.85rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.feature-item:hover .feature-text h5 {
+  transform: translateX(5px);
+  color: #ffffff;
+}
+
+.feature-item:hover .feature-text p {
+  transform: translateX(5px);
+  color: rgba(255, 255, 255, 1);
 }
 
 .footer-bottom {
