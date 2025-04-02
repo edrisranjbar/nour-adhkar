@@ -344,7 +344,7 @@ body.dark-mode .section-title {
   display: flex;
   align-items: center;
   background: white;
-  border-radius: 8px;
+  border-radius: 8px 8px 0 0;
   padding: 0.5rem 1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   position: relative;
