@@ -39,7 +39,7 @@
             </div>
             <h3>اذکار صبحگاه</h3>
             <p>هر روز صبح با این اذکار روز خود را آغاز کنید</p>
-            <div class="badge">۵ ذکر</div>
+            <div class="badge">{{ morningCollection?.adhkar?.length || 0 }} ذکر</div>
           </div>
         </RouterLink>
         
@@ -50,7 +50,7 @@
             </div>
             <h3>اذکار شامگاه</h3>
             <p>پایان هر روز را با این اذکار به خوبی به پایان برسانید</p>
-            <div class="badge">۵ ذکر</div>
+            <div class="badge">{{ nightCollection?.adhkar?.length || 0 }} ذکر</div>
           </div>
         </RouterLink>
       </div>
@@ -64,7 +64,7 @@
             <CategoryCard image-src="src/assets/images/morning.png">
               <div class="card-overlay">
                 <h2 class="card-text-top">اذکار صبحگاه</h2>
-                <span class="card-items-count">۵ ذکر</span>
+                <span class="card-items-count">{{ morningCollection?.adhkar?.length || 0 }} ذکر</span>
               </div>
             </CategoryCard>
           </RouterLink>
@@ -73,7 +73,7 @@
             <CategoryCard image-src="src/assets/images/night.png">
               <div class="card-overlay">
                 <h2 class="card-text-left">اذکار شامگاه</h2>
-                <span class="card-items-count">۵ ذکر</span>
+                <span class="card-items-count">{{ nightCollection?.adhkar?.length || 0 }} ذکر</span>
               </div>
             </CategoryCard>
           </RouterLink>
@@ -84,7 +84,7 @@
             <CategoryCard image-src="src/assets/images/daily.svg">
               <div class="card-overlay">
                 <h2 class="card-text-top">اذکار روزانه</h2>
-                <span class="card-items-count">۳ ذکر</span>
+                <span class="card-items-count">{{ dailyCollection?.adhkar?.length || 0 }} ذکر</span>
               </div>
             </CategoryCard>
           </RouterLink>
@@ -93,7 +93,7 @@
             <CategoryCard image-src="src/assets/images/ramadan.svg">
               <div class="card-overlay">
                 <h2 class="card-text-left">اذکار ماه رمضان</h2>
-                <span class="card-items-count">۳ ذکر</span>
+                <span class="card-items-count">{{ ramadanCollection?.adhkar?.length || 0 }} ذکر</span>
               </div>
             </CategoryCard>
           </RouterLink>
@@ -104,7 +104,7 @@
             <CategoryCard image-src="src/assets/images/sleep.jpg" size="small">
               <div class="card-overlay">
                 <h2 class="card-text-top card-text-top">دعای خواب</h2>
-                <span class="card-items-count">۳ ذکر</span>
+                <span class="card-items-count">{{ sleepCollection?.adhkar?.length || 0 }} ذکر</span>
               </div>
             </CategoryCard>
           </RouterLink>
@@ -112,7 +112,7 @@
             <CategoryCard image-src="src/assets/images/prayer.png" size="small">
               <div class="card-overlay">
                 <h2 class="card-text-bottom card-text-left">دعای استخاره</h2>
-                <span class="card-items-count">۱ ذکر</span>
+                <span class="card-items-count">{{ istikharaCollection?.adhkar?.length || 0 }} ذکر</span>
               </div>
             </CategoryCard>
           </RouterLink>
@@ -123,7 +123,7 @@
             <CategoryCard image-src="src/assets/images/special.svg" size="small">
               <div class="card-overlay">
                 <h2 class="card-text-top card-text-center">مناسبت‌های خاص</h2>
-                <span class="card-items-count">۵ ذکر</span>
+                <span class="card-items-count">{{ specialCollection?.adhkar?.length || 0 }} ذکر</span>
               </div>
             </CategoryCard>
           </RouterLink>
@@ -172,6 +172,13 @@ export default {
   },
   data() {
     return {
+      morningCollection,
+      nightCollection,
+      dailyCollection,
+      ramadanCollection,
+      sleepCollection,
+      istikharaCollection,
+      specialCollection,
       progress: 0,
       showSplash: false,
       searchQuery: '',
@@ -285,7 +292,7 @@ export default {
       this.$router.push({ path: `/${path}` });
     },
     selectRandomDailyRemembrance() {
-      if (dailyCollection && dailyCollection.adhkar && dailyCollection.adhkar.length > 0) {
+      if (dailyCollection?.adhkar?.length > 0) {
         const randomIndex = Math.floor(Math.random() * dailyCollection.adhkar.length);
         this.dailyRemembrance = dailyCollection.adhkar[randomIndex].arabic;
       }
