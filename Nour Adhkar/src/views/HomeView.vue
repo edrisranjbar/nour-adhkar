@@ -138,14 +138,6 @@
       </section>
     </main>
     
-    <!-- Bottom Navigation -->
-    <div class="bottom-navigation">
-      <RouterLink to="/settings" class="nav-icon" aria-label="تنظیمات">
-        <font-awesome-icon icon="fa-solid fa-gear" />
-        <span class="sr-only">تنظیمات</span>
-      </RouterLink>
-    </div>
-    
     <AppFooter />
   </div>
 </template>
@@ -670,56 +662,5 @@ body.dark-mode .search-result-item:hover {
   .special-card p {
     font-size: 0.8rem;
   }
-}
-
-.bottom-navigation {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 100;
-}
-
-.nav-icon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  background-color: #A79277;
-  color: white;
-  border-radius: 50%;
-  text-decoration: none;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-}
-
-.nav-icon:hover {
-  background-color: #9C8466;
-  transform: scale(1.05);
-}
-
-.nav-icon span {
-  font-size: 0.7rem;
-  margin-top: 2px;
-}
-
-body.dark-mode .nav-icon {
-  background-color: var(--dark-accent);
-}
-
-body.dark-mode .nav-icon:hover {
-  background-color: #C5B192;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
 }
 </style>

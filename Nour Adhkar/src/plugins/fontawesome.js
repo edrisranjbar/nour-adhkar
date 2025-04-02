@@ -26,9 +26,8 @@ import {
     faMoon,
     faEnvelope,
     faGlobe,
-    faPaperPlane,
-    faChevronUp,
-    faBookmark
+    faHome,
+    faCalculator
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -63,9 +62,8 @@ library.add(
     faMoon,
     faEnvelope,
     faGlobe,
-    faPaperPlane,
-    faChevronUp,
-    faBookmark,
+    faHome,
+    faCalculator,
     faTelegram,
     faInstagram,
     faGithub

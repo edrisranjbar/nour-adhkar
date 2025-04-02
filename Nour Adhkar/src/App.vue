@@ -15,7 +15,35 @@ export default {
 </script>
 
 <template>
-  <RouterView />
+  <div class="app-container">
+    <RouterView />
+    
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-navigation">
+      <div class="nav-container">
+        <RouterLink to="/" class="nav-item" active-class="active">
+          <font-awesome-icon icon="fa-solid fa-home" />
+          <span>خانه</span>
+        </RouterLink>
+        <RouterLink to="/morning" class="nav-item" active-class="active">
+          <font-awesome-icon icon="fa-solid fa-sun" />
+          <span>صبحگاه</span>
+        </RouterLink>
+        <RouterLink to="/night" class="nav-item" active-class="active">
+          <font-awesome-icon icon="fa-solid fa-moon" />
+          <span>شامگاه</span>
+        </RouterLink>
+        <RouterLink to="/counter" class="nav-item" active-class="active">
+          <font-awesome-icon icon="fa-solid fa-calculator" />
+          <span>تسبیح</span>
+        </RouterLink>
+        <RouterLink to="/settings" class="nav-item" active-class="active">
+          <font-awesome-icon icon="fa-solid fa-gear" />
+          <span>تنظیمات</span>
+        </RouterLink>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style>
@@ -23,5 +51,101 @@ export default {
 
 :root {
   --font-size-factor: 1;
+}
+
+/* Global styles */
+body {
+  padding-bottom: 100px;
+}
+
+.app-container {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Bottom Navigation */
+.bottom-navigation {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 70px;
+  width: 92%;
+  max-width: 500px;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  border-radius: 16px;
+}
+
+.nav-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 10px;
+}
+
+body.dark-mode .bottom-navigation {
+  background-color: #262626;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  text-decoration: none;
+  padding: 8px 0;
+  width: 20%;
+  transition: all 0.25s ease;
+}
+
+body.dark-mode .nav-item {
+  color: #888;
+}
+
+.nav-item span {
+  font-size: 0.85rem;
+  margin-top: 6px;
+  transition: all 0.25s ease;
+}
+
+.nav-item svg {
+  font-size: 1.5rem;
+  transition: all 0.25s ease;
+}
+
+.nav-item:hover, .nav-item.active {
+  color: #A79277;
+}
+
+body.dark-mode .nav-item:hover, 
+body.dark-mode .nav-item.active {
+  color: #C5B192;
+}
+
+.nav-item.active svg {
+  transform: translateY(-3px);
+}
+
+.nav-item.active span {
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .nav-item span {
+    font-size: 0.9rem;
+  }
+
+  .nav-item svg {
+    font-size: 1.7rem;
+  }
 }
 </style>
