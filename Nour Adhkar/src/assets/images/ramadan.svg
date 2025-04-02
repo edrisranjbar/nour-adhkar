@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#ramadan_gradient)"/>
+  
+  <!-- Stars -->
+  <g opacity="0.8">
+    <path d="M120 120L140 160L180 180L140 200L120 240L100 200L60 180L100 160L120 120Z" fill="#FFFFFF"/>
+    <path d="M380 90L395 120L425 135L395 150L380 180L365 150L335 135L365 120L380 90Z" fill="#FFFFFF"/>
+    <path d="M180 300L190 320L210 330L190 340L180 360L170 340L150 330L170 320L180 300Z" fill="#FFFFFF"/>
+    <path d="M360 320L370 340L390 350L370 360L360 380L350 360L330 350L350 340L360 320Z" fill="#FFFFFF"/>
+    <path d="M280 150L285 160L295 165L285 170L280 180L275 170L265 165L275 160L280 150Z" fill="#FFFFFF"/>
+    <path d="M220 230L225 240L235 245L225 250L220 260L215 250L205 245L215 240L220 230Z" fill="#FFFFFF"/>
+    <path d="M330 250L335 260L345 265L335 270L330 280L325 270L315 265L325 260L330 250Z" fill="#FFFFFF"/>
+  </g>
+  
+  <!-- Crescent Moon -->
+  <path d="M320 256C320 326.692 262.692 384 192 384C178.461 384 165.384 382.215 153 378.892C184.369 366.523 207 336.369 207 301C207 265.631 184.369 235.477 153 223.108C165.384 219.785 178.461 218 192 218C262.692 218 320 275.308 320 256Z" fill="#FFFFFF"/>
+  
+  <!-- Lantern -->
+  <g>
+    <rect x="236" y="350" width="40" height="60" rx="5" fill="#125C98"/>
+    <rect x="236" y="350" width="40" height="60" rx="5" fill="url(#lantern_light)" fill-opacity="0.6"/>
+    <rect x="231" y="340" width="50" height="10" rx="3" fill="#102A43"/>
+    <rect x="231" y="410" width="50" height="10" rx="3" fill="#102A43"/>
+    <path d="M246 340L246 330" stroke="#102A43" stroke-width="3" stroke-linecap="round"/>
+    <path d="M266 340L266 330" stroke="#102A43" stroke-width="3" stroke-linecap="round"/>
+    <path d="M256 330L256 320" stroke="#102A43" stroke-width="3" stroke-linecap="round"/>
+    <line x1="240" y1="368" x2="272" y2="368" stroke="#102A43" stroke-width="2" stroke-linecap="round"/>
+    <line x1="240" y1="382" x2="272" y2="382" stroke="#102A43" stroke-width="2" stroke-linecap="round"/>
+    <line x1="240" y1="396" x2="272" y2="396" stroke="#102A43" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Gradient definitions -->
+  <defs>
+    <linearGradient id="ramadan_gradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#102A43"/>
+      <stop offset="1" stop-color="#184E77"/>
+    </linearGradient>
+    <radialGradient id="lantern_light" cx="256" cy="380" r="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFD54F"/>
+      <stop offset="1" stop-color="#FFA000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg> 

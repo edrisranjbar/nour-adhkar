@@ -1,0 +1,104 @@
+/* Dark Mode Styles */
+:root {
+  --dark-bg-primary: #2C2A2A;
+  --dark-bg-secondary: #3A3838;
+  --dark-text-primary: #E0E0E0;
+  --dark-text-secondary: #BBBBBB;
+  --dark-accent: #B9A583;
+  --dark-border: rgba(255, 255, 255, 0.1);
+  --dark-hover: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode {
+  background-color: var(--dark-bg-primary);
+  color: var(--dark-text-primary);
+}
+
+/* Card styles */
+body.dark-mode .settings-card,
+body.dark-mode .category-card,
+body.dark-mode .dhikr-card {
+  background: var(--dark-bg-secondary);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Headers */
+body.dark-mode header {
+  background: var(--dark-bg-secondary);
+  background-image: url('@/assets/images/pattern-dark.svg');
+}
+
+/* Text colors */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3 {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .settings-card h2 {
+  color: var(--dark-accent);
+  border-bottom: 1px solid var(--dark-border);
+}
+
+body.dark-mode .setting-title {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .setting-description {
+  color: var(--dark-text-secondary);
+}
+
+/* Toggle switches */
+body.dark-mode .toggle-slider {
+  background-color: #555;
+}
+
+body.dark-mode input:checked + .toggle-slider {
+  background-color: var(--dark-accent);
+}
+
+/* Buttons */
+body.dark-mode button {
+  background-color: var(--dark-accent);
+}
+
+body.dark-mode button:hover:not(:disabled) {
+  background-color: #C5B192;
+}
+
+body.dark-mode button:disabled {
+  background-color: #555;
+}
+
+/* Hover effects */
+body.dark-mode .settings-item.clickable:hover {
+  background: var(--dark-hover);
+}
+
+/* Cards and items */
+body.dark-mode .stat-item {
+  background: var(--dark-bg-secondary);
+}
+
+body.dark-mode .stat-item span {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .stat-icon {
+  color: var(--dark-accent);
+}
+
+/* Dhikr view specific */
+body.dark-mode .dhikr-text {
+  color: var(--dark-text-primary);
+}
+
+body.dark-mode .dhikr-translation {
+  color: var(--dark-text-secondary);
+}
+
+body.dark-mode .dhikr-count {
+  background: var(--dark-bg-secondary);
+  color: var(--dark-text-primary);
+  border: 1px solid var(--dark-border);
+} 

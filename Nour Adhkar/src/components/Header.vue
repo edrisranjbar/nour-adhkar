@@ -21,7 +21,10 @@
           <span>{{ streak }}</span>
         </div>
       </div>
-      <button v-else @click="goToLogin">ورود</button>
+      <button v-else @click="goToLogin" class="login-button">
+        <font-awesome-icon icon="fa-solid fa-sign-in-alt" />
+        ورود
+      </button>
     </div>
   </header>
 </template>
@@ -38,7 +41,7 @@ export default {
     title: String,
     description: String
   },
-  name: 'Header',
+  name: 'AppHeader',
   computed: {
     ...mapState(['user']),
     ...mapGetters(['isAuthenticated']), // Use isAuthenticated instead of isLoggedIn
@@ -180,6 +183,31 @@ button:hover {
 }
 
 .dashboard-button:active {
+  transform: translateY(0);
+}
+
+.login-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #9C8466;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  background: #A79277;
+  transform: translateY(-2px);
+  box-shadow: rgba(149, 157, 165, 0.5) 0 8px 24px;
+}
+
+.login-button:active {
   transform: translateY(0);
 }
 </style>

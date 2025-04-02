@@ -17,7 +17,10 @@ import {
     faPlus,
     faBookOpen,
     faChevronRight,
-    faChevronLeft
+    faChevronLeft,
+    faSignInAlt,
+    faGear,
+    faMinus
 } from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to library
@@ -36,7 +39,10 @@ library.add(
     faPlus,
     faBookOpen,
     faChevronRight,
-    faChevronLeft
+    faChevronLeft,
+    faSignInAlt,
+    faGear,
+    faMinus
 );
 
 export default FontAwesomeIcon; 

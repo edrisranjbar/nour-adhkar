@@ -1,16 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import store from '../store';
+
+import HomeView from '../views/HomeView.vue'
+import DhikrView from '../views/DhikrView.vue'
+import CounterView from '../views/CounterView.vue'
 import Login from '../views/LoginView.vue';
 import Register from '../views/RegisterView.vue';
 import Dashboard from '../views/DashboardView.vue';
+import SettingsView from '../views/SettingsView.vue'
 
-import HomeView from '@/views/HomeView.vue'
-import DhikrView from "@/views/DhikrView.vue";
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
 import { istikharaCollection } from '@/assets/js/collections/istikhara';
 import { sleepCollection } from '@/assets/js/collections/sleep';
-import CounterView from '@/views/CounterView.vue';
+import { dailyCollection } from '@/assets/js/collections/daily';
+import { ramadanCollection } from '@/assets/js/collections/ramadan';
+import { specialCollection } from '@/assets/js/collections/special';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,22 +52,54 @@ const router = createRouter({
       }
     },
     {
-      path: '/istikhara',
-      name: 'istikhara',
-      component: DhikrView,
-      props: {
-        title: 'دعاء استخاره',
-        openedCollection: istikharaCollection
-      }
-    },
-    {
       path: '/sleep',
       name: 'sleep',
       component: DhikrView,
       props: {
-        title: 'دعاء قبل خواب',
+        title: 'دعای خواب',
         openedCollection: sleepCollection
       }
+    },
+    {
+      path: '/istikhara',
+      name: 'istikhara',
+      component: DhikrView,
+      props: {
+        title: 'دعای استخاره',
+        openedCollection: istikharaCollection
+      }
+    },
+    {
+      path: '/daily',
+      name: 'daily',
+      component: DhikrView,
+      props: {
+        title: 'اذکار روزانه',
+        openedCollection: dailyCollection
+      }
+    },
+    {
+      path: '/ramadan',
+      name: 'ramadan',
+      component: DhikrView,
+      props: {
+        title: 'اذکار ماه رمضان',
+        openedCollection: ramadanCollection
+      }
+    },
+    {
+      path: '/special',
+      name: 'special',
+      component: DhikrView,
+      props: {
+        title: 'اذکار مناسبت‌های خاص',
+        openedCollection: specialCollection
+      }
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: SettingsView
     }
   ]
 })

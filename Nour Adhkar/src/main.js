@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -8,6 +9,16 @@ import "vue-toastification/dist/index.css";
 import FontAwesomeIcon from './plugins/fontawesome'
 import axios from 'axios';
 
+// Import CSS
+import './assets/main.css'
+import './assets/css/dark-mode.css'
+
+// Import additional FontAwesome icons
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faMinus, faPlus, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
+
+// Add icons to the library
+library.add(faMinus, faPlus, faChevronLeft)
 
 const app = createApp(App)
 
@@ -58,5 +69,7 @@ axios.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+app.use(createPinia())
 
 app.mount('#app')
