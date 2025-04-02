@@ -1,30 +1,38 @@
 <template>
-  <header>
-    <h1>{{ title }}</h1>
-    <p class="description">{{ description }}</p>
-    <div class="button-container">
-      <div v-if="isAuthenticated" class="user-stats">
-        <button class="dashboard-button" @click="goToDashboard">
-          <font-awesome-icon icon="fa-solid fa-user" />
-          داشبورد
-        </button>
-        <div class="stat-item">
-          <font-awesome-icon icon="fa-solid fa-star" class="stat-icon" />
-          <span>{{ userScore }}</span>
-        </div>
-        <div class="stat-item">
-          <font-awesome-icon icon="fa-solid fa-heart" class="stat-icon" />
-          <span>{{ heartScore }}</span>
-        </div>
-        <div class="stat-item">
-          <font-awesome-icon icon="fa-solid fa-fire" class="stat-icon" />
-          <span>{{ streak }}</span>
+  <header class="app-header">
+    <div class="header-container">
+      <div class="header-left">
+        <img src="@/assets/icons/logo.png" alt="اذکار نور" class="app-logo" />
+        <div class="header-titles">
+          <h1>{{ title }}</h1>
+          <p class="description">{{ description }}</p>
         </div>
       </div>
-      <button v-else @click="goToLogin" class="login-button">
-        <font-awesome-icon icon="fa-solid fa-sign-in-alt" />
-        ورود
-      </button>
+      
+      <div class="header-right">
+        <div v-if="isAuthenticated" class="user-stats">
+          <button class="dashboard-button" @click="goToDashboard">
+            <font-awesome-icon icon="fa-solid fa-user" />
+            داشبورد
+          </button>
+          <div class="stat-item">
+            <font-awesome-icon icon="fa-solid fa-star" class="stat-icon" />
+            <span>{{ userScore }}</span>
+          </div>
+          <div class="stat-item">
+            <font-awesome-icon icon="fa-solid fa-heart" class="stat-icon" />
+            <span>{{ heartScore }}</span>
+          </div>
+          <div class="stat-item">
+            <font-awesome-icon icon="fa-solid fa-fire" class="stat-icon" />
+            <span>{{ streak }}</span>
+          </div>
+        </div>
+        <button v-else @click="goToLogin" class="login-button">
+          <font-awesome-icon icon="fa-solid fa-sign-in-alt" />
+          ورود
+        </button>
+      </div>
     </div>
   </header>
 </template>
@@ -67,6 +75,87 @@ export default {
 </script>
 
 <style scoped>
+.app-header {
+  padding: 16px 0;
+  background-color: #A79277;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .app-header {
+  background-color: #262626;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 4px;
+  background-color: #fff;
+  transition: transform 0.3s ease;
+}
+
+body.dark-mode .app-logo {
+  background-color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.app-logo:hover {
+  transform: translateY(-3px) rotate(5deg);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: #fff;
+  font-weight: 600;
+}
+
+body.dark-mode h1 {
+  color: #fff;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 4px 0 0 0;
+}
+
+body.dark-mode .description {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
 .button-container {
   display: flex;
   align-items: center;
@@ -77,71 +166,143 @@ export default {
 
 button {
   padding: 10px 15px;
-  margin-right: 10px;
   cursor: pointer;
   background-color: #9C8466;
-  /* Your background color */
   outline: unset;
   border: unset;
   font-family: "Vazirmatn FD", sans-serif;
-  /* Your custom font */
   border-radius: 8px;
-  /* Rounded corners */
   display: flex;
-  /* Flexbox for alignment */
   align-items: center;
-  /* Center items vertically */
-  font-size: 16px;
-  /* Font size */
-  transition: background-color 0.3s ease;
-  /* Transition for hover effect */
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
 }
 
 button:hover {
-  background-color: #7a6b4c;
-  color: #fff;
+  background-color: #A79277;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .user-stats {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-right: 16px;
+  gap: 12px;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(240, 240, 240, .67);
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.2);
   padding: 6px 12px;
   border-radius: 8px;
-  box-shadow: rgba(0, 0, 0, .25) 0 2px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+body.dark-mode .stat-item {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .stat-item span {
-  color: #2C2A2A;
+  color: #fff;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 0.9rem;
+}
+
+body.dark-mode .stat-item span {
+  color: #fff;
 }
 
 .stat-icon {
-  color: #9C8466;
-  font-size: 16px;
+  color: #fff;
+  font-size: 1rem;
 }
 
 /* Hover effect */
 .stat-item:hover {
   transform: translateY(-2px);
-  box-shadow: rgba(149, 157, 165, 0.5) 0 4px 8px;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-mode .stat-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dashboard-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
+.dashboard-button:hover {
+  background: rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.login-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  background: rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 /* Responsive adjustments */
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .header-left {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .header-right {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .user-stats {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 480px) {
   .user-stats {
     gap: 8px;
-    margin-right: 8px;
   }
   
   .stat-item {
@@ -149,65 +310,29 @@ button:hover {
   }
   
   .stat-item span {
-    font-size: 14px;
+    font-size: 0.8rem;
   }
   
   .stat-icon {
-    font-size: 14px;
+    font-size: 0.8rem;
   }
-
-  .button-container {
-    gap: 8px;
+  
+  .dashboard-button, .login-button {
+    padding: 6px 10px;
+    font-size: 0.8rem;
   }
-}
-
-.dashboard-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #9C8466;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.dashboard-button:hover {
-  background: #A79277;
-  transform: translateY(-2px);
-  box-shadow: rgba(149, 157, 165, 0.5) 0 8px 24px;
-}
-
-.dashboard-button:active {
-  transform: translateY(0);
-}
-
-.login-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #9C8466;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.login-button:hover {
-  background: #A79277;
-  transform: translateY(-2px);
-  box-shadow: rgba(149, 157, 165, 0.5) 0 8px 24px;
-}
-
-.login-button:active {
-  transform: translateY(0);
+  
+  .app-logo {
+    width: 40px;
+    height: 40px;
+  }
+  
+  h1 {
+    font-size: 1.3rem;
+  }
+  
+  .description {
+    font-size: 0.8rem;
+  }
 }
 </style>
