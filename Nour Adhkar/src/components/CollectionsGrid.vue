@@ -61,7 +61,7 @@
     
     <section class="small-cards-row">
       <RouterLink to="special" class="card-sm">
-        <CategoryCard image-src="src/assets/images/special.svg" size="small">
+        <CategoryCard image-src="src/assets/images/special.svg" size="small" alt="Special occasions">
           <div class="card-overlay">
             <h2 class="card-text-top card-text-center">مناسبت‌های خاص</h2>
             <span class="card-items-count">{{ specialCollection?.adhkar?.length || 0 }} ذکر</span>
