@@ -447,4 +447,12 @@ body.dark-mode .back-to-top {
     justify-content: space-around;
   }
 }
+
+/* Mobile devices */
+@media (max-width: 767px) {
+  .app-footer {
+    border-radius: 0;
+    margin-top: 3rem;
+  }
+}
 </style>
