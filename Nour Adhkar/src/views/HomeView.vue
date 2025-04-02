@@ -512,9 +512,11 @@ body.dark-mode .search-result-item:hover {
   border-radius: 20px;
   padding: 4px 12px;
   font-size: 0.8rem;
-  align-self: flex-start;
-  margin-top: auto;
-  margin-bottom: 1rem;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  margin: 0;
+  z-index: 3;
 }
 
 .night-card .badge {
@@ -648,6 +650,10 @@ body.dark-mode .search-result-item:hover {
   
   .featured-content p {
     font-size: 1rem;
+  }
+  
+  .special-cards-row {
+    flex-direction: column;
   }
   
   .special-card {
