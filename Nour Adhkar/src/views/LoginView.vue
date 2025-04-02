@@ -129,10 +129,10 @@ export default {
           // Redirect to dashboard
           this.$router.push('/dashboard');
         } else {
-          this.error = response.data.message || 'Login failed';
+          this.error = response.data.message || 'ورود ناموفق بود';
         }
       } catch (err) {
-        this.error = err.response?.data?.error || 'An error occurred';
+        this.error = err.response?.data?.error || 'خطایی رخ داد';
         console.error(err);
       }
     }

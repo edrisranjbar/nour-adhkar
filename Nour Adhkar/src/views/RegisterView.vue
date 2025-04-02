@@ -110,7 +110,7 @@ export default {
                     this.$router.push('/dashboard');
                 }
             } catch (err) {
-                this.error = err.response?.data?.errors || 'Registration failed';
+                this.error = err.response?.data?.errors || 'ثبت نام با مشکل مواجه شد';
             }
         },
     },
