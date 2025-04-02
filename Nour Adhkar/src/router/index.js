@@ -11,6 +11,7 @@ import SettingsView from '../views/SettingsView.vue'
 import DonationView from '../views/DonationView.vue'
 import DonationSuccessView from '../views/DonationSuccessView.vue'
 import DonationFailedView from '../views/DonationFailedView.vue'
+import ContributionView from '../views/ContributionView.vue'
 
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
@@ -118,6 +119,11 @@ const router = createRouter({
       path: '/donation/failed',
       name: 'donation-failed',
       component: DonationFailedView
+    },
+    {
+      path: '/contribution',
+      name: 'contribution',
+      component: ContributionView
     }
   ]
 })

@@ -35,7 +35,17 @@ import {
     faCheck,
     faTimes,
     faInfoCircle,
-    faRedo
+    faRedo,
+    faCode,
+    faCodeBranch,
+    faBug,
+    faLightbulb,
+    faBook,
+    faLanguage,
+    faHandHoldingHeart,
+    faExclamationCircle,
+    faComments,
+    faEdit
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -82,7 +92,17 @@ library.add(
     faCheck,
     faTimes,
     faInfoCircle,
-    faRedo
+    faRedo,
+    faCode,
+    faCodeBranch,
+    faBug,
+    faLightbulb,
+    faBook,
+    faLanguage,
+    faHandHoldingHeart,
+    faExclamationCircle,
+    faComments,
+    faEdit
 );
 
 export default FontAwesomeIcon; 
