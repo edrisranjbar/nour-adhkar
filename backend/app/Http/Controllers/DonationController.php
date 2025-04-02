@@ -59,7 +59,7 @@ class DonationController extends Controller
     public function create(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'amount' => 'required|integer|min:10000',
+            'amount' => 'required|integer|min:1000',
             'name' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
         ]);
