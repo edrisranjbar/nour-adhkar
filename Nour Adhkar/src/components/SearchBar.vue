@@ -51,32 +51,43 @@ export default {
       if (!query || query.length < 3) return [];
       
       const results = [];
+      const addedCategories = new Set(); // Track added categories
       
       this.collections.forEach(collection => {
-        // Add category itself if it matches
-        if (collection.name.toLowerCase().includes(query)) {
+        // Add category itself if it matches and not already added
+        if (collection.name.toLowerCase().includes(query) && !addedCategories.has(collection.path)) {
           results.push({
             id: collection.path,
             title: `اذکار ${collection.name}`,
             path: collection.path,
             type: 'category'
           });
+          addedCategories.add(collection.path); // Mark this category as added
         }
         
         // Check individual adhkar
         if (collection.items) {
           collection.items.forEach(item => {
+            // Skip empty or null items
+            if (!item || !item.arabic && !item.translation) return;
+            
             if (
               (item.arabic && item.arabic.toLowerCase().includes(query)) || 
               (item.translation && item.translation.toLowerCase().includes(query))
             ) {
-              results.push({
-                id: `${collection.path}-${item.id || (item.arabic ? item.arabic.substring(0, 10) : 'item')}`,
-                title: item.title || (item.arabic ? `${item.arabic.substring(0, 20)}...` : 'ذکر'),
-                path: collection.path,
-                itemId: item.id,
-                type: 'item'
-              });
+              // Ensure we have valid title
+              const title = item.title || (item.arabic ? `${item.arabic.substring(0, 20)}...` : null);
+              
+              // Only add if we have a valid title
+              if (title) {
+                results.push({
+                  id: `${collection.path}-${item.id || (item.arabic ? item.arabic.substring(0, 10) : 'item')}`,
+                  title: title,
+                  path: collection.path,
+                  itemId: item.id,
+                  type: 'item'
+                });
+              }
             }
           });
         }
