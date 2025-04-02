@@ -8,6 +8,7 @@ import Login from '../views/LoginView.vue';
 import Register from '../views/RegisterView.vue';
 import Dashboard from '../views/DashboardView.vue';
 import SettingsView from '../views/SettingsView.vue'
+import DonationView from '../views/DonationView.vue'
 
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
@@ -100,6 +101,11 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: SettingsView
+    },
+    {
+      path: '/donate',
+      name: 'donate',
+      component: DonationView
     }
   ]
 })

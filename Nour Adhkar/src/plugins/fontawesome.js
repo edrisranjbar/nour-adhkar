@@ -27,7 +27,11 @@ import {
     faEnvelope,
     faGlobe,
     faHome,
-    faCalculator
+    faCalculator,
+    faCreditCard,
+    faBitcoinSign,
+    faDonate,
+    faBookmark
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -64,9 +68,13 @@ library.add(
     faGlobe,
     faHome,
     faCalculator,
+    faCreditCard,
+    faBitcoinSign,
     faTelegram,
     faInstagram,
-    faGithub
+    faGithub,
+    faDonate,
+    faBookmark
 );
 
 export default FontAwesomeIcon; 
