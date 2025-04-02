@@ -5,6 +5,7 @@
     
     <main class="container">
       <SearchBar :collections="adhkarCollections" />
+      <DailyVerse title="آیه روز" />
       <SpecialSection title="اذکار ویژه روزانه" />
       <h2 class="section-title">دسته بندی ها</h2>
       <CollectionsGrid />
@@ -21,6 +22,7 @@ import SplashScreen from '@/components/SplashScreen.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import CollectionsGrid from '@/components/CollectionsGrid.vue';
 import SpecialSection from '@/components/SpecialSection.vue';
+import DailyVerse from '@/components/DailyVerse.vue';
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
 import { dailyCollection } from '@/assets/js/collections/daily';
@@ -36,7 +38,8 @@ export default {
     AppFooter,
     SearchBar,
     CollectionsGrid,
-    SpecialSection
+    SpecialSection,
+    DailyVerse
   },
   data() {
     return {

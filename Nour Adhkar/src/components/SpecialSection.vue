@@ -52,7 +52,6 @@ export default {
 /* Special Section for Morning and Night Adhkar */
 .special-section {
   max-width: 1200px;
-  padding: 0 16px;
   margin-bottom: 1.5rem;
 }
 
