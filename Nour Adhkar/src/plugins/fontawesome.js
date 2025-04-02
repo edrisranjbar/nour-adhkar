@@ -31,7 +31,11 @@ import {
     faCreditCard,
     faBitcoinSign,
     faDonate,
-    faBookmark
+    faBookmark,
+    faCheck,
+    faTimes,
+    faInfoCircle,
+    faRedo
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -74,7 +78,11 @@ library.add(
     faInstagram,
     faGithub,
     faDonate,
-    faBookmark
+    faBookmark,
+    faCheck,
+    faTimes,
+    faInfoCircle,
+    faRedo
 );
 
 export default FontAwesomeIcon; 

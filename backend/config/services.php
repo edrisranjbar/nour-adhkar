@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'zarinpal' => [
+        'merchant_id' => env('ZARINPAL_MERCHANT_ID', '1234567890123456789012345678901234'),
+    ],
+
 ];

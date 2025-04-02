@@ -11,12 +11,15 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@fortawesome/free-brands-svg-icons": "^6.7.2",
-    "axios": "^1.8.4",
-    "vue": "^3.4.21",
-    "vue-router": "^4.5.0",
-    "vuex": "^4.0.2",
-    "vuex-persistedstate": "^4.1.0"
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-brands-svg-icons": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/vue-fontawesome": "^3.0.3",
+    "axios": "^1.6.7",
+    "pinia": "^2.1.7",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",

@@ -1,4 +1,4 @@
- <template>
+<template>
   <div class="donation-container">
     <AppHeader title="حمایت از ما" description="با حمایت شما، اذکار نور به رشد و توسعه ادامه می‌دهد" />
     
@@ -72,13 +72,20 @@
           </div>
         </div>
         
+        <div v-if="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+        
         <button 
           class="donate-button" 
           :disabled="!canProceed"
           @click="proceedToDonation"
         >
-          پرداخت و حمایت
-          <font-awesome-icon icon="fa-solid fa-heart" class="button-icon" />
+          <span v-if="isLoading">در حال اتصال به درگاه...</span>
+          <span v-else>
+            پرداخت و حمایت
+            <font-awesome-icon icon="fa-solid fa-heart" class="button-icon" />
+          </span>
         </button>
         
         <div class="secure-payment">
@@ -89,7 +96,7 @@
         </div>
       </section>
       
-      <section class="recent-supporters">
+      <section class="recent-supporters" v-if="recentSupporters.length > 0">
         <h2 class="section-title">حامیان اخیر</h2>
         
         <div class="supporters-list">
@@ -114,6 +121,8 @@
 <script>
 import AppHeader from '@/components/Header.vue';
 import AppFooter from '@/components/Footer.vue';
+import { donationService } from '@/services/donationService';
+import { onMounted, ref, computed } from 'vue';
 
 export default {
   name: 'DonationView',
@@ -121,51 +130,99 @@ export default {
     AppHeader,
     AppFooter
   },
-  data() {
-    return {
-      selectedAmount: 500000,
-      customAmount: null,
-      donationAmounts: [
-        { value: 100000, label: '۱۰۰,۰۰۰', description: 'حمایت کوچک' },
-        { value: 500000, label: '۵۰۰,۰۰۰', description: 'حمایت خوب' },
-        { value: 1000000, label: '۱,۰۰۰,۰۰۰', description: 'حمایت متوسط' },
-        { value: 10000000, label: '۱۰,۰۰۰,۰۰۰', description: 'حمایت عالی' }
-      ],
-      recentSupporters: [
-        { name: 'محمد احمدی', amount: 300000, date: '۳ روز پیش' },
-        { name: 'فاطمه محمدی', amount: 1000000, date: '۱ هفته پیش' },
-        { name: 'علی رضایی', amount: 500000, date: '۲ هفته پیش' },
-        { name: 'زهرا حسینی', amount: 100000, date: '۳ هفته پیش' }
-      ]
+  setup() {
+    const selectedAmount = ref(500000);
+    const customAmount = ref(null);
+    const isLoading = ref(false);
+    const errorMessage = ref('');
+    const donationAmounts = [
+      { value: 100000, label: '۱۰۰,۰۰۰', description: 'حمایت کوچک' },
+      { value: 500000, label: '۵۰۰,۰۰۰', description: 'حمایت خوب' },
+      { value: 1000000, label: '۱,۰۰۰,۰۰۰', description: 'حمایت متوسط' },
+      { value: 10000000, label: '۱۰,۰۰۰,۰۰۰', description: 'حمایت عالی' }
+    ];
+    const recentSupporters = ref([]);
+    
+    const finalAmount = computed(() => {
+      return customAmount.value !== null ? customAmount.value : selectedAmount.value;
+    });
+    
+    const canProceed = computed(() => {
+      return finalAmount.value > 0 && !isLoading.value;
+    });
+    
+    const selectAmount = (amount) => {
+      selectedAmount.value = amount;
+      customAmount.value = null;
     };
-  },
-  computed: {
-    finalAmount() {
-      return this.customAmount !== null ? this.customAmount : this.selectedAmount;
-    },
-    canProceed() {
-      return this.finalAmount > 0;
-    }
-  },
-  methods: {
-    selectAmount(amount) {
-      this.selectedAmount = amount;
-      this.customAmount = null;
-    },
-    selectCustomAmount() {
-      if (this.customAmount && this.customAmount > 0) {
-        this.selectedAmount = null;
-      } else if (this.customAmount === null || this.customAmount === '') {
-        this.selectedAmount = 500000;
+    
+    const selectCustomAmount = () => {
+      if (customAmount.value && customAmount.value > 0) {
+        selectedAmount.value = null;
+      } else if (customAmount.value === null || customAmount.value === '') {
+        selectedAmount.value = 500000;
       }
-    },
-    formatAmount(amount) {
+    };
+    
+    const formatAmount = (amount) => {
       return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    },
-    proceedToDonation() {
-      // This would connect to payment gateway API
-      alert(`درخواست پرداخت ${this.formatAmount(this.finalAmount)} تومان از طریق درگاه زرین‌پال ارسال شد.`);
-    }
+    };
+    
+    const loadRecentDonations = async () => {
+      try {
+        const donations = await donationService.getRecentDonations();
+        if (donations.length > 0) {
+          recentSupporters.value = donations;
+        }
+      } catch (error) {
+        console.error('Failed to load recent donations:', error);
+      }
+    };
+    
+    const proceedToDonation = async () => {
+      if (!canProceed.value) return;
+      
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      try {
+        const result = await donationService.createDonation({
+          amount: finalAmount.value,
+          // You can add name/email collection in the form if needed
+        });
+        
+        if (result.success) {
+          // Redirect to Zarinpal
+          window.location.href = result.redirectUrl;
+        } else {
+          errorMessage.value = result.message || 'خطا در اتصال به درگاه پرداخت. لطفا مجددا تلاش کنید.';
+        }
+      } catch (error) {
+        errorMessage.value = 'خطا در ارتباط با سرور. لطفا مجددا تلاش کنید.';
+        console.error('Payment initiation error:', error);
+      } finally {
+        isLoading.value = false;
+      }
+    };
+    
+    onMounted(() => {
+      loadRecentDonations();
+    });
+    
+    return {
+      selectedAmount,
+      customAmount,
+      isLoading,
+      errorMessage,
+      donationAmounts,
+      recentSupporters,
+      finalAmount,
+      canProceed,
+      selectAmount,
+      selectCustomAmount,
+      formatAmount,
+      proceedToDonation
+    };
   }
 };
 </script>
@@ -515,6 +572,20 @@ body.dark-mode .secure-text {
   color: #aaa;
 }
 
+.error-message {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  width: 100%;
+}
+
+body.dark-mode .error-message {
+  background-color: rgba(220, 53, 69, 0.2);
+}
+
 .donate-button {
   background-color: #A79277;
   color: #fff;
@@ -530,6 +601,7 @@ body.dark-mode .secure-text {
   justify-content: center;
   margin-bottom: 1.5rem;
   box-shadow: 0 4px 15px rgba(167, 146, 119, 0.3);
+  min-width: 220px;
 }
 
 .donate-button:hover:not(:disabled) {

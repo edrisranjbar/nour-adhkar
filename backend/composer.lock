@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "78684d71ad835338947fd0a6c860687a",
+    "content-hash": "a3dbf824030304e27da29af4658c07db",
     "packages": [
         {
             "name": "brick/math",
@@ -6116,6 +6116,43 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
+        },
+        {
+            "name": "zarinpal/zarinpal",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/RTLer/zarinpal-composer-library.git",
+                "reference": "a83daaa72b3df0d0e0dfaa4ee887d79161967639"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/RTLer/zarinpal-composer-library/zipball/a83daaa72b3df0d0e0dfaa4ee887d79161967639",
+                "reference": "a83daaa72b3df0d0e0dfaa4ee887d79161967639",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Zarinpal\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL2"
+            ],
+            "authors": [
+                {
+                    "name": "hooman naghiee",
+                    "email": "hooman@rtler.com"
+                }
+            ],
+            "description": "transaction request system for zarinpal",
+            "support": {
+                "issues": "https://github.com/RTLer/zarinpal-composer-library/issues",
+                "source": "https://github.com/RTLer/zarinpal-composer-library/tree/master"
+            },
+            "time": "2015-07-01T17:38:42+00:00"
         }
     ],
     "packages-dev": [

@@ -9,6 +9,8 @@ import Register from '../views/RegisterView.vue';
 import Dashboard from '../views/DashboardView.vue';
 import SettingsView from '../views/SettingsView.vue'
 import DonationView from '../views/DonationView.vue'
+import DonationSuccessView from '../views/DonationSuccessView.vue'
+import DonationFailedView from '../views/DonationFailedView.vue'
 
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
@@ -103,9 +105,19 @@ const router = createRouter({
       component: SettingsView
     },
     {
-      path: '/donate',
-      name: 'donate',
+      path: '/donation',
+      name: 'donation',
       component: DonationView
+    },
+    {
+      path: '/donation/success',
+      name: 'donation-success',
+      component: DonationSuccessView
+    },
+    {
+      path: '/donation/failed',
+      name: 'donation-failed',
+      component: DonationFailedView
     }
   ]
 })
