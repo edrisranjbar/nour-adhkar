@@ -79,6 +79,12 @@ body {
   padding-bottom: 100px;
 }
 
+@media (max-width: 767px) {
+  body {
+    padding-bottom: 70px;
+  }
+}
+
 .app-container {
   position: relative;
   min-height: 100vh;
@@ -100,6 +106,23 @@ body {
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   border-radius: 16px;
+}
+
+/* Mobile view adjustments */
+@media (max-width: 767px) {
+  .bottom-navigation {
+    bottom: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  body.dark-mode .bottom-navigation {
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  }
 }
 
 .nav-container {
