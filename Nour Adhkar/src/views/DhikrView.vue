@@ -115,6 +115,14 @@ export default {
       toastMessage: ''
     }
   },
+  watch: {
+    '$route'() {
+      // Reset to first dhikr when route changes
+      this.counter = 0;
+      this.dhikrIndex = 0;
+      this.openedDhikr = this.openedCollection.adhkar[0];
+    }
+  },
   computed: {
     ...mapState(['user']),
     ...mapGetters(['isAuthenticated']),
