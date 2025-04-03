@@ -167,7 +167,7 @@ body.dark-mode .description {
 button {
   padding: 10px 15px;
   cursor: pointer;
-  background-color: #9C8466;
+  background-color: #8A7559;
   outline: unset;
   border: unset;
   font-family: "Vazirmatn FD", sans-serif;
@@ -176,10 +176,11 @@ button {
   align-items: center;
   font-size: 0.9rem;
   transition: all 0.3s ease;
+  color: white;
 }
 
 button:hover {
-  background-color: #A79277;
+  background-color: #76644A;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -238,7 +239,7 @@ body.dark-mode .stat-item:hover {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: rgba(167, 146, 119, 0.8);
+  background: #8A7559;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -249,7 +250,7 @@ body.dark-mode .stat-item:hover {
 }
 
 .dashboard-button:hover {
-  background: #9C8466;
+  background: #76644A;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
@@ -259,7 +260,7 @@ body.dark-mode .stat-item:hover {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: rgba(167, 146, 119, 0.8);
+  background: #8A7559;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -270,7 +271,7 @@ body.dark-mode .stat-item:hover {
 }
 
 .login-button:hover {
-  background: #9C8466;
+  background: #76644A;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
@@ -297,6 +298,10 @@ body.dark-mode .stat-item:hover {
   .user-stats {
     flex-wrap: wrap;
     justify-content: center;
+  }
+  
+  .description {
+    font-size: 1.5rem;
   }
 }
 
@@ -332,7 +337,8 @@ body.dark-mode .stat-item:hover {
   }
   
   .description {
-    font-size: 0.8rem;
+    font-size: 1.3rem;
+    line-height: 1.5;
   }
 }
 </style>
