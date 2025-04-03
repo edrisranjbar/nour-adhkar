@@ -383,18 +383,21 @@ header h1 {
     width: 178px;
     height: 20px;
     border-radius: 8px;
-    background-color: #9C8466;
+    background-color: rgba(156, 132, 102, 0.3);
     position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .progressbar-fill {
     display: inline-block;
     height: 100%;
-    background-color: #ffffff;
+    background-color: #9C8466;
     border-radius: 8px;
     position: absolute;
     left: 0px;
-    transition: width 1s ease-in-out;
+    transition: width 0.5s ease-in-out;
+    box-shadow: 0 0 5px rgba(156, 132, 102, 0.5);
 }
 
 .modal-container {
@@ -457,8 +460,8 @@ header h1 {
     border-radius: 50%;
     font-size: 32px;
     font-weight: 700;
-    outline: 2px solid #A79277;
-    background-color: #D1BB9E;
+    outline: 3px solid #A79277;
+    background-color: #FFFFFF;
     color: #9C8466;
     position: absolute;
     left: 0px;
@@ -467,6 +470,13 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 10px rgba(156, 132, 102, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bottom-nav-bar .counter-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* End Modal */

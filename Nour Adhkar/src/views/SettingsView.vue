@@ -143,6 +143,10 @@ export default {
   background: #D1BB9E;
 }
 
+body.dark-mode .settings-view {
+  background: #262626;
+}
+
 header {
   height: 80px;
   padding: 0 20px;
@@ -154,6 +158,10 @@ header {
   background-repeat: repeat;
   background-size: cover;
   color: #ffffff;
+}
+
+body.dark-mode header {
+  background: #1E1E1E;
 }
 
 .settings-container {
@@ -169,6 +177,11 @@ header {
   box-shadow: rgba(0, 0, 0, .25) 0 4px 4px;
 }
 
+body.dark-mode .settings-card {
+  background: rgba(50, 50, 50, 0.8);
+  box-shadow: rgba(0, 0, 0, .4) 0 4px 8px;
+}
+
 .settings-card h2 {
   color: #9C8466;
   font-size: 1.3rem;
@@ -176,6 +189,11 @@ header {
   margin-bottom: 20px;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(156, 132, 102, 0.3);
+}
+
+body.dark-mode .settings-card h2 {
+  color: #C5B192;
+  border-bottom: 1px solid rgba(197, 177, 146, 0.3);
 }
 
 .settings-item {
@@ -197,6 +215,10 @@ header {
   background: rgba(255, 255, 255, 0.5);
 }
 
+body.dark-mode .settings-item.clickable:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .setting-label {
   flex: 1;
 }
@@ -207,6 +229,10 @@ header {
   margin-bottom: 4px;
 }
 
+body.dark-mode .setting-title {
+  color: #EFEFEF;
+}
+
 .setting-title.danger {
   color: #e53935;
 }
@@ -214,6 +240,10 @@ header {
 .setting-description {
   font-size: 0.9rem;
   color: #666;
+}
+
+body.dark-mode .setting-description {
+  color: #AAAAAA;
 }
 
 /* Toggle Switch */
@@ -287,9 +317,17 @@ input:checked + .toggle-slider:before {
   background-color: #7a6b4c;
 }
 
+body.dark-mode .font-size-selector button:hover:not(:disabled) {
+  background-color: #C5B192;
+}
+
 .font-size-selector button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+body.dark-mode .font-size-selector button:disabled {
+  background-color: #444;
 }
 
 .font-size-selector span {
