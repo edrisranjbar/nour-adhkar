@@ -1,93 +1,40 @@
-@font-face {
-    font-family: Vazirmatn FD;
-    src: url('../fonts/vazir/Vazirmatn-FD-Thin.woff2') format('woff2');
-    font-weight: 100;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: Vazirmatn FD;
-    src: url('../fonts/vazir/Vazirmatn-FD-ExtraLight.woff2') format('woff2');
-    font-weight: 200;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: Vazirmatn FD;
-    src: url('../fonts/vazir/Vazirmatn-FD-Light.woff2') format('woff2');
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: Vazirmatn FD;
-    src: url('../fonts/vazir/Vazirmatn-FD-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: Vazirmatn FD;
-    src: url('../fonts/vazir/Vazirmatn-FD-Medium.woff2') format('woff2');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: Vazirmatn FD;
-    src: url('../fonts/vazir/Vazirmatn-FD-SemiBold.woff2') format('woff2');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: Vazirmatn FD;
-    src: url('../fonts/vazir/Vazirmatn-FD-Bold.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: Vazirmatn FD;
-    src: url('../fonts/vazir/Vazirmatn-FD-ExtraBold.woff2') format('woff2');
-    font-weight: 800;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: Vazirmatn FD;
-    src: url('../fonts/vazir/Vazirmatn-FD-Black.woff2') format('woff2');
-    font-weight: 900;
-    font-style: normal;
-    font-display: swap;
-}
-.vazirmatn-font {
-    font-family: "Vazirmatn FD", sans-serif !important;
-}
+/* Import Fonts */
+@import './fonts.css';
+@import './dark-mode.css';
 
 :root {
-    /* Colors */
-    --primary-color: #4CAF50;
-    --primary-color-light: #81C784;
-    --primary-color-dark: #388E3C;
-
+    /* Theme Colors - Light Mode */
+    --bg-primary: #D1BB9E;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: rgba(240, 240, 240, .67);
+    
+    /* Text Colors */
+    --text-primary: #2C2A2A;
+    --text-secondary: #666666;
+    --text-light: #FFFFFF;
+    
+    /* Brand Colors */
+    --brand-primary: #9C8466;
+    --brand-secondary: #A79277;
+    --brand-light: #C5B192;
+    --brand-dark: #76644A;
+    
+    /* UI Colors */
+    --ui-border: rgba(156, 132, 102, 0.3);
+    --ui-shadow: rgba(0, 0, 0, 0.25);
+    --ui-shadow-light: rgba(0, 0, 0, 0.1);
+    --ui-hover: rgba(255, 255, 255, 0.5);
+    
+    /* Status Colors */
+    --success: #4CAF50;
+    --warning: #FFC107;
+    --danger: #e53935;
+    --info: #2196F3;
+    
     /* Surface Colors */
     --surface-color: #FFFFFF;
     --surface-color-secondary: #F5F5F5;
     --surface-color-hover: #EEEEEE;
-
-    /* Text Colors */
-    --text-color: #212121;
-    --text-secondary: #757575;
-    --text-disabled: #9E9E9E;
 
     /* Border Colors */
     --border-color: #E0E0E0;
@@ -119,17 +66,29 @@
 }
 
 /* Dark Mode Variables */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --surface-color: #1E1E1E;
-        --surface-color-secondary: #2D2D2D;
-        --surface-color-hover: #3D3D3D;
-        --text-color: #FFFFFF;
-        --text-secondary: #B0B0B0;
-        --text-disabled: #757575;
-        --border-color: #404040;
-        --background-color: #121212;
-    }
+body.dark-mode {
+    --bg-primary: #2C2A2A;
+    --bg-secondary: #1E1E1E;
+    --bg-tertiary: #3A3838;
+    
+    --text-primary: #E0E0E0;
+    --text-secondary: #BBBBBB;
+    
+    --brand-primary: #B9A583;
+    --brand-secondary: #C5B192;
+    --brand-light: #D1BB9E;
+    --brand-dark: #A79277;
+    
+    --ui-border: rgba(255, 255, 255, 0.1);
+    --ui-shadow: rgba(0, 0, 0, 0.4);
+    --ui-shadow-light: rgba(0, 0, 0, 0.2);
+    --ui-hover: rgba(255, 255, 255, 0.05);
+    
+    --surface-color: #1E1E1E;
+    --surface-color-secondary: #2D2D2D;
+    --surface-color-hover: #3D3D3D;
+    --border-color: #404040;
+    --background-color: #121212;
 }
 
 /* Global Styles */
@@ -140,13 +99,13 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    line-height: 1.5;
+    font-family: var(--font-primary);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: var(--line-height-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    direction: rtl;
 }
 
 /* RTL Support */
@@ -177,52 +136,55 @@ body {
     padding: var(--spacing-sm);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-md);
-    background-color: var(--surface-color);
-    color: var(--text-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     transition: border-color var(--transition-fast);
 }
 
 .form-control:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--brand-primary);
 }
 
 /* Buttons */
 .btn-primary {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--brand-primary);
+    color: var(--text-light);
     border: none;
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--border-radius-md);
     cursor: pointer;
-    transition: background-color var(--transition-fast);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-color-dark);
+    background-color: var(--brand-secondary);
+    transform: translateY(-2px);
 }
 
-.btn-primary:disabled {
-    background-color: var(--text-disabled);
-    cursor: not-allowed;
+.btn-primary:active {
+    transform: translateY(0);
 }
 
+.btn-secondary {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--brand-primary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-secondary:hover {
+    background-color: var(--brand-primary);
+    color: var(--text-light);
+    transform: translateY(-2px);
+}
+
+/* Additional Reset and Basic Styles */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
     -webkit-tap-highlight-color: transparent;
-}
-
-body {
-    font-family: "Vazirmatn FD", sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-    background-color: #D1BB9E;
-    width: 100%;
-    margin: 0 auto;
-    overflow-x: hidden;
-    direction: rtl;
 }
 
 #app {
@@ -233,14 +195,15 @@ body {
     max-width: 1000px;
     margin: auto;
 }
+
 header {
     width: 100%;
     min-height: 44px;
-    background-color: #A79277;
+    background-color: var(--brand-secondary);
     padding: 8px 16px;
-    color: #ffffff;
-    font-weight: 500;
-    font-size: 24px;
+    color: var(--text-light);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-xl);
     text-align: center;
     background-image: url('../images/pattern.svg');
     background-repeat: repeat;
@@ -252,8 +215,8 @@ header h1 {
 }
 
 .description {
-    font-weight: 300;
-    color: #e3e3e3;
+    font-weight: var(--font-weight-light);
+    color: var(--text-light);
     margin: 8px auto;
 }
 
@@ -268,11 +231,11 @@ header h1 {
 .category-card {
     height: 200px;
     border-radius: 8px;
-    background-color: #A79277;
-    font-size: 24px;
-    font-weight: 300;
+    background-color: var(--brand-secondary);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-light);
     background-size: cover;
-    color: #ffffff;
+    color: var(--text-light);
     position: relative;
     cursor: pointer;
     transition: all .3s ease-in-out;
@@ -280,7 +243,7 @@ header h1 {
 }
 
 .category-card:hover {
-    font-size: 32px;
+    font-size: var(--font-size-2xl);
     filter: grayscale(100%);
     -webkit-filter: grayscale(100%);
     box-shadow: rgba(149, 157, 165, 0.5) 0 8px 24px;
@@ -335,9 +298,9 @@ header h1 {
 }
 
 #app>div>footer {
-    font-weight: 100;
-    font-size: 20px;
-    color: #2C2A2A;
+    font-weight: var(--font-weight-thin);
+    font-size: var(--font-size-lg);
+    color: var(--text-primary);
     text-align: center;
     margin-bottom: 16px;
 }
@@ -353,7 +316,7 @@ header h1 {
     top: 0;
     left: 0;
     right: 0;
-    background-color: #D1BB9E;
+    background-color: var(--bg-primary);
     display: flex;
     flex-direction: column;
     padding-bottom: 16px;
@@ -364,6 +327,11 @@ header h1 {
     align-items: center;
     justify-content: space-between;
     text-align: right;
+    background-color: var(--brand-secondary);
+    color: var(--text-light);
+    background-image: url('../images/pattern.svg');
+    background-repeat: repeat;
+    background-size: cover;
 }
 
 .appbar-action-button-wrapper {
@@ -373,8 +341,8 @@ header h1 {
     height: 50px;
 }
 
-.modal>header h1,#modal-title {
-    font-size: 24px;
+.modal>header h1, #modal-title {
+    font-size: var(--font-size-xl);
     margin-right: 8px;
 }
 
@@ -386,13 +354,13 @@ header h1 {
     background-color: rgba(156, 132, 102, 0.3);
     position: relative;
     overflow: hidden;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 1px 3px var(--ui-shadow-light);
 }
 
 .progressbar-fill {
     display: inline-block;
     height: 100%;
-    background-color: #9C8466;
+    background-color: var(--brand-primary);
     border-radius: 8px;
     position: absolute;
     left: 0px;
@@ -405,14 +373,14 @@ header h1 {
     position: relative;
     margin: 24px 16px 0 16px;
     padding: 16px;
-    background-color: rgba(240, 240, 240, .67);
+    background-color: var(--bg-tertiary);
     border-radius: 8px;
     display: flex;
     flex-direction: column;
     gap: 16px;
     overflow-y: auto;
     overflow-x: hidden;
-    box-shadow: rgba(0, 0, 0, .25) 0 4px 4px;
+    box-shadow: var(--ui-shadow) 0 4px 4px;
     user-select: none;
 }
 
@@ -424,15 +392,15 @@ header h1 {
 }
 
 .content-top-bar h2 {
-    font-size: 24px;
-    font-weight: 500;
-    color: #9C8466;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-medium);
+    color: var(--brand-primary);
 }
 
 .modal-container>p {
-    font-size: 20px;
-    font-weight: 300;
-    color: #1E1E1E;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-light);
+    color: var(--text-primary);
 }
 
 .bottom-nav-bar {
@@ -440,7 +408,7 @@ header h1 {
     margin: 32px 16px 24px 16px;
     padding: 0 16px;
     height: 50px;
-    background-color: #9C8466;
+    background-color: var(--brand-primary);
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
@@ -449,20 +417,20 @@ header h1 {
 }
 
 .bottom-nav-bar span {
-    font-size: 22px;
-    font-weight: 200;
-    color: #D7D7D7;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-extralight);
+    color: var(--text-light);
 }
 
 .bottom-nav-bar .counter-button {
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    font-size: 32px;
-    font-weight: 700;
-    outline: 3px solid #A79277;
-    background-color: #FFFFFF;
-    color: #9C8466;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    outline: 3px solid var(--brand-secondary);
+    background-color: var(--bg-secondary);
+    color: var(--brand-primary);
     position: absolute;
     left: 0px;
     right: 0px;
@@ -470,13 +438,13 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 10px rgba(156, 132, 102, 0.3);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 12px var(--ui-shadow-light), 0 0 10px rgba(156, 132, 102, 0.3);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .bottom-nav-bar .counter-button:active {
     transform: scale(0.95);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px var(--ui-shadow-light);
 }
 
 /* End Modal */

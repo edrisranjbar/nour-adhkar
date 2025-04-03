@@ -12,6 +12,8 @@ import axios from 'axios';
 
 // Import CSS
 import './assets/main.css'
+import './assets/css/fonts.css'
+import './assets/css/style.css'
 import './assets/css/dark-mode.css'
 
 // Import additional FontAwesome icons

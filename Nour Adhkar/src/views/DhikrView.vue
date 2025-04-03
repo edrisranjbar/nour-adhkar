@@ -25,12 +25,12 @@ section#morning {
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #A79277;
-  color: white;
+  background-color: var(--brand-secondary);
+  color: var(--text-light);
   padding: 12px 20px;
   border-radius: 8px;
   z-index: 1100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--ui-shadow-light);
   text-align: center;
   font-weight: 500;
   animation: fadeInOut 3s ease-in-out forwards;
