@@ -49,6 +49,7 @@ export default {
             required: true
         }
     },
+    emits: ['update:user'],
     setup() {
         const toast = useToast();
         return { toast }
@@ -104,11 +105,18 @@ export default {
                 });
 
                 if (response.data.success) {
-                    this.user = {
+                    // Create updated user object without modifying prop directly
+                    const updatedUser = {
                         ...this.user,
                         avatar: response.data.avatar_url
                     };
-                    this.$store.commit('setUser', this.user);
+                    
+                    // Update store
+                    this.$store.commit('setUser', updatedUser);
+                    
+                    // Emit event for parent component
+                    this.$emit('update:user', updatedUser);
+                    
                     this.toast.success('تصویر پروفایل با موفقیت بروزرسانی شد');
                 }
             } catch (error) {

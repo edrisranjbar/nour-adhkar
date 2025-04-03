@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+import { BASE_API_URL } from '@/config';
 
 export const donationService = {
   /**
@@ -9,7 +8,7 @@ export const donationService = {
    */
   async getRecentDonations() {
     try {
-      const response = await axios.get(`${API_URL}/donations/recent`);
+      const response = await axios.get(`${BASE_API_URL}/donations/recent`);
       
       if (response.data.success) {
         return response.data.data.donations;
@@ -33,7 +32,7 @@ export const donationService = {
    */
   async createDonation(donationData) {
     try {
-      const response = await axios.post(`${API_URL}/donations/create`, donationData);
+      const response = await axios.post(`${BASE_API_URL}/donations/create`, donationData);
       
       return {
         success: response.data.success,
