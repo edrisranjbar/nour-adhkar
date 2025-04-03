@@ -19,10 +19,37 @@ section#morning {
     position: relative;
   }
 }
+
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #A79277;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 1100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  font-weight: 500;
+  animation: fadeInOut 3s ease-in-out forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, -20px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  90% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}
 </style>
 <template>
 
   <CongratsModal v-if="showCongratsModal"/>
+
+  <div class="toast-notification" v-if="showToast">
+    <p>{{ toastMessage }}</p>
+  </div>
 
   <section id="morning" class="modal" v-if="!showCongratsModal">
 
@@ -83,7 +110,9 @@ export default {
       touchstartX: 0,
       touchendX: 0,
       touchstartY: 0,
-      touchendY: 0 // Added missing Y coordinates
+      touchendY: 0,
+      showToast: false,
+      toastMessage: ''
     }
   },
   computed: {
@@ -197,9 +226,10 @@ export default {
       try {
         await navigator.clipboard.writeText(text);
         console.log('Dhikr copied!');
-        // Consider adding toast/notification here
+        this.showToastMessage('متن ذکر کپی شد');
       } catch (err) {
         console.error('Failed to copy:', err);
+        this.showToastMessage('خطا در کپی کردن متن');
       }
     },
     vibrate() {
@@ -246,6 +276,13 @@ export default {
           this.gotoNextDhikr();
         }
       }
+    },
+    showToastMessage(message) {
+      this.toastMessage = message;
+      this.showToast = true;
+      setTimeout(() => {
+        this.showToast = false;
+      }, 3000);
     }
   },
   mounted() {
