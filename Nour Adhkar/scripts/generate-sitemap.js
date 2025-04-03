@@ -88,6 +88,11 @@ const routes = [
     path: '/contribution',
     changefreq: 'monthly',
     priority: '0.6'
+  },
+  {
+    path: '/about',
+    changefreq: 'monthly',
+    priority: '0.5'
   }
 ];
 

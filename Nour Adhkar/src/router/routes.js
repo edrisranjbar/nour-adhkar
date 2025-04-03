@@ -9,6 +9,7 @@ import DonationView from '../views/DonationView.vue'
 import DonationSuccessView from '../views/DonationSuccessView.vue'
 import DonationFailedView from '../views/DonationFailedView.vue'
 import ContributionView from '../views/ContributionView.vue'
+import AboutView from '../views/AboutView.vue'
 
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
@@ -215,6 +216,17 @@ export const routes = [
       description: 'نحوه مشارکت در بهبود و توسعه پروژه منبع باز اذکار نور',
       changefreq: 'monthly',
       priority: '0.6'
+    }
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: AboutView,
+    meta: {
+      title: 'درباره ما | اذکار نور',
+      description: 'اطلاعات درباره اذکار نور و تیم آن',
+      changefreq: 'monthly',
+      priority: '0.5'
     }
   }
 ]; 

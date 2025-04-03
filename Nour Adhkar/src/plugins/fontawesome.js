@@ -46,7 +46,8 @@ import {
     faHandHoldingHeart,
     faExclamationCircle,
     faComments,
-    faEdit
+    faEdit,
+    faHand
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -104,7 +105,8 @@ library.add(
     faHandHoldingHeart,
     faExclamationCircle,
     faComments,
-    faEdit
+    faEdit,
+    faHand
 );
 
 export default FontAwesomeIcon; 
