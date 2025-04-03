@@ -8,10 +8,14 @@
         <p class="section-content">
           اذکار نور یک اپلیکیشن متن‌باز و رایگان است که برای دسترسی آسان به اذکار و ادعیه اسلامی طراحی شده است. هدف ما فراهم کردن ابزاری ساده، زیبا و کاربرپسند است که به کاربران اجازه می‌دهد در هر زمان و مکانی به مجموعه‌ای جامع از اذکار دسترسی داشته باشند.
         </p>
-      </section>
-      
-      <section class="about-section">
-        <h2 class="section-title">ویژگی‌های اذکار نور</h2>
+        <p class="section-content">
+          این پروژه با هدف احیای فرهنگ ذکر و دعا در زندگی روزمره آغاز شده و تلاش دارد با بهره‌گیری از فناوری‌های نوین، دسترسی به منابع معنوی را برای همگان آسان‌تر سازد. اذکار نور علاوه بر ارائه متن اصلی ادعیه و اذکار به زبان عربی، ترجمه‌های دقیق فارسی و همچنین منابع و فضیلت‌های هر ذکر را نیز در اختیار کاربران قرار می‌دهد.
+        </p>
+        <p class="section-content">
+          این اپلیکیشن با در نظر گرفتن نیازهای روزانه مسلمانان و با تمرکز بر تجربه کاربری مطلوب طراحی شده است. رابط کاربری ساده و زیبا، امکان استفاده در حالت شب، قابلیت ذخیره پیشرفت و امکان شخصی‌سازی، از جمله ویژگی‌هایی هستند که استفاده از اذکار نور را لذت‌بخش می‌سازند.
+        </p>
+
+        <h2 class="section-title mt-5">ویژگی‌های اذکار نور</h2>
         <div class="features-list">
           <div class="feature-item">
             <div class="feature-icon">
@@ -53,17 +57,13 @@
             </div>
           </div>
         </div>
-      </section>
-      
-      <section class="about-section">
-        <h2 class="section-title">تیم اذکار نور</h2>
+
+        <h2 class="section-title mt-5">تیم اذکار نور</h2>
         <p class="section-content">
           اذکار نور توسط گروهی از توسعه‌دهندگان و طراحان مسلمان ایجاد شده است که به ارائه محتوای با کیفیت دینی در قالبی مدرن و کاربرپسند اعتقاد دارند. این پروژه به صورت متن‌باز توسعه یافته و از مشارکت افراد علاقمند استقبال می‌کند.
         </p>
-      </section>
-      
-      <section class="about-section">
-        <h2 class="section-title">متن‌باز و آزاد</h2>
+
+        <h2 class="section-title mt-5">متن‌باز و آزاد</h2>
         <p class="section-content">
           اذکار نور یک پروژه متن‌باز است که تحت مجوز MIT منتشر شده است. شما می‌توانید کد منبع آن را در گیت‌هاب مشاهده کنید و در صورت تمایل در توسعه آن مشارکت نمایید.
         </p>
@@ -73,10 +73,8 @@
             <span>مشاهده کد منبع در گیت‌هاب</span>
           </a>
         </div>
-      </section>
-      
-      <section class="about-section">
-        <h2 class="section-title">حمایت از ما</h2>
+
+        <h2 class="section-title mt-5">حمایت از ما</h2>
         <p class="section-content">
           اذکار نور یک پروژه غیرانتفاعی است و برای ادامه توسعه و بهبود به حمایت شما نیاز دارد. شما می‌توانید با اهدای کمک مالی، گزارش مشکلات، پیشنهاد ویژگی‌های جدید یا کمک به توسعه کد، از این پروژه حمایت کنید.
         </p>
@@ -127,11 +125,11 @@ export default {
 }
 
 .about-section {
-  margin-bottom: 3rem;
   background: #fff;
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
 }
 
 body.dark-mode .about-section {
@@ -145,6 +143,10 @@ body.dark-mode .about-section {
   margin-bottom: 1.5rem;
   position: relative;
   padding-right: 1rem;
+}
+
+.mt-5 {
+  margin-top: 3rem;
 }
 
 .section-title::before {
