@@ -8,6 +8,17 @@
 header {
   height: 80px;
 }
+
+section#morning {
+  padding-bottom: 70px;
+}
+
+@media (max-width: 767px) {
+  .bottom-nav-bar {
+    z-index: 999;
+    position: relative;
+  }
+}
 </style>
 <template>
 
