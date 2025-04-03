@@ -57,7 +57,7 @@ export default {
       return this.user?.score || 0
     },
     heartScore() {
-      return this.user?.heartScore || 0
+      return this.user?.heart_score || 0
     },
     streak() {
       return this.user?.streak || 0
