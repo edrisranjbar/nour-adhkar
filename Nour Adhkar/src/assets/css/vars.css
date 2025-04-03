@@ -1,0 +1,90 @@
+/* CSS Variables */
+
+:root {
+  /* Theme Colors - Light Mode */
+  --bg-primary: #D1BB9E;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: rgba(240, 240, 240, .67);
+  
+  /* Text Colors */
+  --text-primary: #2C2A2A;
+  --text-secondary: #666666;
+  --text-light: #FFFFFF;
+  
+  /* Brand Colors */
+  --brand-primary: #9C8466;
+  --brand-secondary: #A79277;
+  --brand-light: #C5B192;
+  --brand-dark: #76644A;
+  
+  /* UI Colors */
+  --ui-border: rgba(156, 132, 102, 0.3);
+  --ui-shadow: rgba(0, 0, 0, 0.25);
+  --ui-shadow-light: rgba(0, 0, 0, 0.1);
+  --ui-hover: rgba(255, 255, 255, 0.5);
+  
+  /* Status Colors */
+  --success: #4CAF50;
+  --warning: #FFC107;
+  --danger: #e53935;
+  --info: #2196F3;
+  
+  /* Surface Colors */
+  --surface-color: #FFFFFF;
+  --surface-color-secondary: #F5F5F5;
+  --surface-color-hover: #EEEEEE;
+
+  /* Border Colors */
+  --border-color: #E0E0E0;
+
+  /* Background Colors */
+  --background-color: #F8F9FA;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* Dark Mode Variables */
+body.dark-mode {
+  --bg-primary: #2C2A2A;
+  --bg-secondary: #1E1E1E;
+  --bg-tertiary: #3A3838;
+  
+  --text-primary: #E0E0E0;
+  --text-secondary: #BBBBBB;
+  
+  --brand-primary: #B9A583;
+  --brand-secondary: #C5B192;
+  --brand-light: #D1BB9E;
+  --brand-dark: #A79277;
+  
+  --ui-border: rgba(255, 255, 255, 0.1);
+  --ui-shadow: rgba(0, 0, 0, 0.4);
+  --ui-shadow-light: rgba(0, 0, 0, 0.2);
+  --ui-hover: rgba(255, 255, 255, 0.05);
+  
+  --surface-color: #1E1E1E;
+  --surface-color-secondary: #2D2D2D;
+  --surface-color-hover: #3D3D3D;
+  --border-color: #404040;
+  --background-color: #121212;
+} 

@@ -471,3 +471,117 @@ header h1 {
         margin: 16px auto;
     }
 }
+
+/* Custom Styles */
+
+/* Any specific styles that don't fit in the component or layout categories */
+
+/* Category Card Styles */
+.category-card {
+  height: 200px;
+  border-radius: 8px;
+  background-color: var(--brand-secondary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-light);
+  background-size: cover;
+  color: var(--text-light);
+  position: relative;
+  cursor: pointer;
+  transition: all .3s ease-in-out;
+  user-select: none;
+}
+
+.category-card:hover {
+  font-size: var(--font-size-2xl);
+  filter: grayscale(100%);
+  -webkit-filter: grayscale(100%);
+  box-shadow: rgba(149, 157, 165, 0.5) 0 8px 24px;
+}
+
+.category-card h2 {
+  position: absolute;
+  bottom: 8px;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.card-text-top {
+  top: 8px;
+  bottom: unset;
+}
+
+.card-text-bottom {
+  bottom: 8px;
+  top: unset;
+}
+
+.card-text-left {
+  left: 16px;
+}
+
+.card-text-right {
+  right: 16px;
+}
+
+/* Progress Bar */
+.progressbar-container {
+  display: inline-block;
+  width: 178px;
+  height: 20px;
+  border-radius: 8px;
+  background-color: rgba(156, 132, 102, 0.3);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px var(--ui-shadow-light);
+}
+
+.progressbar-fill {
+  display: inline-block;
+  height: 100%;
+  background-color: var(--brand-primary);
+  border-radius: 8px;
+  position: absolute;
+  left: 0px;
+  transition: width 0.5s ease-in-out;
+  box-shadow: 0 0 5px rgba(156, 132, 102, 0.5);
+}
+
+/* Counter Button */
+.bottom-nav-bar .counter-button {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  outline: 3px solid var(--brand-secondary);
+  background-color: var(--bg-secondary);
+  color: var(--brand-primary);
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px var(--ui-shadow-light), 0 0 10px rgba(156, 132, 102, 0.3);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.bottom-nav-bar .counter-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px var(--ui-shadow-light);
+}
+
+/* Content Top Bar */
+.content-top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content-top-bar h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--brand-primary);
+}
