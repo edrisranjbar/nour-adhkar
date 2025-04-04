@@ -125,7 +125,6 @@ export default {
   width: 100%;
   max-width: 1200px;
   margin: 1rem auto;
-  padding: 0 16px;
   position: relative;
 }
 
