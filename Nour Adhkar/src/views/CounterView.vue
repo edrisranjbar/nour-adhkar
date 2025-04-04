@@ -371,7 +371,6 @@ header {
 
 .counter-container {
   padding: 20px;
-  max-width: 735px;
   margin: 0 auto;
 }
 
