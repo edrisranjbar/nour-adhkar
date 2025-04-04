@@ -369,7 +369,7 @@ header h1 {
 }
 
 .modal-container {
-    width: calc(100% - 32px);
+    width: 100%;
     position: relative;
     margin: 24px 16px 0 16px;
     padding: 16px;
