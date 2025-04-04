@@ -6,6 +6,11 @@ export default {
   components: {
     RouterView
   },
+  data() {
+    return {
+      showSplash: false
+    }
+  },
   watch: {
     $route(to) {
       // Update meta tags when route changes
@@ -31,6 +36,32 @@ export default {
         url: `https://nour-adhkar.ir${this.$route.path}`
       });
     }
+
+    // Check if splash screen should be shown
+    this.checkSplashScreen()
+
+    // Listen for splash screen events
+    window.addEventListener('splash-shown', () => {
+      this.showSplash = true
+    })
+    window.addEventListener('splash-hidden', () => {
+      this.showSplash = false
+    })
+  },
+  beforeUnmount() {
+    window.removeEventListener('splash-shown', () => {
+      this.showSplash = true
+    })
+    window.removeEventListener('splash-hidden', () => {
+      this.showSplash = false
+    })
+  },
+  methods: {
+    checkSplashScreen() {
+      // Get from local storage to check if the splash is currently showing
+      const hasSplashBeenShown = localStorage.getItem('splashShown')
+      this.showSplash = !hasSplashBeenShown
+    }
   }
 }
 </script>
@@ -39,8 +70,8 @@ export default {
   <div class="app-container">
     <RouterView />
     
-    <!-- Bottom Navigation Bar -->
-    <div class="bottom-navigation">
+    <!-- Bottom Navigation Bar - hidden when splash screen is shown -->
+    <div class="bottom-navigation" v-if="!showSplash">
       <div class="nav-container">
         <RouterLink to="/" class="nav-item" active-class="active">
           <font-awesome-icon icon="fa-solid fa-home" />

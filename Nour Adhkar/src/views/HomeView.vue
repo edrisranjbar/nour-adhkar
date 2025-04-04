@@ -76,6 +76,9 @@ export default {
         this.showSplash = true;
         this.disableScroll();
         this.startProgressBar();
+        
+        // Dispatch event that splash screen is shown
+        window.dispatchEvent(new Event('splash-shown'));
       }
     },
     startProgressBar() {
@@ -91,6 +94,9 @@ export default {
       this.showSplash = false;
       this.enableScroll();
       localStorage.setItem('splashShown', 'true');
+      
+      // Dispatch event that splash screen is hidden
+      window.dispatchEvent(new Event('splash-hidden'));
     },
     disableScroll() {
       document.body.classList.add('no-scroll');
