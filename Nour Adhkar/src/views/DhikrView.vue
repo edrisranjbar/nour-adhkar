@@ -11,6 +11,19 @@ header {
 
 section#morning {
   padding-bottom: 70px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Prevent scrolling on the section itself */
+}
+
+.modal-container {
+  flex: 1; /* Take up all available space between header and footer */
+  overflow-y: auto;
+  padding: 20px;
+  height: calc(100vh - 80px - 70px); /* viewport height minus header and footer heights */
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 767px) {
@@ -34,6 +47,10 @@ section#morning {
   text-align: center;
   font-weight: 500;
   animation: fadeInOut 3s ease-in-out forwards;
+}
+
+.share-button {
+  cursor: pointer;
 }
 
 @keyframes fadeInOut {
