@@ -47,14 +47,19 @@ import {
     faExclamationCircle,
     faComments,
     faEdit,
-    faHand
+    faHand,
+    faArrowRight,
+    faLink
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
 import {
     faTelegram,
     faInstagram,
-    faGithub
+    faGithub,
+    faFacebook,
+    faTwitter,
+    faWhatsapp,
 } from '@fortawesome/free-brands-svg-icons';
 
 // Add icons to library
@@ -106,7 +111,12 @@ library.add(
     faExclamationCircle,
     faComments,
     faEdit,
-    faHand
+    faHand,
+    faFacebook,
+    faTwitter,
+    faWhatsapp,
+    faArrowRight,
+    faLink
 );
 
 export default FontAwesomeIcon; 

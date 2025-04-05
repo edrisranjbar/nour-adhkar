@@ -6,6 +6,7 @@ use App\Http\Controllers\DhikrController;
 use App\Http\Controllers\AdhkarController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\DonationController;
+use App\Http\Controllers\BlogController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,3 +30,25 @@ Route::prefix('donations')->group(function () {
     Route::post('/create', [DonationController::class, 'create']);
     Route::get('/verify', [DonationController::class, 'verify']);
 });
+
+// Blog routes
+Route::get('/blog', [BlogController::class, 'index']);
+Route::get('/blog/{slug}', [BlogController::class, 'show']);
+
+// Admin blog routes (protected)
+Route::middleware('auth:api')->group(function () {
+    // Existing auth routes...
+    
+    // Blog admin (should be restricted to admins in a real app)
+    Route::post('/blog', [BlogController::class, 'store']);
+    Route::put('/blog/{id}', [BlogController::class, 'update']);
+    Route::delete('/blog/{id}', [BlogController::class, 'destroy']);
+});
+
+// Admin blog routes
+Route::middleware('auth:api')->prefix('admin')->group(function () {
+    Route::get('/blog', [BlogController::class, 'adminIndex']);
+    Route::get('/blog/{id}', [BlogController::class, 'adminShow']);
+});
+
+Route::get('/blog/related/{id}', [BlogController::class, 'related']);

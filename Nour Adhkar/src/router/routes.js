@@ -10,6 +10,10 @@ import DonationSuccessView from '../views/DonationSuccessView.vue'
 import DonationFailedView from '../views/DonationFailedView.vue'
 import ContributionView from '../views/ContributionView.vue'
 import AboutView from '../views/AboutView.vue'
+import BlogView from '../views/BlogView.vue';
+import BlogPostView from '../views/BlogPostView.vue';
+import BlogManageView from '../views/admin/BlogManageView.vue';
+import BlogEditorView from '../views/admin/BlogEditorView.vue';
 
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
@@ -227,6 +231,50 @@ export const routes = [
       description: 'اطلاعات درباره اذکار نور و تیم آن',
       changefreq: 'monthly',
       priority: '0.5'
+    }
+  },
+  {
+    path: '/blog',
+    name: 'blog',
+    component: BlogView,
+    meta: {
+      title: 'مقالات و نوشته‌ها | اذکار نور',
+      description: 'مقالات و نوشته‌ها در مورد فضیلت ذکر و دعا',
+      changefreq: 'weekly',
+      priority: '0.7'
+    }
+  },
+  {
+    path: '/blog/:slug',
+    name: 'blog-post',
+    component: BlogPostView,
+    meta: {
+      changefreq: 'monthly',
+      priority: '0.6'
+    }
+  },
+  {
+    path: '/admin/blog',
+    name: 'admin-blog',
+    component: BlogManageView,
+    meta: {
+      noindex: true // exclude from sitemap
+    }
+  },
+  {
+    path: '/admin/blog/new',
+    name: 'admin-blog-new',
+    component: BlogEditorView,
+    meta: {
+      noindex: true
+    }
+  },
+  {
+    path: '/admin/blog/edit/:id',
+    name: 'admin-blog-edit',
+    component: BlogEditorView,
+    meta: {
+      noindex: true
     }
   }
 ]; 
