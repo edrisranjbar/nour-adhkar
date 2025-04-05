@@ -19,19 +19,8 @@
         </div>
         
         <div v-else class="post-grid">
-          <div v-for="post in posts" :key="post.id" class="post-card">
-            <div class="post-image">
-              <img v-if="post.image" :src="post.image" :alt="post.title">
-              <div v-else class="placeholder-image"></div>
-            </div>
-            <div class="post-content">
-              <h2 class="post-title">{{ post.title }}</h2>
-              <p class="post-excerpt">{{ post.excerpt || truncateContent(post.content) }}</p>
-              <div class="post-meta">
-                <span class="post-date">{{ formatDate(post.published_at) }}</span>
-                <RouterLink :to="`/blog/${post.slug}`" class="read-more">ادامه مطلب</RouterLink>
-              </div>
-            </div>
+          <div v-for="post in posts" :key="post.id">
+            <PostCard :post="post" />
           </div>
         </div>
         
@@ -67,11 +56,13 @@ import AppHeader from '@/components/Header.vue';
 import AppFooter from '@/components/Footer.vue';
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
+import PostCard from '@/components/PostCard.vue';
 
 export default {
   components: {
     AppHeader,
-    AppFooter
+    AppFooter,
+    PostCard
   },
   data() {
     return {
@@ -142,6 +133,8 @@ export default {
 <style scoped>
 .blog-container {
   min-height: 100vh;
+  max-width: 1000px;
+  margin: auto;
   display: flex;
   flex-direction: column;
 }
@@ -149,7 +142,7 @@ export default {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px 16px;
+  padding: 20px 0;
   flex: 1;
 }
 

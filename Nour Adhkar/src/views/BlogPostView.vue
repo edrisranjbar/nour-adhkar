@@ -64,17 +64,14 @@
           <p>مقاله مرتبطی یافت نشد.</p>
         </div>
         <div v-else class="related-posts-grid">
-          <div v-for="relatedPost in relatedPosts" :key="relatedPost.id" class="related-post-card">
-            <RouterLink :to="`/blog/${relatedPost.slug}`" class="related-post-link">
-              <div class="related-post-image">
-                <img v-if="relatedPost.image" :src="relatedPost.image" :alt="relatedPost.title">
-                <div v-else class="placeholder-image"></div>
-              </div>
-              <div class="related-post-content">
-                <h4>{{ relatedPost.title }}</h4>
-                <span class="related-post-date">{{ formatDate(relatedPost.published_at) }}</span>
-              </div>
-            </RouterLink>
+          <div v-for="relatedPost in relatedPosts" :key="relatedPost.id">
+            <PostCard 
+              :post="relatedPost" 
+              :compact="true" 
+              :displayExcerpt="false" 
+              :displayAuthor="false"
+              :displayReadMore="false"
+            />
           </div>
         </div>
       </div>
@@ -94,11 +91,13 @@ import AppHeader from '@/components/Header.vue';
 import AppFooter from '@/components/Footer.vue';
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
+import PostCard from '@/components/PostCard.vue';
 
 export default {
   components: {
     AppHeader,
-    AppFooter
+    AppFooter,
+    PostCard
   },
   data() {
     return {
@@ -490,66 +489,6 @@ export default {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
-}
-
-.related-post-card {
-  background-color: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.related-post-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.related-post-link {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-}
-
-.related-post-image {
-  height: 150px;
-  overflow: hidden;
-}
-
-.related-post-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s;
-}
-
-.related-post-card:hover .related-post-image img {
-  transform: scale(1.05);
-}
-
-.placeholder-image {
-  width: 100%;
-  height: 100%;
-  background-color: #e9e9e9;
-  background-image: linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 75%, #ddd 75%, #ddd),
-                    linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 75%, #ddd 75%, #ddd);
-  background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
-}
-
-.related-post-content {
-  padding: 15px;
-}
-
-.related-post-content h4 {
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.related-post-date {
-  font-size: 0.85rem;
-  color: #777;
 }
 
 .no-related-posts {
