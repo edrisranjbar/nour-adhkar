@@ -32,6 +32,7 @@ class AuthController extends Controller
                 'created_at' => $request->user()->created_at,
                 'avatar' => $request->user()->avatar,
                 'badges' => $request->user()->badges,
+                'role' => $request->user()->role,
             ]
         ]);
     }

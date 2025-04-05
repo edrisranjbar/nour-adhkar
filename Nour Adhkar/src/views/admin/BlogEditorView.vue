@@ -131,14 +131,13 @@
 </template>
 
 <script>
-import AppHeader from '@/components/Header.vue';
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
 import { mapGetters } from 'vuex';
 
 export default {
   components: {
-    AppHeader
+    // Only keep necessary components
   },
   data() {
     return {
@@ -171,12 +170,8 @@ export default {
     }
   },
   mounted() {
-    if (!this.isAuthenticated) {
-      this.$router.push('/login');
-      return;
-    }
-    
-    // Check if we're editing an existing post
+    // Remove the authentication check
+    // Only check for editing vs creating
     const postId = this.$route.params.id;
     if (postId) {
       this.isEditing = true;

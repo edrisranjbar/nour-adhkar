@@ -103,14 +103,13 @@
 </template>
 
 <script>
-import AppHeader from '@/components/Header.vue';
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
 import { mapGetters } from 'vuex';
 
 export default {
   components: {
-    AppHeader
+    // Only keep necessary components
   },
   data() {
     return {
@@ -133,10 +132,7 @@ export default {
     ...mapGetters(['isAuthenticated'])
   },
   mounted() {
-    if (!this.isAuthenticated) {
-      this.$router.push('/login');
-      return;
-    }
+    // Remove the redirection check since it's handled by the guard
     this.fetchPosts();
   },
   methods: {

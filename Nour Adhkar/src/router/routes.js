@@ -3,17 +3,13 @@ import DhikrView from '../views/DhikrView.vue'
 import CounterView from '../views/CounterView.vue'
 import Login from '../views/LoginView.vue';
 import Register from '../views/RegisterView.vue';
-import Dashboard from '../views/DashboardView.vue';
 import SettingsView from '../views/SettingsView.vue'
 import DonationView from '../views/DonationView.vue'
 import DonationSuccessView from '../views/DonationSuccessView.vue'
 import DonationFailedView from '../views/DonationFailedView.vue'
 import ContributionView from '../views/ContributionView.vue'
 import AboutView from '../views/AboutView.vue'
-import BlogView from '../views/BlogView.vue';
-import BlogPostView from '../views/BlogPostView.vue';
-import BlogManageView from '../views/admin/BlogManageView.vue';
-import BlogEditorView from '../views/admin/BlogEditorView.vue';
+import { authGuard, adminGuard } from './guards';
 
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
@@ -23,8 +19,17 @@ import { dailyCollection } from '@/assets/js/collections/daily';
 import { ramadanCollection } from '@/assets/js/collections/ramadan';
 import { specialCollection } from '@/assets/js/collections/special';
 
-// Define routes with metadata for SEO and sitemap
-export const routes = [
+// Lazy loading for blog components
+const BlogView = () => import('../views/BlogView.vue');
+const BlogPostView = () => import('../views/BlogPostView.vue');
+
+// Admin components
+const AdminLayout = () => import('../views/admin/AdminLayout.vue');
+const BlogManageView = () => import('../views/admin/BlogManageView.vue');
+const BlogEditorView = () => import('../views/admin/BlogEditorView.vue');
+
+// Public routes that everyone can access
+export const publicRoutes = [
   { 
     path: '/login', 
     component: Login,
@@ -35,13 +40,6 @@ export const routes = [
   { 
     path: '/register', 
     component: Register,
-    meta: { 
-      noindex: true // exclude from sitemap 
-    }
-  },
-  { 
-    path: '/dashboard', 
-    component: Dashboard,
     meta: { 
       noindex: true // exclude from sitemap 
     }
@@ -253,28 +251,65 @@ export const routes = [
       priority: '0.6'
     }
   },
+];
+
+// Protected routes that require authentication
+export const authRoutes = [
   {
-    path: '/admin/blog',
-    name: 'admin-blog',
-    component: BlogManageView,
-    meta: {
-      noindex: true // exclude from sitemap
-    }
-  },
-  {
-    path: '/admin/blog/new',
-    name: 'admin-blog-new',
-    component: BlogEditorView,
-    meta: {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: () => import('../views/DashboardView.vue'),
+    beforeEnter: authGuard,
+    meta: { 
       noindex: true
     }
   },
+];
+
+// Admin routes that require admin privileges
+export const adminRoutes = [
   {
-    path: '/admin/blog/edit/:id',
-    name: 'admin-blog-edit',
-    component: BlogEditorView,
-    meta: {
-      noindex: true
-    }
+    path: '/admin',
+    component: AdminLayout,
+    beforeEnter: adminGuard,
+    meta: { 
+      noindex: true 
+    },
+    children: [
+      {
+        path: 'blog',
+        name: 'admin-blog',
+        component: BlogManageView,
+        meta: {
+          title: 'مدیریت مقالات | اذکار نور',
+          noindex: true
+        }
+      },
+      {
+        path: 'blog/new',
+        name: 'admin-blog-new',
+        component: BlogEditorView,
+        meta: {
+          title: 'ایجاد مقاله جدید | اذکار نور',
+          noindex: true
+        }
+      },
+      {
+        path: 'blog/edit/:id',
+        name: 'admin-blog-edit',
+        component: BlogEditorView,
+        meta: {
+          title: 'ویرایش مقاله | اذکار نور',
+          noindex: true
+        }
+      }
+    ]
   }
+];
+
+// Combine all routes
+export const routes = [
+  ...publicRoutes,
+  ...authRoutes,
+  ...adminRoutes,
 ]; 
