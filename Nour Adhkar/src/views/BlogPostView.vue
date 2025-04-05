@@ -19,13 +19,19 @@
           <h1>{{ post.title }}</h1>
           <div class="post-meta">
             <div class="author" v-if="post.user">
-              <font-awesome-icon icon="fa-solid fa-user" class="author-icon" />
+              <font-awesome-icon icon="fa-solid fa-user" class="meta-icon" />
               <div class="author-info">
-                <span class="author-label">نویسنده:</span>
+                <span class="meta-label">نویسنده:</span>
                 <span class="author-name">{{ post.user.name }}</span>
               </div>
             </div>
-            <span class="post-date">{{ formatDate(post.published_at) }}</span>
+            <div class="date-info">
+              <font-awesome-icon icon="fa-solid fa-calendar-alt" class="meta-icon" />
+              <div class="date-text">
+                <span class="meta-label">تاریخ انتشار:</span>
+                <span class="post-date">{{ formatDate(post.published_at) }}</span>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -302,32 +308,40 @@ export default {
   align-items: center;
   color: #777;
   font-size: 0.95rem;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-.author {
+.author, .date-info {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.author-icon {
+.meta-icon {
   color: #A79277;
   font-size: 1.1rem;
 }
 
-.author-info {
+.author-info, .date-text {
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
-.author-label {
+.meta-label {
   color: #888;
   font-size: 0.9rem;
 }
 
-.author-name {
+.author-name, .post-date {
   font-weight: 500;
+  color: #555;
+}
+
+body.dark-mode .author-name, 
+body.dark-mode .post-date {
+  color: #ddd;
 }
 
 .post-featured-image {
