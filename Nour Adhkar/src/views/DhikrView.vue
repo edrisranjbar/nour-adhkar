@@ -120,7 +120,7 @@ export default {
   },
   data() {
     return {
-      counter: 0,
+      counters: {}, // Object to store counter for each dhikr by its text (used as key)
       dhikrIndex: 0,
       openedDhikr: this.openedCollection.adhkar[0],
       tapSoundAudioPath: tapSound,
@@ -135,14 +135,19 @@ export default {
   watch: {
     '$route'() {
       // Reset to first dhikr when route changes
-      this.counter = 0;
       this.dhikrIndex = 0;
       this.openedDhikr = this.openedCollection.adhkar[0];
+      // Initialize counters for the new collection
+      this.initializeCounters();
     }
   },
   computed: {
     ...mapState(['user']),
     ...mapGetters(['isAuthenticated']),
+    counter() {
+      // Get counter for current dhikr, default to 0 if not set
+      return this.counters[this.openedDhikr.text] || 0;
+    },
     isFirstDhikr() {
       return this.openedCollection.adhkar[0].text === this.openedDhikr.text;
     },
@@ -166,28 +171,39 @@ export default {
     }
   },
   methods: {
+    initializeCounters() {
+      // Create an object with a counter for each dhikr in the collection
+      const newCounters = {};
+      this.openedCollection.adhkar.forEach(dhikr => {
+        newCounters[dhikr.text] = this.counters[dhikr.text] || 0;
+      });
+      this.counters = newCounters;
+    },
     count(event) {
       if (event && event.target.id === 'share-button') {
         return;
       }
-      if (this.counter == this.openedDhikr.count) {
+      
+      const currentCount = this.counters[this.openedDhikr.text] || 0;
+      if (currentCount >= this.openedDhikr.count) {
         return;
       }
-      this.counter++;
-      if (this.counter >= this.openedDhikr.count && this.isThereANextDhikr) {
+      
+      // Update the counter for the current dhikr
+      this.counters[this.openedDhikr.text] = currentCount + 1;
+      
+      if (currentCount + 1 >= this.openedDhikr.count && this.isThereANextDhikr) {
         this.gotoNextDhikr();
       }
       this.playAudio(this.tapSoundAudioPath);
     },
     gotoPrevDhikr() {
       if (!this.isFirstDhikr) {
-        this.counter = 0;
         this.openedDhikr = this.openedCollection.adhkar[--this.dhikrIndex];
       }
     },
     gotoNextDhikr() {
       if (this.isThereANextDhikr) {
-        this.counter = 0;
         try {
           if ("vibrate" in navigator) this.vibrate();
         } catch {
@@ -311,6 +327,7 @@ export default {
     }
   },
   mounted() {
+    this.initializeCounters();
     window.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('touchstart', this.handleTouchStart);
     document.addEventListener('touchend', this.handleTouchEnd);
