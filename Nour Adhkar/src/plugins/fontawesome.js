@@ -49,7 +49,8 @@ import {
     faEdit,
     faHand,
     faArrowRight,
-    faLink
+    faLink,
+    faNewspaper
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -116,7 +117,8 @@ library.add(
     faTwitter,
     faWhatsapp,
     faArrowRight,
-    faLink
+    faLink,
+    faNewspaper
 );
 
 export default FontAwesomeIcon; 

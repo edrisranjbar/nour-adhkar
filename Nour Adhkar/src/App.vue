@@ -85,6 +85,10 @@ export default {
           <font-awesome-icon icon="fa-solid fa-moon" />
           <span>شامگاه</span>
         </RouterLink>
+        <RouterLink to="/blog" class="nav-item" active-class="active">
+          <font-awesome-icon icon="fa-solid fa-newspaper" />
+          <span>مقالات</span>
+        </RouterLink>
         <RouterLink to="/counter" class="nav-item" active-class="active">
           <font-awesome-icon icon="fa-solid fa-calculator" />
           <span>تسبیح</span>
@@ -178,7 +182,7 @@ body.dark-mode .bottom-navigation {
   color: #777;
   text-decoration: none;
   padding: 8px 0;
-  width: 20%;
+  width: 16.66%;
   transition: all 0.25s ease;
 }
 

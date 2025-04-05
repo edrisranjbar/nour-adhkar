@@ -15,6 +15,7 @@
             <li><RouterLink to="/morning" class="footer-link">اذکار صبحگاه</RouterLink></li>
             <li><RouterLink to="/night" class="footer-link">اذکار شامگاه</RouterLink></li>
             <li><RouterLink to="/counter" class="footer-link">تسبیح شمار</RouterLink></li>
+            <li><RouterLink to="/blog" class="footer-link">مقالات</RouterLink></li>
           </ul>
         </div>
         
