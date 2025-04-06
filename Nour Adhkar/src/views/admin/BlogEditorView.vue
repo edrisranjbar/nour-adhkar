@@ -75,6 +75,28 @@
               <img :src="post.image" alt="Preview">
               <button @click="removeImage" class="remove-image-btn" type="button">حذف تصویر</button>
             </div>
+            <div class="image-preview placeholder-preview" v-else>
+              <svg width="100%" height="170" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background -->
+                <rect width="400" height="200" fill="#f8f8f8"/>
+                <rect width="400" height="26" fill="#A79277" y="0"/>
+                <!-- Decorative elements -->
+                <path d="M0,26 L400,26 L400,200 L0,200 Z" fill="#f8f8f8"/>
+                <rect x="40" y="60" width="320" height="80" rx="4" fill="#f0f0f0" stroke="#e0e0e0" stroke-width="1"/>
+                <!-- Image icon -->
+                <path d="M170,70 L230,70 L230,130 L170,130 Z" fill="#e9e9e9" stroke="#d5d5d5" stroke-width="1"/>
+                <circle cx="190" cy="90" r="8" fill="#d0d0d0"/>
+                <path d="M175,125 L225,125 L208,95 L195,110 L185,105 Z" fill="#d0d0d0"/>
+                <!-- Text lines -->
+                <rect x="100" y="150" width="200" height="10" rx="2" fill="#e0e0e0"/>
+                <rect x="150" y="170" width="100" height="6" rx="2" fill="#e0e0e0"/>
+                <!-- Islamic decorative pattern -->
+                <path d="M20,10 L30,18 L20,18 Z" fill="#f0f0f0" opacity="0.5"/>
+                <path d="M380,10 L370,18 L380,18 Z" fill="#f0f0f0" opacity="0.5"/>
+                <text x="200" y="18" text-anchor="middle" fill="#ffffff" font-size="13" font-family="Arial, sans-serif">تصویر مقاله</text>
+              </svg>
+              <div class="placeholder-text">پیش‌نمایش تصویر</div>
+            </div>
           </div>
         </div>
         
@@ -162,7 +184,8 @@ export default {
       toastMessage: '',
       isEditing: false,
       postId: null,
-      uploadStatus: ''
+      uploadStatus: '',
+      placeholderSvg: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="200" fill="#f8f8f8"/><rect width="400" height="26" fill="#A79277" y="0"/><path d="M0,26 L400,26 L400,200 L0,200 Z" fill="#f8f8f8"/><rect x="40" y="60" width="320" height="80" rx="4" fill="#f0f0f0" stroke="#e0e0e0" stroke-width="1"/><path d="M170,70 L230,70 L230,130 L170,130 Z" fill="#e9e9e9" stroke="#d5d5d5" stroke-width="1"/><circle cx="190" cy="90" r="8" fill="#d0d0d0"/><path d="M175,125 L225,125 L208,95 L195,110 L185,105 Z" fill="#d0d0d0"/><rect x="100" y="150" width="200" height="10" rx="2" fill="#e0e0e0"/><rect x="150" y="170" width="100" height="6" rx="2" fill="#e0e0e0"/><path d="M20,10 L30,18 L20,18 Z" fill="#f0f0f0" opacity="0.5"/><path d="M380,10 L370,18 L380,18 Z" fill="#f0f0f0" opacity="0.5"/><text x="200" y="18" text-anchor="middle" fill="#ffffff" font-size="13" font-family="Arial, sans-serif">تصویر مقاله</text></svg>')
     };
   },
   computed: {
@@ -229,12 +252,20 @@ export default {
         this.generateSlug();
       }
       
+      // If no image is provided, use the placeholder for server storage
+      const postData = { ...this.post };
+      if (!postData.image && status === 'published') {
+        postData.image = this.placeholderSvg;
+      }
+      
       this.saving = true;
       this.post.status = status;
+      postData.status = status;
       
       // If publishing for the first time without a date, set to now
       if (status === 'published' && !this.post.published_at) {
         this.post.published_at = new Date().toISOString();
+        postData.published_at = this.post.published_at;
       }
       
       try {
@@ -242,13 +273,13 @@ export default {
         let response;
         
         if (this.isEditing) {
-          response = await axios.put(`${BASE_API_URL}/blog/${this.postId}`, this.post, {
+          response = await axios.put(`${BASE_API_URL}/blog/${this.postId}`, postData, {
             headers: {
               Authorization: `Bearer ${token}`
             }
           });
         } else {
-          response = await axios.post(`${BASE_API_URL}/blog`, this.post, {
+          response = await axios.post(`${BASE_API_URL}/blog`, postData, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -952,5 +983,32 @@ body.dark-mode .save-draft-button:hover {
   .editor-toolbar {
     justify-content: center;
   }
+}
+
+.placeholder-preview {
+  background-color: #f9f9f9;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.placeholder-preview:hover {
+  border-color: #A79277;
+  box-shadow: 0 4px 8px rgba(167, 146, 119, 0.15);
+}
+
+.placeholder-text {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: #666;
+  font-size: 0.85rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 4px 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 </style> 
