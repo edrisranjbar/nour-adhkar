@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 // Import icons you need
 import { 
-    faSignOutAlt,
+    faSignOutAlt, 
     faUser,
     faLock,
     faCamera,
@@ -57,7 +57,12 @@ import {
     faPencil,
     faPenToSquare,
     faEye,
-    faEyeSlash
+    faEyeSlash,
+    faUsers,
+    faList,
+    faTachometerAlt,
+    faBan,
+    faSync,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -132,7 +137,12 @@ library.add(
     faPencil,
     faPenToSquare,
     faEye,
-    faEyeSlash
+    faEyeSlash,
+    faUsers,
+    faList,
+    faTachometerAlt,
+    faBan,
+    faSync,
 );
 
 export default FontAwesomeIcon; 

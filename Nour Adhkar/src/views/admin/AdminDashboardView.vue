@@ -94,20 +94,21 @@
                 <td>{{ formatDate(post.published_at) }}</td>
                 <td>{{ post.views || 0 }}</td>
                 <td class="actions-cell">
-                  <button 
+                  <RouterLink 
+                    :to="`/blog/${post.slug}`" 
+                    target="_blank" 
                     class="action-button view-button" 
                     title="مشاهده"
-                    @click="viewPost(post)"
                   >
                     <font-awesome-icon icon="fa-solid fa-eye" />
-                  </button>
-                  <button 
+                  </RouterLink>
+                  <RouterLink 
+                    :to="`/admin/blog/edit/${post.id}`" 
                     class="action-button edit-button" 
                     title="ویرایش"
-                    @click="editPost(post.id)"
                   >
                     <font-awesome-icon icon="fa-solid fa-pen" />
-                  </button>
+                  </RouterLink>
                 </td>
               </tr>
             </tbody>
@@ -133,6 +134,13 @@
             <span class="action-label">مدیریت مقالات</span>
           </div>
           
+          <div class="action-card" @click="goTo('/admin/users')">
+            <div class="action-icon">
+              <font-awesome-icon icon="fa-solid fa-users" />
+            </div>
+            <span class="action-label">مدیریت کاربران</span>
+          </div>
+          
           <!-- Future quick actions can be added here -->
           <div class="action-card" @click="refreshStats">
             <div class="action-icon">
@@ -148,7 +156,32 @@
 
 <script>
 import axios from 'axios';
-import { mapState } from 'vuex';
+import { BASE_API_URL } from '@/config';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { 
+  faNewspaper, 
+  faUsers, 
+  faEye, 
+  faComments, 
+  faPlus, 
+  faList, 
+  faSync, 
+  faPen,
+  faArrowLeft
+} from '@fortawesome/free-solid-svg-icons';
+
+// Add icons to the library
+library.add(
+  faNewspaper, 
+  faUsers, 
+  faEye, 
+  faComments, 
+  faPlus, 
+  faList, 
+  faSync, 
+  faPen,
+  faArrowLeft
+);
 
 export default {
   name: 'AdminDashboardView',
@@ -165,7 +198,9 @@ export default {
     };
   },
   computed: {
-    ...mapState(['token', 'apiUrl'])
+    token() {
+      return this.$store.state.token;
+    }
   },
   mounted() {
     this.fetchDashboardData();
@@ -174,71 +209,91 @@ export default {
     async fetchDashboardData() {
       this.loading = true;
       try {
-        // In a real implementation, you would fetch this data from your API
-        const [statsResponse, postsResponse] = await Promise.all([
+        await Promise.all([
           this.fetchStats(),
           this.fetchRecentPosts()
         ]);
-        
-        this.stats = statsResponse.data;
-        this.recentPosts = postsResponse.data;
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        // Handle error (show notification, etc.)
       } finally {
         this.loading = false;
       }
     },
     
     async fetchStats() {
-      // In a real implementation, you would have an endpoint for this
       try {
-        return await axios.get(`${this.apiUrl}/admin/stats`, {
+        // Try to get blog post count
+        const blogCountResponse = await this.getBlogPostsCount();
+        this.stats.blogPostsCount = blogCountResponse;
+        
+        // Get users count 
+        const usersResponse = await this.getUsersCount();
+        this.stats.usersCount = usersResponse;
+        
+        // Use mock data for metrics that don't have specific endpoints yet
+        this.stats.totalViews = 150;
+        this.stats.commentsCount = 8;
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    },
+    
+    async getBlogPostsCount() {
+      try {
+        const response = await axios.get(`${BASE_API_URL}/admin/blog`, {
           headers: {
             Authorization: `Bearer ${this.token}`
           }
         });
+        
+        if (response.data.success && response.data.posts) {
+          return response.data.posts.total || 0;
+        }
+        return 0;
       } catch (error) {
-        console.error('Error fetching stats:', error);
-        // If the endpoint doesn't exist yet, return mock data
-        return {
-          data: {
-            blogPostsCount: await this.getPostsCount(),
-            usersCount: 1,
-            totalViews: 120,
-            commentsCount: 5
-          }
-        };
+        console.error('Error getting blog posts count:', error);
+        return 0;
       }
     },
     
-    async getPostsCount() {
+    async getUsersCount() {
       try {
-        const response = await axios.get(`${this.apiUrl}/blog-posts`, {
-          params: { count_only: true }
+        const response = await axios.get(`${BASE_API_URL}/admin/users`, {
+          params: {
+            per_page: 1
+          },
+          headers: {
+            Authorization: `Bearer ${this.token}`
+          }
         });
-        return response.data.count || 0;
+        
+        if (response.data.success && response.data.users) {
+          return response.data.users.total || 0;
+        }
+        return 0;
       } catch (error) {
+        console.error('Error getting users count:', error);
         return 0;
       }
     },
     
     async fetchRecentPosts() {
       try {
-        const response = await axios.get(`${this.apiUrl}/blog-posts`, {
+        const response = await axios.get(`${BASE_API_URL}/admin/blog`, {
           params: {
-            per_page: 5,
-            order_by: 'created_at',
-            order: 'desc'
+            per_page: 5
           },
           headers: {
             Authorization: `Bearer ${this.token}`
           }
         });
-        return response;
+        
+        if (response.data.success && response.data.posts && response.data.posts.data) {
+          this.recentPosts = response.data.posts.data;
+        }
       } catch (error) {
         console.error('Error fetching recent posts:', error);
-        return { data: [] };
+        this.recentPosts = [];
       }
     },
     
@@ -259,24 +314,15 @@ export default {
     },
     
     getStatusClass(post) {
-      if (!post.is_published) return 'draft';
+      if (post.status === 'draft') return 'draft';
       if (post.featured) return 'featured';
       return 'published';
     },
     
     getStatusText(post) {
-      if (!post.is_published) return 'پیش‌نویس';
+      if (post.status === 'draft') return 'پیش‌نویس';
       if (post.featured) return 'ویژه';
       return 'منتشر شده';
-    },
-    
-    viewPost(post) {
-      // Open the post in a new tab
-      window.open(`/blog/${post.slug}`, '_blank');
-    },
-    
-    editPost(id) {
-      this.$router.push(`/admin/blog/edit/${id}`);
     },
     
     goTo(path) {

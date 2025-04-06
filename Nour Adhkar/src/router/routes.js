@@ -28,6 +28,7 @@ const AdminLayout = () => import('../views/admin/AdminLayout.vue');
 const AdminDashboardView = () => import('../views/admin/AdminDashboardView.vue');
 const BlogManageView = () => import('../views/admin/BlogManageView.vue');
 const BlogEditorView = () => import('../views/admin/BlogEditorView.vue');
+const UsersManageView = () => import('../views/admin/UsersManageView.vue');
 
 // Public routes that everyone can access
 export const publicRoutes = [
@@ -310,6 +311,15 @@ export const adminRoutes = [
         component: BlogEditorView,
         meta: {
           title: 'ویرایش مقاله | اذکار نور',
+          noindex: true
+        }
+      },
+      {
+        path: 'users',
+        name: 'admin-users',
+        component: UsersManageView,
+        meta: {
+          title: 'مدیریت کاربران | اذکار نور',
           noindex: true
         }
       }

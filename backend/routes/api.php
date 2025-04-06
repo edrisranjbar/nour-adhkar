@@ -52,6 +52,13 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::get('/blog', [BlogController::class, 'adminIndex']);
     Route::get('/blog/{id}', [BlogController::class, 'adminShow']);
+    
+    // User management routes
+    Route::get('/users', [AuthController::class, 'adminIndex']);
+    Route::get('/users/{id}', [AuthController::class, 'adminShow']);
+    Route::post('/users', [AuthController::class, 'adminStore']);
+    Route::put('/users/{id}', [AuthController::class, 'adminUpdate']);
+    Route::patch('/users/{id}/toggle-status', [AuthController::class, 'toggleStatus']);
 });
 
 Route::get('/blog/related/{id}', [BlogController::class, 'related']);

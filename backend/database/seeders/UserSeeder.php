@@ -10,18 +10,69 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        // Create a test user with streak data
-        $user = User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => bcrypt('password'),
-            'heart_score' => 75,
-            'streak' => 5,
-            'completed_dates' => $this->generateTestDates()
-        ]);
+        // Create admin users
+        $adminUsers = [
+            [
+                'name' => 'علی محمدی',
+                'email' => 'admin@example.com',
+                'password' => bcrypt('admin123'),
+                'role' => 'admin',
+                'heart_score' => 100,
+                'streak' => 10,
+            ],
+            [
+                'name' => 'مریم حسینی',
+                'email' => 'superadmin@example.com',
+                'password' => bcrypt('super123'),
+                'role' => 'admin',
+                'heart_score' => 100,
+                'streak' => 15,
+            ],
+            [
+                'name' => 'رضا احمدی',
+                'email' => 'systemadmin@example.com',
+                'password' => bcrypt('system123'),
+                'role' => 'admin',
+                'heart_score' => 100,
+                'streak' => 20,
+            ],
+        ];
 
-        // Create dhikr records for the user
-        $this->createDhikrRecords($user);
+        foreach ($adminUsers as $adminData) {
+            $admin = User::create($adminData);
+            $admin->completed_dates = $this->generateTestDates();
+            $admin->save();
+            $this->createDhikrRecords($admin);
+        }
+
+        // Persian names for regular users
+        $persianNames = [
+            'سارا رضایی',
+            'محمد کریمی',
+            'زهرا محمودی',
+            'حسین علیزاده',
+            'فاطمه صادقی',
+            'امیر حسینی',
+            'نرگس محمدی',
+            'علی رضایی',
+            'مریم کریمی',
+            'رضا محمودی'
+        ];
+
+        // Create 10 regular users
+        for ($i = 0; $i < 10; $i++) {
+            $user = User::create([
+                'name' => $persianNames[$i],
+                'email' => 'user' . ($i + 1) . '@example.com',
+                'password' => bcrypt('password' . ($i + 1)),
+                'role' => 'user',
+                'heart_score' => rand(0, 100),
+                'streak' => rand(0, 30),
+                'completed_dates' => $this->generateTestDates()
+            ]);
+
+            $this->createDhikrRecords($user);
+        }
     }
 
     private function generateTestDates()

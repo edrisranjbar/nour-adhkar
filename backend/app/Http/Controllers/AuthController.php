@@ -71,7 +71,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+            return response()->json(['error' => 'نام کاربری یا رمز عبور اشتباه است'], 401);
         }
 
         return response()->json([
@@ -87,7 +87,7 @@ class AuthController extends Controller
             JWTAuth::invalidate(JWTAuth::getToken());
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'error' => 'Logout failed'], 500);
+            return response()->json(['success' => false, 'error' => 'خروج از سیستم با خطا مواجه شد'], 500);
         }
     }
 
@@ -138,7 +138,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error updating heart score',
+                'message' => 'خطا در بروزرسانی امتیاز قلب',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -150,7 +150,7 @@ class AuthController extends Controller
             if (!$request->hasFile('avatar')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No avatar file provided'
+                    'message' => 'فایل تصویر پروفایل ارسال نشده است'
                 ], 400);
             }
 
@@ -175,7 +175,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Avatar updated successfully',
+                'message' => 'تصویر پروفایل با موفقیت بروزرسانی شد',
                 'avatar_url' => $avatarUrl
             ]);
 
@@ -183,9 +183,203 @@ class AuthController extends Controller
             \Log::error('Avatar upload error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error uploading avatar'
+                'message' => 'خطا در آپلود تصویر پروفایل'
             ], 500);
         }
+    }
+
+    /**
+     * Get a list of all users for admin
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function adminIndex(Request $request)
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'شما دسترسی لازم برای این عملیات را ندارید'], 403);
+        }
+
+        $perPage = $request->query('per_page', 10);
+        $search = $request->query('search', '');
+        $role = $request->query('role', '');
+        $sortBy = $request->query('sort', 'created_at_desc');
+
+        $query = User::query();
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply role filter
+        if ($role) {
+            $query->where('role', $role);
+        }
+
+        // Apply sorting
+        switch ($sortBy) {
+            case 'created_at_asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $users = $query->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'users' => $users
+        ]);
+    }
+
+    /**
+     * Get a specific user by ID for admin
+     * 
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function adminShow($id)
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'شما دسترسی لازم برای این عملیات را ندارید'], 403);
+        }
+
+        $user = User::findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * Create a new user by admin
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function adminStore(Request $request)
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'شما دسترسی لازم برای این عملیات را ندارید'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'role' => 'required|in:user,admin',
+            'active' => 'boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'active' => $request->active ?? true,
+        ]);
+
+        // Initialize badges for new user
+        $this->badgeService->initializeBadges($user);
+
+        return response()->json([
+            'success' => true,
+            'user' => $user,
+        ], 201);
+    }
+
+    /**
+     * Update a user by admin
+     * 
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function adminUpdate(Request $request, $id)
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'شما دسترسی لازم برای این عملیات را ندارید'], 403);
+        }
+
+        $user = User::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|max:255',
+            'email' => 'string|email|max:255|unique:users,email,'.$id,
+            'role' => 'in:user,admin',
+            'active' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        // Update user data
+        if ($request->has('name')) $user->name = $request->name;
+        if ($request->has('email')) $user->email = $request->email;
+        if ($request->has('role')) $user->role = $request->role;
+        if ($request->has('active')) $user->active = $request->active;
+
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * Toggle user active status
+     * 
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function toggleStatus($id)
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'شما دسترسی لازم برای این عملیات را ندارید'], 403);
+        }
+
+        $user = User::findOrFail($id);
+        
+        // Don't allow deactivating yourself
+        if ($user->id === Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'شما نمی‌توانید وضعیت خود را تغییر دهید'
+            ], 403);
+        }
+
+        $user->active = !$user->active;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $user->active ? 'کاربر با موفقیت فعال شد' : 'کاربر با موفقیت غیرفعال شد',
+            'user' => $user
+        ]);
     }
 
 }

@@ -42,6 +42,12 @@
                 <span>مدیریت مقالات</span>
               </RouterLink>
             </li>
+            <li class="admin-menu-item">
+              <RouterLink to="/admin/users" class="admin-menu-link" active-class="active">
+                <font-awesome-icon icon="fa-solid fa-users" />
+                <span>مدیریت کاربران</span>
+              </RouterLink>
+            </li>
             <!-- Add other admin menu items as needed -->
           </ul>
         </nav>
