@@ -1,87 +1,92 @@
 <template>
-  <div v-if="show" class="pagination">
+  <div v-if="shouldShowPagination" class="pagination">
     <button 
-      class="pagination-button" 
-      :disabled="currentPage === 1" 
-      @click="$emit('change-page', currentPage - 1)"
+      :disabled="pagination.current_page === 1" 
+      @click="$emit('page-change', pagination.current_page - 1)"
+      class="pagination-button"
     >
-      <font-awesome-icon icon="fa-solid fa-chevron-right" />
+      قبلی
     </button>
     
-    <span class="page-info">
-      صفحه {{ currentPage }} از {{ totalPages }}
-    </span>
+    <span class="page-info">صفحه {{ pagination.current_page }} از {{ pagination.last_page }}</span>
     
     <button 
-      class="pagination-button" 
-      :disabled="currentPage === totalPages" 
-      @click="$emit('change-page', currentPage + 1)"
+      :disabled="pagination.current_page === pagination.last_page" 
+      @click="$emit('page-change', pagination.current_page + 1)"
+      class="pagination-button"
     >
-      <font-awesome-icon icon="fa-solid fa-chevron-left" />
+      بعدی
     </button>
   </div>
 </template>
 
 <script>
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-
-// Add icons to the library
-library.add(faChevronRight, faChevronLeft);
-
 export default {
-  name: 'PaginationControls',
+  name: 'AdminPagination',
   props: {
-    currentPage: {
-      type: Number,
-      required: true
-    },
-    totalPages: {
-      type: Number,
-      required: true
-    },
-    show: {
-      type: Boolean,
-      default: true
+    pagination: {
+      type: Object,
+      required: true,
+      default: () => ({
+        current_page: 1,
+        last_page: 1,
+        total: 0
+      }),
+      validator: (value) => {
+        if (!value) return false
+        return 'current_page' in value &&
+               'last_page' in value &&
+               'total' in value
+      }
     }
-  }
-};
+  },
+  computed: {
+    shouldShowPagination() {
+      return this.pagination && 
+             this.pagination.last_page && 
+             this.pagination.last_page > 1
+    }
+  },
+  emits: ['page-change']
+}
 </script>
 
 <style scoped>
 .pagination {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
+  align-items: center;
+  margin-top: 20px;
+  gap: 16px;
+  padding: 16px;
 }
 
 .pagination-button {
-  border: 1px solid #ddd;
-  background-color: white;
+  background-color: #A79277;
+  color: white;
+  border: none;
+  padding: 8px 16px;
   border-radius: 4px;
-  padding: 0.5rem 0.75rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: background-color 0.2s;
+  font-family: inherit;
 }
 
 .pagination-button:disabled {
-  opacity: 0.5;
+  background-color: #d1d1d1;
   cursor: not-allowed;
 }
 
+.pagination-button:not(:disabled):hover {
+  background-color: #8a7660;
+}
+
 .page-info {
-  font-size: 0.95rem;
   color: #666;
 }
 
-/* Dark mode styles */
-body.dark-mode .pagination-button {
-  background-color: #333;
-  border-color: #444;
-  color: #eee;
+/* Dark mode */
+:deep(body.dark-mode) .page-info {
+  color: #ddd;
 }
 </style> 

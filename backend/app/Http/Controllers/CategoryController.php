@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -12,50 +11,35 @@ class CategoryController extends Controller
 {
     /**
      * Display a listing of the categories.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $categories = Category::with('parent')->get();
-        
-        return response()->json([
-            'success' => true,
-            'categories' => $categories
-        ]);
+        $categories = Category::all();
+        return response()->json($categories);
     }
 
     /**
      * Store a newly created category in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:categories',
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:categories',
             'description' => 'nullable|string',
-            'parent_id' => 'nullable|exists:categories,id',
+            'parent_id' => 'nullable|exists:categories,id'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        // Generate slug from name
+        $validated['slug'] = $this->generateUniqueSlug($validated['name']);
 
-        $data = $validator->validated();
-        
-        // Generate slug if not provided
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['name']);
-        }
+        $category = Category::create($validated);
 
-        $category = Category::create($data);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'دسته‌بندی با موفقیت ایجاد شد',
-            'category' => $category
-        ], 201);
+        return response()->json($category, 201);
     }
 
     /**
@@ -73,13 +57,16 @@ class CategoryController extends Controller
 
     /**
      * Update the specified category in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Category  $category
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Category $category)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'slug' => [
-                'nullable',
+        $validated = $request->validate([
+            'name' => [
+                'required',
                 'string',
                 'max:255',
                 Rule::unique('categories')->ignore($category->id),
@@ -89,62 +76,59 @@ class CategoryController extends Controller
                 'nullable',
                 'exists:categories,id',
                 function ($attribute, $value, $fail) use ($category) {
-                    if ($value == $category->id) {
-                        $fail('دسته‌بندی نمی‌تواند والد خود باشد.');
+                    if ($value === $category->id) {
+                        $fail('A category cannot be its own parent.');
                     }
                 },
             ],
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+        // Update slug if name has changed
+        if ($request->name !== $category->name) {
+            $validated['slug'] = $this->generateUniqueSlug($request->name);
         }
 
-        $data = $validator->validated();
-        
-        // Generate slug if not provided
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['name']);
-        }
+        $category->update($validated);
 
-        $category->update($data);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'دسته‌بندی با موفقیت بروزرسانی شد',
-            'category' => $category
-        ]);
+        return response()->json($category);
     }
 
     /**
      * Remove the specified category from storage.
+     *
+     * @param  \App\Models\Category  $category
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Category $category)
     {
-        // Check if category has posts
-        if ($category->posts()->count() > 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'این دسته‌بندی دارای مقالات است و قابل حذف نیست'
-            ], 422);
-        }
-        
         // Check if category has children
-        if ($category->children()->count() > 0) {
+        if ($category->children()->exists()) {
             return response()->json([
-                'success' => false,
-                'message' => 'این دسته‌بندی دارای زیردسته‌بندی است و قابل حذف نیست'
+                'message' => 'Cannot delete category with subcategories. Please delete subcategories first.'
             ], 422);
         }
-        
+
         $category->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'دسته‌بندی با موفقیت حذف شد'
-        ]);
+        return response()->json(null, 204);
+    }
+
+    /**
+     * Generate a unique slug from the given name.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    private function generateUniqueSlug($name)
+    {
+        $slug = Str::slug($name);
+        $count = 2;
+
+        while (Category::where('slug', $slug)->exists()) {
+            $slug = Str::slug($name) . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
     }
 } 

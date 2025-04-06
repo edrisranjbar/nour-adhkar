@@ -19,7 +19,7 @@ class Category extends Model
         'name',
         'slug',
         'description',
-        'parent_id',
+        'parent_id'
     ];
 
     /**
@@ -63,7 +63,7 @@ class Category extends Model
     }
 
     /**
-     * Get the posts for the category.
+     * Get the blog posts that belong to this category.
      */
     public function posts()
     {

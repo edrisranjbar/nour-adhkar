@@ -25,10 +25,12 @@
     />
     
     <PaginationControls 
-      :current-page="pagination.currentPage"
-      :total-pages="pagination.totalPages"
-      :show="users.length && pagination.totalPages > 1"
-      @change-page="changePage"
+      :pagination="{
+        current_page: pagination.current_page,
+        last_page: pagination.last_page,
+        total: pagination.total
+      }"
+      @page-change="changePage"
     />
     
     <UserEditModal 
@@ -79,9 +81,10 @@ export default {
       roleFilter: '',
       sortBy: 'created_at_desc',
       pagination: {
-        currentPage: 1,
-        totalPages: 1,
-        perPage: 10
+        current_page: 1,
+        last_page: 1,
+        per_page: 10,
+        total: 0
       },
       showEditModal: false,
       showCreateModal: false,
@@ -129,8 +132,8 @@ export default {
     async fetchUsers() {
       this.loading = true;
       console.log('Fetching users with params:', {
-        page: this.pagination.currentPage,
-        per_page: this.pagination.perPage,
+        page: this.pagination.current_page,
+        per_page: this.pagination.per_page,
         search: this.searchQuery,
         role: this.roleFilter,
         sort: this.sortBy
@@ -139,8 +142,8 @@ export default {
       try {
         const response = await axios.get(`${BASE_API_URL}/admin/users`, {
           params: {
-            page: this.pagination.currentPage,
-            per_page: this.pagination.perPage,
+            page: this.pagination.current_page,
+            per_page: this.pagination.per_page,
             search: this.searchQuery,
             role: this.roleFilter,
             sort: this.sortBy
@@ -154,8 +157,9 @@ export default {
         
         if (response.data.success) {
           this.users = response.data.users.data || [];
-          this.pagination.currentPage = response.data.users.current_page;
-          this.pagination.totalPages = response.data.users.last_page;
+          this.pagination.current_page = response.data.users.current_page;
+          this.pagination.last_page = response.data.users.last_page;
+          this.pagination.total = response.data.users.total;
           console.log('Users updated:', this.users.length);
         } else {
           this.showToast('خطا در دریافت لیست کاربران', 'error');
@@ -170,7 +174,7 @@ export default {
     
     handleSearch(query) {
       this.searchQuery = query;
-      this.pagination.currentPage = 1;
+      this.pagination.current_page = 1;
       this.fetchUsers();
     },
     
@@ -178,12 +182,12 @@ export default {
       this.searchQuery = filters.searchQuery;
       this.roleFilter = filters.roleFilter;
       this.sortBy = filters.sortBy;
-      this.pagination.currentPage = 1;
+      this.pagination.current_page = 1;
       this.fetchUsers();
     },
     
     changePage(page) {
-      this.pagination.currentPage = page;
+      this.pagination.current_page = page;
       this.fetchUsers();
     },
     

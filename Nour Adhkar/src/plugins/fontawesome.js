@@ -66,6 +66,7 @@ import {
     faCloudUploadAlt,
     faPlusCircle,
     faPen,
+    faTags,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -149,6 +150,7 @@ library.add(
     faSync,
     faCloudUploadAlt,
     faPlusCircle,
+    faTags,
 );
 
 export default FontAwesomeIcon; 

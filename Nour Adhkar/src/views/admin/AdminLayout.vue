@@ -43,6 +43,12 @@
               </RouterLink>
             </li>
             <li class="admin-menu-item">
+              <RouterLink to="/admin/categories" class="admin-menu-link" active-class="active">
+                <font-awesome-icon icon="fa-solid fa-tags" />
+                <span>دسته‌بندی‌ها</span>
+              </RouterLink>
+            </li>
+            <li class="admin-menu-item">
               <RouterLink to="/admin/users" class="admin-menu-link" active-class="active">
                 <font-awesome-icon icon="fa-solid fa-users" />
                 <span>مدیریت کاربران</span>
