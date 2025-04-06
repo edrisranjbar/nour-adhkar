@@ -46,13 +46,13 @@
               </td>
               <td>{{ post.published_at ? formatDate(post.published_at) : '—' }}</td>
               <td class="actions">
-                <RouterLink :to="`/admin/blog/edit/${post.id}`" class="edit-button">
-                  <font-awesome-icon icon="fa-solid fa-edit" />
+                <RouterLink :to="`/admin/blog/edit/${post.id}`" class="action-button edit-button" title="ویرایش">
+                  <font-awesome-icon icon="fa-solid fa-pen" />
                 </RouterLink>
-                <RouterLink :to="`/blog/${post.slug}`" target="_blank" class="view-button">
+                <RouterLink :to="`/blog/${post.slug}`" target="_blank" class="action-button view-button" title="مشاهده">
                   <font-awesome-icon icon="fa-solid fa-eye" />
                 </RouterLink>
-                <button @click="confirmDelete(post)" class="delete-button">
+                <button @click="confirmDelete(post)" class="action-button delete-button" title="حذف">
                   <font-awesome-icon icon="fa-solid fa-trash" />
                 </button>
               </td>
@@ -355,40 +355,29 @@ export default {
 
 .actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
 }
 
-.edit-button,
-.view-button,
-.delete-button {
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  cursor: pointer;
+.action-button {
+  background: none;
   border: none;
-  transition: opacity 0.2s;
+  padding: 0.4rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+  color: #666;
 }
 
-.edit-button {
-  background-color: #007bff;
+.view-button:hover {
+  color: #4a6fa5;
 }
 
-.view-button {
-  background-color: #6c757d;
+.edit-button:hover {
+  color: #A79277;
 }
 
-.delete-button {
-  background-color: #dc3545;
-}
-
-.edit-button:hover,
-.view-button:hover,
 .delete-button:hover {
-  opacity: 0.8;
+  color: #dc3545;
 }
 
 .no-posts {
