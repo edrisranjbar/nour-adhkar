@@ -3,62 +3,73 @@
     <header class="admin-header">
       <div class="admin-header-container">
         <div class="admin-brand">
-          <RouterLink to="/" class="admin-logo">
-            <img src="@/assets/icons/logo.png" alt="اذکار نور" class="logo-image">
+          <RouterLink to="/admin" class="admin-logo">
+            <img src="@/assets/icons/logo.png" alt="Logo" class="logo-image" />
             <span class="logo-text">اذکار نور</span>
+            <span class="admin-badge">مدیریت</span>
           </RouterLink>
-          <span class="admin-badge">پنل مدیریت</span>
         </div>
-        
         <div class="admin-user-info">
-          <div class="user-avatar" v-if="user">
-            <img v-if="user.avatar" :src="user.avatar" :alt="user.name">
-            <div v-else class="avatar-placeholder">{{ userInitials }}</div>
+          <div class="user-avatar">
+            <div v-if="!user?.avatar" class="avatar-placeholder">
+              {{ userInitials }}
+            </div>
+            <img v-else :src="user.avatar" :alt="user.name" />
           </div>
-          <div class="admin-user-name" v-if="user">
-            <span>{{ user.name }}</span>
-            <button @click="logout" class="logout-button">
+          <div class="admin-user-name">
+            <span class="user-name">{{ user?.name || 'Admin' }}</span>
+            <button class="logout-button" @click="logout">
               <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
-              خروج
+              <span>خروج</span>
             </button>
           </div>
         </div>
       </div>
     </header>
-    
     <div class="admin-content">
-      <aside class="admin-sidebar">
+      <aside class="admin-sidebar" :class="{ 'collapsed': isSidebarCollapsed }">
+        <div class="sidebar-header">
+          <button class="collapse-button" @click="toggleSidebar">
+            <font-awesome-icon :icon="isSidebarCollapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left'" />
+          </button>
+        </div>
         <nav class="admin-nav">
           <ul class="admin-menu">
             <li class="admin-menu-item">
               <RouterLink to="/admin" class="admin-menu-link" active-class="active" exact>
-                <font-awesome-icon icon="fa-solid fa-tachometer-alt" />
-                <span>پیشخوان</span>
+                <div class="menu-icon">
+                  <font-awesome-icon icon="fa-solid fa-tachometer-alt" />
+                </div>
+                <span class="menu-text">پیشخوان</span>
               </RouterLink>
             </li>
             <li class="admin-menu-item">
               <RouterLink to="/admin/blog" class="admin-menu-link" active-class="active">
-                <font-awesome-icon icon="fa-solid fa-newspaper" />
-                <span>مدیریت مقالات</span>
+                <div class="menu-icon">
+                  <font-awesome-icon icon="fa-solid fa-newspaper" />
+                </div>
+                <span class="menu-text">مدیریت مقالات</span>
               </RouterLink>
             </li>
             <li class="admin-menu-item">
               <RouterLink to="/admin/categories" class="admin-menu-link" active-class="active">
-                <font-awesome-icon icon="fa-solid fa-tags" />
-                <span>دسته‌بندی‌ها</span>
+                <div class="menu-icon">
+                  <font-awesome-icon icon="fa-solid fa-tags" />
+                </div>
+                <span class="menu-text">دسته‌بندی‌ها</span>
               </RouterLink>
             </li>
             <li class="admin-menu-item">
               <RouterLink to="/admin/users" class="admin-menu-link" active-class="active">
-                <font-awesome-icon icon="fa-solid fa-users" />
-                <span>مدیریت کاربران</span>
+                <div class="menu-icon">
+                  <font-awesome-icon icon="fa-solid fa-users" />
+                </div>
+                <span class="menu-text">مدیریت کاربران</span>
               </RouterLink>
             </li>
-            <!-- Add other admin menu items as needed -->
           </ul>
         </nav>
       </aside>
-      
       <main class="admin-main">
         <RouterView />
       </main>
@@ -71,6 +82,11 @@ import { mapState, mapActions } from 'vuex';
 
 export default {
   name: 'AdminLayout',
+  data() {
+    return {
+      isSidebarCollapsed: false
+    }
+  },
   computed: {
     ...mapState(['user']),
     userInitials() {
@@ -87,20 +103,20 @@ export default {
     async logout() {
       await this.logoutUser();
       this.$router.push('/');
+    },
+    toggleSidebar() {
+      this.isSidebarCollapsed = !this.isSidebarCollapsed;
     }
   },
   created() {
-    // Verify that user is admin, redirect if not
     if (!this.$store.getters.isAdmin) {
       this.$router.push('/');
     }
   },
   mounted() {
-    // Add the admin-page class to body when this component mounts
     document.body.classList.add('admin-page');
   },
   beforeUnmount() {
-    // Remove the admin-page class from body when this component unmounts
     document.body.classList.remove('admin-page');
   }
 }
@@ -131,6 +147,10 @@ export default {
   align-items: center;
 }
 
+.admin-content {
+  display: flex;
+  flex: 1;
+}
 .admin-brand {
   display: flex;
   align-items: center;
@@ -142,17 +162,24 @@ export default {
   text-decoration: none;
   color: white;
   margin-left: 1rem;
+  gap: 0.75rem;
 }
 
 .logo-image {
   width: 32px;
   height: 32px;
   margin-left: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.admin-logo:hover .logo-image {
+  transform: rotate(5deg);
 }
 
 .logo-text {
   font-size: 1.2rem;
   font-weight: 600;
+  margin-right: 0.5rem;
 }
 
 .admin-badge {
@@ -167,7 +194,7 @@ export default {
 .admin-user-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .user-avatar {
@@ -175,12 +202,7 @@ export default {
   height: 36px;
   border-radius: 50%;
   overflow: hidden;
-}
-
-.user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .avatar-placeholder {
@@ -192,14 +214,24 @@ export default {
   background-color: #A79277;
   color: white;
   font-size: 1.2rem;
-  padding-top: 0.4rem;
   font-weight: 600;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .admin-user-name {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.user-name {
+  font-weight: 500;
+  color: #fff;
 }
 
 .logout-button {
@@ -213,15 +245,39 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  transition: color 0.2s ease;
 }
 
 .logout-button:hover {
   color: white;
 }
 
-.admin-content {
-  display: flex;
-  flex: 1;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .admin-header-container {
+    padding: 0.5rem;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .admin-badge {
+    display: none;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .admin-user-info {
+    gap: 0.5rem;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 .admin-sidebar {
@@ -230,6 +286,34 @@ export default {
   color: white;
   border-right: 1px solid #444;
   overflow-y: auto;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.admin-sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar-header {
+  padding: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: 1px solid #444;
+}
+
+.collapse-button {
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.collapse-button:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .admin-nav {
@@ -254,16 +338,32 @@ export default {
   color: #ddd;
   text-decoration: none;
   transition: all 0.2s;
+  border-left: 3px solid transparent;
 }
 
 .admin-menu-link:hover {
   background-color: #444;
   color: white;
+  border-left-color: #A79277;
 }
 
 .admin-menu-link.active {
-  background-color: #A79277;
+  background-color: #444;
   color: white;
+  border-left-color: #A79277;
+}
+
+.menu-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.collapsed .menu-text {
+  display: none;
 }
 
 .admin-main {
@@ -282,24 +382,46 @@ body.dark-mode .admin-main {
   .admin-content {
     flex-direction: column;
   }
-  
+
   .admin-sidebar {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid #444;
   }
-  
+
+  .admin-sidebar.collapsed {
+    width: 100%;
+  }
+
+  .collapsed .menu-text {
+    display: block;
+  }
+
   .admin-menu {
     display: flex;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem;
   }
-  
+
   .admin-menu-item {
     margin-bottom: 0;
+    flex: 1;
+    min-width: 150px;
   }
-  
+
   .admin-menu-link {
-    white-space: nowrap;
+    justify-content: center;
+    text-align: center;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 4px;
+  }
+
+  .admin-menu-link:hover,
+  .admin-menu-link.active {
+    border-left-color: transparent;
+    border-bottom-color: #A79277;
   }
 }
-</style> 
+</style>
