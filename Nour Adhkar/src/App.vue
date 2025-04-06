@@ -11,6 +11,12 @@ export default {
       showSplash: false
     }
   },
+  computed: {
+    isAdminRoute() {
+      // Check if the current route path starts with /admin
+      return this.$route.path.startsWith('/admin')
+    }
+  },
   watch: {
     $route(to) {
       // Update meta tags when route changes
@@ -70,8 +76,8 @@ export default {
   <div class="app-container">
     <RouterView />
     
-    <!-- Bottom Navigation Bar - hidden when splash screen is shown -->
-    <div class="bottom-navigation" v-if="!showSplash">
+    <!-- Bottom Navigation Bar - hidden when splash screen is shown or on admin routes -->
+    <div class="bottom-navigation" v-if="!showSplash && !isAdminRoute">
       <div class="nav-container">
         <RouterLink to="/" class="nav-item" active-class="active">
           <font-awesome-icon icon="fa-solid fa-home" />
@@ -114,9 +120,19 @@ body {
   padding-bottom: 100px;
 }
 
+/* Remove bottom padding for admin pages */
+body.admin-page {
+  padding-bottom: 0 !important;
+}
+
 @media (max-width: 767px) {
   body {
     padding-bottom: 70px;
+  }
+  
+  /* Even for mobile, admin pages should have no bottom padding */
+  body.admin-page {
+    padding-bottom: 0 !important;
   }
 }
 

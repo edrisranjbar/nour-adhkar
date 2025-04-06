@@ -14,6 +14,6 @@ export default defineConfig({
     }
   },
   server: {
-    allowedHosts: ['adhkar.ir', 'www.adhkar.ir']
+    allowedHosts: ['adhkar.ir', 'www.adhkar.ir', 'localhost', '127.0.0.1', '85.198.10.144'],
   }
 })

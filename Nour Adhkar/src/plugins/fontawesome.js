@@ -51,7 +51,13 @@ import {
     faArrowRight,
     faLink,
     faNewspaper,
-    faCalendarAlt
+    faCalendarAlt,
+    faUserPen,
+    faTrash,
+    faPencil,
+    faPenToSquare,
+    faEye,
+    faEyeSlash
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -120,7 +126,13 @@ library.add(
     faArrowRight,
     faLink,
     faNewspaper,
-    faCalendarAlt
+    faCalendarAlt,
+    faUserPen,
+    faTrash,
+    faPencil,
+    faPenToSquare,
+    faEye,
+    faEyeSlash
 );
 
 export default FontAwesomeIcon; 

@@ -31,6 +31,12 @@
         <nav class="admin-nav">
           <ul class="admin-menu">
             <li class="admin-menu-item">
+              <RouterLink to="/admin" class="admin-menu-link" active-class="active" exact>
+                <font-awesome-icon icon="fa-solid fa-tachometer-alt" />
+                <span>پیشخوان</span>
+              </RouterLink>
+            </li>
+            <li class="admin-menu-item">
               <RouterLink to="/admin/blog" class="admin-menu-link" active-class="active">
                 <font-awesome-icon icon="fa-solid fa-newspaper" />
                 <span>مدیریت مقالات</span>
@@ -76,6 +82,14 @@ export default {
     if (!this.$store.getters.isAdmin) {
       this.$router.push('/');
     }
+  },
+  mounted() {
+    // Add the admin-page class to body when this component mounts
+    document.body.classList.add('admin-page');
+  },
+  beforeUnmount() {
+    // Remove the admin-page class from body when this component unmounts
+    document.body.classList.remove('admin-page');
   }
 }
 </script>
@@ -83,11 +97,14 @@ export default {
 <style scoped>
 .admin-layout {
   min-height: 100vh;
+  margin: 0;
   display: flex;
   flex-direction: column;
 }
 
 .admin-header {
+  margin-top: 0;
+  border-radius: 0;
   background-color: #262626;
   color: white;
   border-bottom: 1px solid #444;
@@ -96,8 +113,6 @@ export default {
 }
 
 .admin-header-container {
-  max-width: 1400px;
-  margin: 0 auto;
   padding: 0.75rem 1rem;
   display: flex;
   justify-content: space-between;
@@ -164,6 +179,8 @@ export default {
   justify-content: center;
   background-color: #A79277;
   color: white;
+  font-size: 1.2rem;
+  padding-top: 0.4rem;
   font-weight: 600;
 }
 
@@ -179,6 +196,7 @@ export default {
   color: #aaa;
   cursor: pointer;
   padding: 0;
+  font-family: inherit;
   font-size: 0.8rem;
   display: flex;
   align-items: center;
