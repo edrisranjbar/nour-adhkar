@@ -1,136 +1,19 @@
 <template>
   <div class="categories-manage">
-    <AppHeader 
-      title="مدیریت دسته‌بندی‌ها" 
-      description="در این بخش می‌توانید دسته‌بندی‌های سایت را مدیریت کنید."
-    />
+    <main class="container">
 
-    <!-- Actions Bar -->
-    <div class="mb-6 flex justify-between items-center">
-      <div class="flex items-center gap-4">
-        <div class="relative">
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="جستجو در دسته‌بندی‌ها..."
-            class="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white w-64"
-          />
-          <font-awesome-icon
-            icon="search"
-            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
-          />
-        </div>
+      <div class="admin-controls">
+        <h2>مدیریت دسته‌بندی‌ها</h2>
+        <RouterLink to="/admin/categories/new" class="new-category-button">
+          <font-awesome-icon icon="fa-solid fa-plus" />
+          ایجاد دسته‌بندی جدید
+        </RouterLink>
       </div>
 
-      <button
-        @click="openAddModal()"
-        class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-      >
-        <font-awesome-icon icon="plus" class="ml-2" />
-        افزودن دسته‌بندی جدید
-      </button>
-    </div>
-
-    <!-- Categories Grid Component -->
-    <CategoriesGrid
-      :categories="paginatedCategories"
-      :loading="loading"
-      :search-query="searchQuery"
-      :pagination="pagination"
-      @edit="openEditModal"
-      @delete="openDeleteModal"
-      @page-change="changePage"
-    />
-
-    <!-- Add/Edit Modal -->
-    <div v-if="showEditModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50 transition-opacity" @click="closeEditModal"></div>
-        
-        <div class="relative w-full max-w-md transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 p-6 text-right shadow-xl transition-all">
-          <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100 mb-4">
-            {{ editingCategory ? 'ویرایش دسته‌بندی' : 'افزودن دسته‌بندی جدید' }}
-          </h3>
-          
-          <form @submit.prevent="handleSubmit" class="rtl">
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  نام دسته‌بندی
-                </label>
-                <input
-                  v-model="form.name"
-                  type="text"
-                  required
-                  dir="rtl"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                />
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  توضیحات
-                </label>
-                <textarea
-                  v-model="form.description"
-                  rows="3"
-                  dir="rtl"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                ></textarea>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  دسته‌بندی والد
-                </label>
-                <select
-                  v-model="form.parent_id"
-                  dir="rtl"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                >
-                  <option :value="null">بدون والد</option>
-                  <option
-                    v-for="category in mainCategories"
-                    :key="category.id"
-                    :value="category.id"
-                    :disabled="editingCategory && category.id === editingCategory.id"
-                  >
-                    {{ category.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mt-6 flex justify-start gap-3">
-              <button
-                type="submit"
-                class="inline-flex justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-                :disabled="loading"
-              >
-                {{ editingCategory ? 'ذخیره تغییرات' : 'افزودن' }}
-              </button>
-              <button
-                type="button"
-                @click="closeEditModal"
-                class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-              >
-                انصراف
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <ConfirmationModal
-      :show="showDeleteModal"
-      title="حذف دسته‌بندی"
-      :message="deleteMessage"
-      confirm-text="حذف"
-      @confirm="handleDelete"
-      @close="closeDeleteModal"
-    />
+      <!-- Categories Grid Component -->
+      <CategoriesGrid :categories="paginatedCategories" :loading="loading" :search-query="searchQuery"
+        :pagination="pagination" @edit="openEditModal" @delete="openDeleteModal" @page-change="changePage" />
+    </main>
   </div>
 </template>
 
@@ -385,6 +268,36 @@ export default {
 </script>
 
 <style>
+
+.admin-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.admin-controls h2 {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.new-category-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #A79277;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.new-category-button:hover {
+  background-color: #8a7660;
+}
+
 .categories-manage {
   max-width: 1200px;
   margin: 0 auto;

@@ -18,7 +18,6 @@
             <th>نام</th>
             <th>شناسه</th>
             <th>دسته‌بندی والد</th>
-            <th>توضیحات</th>
             <th>عملیات</th>
           </tr>
         </thead>
@@ -27,7 +26,6 @@
             <td>{{ category.name }}</td>
             <td class="font-mono">{{ category.slug }}</td>
             <td>{{ getParentCategoryName(category.parent_id) }}</td>
-            <td>{{ category.description || '—' }}</td>
             <td class="actions">
               <button
                 @click="$emit('edit', category)"
