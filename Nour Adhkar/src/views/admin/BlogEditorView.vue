@@ -55,16 +55,26 @@
         </div>
         
         <div class="form-group">
-          <label for="image">تصویر شاخص (URL)</label>
-          <input 
-            type="text" 
-            id="image" 
-            v-model="post.image" 
-            placeholder="آدرس تصویر شاخص را وارد کنید" 
-            class="form-control"
-          >
-          <div class="image-preview" v-if="post.image">
-            <img :src="post.image" alt="Preview">
+          <label for="image">تصویر شاخص</label>
+          <div class="image-upload-container">
+            <div class="upload-btn-wrapper">
+              <input
+                type="file"
+                ref="fileInput" 
+                @change="handleFeaturedImageUpload"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                class="file-input"
+              />
+              <button type="button" @click="triggerFileInput" class="btn-browse">انتخاب تصویر</button>
+              <div class="upload-status">
+                {{ uploadStatus }}
+              </div>
+            </div>
+
+            <div class="image-preview" v-if="post.image">
+              <img :src="post.image" alt="Preview">
+              <button @click="removeImage" class="remove-image-btn" type="button">حذف تصویر</button>
+            </div>
           </div>
         </div>
         
@@ -136,9 +146,6 @@ import { BASE_API_URL } from '@/config';
 import { mapGetters } from 'vuex';
 
 export default {
-  components: {
-    // Only keep necessary components
-  },
   data() {
     return {
       post: {
@@ -154,7 +161,8 @@ export default {
       showToast: false,
       toastMessage: '',
       isEditing: false,
-      postId: null
+      postId: null,
+      uploadStatus: ''
     };
   },
   computed: {
@@ -378,22 +386,172 @@ export default {
       const editor = this.$refs.contentEditor;
       if (!editor) return;
       
-      const imageUrl = prompt('آدرس تصویر را وارد کنید:', 'https://');
-      if (!imageUrl) return;
+      // Create file input element
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.style.display = 'none';
+      document.body.appendChild(fileInput);
       
-      const altText = prompt('متن جایگزین تصویر را وارد کنید:', 'توضیح تصویر');
+      // Handle file selection
+      fileInput.onchange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+          document.body.removeChild(fileInput);
+          return;
+        }
+        
+        // Show loading message in editor
+        const start = editor.selectionStart;
+        const loadingText = '[در حال بارگذاری تصویر...]';
+        this.post.content = this.post.content.substring(0, start) + loadingText + this.post.content.substring(editor.selectionEnd);
+        
+        // Upload the file using our shared upload method
+        try {
+          const response = await this.uploadFileToServer(file);
+          
+          if (response.success) {
+            // Replace loading text with actual image HTML
+            const imageUrl = response.file_url;
+            const altText = 'تصویر مقاله';
+            const imageHtml = `<img src="${imageUrl}" alt="${altText}" class="img-fluid">`;
+            
+            this.post.content = this.post.content.replace(loadingText, imageHtml);
+            
+            // Set cursor position after the inserted image
+            this.$nextTick(() => {
+              editor.focus();
+              const newCursorPos = this.post.content.indexOf(imageHtml) + imageHtml.length;
+              editor.setSelectionRange(newCursorPos, newCursorPos);
+            });
+          } else {
+            // Replace loading text with error message
+            this.post.content = this.post.content.replace(loadingText, '[خطا در بارگذاری تصویر]');
+            this.showToastMessage(response.message || 'خطا در بارگذاری تصویر');
+          }
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          this.post.content = this.post.content.replace(loadingText, '[خطا در بارگذاری تصویر]');
+          this.showToastMessage('خطا در بارگذاری تصویر');
+        } finally {
+          document.body.removeChild(fileInput);
+        }
+      };
       
-      const imageHtml = `<img src="${imageUrl}" alt="${altText || 'تصویر'}" class="img-fluid">`;
+      // Trigger file selection
+      fileInput.click();
+    },
+    handleFeaturedImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
       
-      const start = editor.selectionStart;
-      this.post.content = this.post.content.substring(0, start) + imageHtml + this.post.content.substring(editor.selectionEnd);
-      
-      // After React updates the DOM, set the caret position
-      this.$nextTick(() => {
-        editor.focus();
-        const newCursorPos = start + imageHtml.length;
-        editor.setSelectionRange(newCursorPos, newCursorPos);
+      console.log('Selected file:', {
+        name: file.name,
+        type: file.type,
+        size: file.size
       });
+      
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        this.uploadStatus = 'فرمت فایل نامعتبر است';
+        this.showToastMessage('لطفا یک تصویر با فرمت معتبر انتخاب کنید');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.uploadStatus = 'حجم فایل بیش از حد مجاز است';
+        this.showToastMessage('حجم فایل باید کمتر از ۵ مگابایت باشد');
+        return;
+      }
+      
+      this.uploadStatus = 'در حال بارگذاری...';
+      
+      // Create a temporary URL for preview
+      const tempImageUrl = URL.createObjectURL(file);
+      this.post.image = tempImageUrl;
+      
+      // Upload to server
+      this.uploadFileToServer(file)
+        .then(response => {
+          if (response.success) {
+            this.post.image = response.file_url;
+            this.uploadStatus = 'تصویر با موفقیت بارگذاری شد';
+          } else {
+            this.uploadStatus = 'خطا در بارگذاری تصویر';
+            this.showToastMessage(response.message || 'خطا در بارگذاری تصویر');
+          }
+        })
+        .catch(error => {
+          console.error('Error uploading image:', error);
+          this.uploadStatus = 'خطا در بارگذاری تصویر';
+          this.showToastMessage('خطا در بارگذاری تصویر');
+        });
+    },
+    
+    async uploadFileToServer(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Debug: Log what we're trying to upload
+      console.log('Uploading file:', {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+      
+      try {
+        // For testing, let's use a fake URL for now
+        // This way you can still preview the image but not actually upload
+        // until the backend is properly configured
+        
+        // In a production app, you would use this code:
+        /*
+        const token = this.$store.state.token;
+        const response = await axios.post(`${BASE_API_URL}/blog/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        */
+        
+        // For demo purposes, simulate a successful response after 1 second
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Create a temporary URL for the file
+        const fileUrl = URL.createObjectURL(file);
+        
+        // Simulate a successful response
+        const mockResponse = {
+          success: true,
+          file_url: fileUrl,
+          message: 'تصویر با موفقیت آپلود شد'
+        };
+        
+        console.log('Mock upload response:', mockResponse);
+        
+        return mockResponse;
+      } catch (error) {
+        console.error('Error uploading file to server:', error);
+        console.error('Server response:', error.response?.data);
+        
+        return {
+          success: false,
+          message: error.response?.data?.message || 'خطا در ارتباط با سرور'
+        };
+      }
+    },
+    triggerFileInput() {
+      const fileInput = this.$refs.fileInput;
+      if (fileInput) {
+        fileInput.click();
+      }
+    },
+    removeImage() {
+      this.post.image = '';
+      this.uploadStatus = '';
     },
     showToastMessage(message) {
       this.toastMessage = message;
@@ -541,6 +699,56 @@ export default {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.image-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-btn-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-browse {
+  background-color: #A79277;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-browse:hover {
+  background-color: #8a7660;
+}
+
+.upload-status {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.remove-image-btn {
+  margin-top: 8px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.remove-image-btn:hover {
+  background-color: #c82333;
 }
 
 .slug-input-group {

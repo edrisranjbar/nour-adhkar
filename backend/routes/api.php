@@ -43,6 +43,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/blog', [BlogController::class, 'store']);
     Route::put('/blog/{id}', [BlogController::class, 'update']);
     Route::delete('/blog/{id}', [BlogController::class, 'destroy']);
+    
+    // File upload for blog
+    Route::post('/blog/upload', [BlogController::class, 'uploadFile']);
 });
 
 // Admin blog routes
