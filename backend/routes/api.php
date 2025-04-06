@@ -7,6 +7,7 @@ use App\Http\Controllers\AdhkarController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CategoryController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -35,21 +36,14 @@ Route::prefix('donations')->group(function () {
 Route::get('/blog', [BlogController::class, 'index']);
 Route::get('/blog/{slug}', [BlogController::class, 'show']);
 
-// Admin blog routes (protected)
-Route::middleware('auth:api')->group(function () {
-    // Existing auth routes...
-    
-    // Blog admin (should be restricted to admins in a real app)
+// Admin blog routes
+Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::post('/blog', [BlogController::class, 'store']);
     Route::put('/blog/{id}', [BlogController::class, 'update']);
     Route::delete('/blog/{id}', [BlogController::class, 'destroy']);
     
     // File upload for blog
     Route::post('/blog/upload', [BlogController::class, 'uploadFile']);
-});
-
-// Admin blog routes
-Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::get('/blog', [BlogController::class, 'adminIndex']);
     Route::get('/blog/{id}', [BlogController::class, 'adminShow']);
     
@@ -59,6 +53,12 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::post('/users', [AuthController::class, 'adminStore']);
     Route::put('/users/{id}', [AuthController::class, 'adminUpdate']);
     Route::patch('/users/{id}/toggle-status', [AuthController::class, 'toggleStatus']);
+
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::get('/categories/{category}', [CategoryController::class, 'show']);
+    Route::put('/categories/{category}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
 });
 
 Route::get('/blog/related/{id}', [BlogController::class, 'related']);

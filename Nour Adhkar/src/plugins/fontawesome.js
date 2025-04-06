@@ -63,6 +63,9 @@ import {
     faTachometerAlt,
     faBan,
     faSync,
+    faCloudUploadAlt,
+    faPlusCircle,
+    faPen,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -134,6 +137,7 @@ library.add(
     faCalendarAlt,
     faUserPen,
     faTrash,
+    faPen,
     faPencil,
     faPenToSquare,
     faEye,
@@ -143,6 +147,8 @@ library.add(
     faTachometerAlt,
     faBan,
     faSync,
+    faCloudUploadAlt,
+    faPlusCircle,
 );
 
 export default FontAwesomeIcon; 

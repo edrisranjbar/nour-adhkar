@@ -57,7 +57,7 @@
         <div class="form-group">
           <label for="image">تصویر شاخص</label>
           <ImageUploadField 
-            v-model="post.image"
+            v-model="post.featured_image"
             :upload-status="uploadStatus"
             @file-selected="handleFeaturedImageUpload"
             @image-removed="removeImage"
@@ -106,6 +106,37 @@
           </select>
         </div>
         
+        <div class="form-group">
+          <label for="categories">دسته‌بندی‌ها</label>
+          <div class="categories-selector">
+            <div v-if="loadingCategories" class="loading-categories">
+              <div class="loading-spinner"></div>
+              <span>در حال بارگذاری دسته‌بندی‌ها...</span>
+            </div>
+            <div v-else-if="categories.length === 0" class="no-categories">
+              <p>هیچ دسته‌بندی‌ای یافت نشد</p>
+              <RouterLink to="/admin/categories" class="create-category-link">ایجاد دسته‌بندی جدید</RouterLink>
+            </div>
+            <div v-else class="categories-list">
+              <div 
+                v-for="category in categories" 
+                :key="category.id" 
+                class="category-checkbox"
+                :class="{ 'has-parent': category.parent_id }"
+              >
+                <label class="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    :value="category.id" 
+                    v-model="selectedCategories"
+                  >
+                  <span>{{ category.name }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div class="form-group" v-if="post.status === 'published'">
           <label for="published_at">تاریخ انتشار</label>
           <input 
@@ -143,10 +174,14 @@ export default {
         slug: '',
         excerpt: '',
         content: '',
-        image: '',
+        featured_image: null,
         status: 'draft',
-        published_at: null
+        published_at: null,
+        categories: []
       },
+      categories: [],
+      selectedCategories: [],
+      loadingCategories: false,
       saving: false,
       showToast: false,
       toastMessage: '',
@@ -177,6 +212,7 @@ export default {
       this.postId = postId;
       this.fetchPost(postId);
     }
+    this.fetchCategories();
   },
   methods: {
     async fetchPost(id) {
@@ -198,65 +234,63 @@ export default {
         this.showToastMessage('خطا در ارتباط با سرور');
       }
     },
-    async saveDraft() {
-      await this.savePost('draft');
-    },
-    async publishPost() {
-      await this.savePost('published');
-    },
-    async savePost(status) {
-      if (!this.post.title) {
-        this.showToastMessage('لطفا عنوان مقاله را وارد کنید');
-        return;
-      }
-      
-      if (!this.post.content) {
-        this.showToastMessage('لطفا متن مقاله را وارد کنید');
-        return;
-      }
-      
-      if (!this.post.slug && status === 'published') {
-        // Auto-generate slug if publishing and no slug provided
-        this.generateSlug();
-      }
-      
-      // If no image is provided, use the placeholder for server storage
-      const postData = { ...this.post };
-      if (!postData.image && status === 'published') {
-        postData.image = this.placeholderSvg;
-      }
-      
-      this.saving = true;
-      this.post.status = status;
-      postData.status = status;
-      
-      // If publishing for the first time without a date, set to now
-      if (status === 'published' && !this.post.published_at) {
-        this.post.published_at = new Date().toISOString();
-        postData.published_at = this.post.published_at;
-      }
+    async fetchCategories() {
+      this.loadingCategories = true;
       
       try {
         const token = this.$store.state.token;
-        let response;
-        
-        if (this.isEditing) {
-          response = await axios.put(`${BASE_API_URL}/blog/${this.postId}`, postData, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-        } else {
-          response = await axios.post(`${BASE_API_URL}/blog`, postData, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-        }
+        const response = await axios.get(`${BASE_API_URL}/admin/categories`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         
         if (response.data.success) {
-          const statusText = status === 'published' ? 'منتشر' : 'ذخیره';
-          this.showToastMessage(`مقاله با موفقیت ${statusText} شد`);
+          this.categories = response.data.categories;
+          
+          // If editing, set selected categories
+          if (this.isEditing && this.post.categories) {
+            this.selectedCategories = this.post.categories.map(category => category.id);
+          }
+        } else {
+          this.showToastMessage('خطا در دریافت لیست دسته‌بندی‌ها');
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        this.showToastMessage('خطا در دریافت لیست دسته‌بندی‌ها');
+      } finally {
+        this.loadingCategories = false;
+      }
+    },
+    async saveDraft() {
+      try {
+        const formData = new FormData();
+        Object.keys(this.post).forEach(key => {
+          if (key === 'featured_image' && this.post[key]) {
+            formData.append('featured_image', this.post[key]);
+          } else if (key !== 'featured_image') {
+            formData.append(key, this.post[key]);
+          }
+        });
+        
+        // Add selected categories
+        formData.append('category_ids', JSON.stringify(this.selectedCategories));
+        
+        const token = this.$store.state.token;
+        const endpoint = `${BASE_API_URL}/admin/blog${this.isEditing ? `/${this.postId}/draft` : '/draft'}`;
+        
+        const response = await axios({
+          method: this.isEditing ? 'put' : 'post',
+          url: endpoint,
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (response.data.success) {
+          this.showToastMessage(this.isEditing ? 'پیش‌نویس با موفقیت بروزرسانی شد' : 'پیش‌نویس با موفقیت ذخیره شد');
           
           if (!this.isEditing) {
             // Redirect to edit mode if created new post
@@ -265,13 +299,55 @@ export default {
             }, 1000);
           }
         } else {
-          this.showToastMessage('خطا در ذخیره مقاله');
+          this.showToastMessage(this.isEditing ? 'خطا در بروزرسانی پیش‌نویس' : 'خطا در ذخیره پیش‌نویس');
         }
       } catch (error) {
         console.error('Error saving post:', error);
-        this.showToastMessage('خطا در ارتباط با سرور');
-      } finally {
-        this.saving = false;
+        this.showToastMessage(this.isEditing ? 'خطا در بروزرسانی پیش‌نویس' : 'خطا در ذخیره پیش‌نویس');
+      }
+    },
+    async publishPost() {
+      try {
+        const formData = new FormData();
+        Object.keys(this.post).forEach(key => {
+          if (key === 'featured_image' && this.post[key]) {
+            formData.append('featured_image', this.post[key]);
+          } else if (key !== 'featured_image') {
+            formData.append(key, this.post[key]);
+          }
+        });
+        
+        // Add selected categories
+        formData.append('category_ids', JSON.stringify(this.selectedCategories));
+        
+        const token = this.$store.state.token;
+        const endpoint = `${BASE_API_URL}/admin/blog${this.isEditing ? `/${this.postId}` : ''}`;
+        
+        const response = await axios({
+          method: this.isEditing ? 'put' : 'post',
+          url: endpoint,
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (response.data.success) {
+          this.showToastMessage(this.isEditing ? 'مقاله با موفقیت بروزرسانی شد' : 'مقاله با موفقیت منتشر شد');
+          
+          if (!this.isEditing) {
+            // Redirect to edit mode if created new post
+            setTimeout(() => {
+              this.$router.push(`/admin/blog/edit/${response.data.post.id}`);
+            }, 1000);
+          }
+        } else {
+          this.showToastMessage(this.isEditing ? 'خطا در بروزرسانی مقاله' : 'خطا در انتشار مقاله');
+        }
+      } catch (error) {
+        console.error('Error publishing post:', error);
+        this.showToastMessage(this.isEditing ? 'خطا در بروزرسانی مقاله' : 'خطا در انتشار مقاله');
       }
     },
     generateSlug() {
@@ -440,8 +516,7 @@ export default {
       // Trigger file selection
       fileInput.click();
     },
-    handleFeaturedImageUpload(event) {
-      const file = event.target.files[0];
+    handleFeaturedImageUpload(file) {
       if (!file) return;
       
       console.log('Selected file:', {
@@ -469,13 +544,13 @@ export default {
       
       // Create a temporary URL for preview
       const tempImageUrl = URL.createObjectURL(file);
-      this.post.image = tempImageUrl;
+      this.post.featured_image = tempImageUrl;
       
       // Upload to server
       this.uploadFileToServer(file)
         .then(response => {
           if (response.success) {
-            this.post.image = response.file_url;
+            this.post.featured_image = response.file_url;
             this.uploadStatus = 'تصویر با موفقیت بارگذاری شد';
           } else {
             this.uploadStatus = 'خطا در بارگذاری تصویر';
@@ -549,7 +624,7 @@ export default {
       }
     },
     removeImage() {
-      this.post.image = '';
+      this.post.featured_image = null;
       this.uploadStatus = '';
     },
     showToastMessage(message) {
@@ -987,5 +1062,108 @@ body.dark-mode .save-draft-button:hover {
 .generate-slug-btn,
 .remove-image-btn {
   font-family: inherit;
+}
+
+.categories-selector {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.loading-categories {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: #6c757d;
+}
+
+.loading-spinner {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 3px solid #A79277;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.no-categories {
+  text-align: center;
+  padding: 1rem;
+  color: #6c757d;
+}
+
+.create-category-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: #A79277;
+  text-decoration: none;
+}
+
+.create-category-link:hover {
+  text-decoration: underline;
+}
+
+.categories-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.category-checkbox {
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.category-checkbox.has-parent {
+  margin-right: 1.5rem;
+  position: relative;
+}
+
+.category-checkbox.has-parent::before {
+  content: '';
+  position: absolute;
+  right: -1rem;
+  top: 50%;
+  width: 0.75rem;
+  height: 1px;
+  background-color: #ced4da;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  margin-left: 8px;
+}
+
+/* Dark mode styles */
+body.dark-mode .categories-selector {
+  background-color: #444;
+  border-color: #555;
+}
+
+body.dark-mode .category-checkbox {
+  background-color: #555;
+}
+
+body.dark-mode .category-checkbox.has-parent::before {
+  background-color: #777;
+}
+
+body.dark-mode .create-category-link {
+  color: #C5B192;
 }
 </style> 
