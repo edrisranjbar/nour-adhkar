@@ -599,8 +599,17 @@ body.dark-mode .error-message {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .container {
+    padding: 0;
+    margin-top: 0;
+  }
+  
   .post {
     padding: 20px;
+    border-radius: 0;
+    border-top: 0;
+    box-shadow: none;
+    margin-top: 0;
   }
   
   .post-header h1 {
@@ -616,6 +625,11 @@ body.dark-mode .error-message {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+  
+  .related-posts {
+    margin-top: 30px;
+    padding: 0 15px 30px 15px;
   }
   
   .related-posts-grid {

@@ -290,6 +290,12 @@ body.dark-mode .stat-item:hover {
     align-items: center;
   }
   
+  .app-logo {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 10px;
+  }
+  
   .header-right {
     width: 100%;
     justify-content: center;
@@ -328,8 +334,8 @@ body.dark-mode .stat-item:hover {
   }
   
   .app-logo {
-    width: 40px;
-    height: 40px;
+    width: 65px;
+    height: 65px;
   }
   
   h1 {
