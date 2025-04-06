@@ -2,7 +2,7 @@
   <div class="users-manage">
     <div class="admin-controls">
       <h1 class="page-title">مدیریت کاربران</h1>
-      <button class="new-user-button" @click="createUser">
+      <button class="new-user-button" @click="openCreateModal">
         <font-awesome-icon icon="fa-solid fa-plus" />
         <span>کاربر جدید</span>
       </button>
@@ -39,6 +39,13 @@
       @save="saveUser"
     />
     
+    <UserCreateModal
+      :show="showCreateModal"
+      :saving="saving"
+      @close="closeCreateModal"
+      @save="createNewUser"
+    />
+    
     <!-- Toast Notification -->
     <div v-if="toast.show" :class="['toast', `toast-${toast.type}`]">
       {{ toast.message }}
@@ -53,6 +60,7 @@ import UserFilters from '@/components/Admin/UserFilters.vue';
 import UserTable from '@/components/Admin/UserTable.vue';
 import PaginationControls from '@/components/Admin/Pagination.vue';
 import UserEditModal from '@/components/Admin/UserEditModal.vue';
+import UserCreateModal from '@/components/Admin/UserCreateModal.vue';
 
 export default {
   name: 'UsersManageView',
@@ -60,7 +68,8 @@ export default {
     UserFilters,
     UserTable,
     PaginationControls,
-    UserEditModal
+    UserEditModal,
+    UserCreateModal
   },
   data() {
     return {
@@ -75,6 +84,7 @@ export default {
         perPage: 10
       },
       showEditModal: false,
+      showCreateModal: false,
       editedUser: {
         id: null,
         name: '',
@@ -198,6 +208,57 @@ export default {
       this.saving = false;
     },
     
+    openCreateModal() {
+      this.showCreateModal = true;
+    },
+    
+    closeCreateModal() {
+      this.showCreateModal = false;
+    },
+    
+    async createNewUser(user) {
+      this.saving = true;
+      console.log('Creating new user:', user);
+      
+      try {
+        const response = await axios.post(
+          `${BASE_API_URL}/admin/users`, 
+          user,
+          {
+            headers: {
+              Authorization: `Bearer ${this.token}`
+            }
+          }
+        );
+        
+        console.log('Create response:', response);
+        
+        if (response && response.data && response.data.success) {
+          this.showToast('کاربر جدید با موفقیت ایجاد شد', 'success');
+          
+          // Close the modal first to provide better UX
+          this.closeCreateModal();
+          
+          // Then fetch the updated data
+          await this.fetchUsers();
+        } else {
+          // Show error message
+          const errorMessage = 'خطا در ایجاد کاربر جدید';
+          this.showToast(errorMessage, 'error');
+        }
+      } catch (error) {
+        console.error('Error creating user:', error);
+        
+        // Show more specific error message if available
+        const errorMessage = error.response?.data?.errors || 'خطا در ایجاد کاربر جدید';
+        this.showToast(errorMessage, 'error');
+        
+        // Don't close the modal on error so user can fix the issue
+      } finally {
+        this.saving = false;
+      }
+    },
+    
     async saveUser(user) {
       this.saving = true;
       console.log('Saving user:', user);
@@ -280,10 +341,6 @@ export default {
         console.error('Error toggling user status:', error);
         this.showToast(error.response?.data?.message || 'خطا در تغییر وضعیت کاربر', 'error');
       }
-    },
-    
-    createUser() {
-      this.$router.push('/admin/users/create');
     }
   }
 };

@@ -139,6 +139,7 @@ body {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     transition: border-color var(--transition-fast);
+    font-family: inherit;
 }
 
 .form-control:focus {

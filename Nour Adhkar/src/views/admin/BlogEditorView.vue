@@ -56,48 +56,12 @@
         
         <div class="form-group">
           <label for="image">تصویر شاخص</label>
-          <div class="image-upload-container">
-            <div class="upload-btn-wrapper">
-              <input
-                type="file"
-                ref="fileInput" 
-                @change="handleFeaturedImageUpload"
-                accept="image/jpeg,image/png,image/gif,image/webp"
-                class="file-input"
-              />
-              <button type="button" @click="triggerFileInput" class="btn-browse">انتخاب تصویر</button>
-              <div class="upload-status">
-                {{ uploadStatus }}
-              </div>
-            </div>
-
-            <div class="image-preview" v-if="post.image">
-              <img :src="post.image" alt="Preview">
-              <button @click="removeImage" class="remove-image-btn" type="button">حذف تصویر</button>
-            </div>
-            <div class="image-preview placeholder-preview" v-else>
-              <svg width="100%" height="170" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
-                <!-- Background -->
-                <rect width="400" height="200" fill="#f8f8f8"/>
-                <rect width="400" height="26" fill="#A79277" y="0"/>
-                <!-- Decorative elements -->
-                <path d="M0,26 L400,26 L400,200 L0,200 Z" fill="#f8f8f8"/>
-                <rect x="40" y="60" width="320" height="80" rx="4" fill="#f0f0f0" stroke="#e0e0e0" stroke-width="1"/>
-                <!-- Image icon -->
-                <path d="M170,70 L230,70 L230,130 L170,130 Z" fill="#e9e9e9" stroke="#d5d5d5" stroke-width="1"/>
-                <circle cx="190" cy="90" r="8" fill="#d0d0d0"/>
-                <path d="M175,125 L225,125 L208,95 L195,110 L185,105 Z" fill="#d0d0d0"/>
-                <!-- Text lines -->
-                <rect x="100" y="150" width="200" height="10" rx="2" fill="#e0e0e0"/>
-                <rect x="150" y="170" width="100" height="6" rx="2" fill="#e0e0e0"/>
-                <!-- Islamic decorative pattern -->
-                <path d="M20,10 L30,18 L20,18 Z" fill="#f0f0f0" opacity="0.5"/>
-                <path d="M380,10 L370,18 L380,18 Z" fill="#f0f0f0" opacity="0.5"/>
-                <text x="200" y="18" text-anchor="middle" fill="#ffffff" font-size="13" font-family="Arial, sans-serif">تصویر مقاله</text>
-              </svg>
-              <div class="placeholder-text">پیش‌نمایش تصویر</div>
-            </div>
-          </div>
+          <ImageUploadField 
+            v-model="post.image"
+            :upload-status="uploadStatus"
+            @file-selected="handleFeaturedImageUpload"
+            @image-removed="removeImage"
+          />
         </div>
         
         <div class="form-group">
@@ -166,8 +130,12 @@
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
 import { mapGetters } from 'vuex';
+import ImageUploadField from '@/components/Admin/ImageUploadField.vue';
 
 export default {
+  components: {
+    ImageUploadField
+  },
   data() {
     return {
       post: {
@@ -1010,5 +978,14 @@ body.dark-mode .save-draft-button:hover {
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.save-draft-button,
+.publish-button,
+.cancel-button,
+.toolbar-btn,
+.generate-slug-btn,
+.remove-image-btn {
+  font-family: inherit;
 }
 </style> 
