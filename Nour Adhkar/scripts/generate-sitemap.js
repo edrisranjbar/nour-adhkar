@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Site URL
-const siteUrl = 'https://nour-adhkar.ir';
+const siteUrl = 'https://adhkar.ir';
 
 // Define routes manually
 const routes = [
