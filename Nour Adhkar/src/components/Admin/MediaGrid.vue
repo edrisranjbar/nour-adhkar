@@ -14,19 +14,21 @@
         @click="toggleSelection(item.id)"
       >
         <div class="selection-indicator" v-if="selectable">
-          <i class="fas" :class="selectedItems.includes(item.id) ? 'fa-check-circle' : 'fa-circle'"></i>
+          <font-awesome-icon 
+            :icon="selectedItems.includes(item.id) ? 'fa-solid fa-check-circle' : 'fa-solid fa-circle'" 
+          />
         </div>
         
         <div class="media-preview">
           <img v-if="isImage(item.type)" :src="item.url" :alt="item.name" @load="onImageLoad" />
           <div v-else-if="isAudio(item.type)" class="audio-preview">
-            <i class="fas fa-music"></i>
+            <font-awesome-icon icon="fa-solid fa-music" />
             <audio controls>
               <source :src="item.url" :type="item.type">
             </audio>
           </div>
           <div v-else class="file-preview">
-            <i class="fas fa-file"></i>
+            <font-awesome-icon icon="fa-solid fa-file" />
           </div>
         </div>
         
@@ -37,20 +39,20 @@
         
         <div class="media-actions" @click.stop>
           <button @click="copyUrl(item.url)" title="کپی لینک">
-            <i class="fas fa-link"></i>
+            <font-awesome-icon icon="fa-solid fa-link" />
           </button>
           <button @click="$emit('edit', item)" title="ویرایش">
-            <i class="fas fa-pen"></i>
+            <font-awesome-icon icon="fa-solid fa-pen" />
           </button>
           <button @click="$emit('delete', item.id)" title="حذف">
-            <i class="fas fa-trash"></i>
+            <font-awesome-icon icon="fa-solid fa-trash" />
           </button>
         </div>
       </div>
     </div>
     
     <div v-else class="no-media">
-      <i class="fas fa-images"></i>
+      <font-awesome-icon icon="fa-solid fa-images" />
       <p>هیچ فایلی یافت نشد</p>
     </div>
   </div>
