@@ -30,6 +30,12 @@ const BlogManageView = () => import('../views/admin/BlogManageView.vue');
 const BlogEditorView = () => import('../views/admin/BlogEditorView.vue');
 const UsersManageView = () => import('../views/admin/UsersManageView.vue');
 const CategoriesManageView = () => import('../views/admin/CategoriesManageView.vue');
+// New admin components
+const MediaManageView = () => import('../views/admin/MediaManageView.vue');
+const PermissionsManageView = () => import('../views/admin/PermissionsManageView.vue');
+const SettingsManageView = () => import('../views/admin/SettingsManageView.vue');
+const BackupManageView = () => import('../views/admin/BackupManageView.vue');
+const LogsManageView = () => import('../views/admin/LogsManageView.vue');
 
 // Public routes that everyone can access
 export const publicRoutes = [
@@ -330,6 +336,52 @@ export const adminRoutes = [
         component: UsersManageView,
         meta: {
           title: 'مدیریت کاربران | اذکار نور',
+          noindex: true
+        }
+      },
+      // New routes for the additional sections
+      {
+        path: 'media',
+        name: 'admin-media',
+        component: MediaManageView,
+        meta: {
+          title: 'مدیریت رسانه‌ها | اذکار نور',
+          noindex: true
+        }
+      },
+      {
+        path: 'permissions',
+        name: 'admin-permissions',
+        component: PermissionsManageView,
+        meta: {
+          title: 'مدیریت دسترسی‌ها | اذکار نور',
+          noindex: true
+        }
+      },
+      {
+        path: 'settings',
+        name: 'admin-settings',
+        component: SettingsManageView,
+        meta: {
+          title: 'تنظیمات سیستم | اذکار نور',
+          noindex: true
+        }
+      },
+      {
+        path: 'backup',
+        name: 'admin-backup',
+        component: BackupManageView,
+        meta: {
+          title: 'پشتیبان‌گیری | اذکار نور',
+          noindex: true
+        }
+      },
+      {
+        path: 'logs',
+        name: 'admin-logs',
+        component: LogsManageView,
+        meta: {
+          title: 'گزارش‌ها و لاگ‌ها | اذکار نور',
           noindex: true
         }
       }

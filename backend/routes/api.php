@@ -8,6 +8,7 @@ use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\MediaController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -59,6 +60,14 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::get('/categories/{category}', [CategoryController::class, 'show']);
     Route::put('/categories/{category}', [CategoryController::class, 'update']);
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+
+    // Media management routes
+    Route::get('/media', [MediaController::class, 'index']);
+    Route::get('/media/{id}', [MediaController::class, 'show']);
+    Route::post('/media/upload', [MediaController::class, 'upload']);
+    Route::put('/media/{id}', [MediaController::class, 'update']);
+    Route::delete('/media/{id}', [MediaController::class, 'destroy']);
+    Route::post('/media/delete-multiple', [MediaController::class, 'deleteMultiple']);
 });
 
 Route::get('/blog/related/{id}', [BlogController::class, 'related']);

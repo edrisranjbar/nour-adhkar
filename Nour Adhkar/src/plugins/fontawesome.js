@@ -67,6 +67,32 @@ import {
     faPlusCircle,
     faPen,
     faTags,
+    // Media management icons
+    faMusic,
+    faFile,
+    faFolder,
+    faFolderOpen,
+    faUpload,
+    // Add new icons for sidebar categories
+    faFileAlt,
+    faUserShield,
+    faCogs,
+    faImages,
+    faSlidersH,
+    faDatabase,
+    faClipboardList,
+    faChevronDown,
+    // Additional media management icons
+    faCircle,
+    faCheckDouble,
+    faArrowLeft,
+    faCheckSquare,
+    faCopy,
+    faSave,
+    faExclamationTriangle,
+    faQuestionCircle,
+    faImage,
+    faTimesCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -151,6 +177,32 @@ library.add(
     faCloudUploadAlt,
     faPlusCircle,
     faTags,
+    // Media management icons
+    faMusic,
+    faFile,
+    faFolder,
+    faFolderOpen,
+    faUpload,
+    // Add new icons for sidebar categories
+    faFileAlt,
+    faUserShield,
+    faCogs,
+    faImages,
+    faSlidersH,
+    faDatabase,
+    faClipboardList,
+    faChevronDown,
+    // Additional media management icons
+    faCircle,
+    faCheckDouble,
+    faArrowLeft,
+    faCheckSquare,
+    faCopy,
+    faSave,
+    faExclamationTriangle,
+    faQuestionCircle,
+    faImage,
+    faTimesCircle,
 );
 
 export default FontAwesomeIcon; 
