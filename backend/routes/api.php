@@ -68,6 +68,11 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::put('/media/{id}', [MediaController::class, 'update']);
     Route::delete('/media/{id}', [MediaController::class, 'destroy']);
     Route::post('/media/delete-multiple', [MediaController::class, 'deleteMultiple']);
+
+    // Logs routes
+    Route::get('/logs', [App\Http\Controllers\Admin\LogController::class, 'index']);
+    Route::get('/logs/{id}', [App\Http\Controllers\Admin\LogController::class, 'show']);
+    Route::delete('/logs', [App\Http\Controllers\Admin\LogController::class, 'destroy']);
 });
 
 Route::get('/blog/related/{id}', [BlogController::class, 'related']);

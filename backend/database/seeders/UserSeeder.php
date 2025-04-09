@@ -13,19 +13,19 @@ class UserSeeder extends Seeder
         // Create admin users
         $adminUsers = [
             [
-                'name' => 'علی محمدی',
-                'email' => 'admin@example.com',
-                'password' => bcrypt('admin123'),
+                'name' => 'ادریس رنجبر',
+                'email' => 'edris.qeshm2@gmail.com',
+                'password' => bcrypt('password'),
                 'role' => 'admin',
-                'heart_score' => 100,
-                'streak' => 10,
+                'heart_score' => 0,
+                'streak' => 0,
             ],
             [
                 'name' => 'مریم حسینی',
                 'email' => 'superadmin@example.com',
                 'password' => bcrypt('super123'),
                 'role' => 'admin',
-                'heart_score' => 100,
+                'heart_score' => 0,
                 'streak' => 15,
             ],
             [
@@ -33,16 +33,22 @@ class UserSeeder extends Seeder
                 'email' => 'systemadmin@example.com',
                 'password' => bcrypt('system123'),
                 'role' => 'admin',
-                'heart_score' => 100,
+                'heart_score' => 0,
                 'streak' => 20,
             ],
         ];
 
         foreach ($adminUsers as $adminData) {
-            $admin = User::create($adminData);
-            $admin->completed_dates = $this->generateTestDates();
-            $admin->save();
-            $this->createDhikrRecords($admin);
+            $admin = User::updateOrCreate(
+                ['email' => $adminData['email']],
+                $adminData
+            );
+            
+            if (!$admin->completed_dates) {
+                $admin->completed_dates = $this->generateTestDates();
+                $admin->save();
+                $this->createDhikrRecords($admin);
+            }
         }
 
         // Persian names for regular users
@@ -61,17 +67,25 @@ class UserSeeder extends Seeder
 
         // Create 10 regular users
         for ($i = 0; $i < 10; $i++) {
-            $user = User::create([
+            $userData = [
                 'name' => $persianNames[$i],
                 'email' => 'user' . ($i + 1) . '@example.com',
                 'password' => bcrypt('password' . ($i + 1)),
                 'role' => 'user',
                 'heart_score' => rand(0, 100),
                 'streak' => rand(0, 30),
-                'completed_dates' => $this->generateTestDates()
-            ]);
-
-            $this->createDhikrRecords($user);
+            ];
+            
+            $user = User::updateOrCreate(
+                ['email' => $userData['email']],
+                $userData
+            );
+            
+            if (!$user->completed_dates) {
+                $user->completed_dates = $this->generateTestDates();
+                $user->save();
+                $this->createDhikrRecords($user);
+            }
         }
     }
 

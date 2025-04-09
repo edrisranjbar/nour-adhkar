@@ -23,18 +23,16 @@ import { specialCollection } from '@/assets/js/collections/special';
 const BlogView = () => import('../views/BlogView.vue');
 const BlogPostView = () => import('../views/BlogPostView.vue');
 
-// Admin components
+// Lazy loading for admin components
 const AdminLayout = () => import('../views/admin/AdminLayout.vue');
 const AdminDashboardView = () => import('../views/admin/AdminDashboardView.vue');
 const BlogManageView = () => import('../views/admin/BlogManageView.vue');
 const BlogEditorView = () => import('../views/admin/BlogEditorView.vue');
-const UsersManageView = () => import('../views/admin/UsersManageView.vue');
 const CategoriesManageView = () => import('../views/admin/CategoriesManageView.vue');
-// New admin components
+const UsersManageView = () => import('../views/admin/UsersManageView.vue');
 const MediaManageView = () => import('../views/admin/MediaManageView.vue');
 const PermissionsManageView = () => import('../views/admin/PermissionsManageView.vue');
 const SettingsManageView = () => import('../views/admin/SettingsManageView.vue');
-const BackupManageView = () => import('../views/admin/BackupManageView.vue');
 const LogsManageView = () => import('../views/admin/LogsManageView.vue');
 
 // Public routes that everyone can access
@@ -364,15 +362,6 @@ export const adminRoutes = [
         component: SettingsManageView,
         meta: {
           title: 'تنظیمات سیستم | اذکار نور',
-          noindex: true
-        }
-      },
-      {
-        path: 'backup',
-        name: 'admin-backup',
-        component: BackupManageView,
-        meta: {
-          title: 'پشتیبان‌گیری | اذکار نور',
           noindex: true
         }
       },

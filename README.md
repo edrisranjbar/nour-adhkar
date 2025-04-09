@@ -75,17 +75,22 @@ Nour Adhkar is a web application that provides a collection of Islamic adhkar (r
    php artisan key:generate
    ```
 
-5. Run database migrations and seed data
+5. Generate JWT secret key
+   ```bash
+   php artisan jwt:secret
+   ```
+
+6. Run database migrations and seed data
    ```bash
    php artisan migrate --seed
    ```
 
-6. Start the backend server
+7. Start the backend server
    ```bash
    php artisan serve
    ```
 
-7. The backend API will be available at `http://localhost:8000`
+8. The backend API will be available at `http://localhost:8000`
 
 ## Building for Production
 

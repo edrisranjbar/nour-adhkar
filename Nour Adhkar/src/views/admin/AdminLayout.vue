@@ -140,14 +140,6 @@
                     </RouterLink>
                   </li>
                   <li class="admin-menu-item">
-                    <RouterLink to="/admin/backup" class="admin-menu-link" active-class="active">
-                      <div class="menu-icon">
-                        <font-awesome-icon icon="fa-solid fa-database" />
-                      </div>
-                      <span class="menu-text">پشتیبان‌گیری</span>
-                    </RouterLink>
-                  </li>
-                  <li class="admin-menu-item">
                     <RouterLink to="/admin/logs" class="admin-menu-link" active-class="active">
                       <div class="menu-icon">
                         <font-awesome-icon icon="fa-solid fa-clipboard-list" />
@@ -213,7 +205,7 @@ export default {
       const categoryRoutes = {
         content: ['/admin/blog', '/admin/categories', '/admin/media'],
         users: ['/admin/users', '/admin/permissions'],
-        system: ['/admin/settings', '/admin/backup', '/admin/logs']
+        system: ['/admin/settings', '/admin/logs']
       };
       
       return categoryRoutes[category]?.some(path => route.startsWith(path)) || false;
