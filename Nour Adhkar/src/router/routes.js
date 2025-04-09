@@ -31,7 +31,6 @@ const BlogEditorView = () => import('../views/admin/BlogEditorView.vue');
 const CategoriesManageView = () => import('../views/admin/CategoriesManageView.vue');
 const UsersManageView = () => import('../views/admin/UsersManageView.vue');
 const MediaManageView = () => import('../views/admin/MediaManageView.vue');
-const PermissionsManageView = () => import('../views/admin/PermissionsManageView.vue');
 const SettingsManageView = () => import('../views/admin/SettingsManageView.vue');
 const LogsManageView = () => import('../views/admin/LogsManageView.vue');
 
@@ -344,15 +343,6 @@ export const adminRoutes = [
         component: MediaManageView,
         meta: {
           title: 'مدیریت رسانه‌ها | اذکار نور',
-          noindex: true
-        }
-      },
-      {
-        path: 'permissions',
-        name: 'admin-permissions',
-        component: PermissionsManageView,
-        meta: {
-          title: 'مدیریت دسترسی‌ها | اذکار نور',
           noindex: true
         }
       },
