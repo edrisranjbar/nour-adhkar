@@ -94,6 +94,7 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: inherit;
 }
 
 .logout-button:hover {

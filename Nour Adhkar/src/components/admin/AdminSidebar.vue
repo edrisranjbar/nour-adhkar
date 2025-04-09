@@ -1,165 +1,82 @@
 <template>
-  <aside class="admin-sidebar" :class="{ 'collapsed': isSidebarCollapsed }">
-    <div class="sidebar-header">
-      <button class="collapse-button" @click="toggleSidebar">
-        <font-awesome-icon :icon="isSidebarCollapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left'" />
-      </button>
-    </div>
-    <nav class="admin-nav">
-      <ul class="admin-menu">
-        <li class="admin-menu-item">
-          <RouterLink to="/admin" class="admin-menu-link" active-class="active" exact>
-            <div class="menu-icon">
-              <font-awesome-icon icon="fa-solid fa-tachometer-alt" />
-            </div>
-            <span class="menu-text">پیشخوان</span>
-          </RouterLink>
-        </li>
-
-        <!-- Content Management Category -->
-        <li class="admin-menu-category">
-          <div class="category-header" @click="toggleCategory('content')">
-            <div class="menu-icon">
-              <font-awesome-icon icon="fa-solid fa-file-alt" />
-            </div>
-            <span class="menu-text">مدیریت محتوا</span>
-            <div class="category-toggle" v-if="!isSidebarCollapsed">
-              <font-awesome-icon :icon="expandedCategories.content ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-left'" />
-            </div>
-          </div>
-          <transition name="slide">
-            <ul class="category-items" v-if="expandedCategories.content || isSidebarCollapsed">
-              <li class="admin-menu-item">
-                <RouterLink to="/admin/blog" class="admin-menu-link" active-class="active">
-                  <div class="menu-icon">
-                    <font-awesome-icon icon="fa-solid fa-newspaper" />
-                  </div>
-                  <span class="menu-text">مقالات</span>
-                </RouterLink>
-              </li>
-              <li class="admin-menu-item">
-                <RouterLink to="/admin/categories" class="admin-menu-link" active-class="active">
-                  <div class="menu-icon">
-                    <font-awesome-icon icon="fa-solid fa-tags" />
-                  </div>
-                  <span class="menu-text">دسته‌بندی‌ها</span>
-                </RouterLink>
-              </li>
-              <li class="admin-menu-item">
-                <RouterLink to="/admin/media" class="admin-menu-link" active-class="active">
-                  <div class="menu-icon">
-                    <font-awesome-icon icon="fa-solid fa-images" />
-                  </div>
-                  <span class="menu-text">رسانه‌ها</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </transition>
-        </li>
-
-        <!-- User Management Category -->
-        <li class="admin-menu-category">
-          <div class="category-header" @click="toggleCategory('users')">
-            <div class="menu-icon">
-              <font-awesome-icon icon="fa-solid fa-user-shield" />
-            </div>
-            <span class="menu-text">مدیریت کاربران</span>
-            <div class="category-toggle" v-if="!isSidebarCollapsed">
-              <font-awesome-icon :icon="expandedCategories.users ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-left'" />
-            </div>
-          </div>
-          <transition name="slide">
-            <ul class="category-items" v-if="expandedCategories.users || isSidebarCollapsed">
-              <li class="admin-menu-item">
-                <RouterLink to="/admin/users" class="admin-menu-link" active-class="active">
-                  <div class="menu-icon">
-                    <font-awesome-icon icon="fa-solid fa-users" />
-                  </div>
-                  <span class="menu-text">کاربران</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </transition>
-        </li>
-        
-        <!-- System Category -->
-        <li class="admin-menu-category">
-          <div class="category-header" @click="toggleCategory('system')">
-            <div class="menu-icon">
-              <font-awesome-icon icon="fa-solid fa-cogs" />
-            </div>
-            <span class="menu-text">تنظیمات سیستم</span>
-            <div class="category-toggle" v-if="!isSidebarCollapsed">
-              <font-awesome-icon :icon="expandedCategories.system ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-left'" />
-            </div>
-          </div>
-          <transition name="slide">
-            <ul class="category-items" v-if="expandedCategories.system || isSidebarCollapsed">
-              <li class="admin-menu-item">
-                <RouterLink to="/admin/settings" class="admin-menu-link" active-class="active">
-                  <div class="menu-icon">
-                    <font-awesome-icon icon="fa-solid fa-sliders-h" />
-                  </div>
-                  <span class="menu-text">تنظیمات عمومی</span>
-                </RouterLink>
-              </li>
-              <li class="admin-menu-item">
-                <RouterLink to="/admin/logs" class="admin-menu-link" active-class="active">
-                  <div class="menu-icon">
-                    <font-awesome-icon icon="fa-solid fa-clipboard-list" />
-                  </div>
-                  <span class="menu-text">گزارش‌ها</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </transition>
-        </li>
-      </ul>
-    </nav>
-  </aside>
+  <Sidebar :items="menuItems" @sidebar-toggle="onSidebarToggle" />
 </template>
 
 <script>
+import Sidebar from '@/components/common/Sidebar.vue';
+
 export default {
   name: 'AdminSidebar',
+  components: {
+    Sidebar
+  },
   data() {
     return {
-      isSidebarCollapsed: false,
-      expandedCategories: {
-        content: true,
-        users: false,
-        system: false
-      }
+      menuItems: [
+        {
+          path: '/admin',
+          title: 'پیشخوان',
+          icon: 'fa-solid fa-tachometer-alt',
+          exact: true
+        },
+        {
+          id: 'content',
+          title: 'مدیریت محتوا',
+          icon: 'fa-solid fa-file-alt',
+          items: [
+            {
+              path: '/admin/blog',
+              title: 'مقالات',
+              icon: 'fa-solid fa-newspaper'
+            },
+            {
+              path: '/admin/categories',
+              title: 'دسته‌بندی‌ها',
+              icon: 'fa-solid fa-tags'
+            },
+            {
+              path: '/admin/media',
+              title: 'رسانه‌ها',
+              icon: 'fa-solid fa-images'
+            }
+          ]
+        },
+        {
+          id: 'users',
+          title: 'مدیریت کاربران',
+          icon: 'fa-solid fa-user-shield',
+          items: [
+            {
+              path: '/admin/users',
+              title: 'کاربران',
+              icon: 'fa-solid fa-users'
+            }
+          ]
+        },
+        {
+          id: 'system',
+          title: 'تنظیمات سیستم',
+          icon: 'fa-solid fa-cogs',
+          items: [
+            {
+              path: '/admin/settings',
+              title: 'تنظیمات عمومی',
+              icon: 'fa-solid fa-sliders-h'
+            },
+            {
+              path: '/admin/logs',
+              title: 'گزارش‌ها',
+              icon: 'fa-solid fa-clipboard-list'
+            }
+          ]
+        }
+      ]
     }
   },
   methods: {
-    toggleSidebar() {
-      this.isSidebarCollapsed = !this.isSidebarCollapsed;
-      this.$emit('sidebar-toggle', this.isSidebarCollapsed);
-    },
-    toggleCategory(category) {
-      if (!this.isSidebarCollapsed) {
-        this.expandedCategories[category] = !this.expandedCategories[category];
-      }
-    },
-    isRouteInCategory(category) {
-      const route = this.$route.path;
-      const categoryRoutes = {
-        content: ['/admin/blog', '/admin/categories', '/admin/media'],
-        users: ['/admin/users'],
-        system: ['/admin/settings', '/admin/logs']
-      };
-      
-      return categoryRoutes[category]?.some(path => route.startsWith(path)) || false;
+    onSidebarToggle(isCollapsed) {
+      this.$emit('sidebar-toggle', isCollapsed);
     }
-  },
-  created() {
-    // Auto-expand category based on current route
-    Object.keys(this.expandedCategories).forEach(category => {
-      if (this.isRouteInCategory(category)) {
-        this.expandedCategories[category] = true;
-      }
-    });
   }
 }
 </script>

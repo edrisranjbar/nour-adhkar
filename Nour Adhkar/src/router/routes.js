@@ -23,6 +23,15 @@ import { specialCollection } from '@/assets/js/collections/special';
 const BlogView = () => import('../views/BlogView.vue');
 const BlogPostView = () => import('../views/BlogPostView.vue');
 
+// Lazy loading for dashboard components
+const DashboardLayout = () => import('../views/dashboard/DashboardLayout.vue');
+const DashboardView = () => import('../views/dashboard/DashboardView.vue');
+const DailyAdhkarView = () => import('../views/dashboard/DailyAdhkarView.vue');
+const FavoriteAdhkarView = () => import('../views/dashboard/FavoriteAdhkarView.vue');
+const CustomAdhkarView = () => import('../views/dashboard/CustomAdhkarView.vue');
+const ProfileSettingsView = () => import('../views/dashboard/ProfileSettingsView.vue');
+const ProfileStatsView = () => import('../views/dashboard/ProfileStatsView.vue');
+
 // Lazy loading for admin components
 const AdminLayout = () => import('../views/admin/AdminLayout.vue');
 const AdminDashboardView = () => import('../views/admin/AdminDashboardView.vue');
@@ -260,16 +269,65 @@ export const publicRoutes = [
 ];
 
 // Protected routes that require authentication
-export const authRoutes = [
+export const protectedRoutes = [
   {
     path: '/dashboard',
-    name: 'dashboard',
-    component: () => import('../views/DashboardView.vue'),
-    beforeEnter: authGuard,
+    component: DashboardLayout,
     meta: { 
+      requiresAuth: true,
       noindex: true
-    }
-  },
+    },
+    children: [
+      {
+        path: '',
+        name: 'dashboard',
+        component: DashboardView,
+        meta: {
+          title: 'داشبورد | اذکار نور'
+        }
+      },
+      {
+        path: 'adhkar/daily',
+        name: 'daily-adhkar',
+        component: DailyAdhkarView,
+        meta: {
+          title: 'اذکار روزانه | داشبورد'
+        }
+      },
+      {
+        path: 'adhkar/favorites',
+        name: 'favorite-adhkar',
+        component: FavoriteAdhkarView,
+        meta: {
+          title: 'اذکار مورد علاقه | داشبورد'
+        }
+      },
+      {
+        path: 'adhkar/custom',
+        name: 'custom-adhkar',
+        component: CustomAdhkarView,
+        meta: {
+          title: 'اذکار شخصی | داشبورد'
+        }
+      },
+      {
+        path: 'profile/settings',
+        name: 'profile-settings',
+        component: ProfileSettingsView,
+        meta: {
+          title: 'تنظیمات پروفایل | داشبورد'
+        }
+      },
+      {
+        path: 'profile/stats',
+        name: 'profile-stats',
+        component: ProfileStatsView,
+        meta: {
+          title: 'آمار و گزارشات | داشبورد'
+        }
+      }
+    ]
+  }
 ];
 
 // Admin routes that require admin privileges
@@ -371,6 +429,6 @@ export const adminRoutes = [
 // Combine all routes
 export const routes = [
   ...publicRoutes,
-  ...authRoutes,
+  ...protectedRoutes,
   ...adminRoutes,
 ];

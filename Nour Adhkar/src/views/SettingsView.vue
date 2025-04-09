@@ -88,7 +88,7 @@
           </div>
         </div>
 
-        <RouterLink to="/dashboard" class="settings-item clickable">
+        <RouterLink to="/dashboard/profile/settings" class="settings-item clickable">
           <div class="setting-label">
             <div class="setting-title">حساب کاربری</div>
             <div class="setting-description">مدیریت حساب کاربری</div>

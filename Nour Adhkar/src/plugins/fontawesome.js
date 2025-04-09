@@ -93,6 +93,7 @@ import {
     faQuestionCircle,
     faImage,
     faTimesCircle,
+    faPray,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -203,6 +204,7 @@ library.add(
     faQuestionCircle,
     faImage,
     faTimesCircle,
+    faPray,
 );
 
 export default FontAwesomeIcon; 
