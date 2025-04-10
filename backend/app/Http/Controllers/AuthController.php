@@ -32,6 +32,7 @@ class AuthController extends Controller
                 'created_at' => $request->user()->created_at,
                 'avatar' => $request->user()->avatar,
                 'badges' => $request->user()->badges,
+                'streak' => $request->user()->streak,
                 'role' => $request->user()->role,
             ]
         ]);
@@ -139,6 +140,35 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'خطا در بروزرسانی امتیاز قلب',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getUserStats(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $today = now()->format('Y-m-d');
+            
+            // Get today's dhikr count
+            $todayCount = in_array($today, $user->completed_dates ?? []) ? 1 : 0;
+            
+            // Get favorite dhikr count (using completed_dates array length as a proxy)
+            $favoriteCount = count($user->completed_dates ?? []);
+            
+            return response()->json([
+                'success' => true,
+                'todayCount' => $todayCount,
+                'favoriteCount' => $favoriteCount,
+                'streak' => $user->streak,
+                'heartScore' => $user->heart_score ?? 0,
+                'totalDhikrs' => $user->total_dhikrs ?? 0
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در دریافت آمار',
                 'error' => $e->getMessage()
             ], 500);
         }

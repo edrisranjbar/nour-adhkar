@@ -30,7 +30,10 @@ class User extends Authenticatable implements JWTSubject
         );
     }
     
-    protected $appends = ['has_new_badge'];
+    protected $appends = [
+        'has_new_badge',
+        'streak'
+    ];
     protected $fillable = [
         'name',
         'email',
@@ -51,7 +54,8 @@ class User extends Authenticatable implements JWTSubject
         'badges' => 'array',
         'last_dhikr_date' => 'date',
         'password' => 'hashed',
-        'completed_dates' => 'array'
+        'completed_dates' => 'array',
+        'favorites' => 'array'
     ];
 
     public function getJWTIdentifier()
@@ -67,6 +71,39 @@ class User extends Authenticatable implements JWTSubject
     public function dhikrs()
     {
         return $this->hasMany(Dhikr::class);
+    }
+
+    public function getStreakAttribute()
+    {
+        $streak = 0;
+        $dates = $this->completed_dates ?? [];
+        sort($dates);
+        
+        if (!empty($dates)) {
+            $lastDate = end($dates);
+            $currentStreak = 1;
+            
+            // If last completion was yesterday or today, count the streak
+            $lastCompletion = \Carbon\Carbon::parse($lastDate);
+            $now = now();
+            
+            if ($lastCompletion->diffInDays($now) <= 1) {
+                // Count backwards from the last date
+                for ($i = count($dates) - 2; $i >= 0; $i--) {
+                    $currentDate = \Carbon\Carbon::parse($dates[$i]);
+                    $expectedDate = \Carbon\Carbon::parse($dates[$i + 1])->subDay();
+                    
+                    if ($currentDate->format('Y-m-d') === $expectedDate->format('Y-m-d')) {
+                        $currentStreak++;
+                    } else {
+                        break;
+                    }
+                }
+                $streak = $currentStreak;
+            }
+        }
+        
+        return $streak;
     }
 
 }

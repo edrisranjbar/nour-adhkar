@@ -42,6 +42,8 @@ const UsersManageView = () => import('../views/admin/UsersManageView.vue');
 const MediaManageView = () => import('../views/admin/MediaManageView.vue');
 const SettingsManageView = () => import('../views/admin/SettingsManageView.vue');
 const LogsManageView = () => import('../views/admin/LogsManageView.vue');
+import AdminAdhkarView from '@/views/admin/AdminAdhkarView.vue';
+import AdminCollectionsView from '@/views/admin/AdminCollectionsView.vue';
 
 // Public routes that everyone can access
 export const publicRoutes = [
@@ -346,6 +348,24 @@ export const adminRoutes = [
         component: AdminDashboardView,
         meta: {
           title: 'پیشخوان مدیریت | اذکار نور',
+          noindex: true
+        }
+      },
+      {
+        path: 'adhkar',
+        name: 'admin-adhkar',
+        component: AdminAdhkarView,
+        meta: {
+          title: 'مدیریت اذکار | اذکار نور',
+          noindex: true
+        }
+      },
+      {
+        path: 'collections',
+        name: 'admin-collections',
+        component: AdminCollectionsView,
+        meta: {
+          title: 'مدیریت مجموعه ها | اذکار نور',
           noindex: true
         }
       },

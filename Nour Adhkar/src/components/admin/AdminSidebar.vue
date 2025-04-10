@@ -20,6 +20,23 @@ export default {
           exact: true
         },
         {
+          id: 'adhkar',
+          title: 'مدیریت اذکار',
+          icon: 'fa-solid fa-book-quran',
+          items: [
+            {
+              path: '/admin/adhkar',
+              title: 'اذکار',
+              icon: 'fa-solid fa-book-quran'
+            },
+            {
+              path: '/admin/collections',
+              title: 'مجموعه‌ها',
+              icon: 'fa-solid fa-layer-group'
+            }
+          ]
+        },
+        {
           id: 'content',
           title: 'مدیریت محتوا',
           icon: 'fa-solid fa-file-alt',

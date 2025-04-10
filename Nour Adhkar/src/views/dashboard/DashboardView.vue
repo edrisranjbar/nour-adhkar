@@ -96,6 +96,13 @@ export default {
         BadgesSection,
         StreakCalendar
     },
+    watch: {
+        'user.total_dhikrs': {
+            handler() {
+                this.loadStats();
+            }
+        }
+    },
     async mounted() {
         try {
             const response = await axios.get(`${BASE_API_URL}/user`, {

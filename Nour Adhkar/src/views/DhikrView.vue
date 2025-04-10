@@ -49,8 +49,48 @@ section#morning {
   animation: fadeInOut 3s ease-in-out forwards;
 }
 
-.share-button {
+.content-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.favorite-button {
+  background: none;
+  border: none;
+  color: #9C8466;
   cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  font-size: 1.5rem;
+}
+
+.favorite-button:hover {
+  transform: scale(1.1);
+  color: #dc3545;
+}
+
+.favorite-button.is-favorite {
+  color: #dc3545;
+}
+
+.share-button {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.share-button:hover {
+  transform: scale(1.1);
 }
 
 @keyframes fadeInOut {
@@ -85,7 +125,12 @@ section#morning {
     <main class="modal-container" @click="handleDhikrBodyClick">
       <div class="content-top-bar">
         <h2 id="dhikr-title"></h2>
-        <img id="share-button" class="share-button" src="@/assets/icons/share.svg" alt="اشتراک گذاری" @click="share()">
+        <div class="action-buttons">
+          <button class="favorite-button" @click="handleToggleFavorite" :class="{ 'is-favorite': isFavorite }">
+            <font-awesome-icon :icon="['fas', isFavorite ? 'heart' : 'heart']" />
+          </button>
+          <img id="share-button" class="share-button" src="@/assets/icons/share.svg" alt="اشتراک گذاری" @click="share()">
+        </div>
       </div>
       <p id="dhikr-prefix">{{ openedDhikr.prefix }}</p>
       <p id="dhikr-text">{{ openedDhikr.text }}</p>
@@ -103,7 +148,7 @@ section#morning {
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import axios from 'axios';
 import CongratsModal from "@/components/Congrats.vue";
 import Collection from "@/models/collection.js";
@@ -111,6 +156,7 @@ import tapSound from "@/assets/audios/click.mp3"
 import { BASE_API_URL } from '@/config';
 
 export default {
+  name: 'DhikrView',
   components: {
     CongratsModal
   },
@@ -129,7 +175,8 @@ export default {
       touchstartY: 0,
       touchendY: 0,
       showToast: false,
-      toastMessage: ''
+      toastMessage: '',
+      loading: false
     }
   },
   watch: {
@@ -142,7 +189,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['user']),
+    ...mapState(['user', 'favorites']),
     ...mapGetters(['isAuthenticated']),
     counter() {
       // Get counter for current dhikr, default to 0 if not set
@@ -168,9 +215,13 @@ export default {
         this.storeDhikr();
       }
       return result;
+    },
+    isFavorite() {
+      return this.favorites.some(f => f.id === this.openedDhikr?.id);
     }
   },
   methods: {
+    ...mapActions(['toggleFavorite', 'loadFavorites']),
     initializeCounters() {
       // Create an object with a counter for each dhikr in the collection
       const newCounters = {};
@@ -248,7 +299,13 @@ export default {
         });
 
         if (response.data.success) {
+          // Update the user state in Vuex store
           this.$store.commit('setUser', response.data.user);
+          
+          // Force a refresh of the dashboard stats
+          if (this.$route.name === 'dashboard') {
+            await this.$store.dispatch('loadUserStats');
+          }
         }
       } catch (error) {
         console.error('Error storing dhikr:', error);
@@ -324,6 +381,30 @@ export default {
       setTimeout(() => {
         this.showToast = false;
       }, 3000);
+    },
+    async handleToggleFavorite() {
+      if (!this.$store.state.token) {
+        this.$toast.error('Please login to add favorites');
+        return;
+      }
+      
+      try {
+        this.loading = true;
+        const response = await this.toggleFavorite(this.openedDhikr.id);
+        if (response.success) {
+          this.$toast.success(response.isFavorite ? 'Added to favorites' : 'Removed from favorites');
+        }
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
+        this.$toast.error('Failed to update favorite');
+      } finally {
+        this.loading = false;
+      }
+    }
+  },
+  async created() {
+    if (this.$store.state.token) {
+      await this.loadFavorites();
     }
   },
   mounted() {

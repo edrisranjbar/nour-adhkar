@@ -94,6 +94,7 @@ import {
     faImage,
     faTimesCircle,
     faPray,
+    faLayerGroup,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -205,6 +206,7 @@ library.add(
     faImage,
     faTimesCircle,
     faPray,
+    faLayerGroup,
 );
 
 export default FontAwesomeIcon; 

@@ -19,7 +19,10 @@ Route::middleware('auth:api')->group(function () {
     Route::patch('/user/name', [AuthController::class, 'changeName']);
     Route::patch('/user/password', [AuthController::class, 'changePassword']);
     Route::patch('/user/heart', [AuthController::class, 'updateHeartScore']);
-    Route::post('/dhikr', [DhikrController::class, 'store']);    
+    Route::get('/user/stats', [AuthController::class, 'getUserStats']);
+    Route::post('/dhikr', [DhikrController::class, 'store']);
+    Route::post('/adhkar/favorites/{id}', [AdhkarController::class, 'toggleFavorite']);
+    Route::get('/adhkar/favorites', [AdhkarController::class, 'getFavorites']);
 });
 
 // Adhkar routes
