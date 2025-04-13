@@ -7,40 +7,43 @@
     </div>
     <nav class="nav">
       <ul class="menu">
-        <!-- Single items -->
-        <li v-for="item in singleItems" :key="item.path" class="menu-item">
-          <RouterLink :to="item.path" class="menu-link" active-class="active" :exact="item.exact">
-            <div class="menu-icon">
-              <font-awesome-icon :icon="item.icon" />
-            </div>
-            <span class="menu-text">{{ item.title }}</span>
-          </RouterLink>
-        </li>
+        <!-- Render all items in their original order -->
+        <template v-for="item in items">
+          <!-- Single items -->
+          <li v-if="!item.items" :key="item.path" class="menu-item">
+            <RouterLink :to="item.path" class="menu-link" active-class="active" :exact="item.exact">
+              <div class="menu-icon">
+                <font-awesome-icon :icon="item.icon" />
+              </div>
+              <span class="menu-text">{{ item.title }}</span>
+            </RouterLink>
+          </li>
 
-        <!-- Categories -->
-        <li v-for="category in categories" :key="category.id" class="menu-category">
-          <div class="category-header" @click="toggleCategory(category.id)">
-            <div class="menu-icon">
-              <font-awesome-icon :icon="category.icon" />
+          <!-- Categories -->
+          <li v-else :key="item.id" class="menu-category">
+            <div class="category-header" @click="toggleCategory(item.id)">
+              <div class="menu-icon">
+                <font-awesome-icon :icon="item.icon" />
+              </div>
+              <span class="menu-text">{{ item.title }}</span>
+              <div class="category-toggle" v-if="!isCollapsed">
+                <font-awesome-icon :icon="expandedCategories[item.id] ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-left'" />
+              </div>
             </div>
-            <span class="menu-text">{{ category.title }}</span>
-            <div class="category-toggle" v-if="!isCollapsed">
-              <font-awesome-icon :icon="expandedCategories[category.id] ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-left'" />
-            </div>
-          </div>
-          <transition name="slide">
-            <ul class="category-items" v-if="expandedCategories[category.id] || isCollapsed">
-              <li v-for="item in category.items" :key="item.path" class="menu-item">
-                <RouterLink :to="item.path" class="menu-link" active-class="active">
-                  <div class="menu-icon">
-                    <font-awesome-icon :icon="item.icon" />
-                  </div>
-                  <span class="menu-text">{{ item.title }}</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </transition>
-        </li>
+            <transition name="slide">
+              <ul class="category-items" v-if="expandedCategories[item.id] || isCollapsed">
+                <li v-for="subItem in item.items" :key="subItem.path" class="menu-item">
+                  <RouterLink :to="subItem.path" class="menu-link" active-class="active">
+                    <div class="menu-icon">
+                      <font-awesome-icon :icon="subItem.icon" />
+                    </div>
+                    <span class="menu-text">{{ subItem.title }}</span>
+                  </RouterLink>
+                </li>
+              </ul>
+            </transition>
+          </li>
+        </template>
       </ul>
     </nav>
   </aside>

@@ -71,21 +71,16 @@ export default {
           ]
         },
         {
-          id: 'system',
+          path: '/admin/settings',
           title: 'تنظیمات سیستم',
           icon: 'fa-solid fa-cogs',
-          items: [
-            {
-              path: '/admin/settings',
-              title: 'تنظیمات عمومی',
-              icon: 'fa-solid fa-sliders-h'
-            },
-          ]
+          exact: true
         },
         {
           path: '/admin/logs',
           title: 'گزارش‌ها',
-          icon: 'fa-solid fa-clipboard-list'
+          icon: 'fa-solid fa-clipboard-list',
+          exact: true
         },
       ]
     }
