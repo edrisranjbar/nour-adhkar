@@ -22,9 +22,21 @@
       v-else
       :columns="tableColumns"
       :items="paginatedAdhkar"
-      @edit="editDhikr"
-      @delete="confirmDelete"
     >
+    <div class="actions">
+      <ActionButton
+        icon="edit"
+        variant="primary"
+        size="sm"
+        @click="editDhikr(item)"
+      />
+      <ActionButton
+        icon="trash"
+        variant="danger"
+        size="sm"
+        @click="confirmDelete(item)"
+      />
+    </div>
       <template #pagination>
         <Pagination
           :pagination="pagination"
@@ -127,6 +139,7 @@ import DataTable from '@/components/Admin/DataTable.vue';
 import FormModal from '@/components/Admin/FormModal.vue';
 import NotificationToast from '@/components/Admin/NotificationToast.vue';
 import Pagination from '@/components/Admin/Pagination.vue';
+import ActionButton from '@/components/Admin/ActionButton.vue';
 
 
 export default {
@@ -136,7 +149,8 @@ export default {
     DataTable,
     FormModal,
     NotificationToast,
-    Pagination
+    Pagination,
+    ActionButton
   },
   data() {
     return {
@@ -404,5 +418,11 @@ body.dark-mode {
     border-color: #555;
     color: #fff;
   }
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 </style>
