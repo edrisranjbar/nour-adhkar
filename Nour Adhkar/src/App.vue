@@ -1,5 +1,5 @@
 <script>
-import { RouterView } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router'
 import { useSettingsStore } from './stores/settings'
 
 export default {
@@ -83,14 +83,6 @@ export default {
           <font-awesome-icon icon="fa-solid fa-home" />
           <span>خانه</span>
         </RouterLink>
-        <RouterLink to="/morning" class="nav-item" active-class="active">
-          <font-awesome-icon icon="fa-solid fa-sun" />
-          <span>صبحگاه</span>
-        </RouterLink>
-        <RouterLink to="/night" class="nav-item" active-class="active">
-          <font-awesome-icon icon="fa-solid fa-moon" />
-          <span>شامگاه</span>
-        </RouterLink>
         <RouterLink to="/blog" class="nav-item" active-class="active">
           <font-awesome-icon icon="fa-solid fa-newspaper" />
           <span>مقالات</span>
@@ -98,6 +90,10 @@ export default {
         <RouterLink to="/counter" class="nav-item" active-class="active">
           <font-awesome-icon icon="fa-solid fa-calculator" />
           <span>تسبیح</span>
+        </RouterLink>
+        <RouterLink to="/dashboard" class="nav-item" active-class="active">
+          <font-awesome-icon icon="fa-solid fa-user" />
+          <span>پروفایل</span>
         </RouterLink>
         <RouterLink to="/settings" class="nav-item" active-class="active">
           <font-awesome-icon icon="fa-solid fa-gear" />
