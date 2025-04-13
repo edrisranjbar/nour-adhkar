@@ -37,7 +37,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import AdminSidebar from '@/components/admin/AdminSidebar.vue';
+import AdminSidebar from '@/components/Admin/AdminSidebar.vue';
 
 export default {
   name: 'AdminLayout',
