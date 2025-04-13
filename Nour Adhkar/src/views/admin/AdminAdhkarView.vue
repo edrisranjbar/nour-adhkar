@@ -58,7 +58,7 @@
             <label for="arabicText">متن عربی</label>
             <textarea
               id="arabicText"
-              v-model="formData.arabicText"
+              v-model="formData.arabic_text"
               required
               placeholder="متن عربی ذکر را وارد کنید"
               dir="rtl"
@@ -120,31 +120,44 @@
       <p class="subtitle">برای افزودن ذکر جدید روی دکمه بالا کلیک کنید</p>
     </div>
 
-    <div v-else class="adhkar-list">
-      <div v-for="dhikr in filteredAdhkar" :key="dhikr.id" class="adhkar-card">
-        <div class="adhkar-header">
-          <h3>{{ dhikr.title }}</h3>
-          <div class="card-actions">
-            <button class="edit-button" @click="editDhikr(dhikr)">
-              <font-awesome-icon icon="fa-solid fa-edit" />
-            </button>
-            <button class="delete-button" @click="confirmDelete(dhikr)">
-              <font-awesome-icon icon="fa-solid fa-trash" />
-            </button>
-          </div>
-        </div>
-        
-        <div class="adhkar-content">
-          <p class="arabic-text">{{ dhikr.arabicText }}</p>
-          <p class="translation">{{ dhikr.translation }}</p>
-          <div class="adhkar-meta">
-            <span class="category" v-if="dhikr.category">{{ dhikr.category }}</span>
-            <span class="count" v-if="dhikr.recommendedCount">
-              تعداد تکرار: {{ dhikr.recommendedCount }}
-            </span>
-          </div>
-        </div>
-      </div>
+    <div v-else class="adhkar-table-container">
+      <table class="adhkar-table">
+        <thead>
+          <tr>
+            <th>عنوان</th>
+            <th>متن عربی</th>
+            <th>دسته‌بندی</th>
+            <th>تعداد تکرار</th>
+            <th>عملیات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="dhikr in paginatedAdhkar" :key="dhikr.id">
+            <td>{{ dhikr.title || '—' }}</td>
+            <td class="arabic-text-cell">{{ truncateText(dhikr.arabicText, 50) }}</td>
+            <td>{{ dhikr.category || '—' }}</td>
+            <td>{{ dhikr.recommendedCount || '—' }}</td>
+            <td class="actions">
+              <ActionButton
+                type="edit"
+                title="ویرایش"
+                @click="editDhikr(dhikr)"
+              />
+              <ActionButton
+                type="delete"
+                title="حذف"
+                @click="confirmDelete(dhikr)"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Pagination -->
+      <Pagination
+        :pagination="pagination"
+        @page-change="changePage"
+      />
     </div>
 
     <!-- Delete Confirmation Modal -->
@@ -177,6 +190,8 @@
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
 import NotificationToast from '@/components/Admin/NotificationToast.vue';
+import ActionButton from '@/components/Admin/ActionButton.vue';
+import Pagination from '@/components/Admin/Pagination.vue';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { 
   faPlus, 
@@ -193,7 +208,9 @@ library.add(faPlus, faSearch, faEdit, faTrash, faBook, faSpinner);
 export default {
   name: 'AdminAdhkarView',
   components: {
-    NotificationToast
+    NotificationToast,
+    ActionButton,
+    Pagination
   },
   data() {
     return {
@@ -216,6 +233,13 @@ export default {
       notification: {
         type: '',
         message: ''
+      },
+      // Pagination
+      pagination: {
+        current_page: 1,
+        last_page: 1,
+        total: 0,
+        per_page: 10
       }
     }
   },
@@ -230,9 +254,9 @@ export default {
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(dhikr => 
-          dhikr.title.toLowerCase().includes(query) ||
-          dhikr.arabicText.toLowerCase().includes(query) ||
-          dhikr.translation.toLowerCase().includes(query)
+          (dhikr.title && dhikr.title.toLowerCase().includes(query)) ||
+          (dhikr.arabicText && dhikr.arabicText.toLowerCase().includes(query)) ||
+          (dhikr.translation && dhikr.translation.toLowerCase().includes(query))
         );
       }
       
@@ -244,14 +268,19 @@ export default {
       // Apply sorting
       const [field, order] = this.sortBy.split('_');
       filtered.sort((a, b) => {
-        const aValue = a[field];
-        const bValue = b[field];
+        const aValue = a[field] || '';
+        const bValue = b[field] || '';
         return order === 'asc' ? 
           (aValue > bValue ? 1 : -1) : 
           (aValue < bValue ? 1 : -1);
       });
       
+      // Apply pagination
       return filtered;
+    },
+    paginatedAdhkar() {
+      const startIndex = (this.pagination.current_page - 1) * this.pagination.per_page;
+      return this.filteredAdhkar.slice(startIndex, startIndex + this.pagination.per_page);
     }
   },
   methods: {
@@ -272,11 +301,23 @@ export default {
       }
     },
     handleSearch() {
-      // Debounce search if needed
-      this.applyFilters();
+      this.pagination.current_page = 1; // Reset to first page on search
+      this.updatePagination();
     },
     applyFilters() {
-      // Filters are applied through computed property
+      this.updatePagination();
+    },
+    updatePagination() {
+      this.pagination.total = this.filteredAdhkar.length;
+      this.pagination.last_page = Math.ceil(this.filteredAdhkar.length / this.pagination.per_page);
+    },
+    changePage(page) {
+      this.pagination.current_page = page;
+      window.scrollTo(0, 0);
+    },
+    truncateText(text, maxLength) {
+      if (!text) return '';
+      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     },
     resetForm() {
       this.formData = {
@@ -375,8 +416,14 @@ export default {
       };
     }
   },
+  watch: {
+    filteredAdhkar() {
+      this.updatePagination();
+    }
+  },
   async created() {
     await this.loadAdhkar();
+    this.updatePagination();
   }
 }
 </script>
@@ -451,6 +498,48 @@ export default {
   font-size: 1rem;
   min-width: 150px;
   font-family: inherit;
+}
+
+/* Table Styles */
+.adhkar-table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.adhkar-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.adhkar-table th,
+.adhkar-table td {
+  padding: 1rem;
+  text-align: right;
+  border-bottom: 1px solid #eee;
+}
+
+.adhkar-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.adhkar-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+.arabic-text-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
 }
 
 .form-overlay {
@@ -566,87 +655,6 @@ export default {
   margin-top: 0.5rem;
 }
 
-.adhkar-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem;
-}
-
-.adhkar-card {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.adhkar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.adhkar-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.card-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.edit-button,
-.delete-button {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: inherit;
-}
-
-.edit-button {
-  color: #2196f3;
-}
-
-.delete-button {
-  color: #dc3545;
-}
-
-.edit-button:hover {
-  background-color: rgba(33, 150, 243, 0.1);
-}
-
-.delete-button:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-}
-
-.adhkar-content {
-  margin-top: 1rem;
-}
-
-.arabic-text {
-  font-size: 1.5rem;
-  text-align: center;
-  margin: 1rem 0;
-  color: #333;
-}
-
-.translation {
-  color: #666;
-  margin-bottom: 1rem;
-}
-
-.adhkar-meta {
-  display: flex;
-  gap: 1rem;
-  color: #666;
-  font-size: 0.9rem;
-}
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -663,90 +671,86 @@ export default {
 .modal-container {
   background: white;
   border-radius: 8px;
-  padding: 2rem;
+  padding: 1.5rem;
   width: 90%;
-  max-width: 500px;
+  max-width: 400px;
+  text-align: center;
 }
 
 .modal-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.modal-header h2 {
-  margin: 0;
-  color: #333;
-}
-
 .delete-icon {
+  font-size: 2rem;
   color: #dc3545;
-  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .modal-actions {
   display: flex;
+  justify-content: center;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 .btn-danger {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: #dc3545;
+  background-color: #dc3545;
   color: white;
   border: none;
+  padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .btn-danger:hover {
   background-color: #c82333;
 }
 
-.btn-secondary {
-  padding: 0.75rem 1.5rem;
-  background: #f8f9fa;
-  color: #666;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: inherit;
-}
-
 .btn-secondary:hover {
-  background-color: #e9ecef;
+  background-color: #5a6268;
 }
 
 /* Dark mode styles */
 body.dark-mode {
   .form-container,
   .modal-container,
-  .adhkar-card,
+  .adhkar-table-container,
   .empty-state {
     background-color: #333;
   }
 
   .form-group label,
-  .adhkar-header h3,
   .modal-header h2 {
     color: #fff;
   }
 
-  .arabic-text {
-    color: #fff;
+  .adhkar-table th {
+    background-color: #444;
+    color: #ddd;
   }
 
-  .translation,
-  .adhkar-meta,
-  .subtitle {
-    color: #aaa;
+  .adhkar-table td {
+    border-bottom-color: #444;
+  }
+
+  .adhkar-table tr:hover {
+    background-color: #3a3a3a;
   }
 
   .search-input,
@@ -784,8 +788,11 @@ body.dark-mode {
     width: 100%;
   }
 
-  .adhkar-list {
-    grid-template-columns: 1fr;
+  .adhkar-table th:nth-child(2),
+  .adhkar-table td:nth-child(2),
+  .adhkar-table th:nth-child(3),
+  .adhkar-table td:nth-child(3) {
+    display: none;
   }
 }
 </style> 

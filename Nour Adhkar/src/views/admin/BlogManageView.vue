@@ -70,7 +70,16 @@
             قبلی
           </button>
           
-          <span class="page-info">صفحه {{ pagination.current_page }} از {{ pagination.last_page }}</span>
+          <div class="page-numbers">
+            <button 
+              v-for="page in displayedPages" 
+              :key="page" 
+              :class="['page-number', { active: pagination.current_page === page }]"
+              @click="changePage(page)"
+            >
+              {{ page }}
+            </button>
+          </div>
           
           <button 
             :disabled="pagination.current_page === pagination.last_page" 
@@ -129,7 +138,23 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['isAuthenticated'])
+    ...mapGetters(['isAuthenticated']),
+    displayedPages() {
+      const displayCount = 5;
+      let start = Math.max(1, this.pagination.current_page - Math.floor(displayCount / 2));
+      let end = Math.min(this.pagination.last_page, start + displayCount - 1);
+      
+      // Adjust start if end is at max pages
+      if (end === this.pagination.last_page) {
+        start = Math.max(1, end - displayCount + 1);
+      }
+      
+      const pages = [];
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
   },
   mounted() {
     // Remove the redirection check since it's handled by the guard
@@ -403,31 +428,44 @@ export default {
   justify-content: center;
   align-items: center;
   margin-top: 20px;
-  gap: 16px;
-  padding: 16px;
 }
 
 .pagination-button {
-  background-color: #A79277;
-  color: white;
-  border: none;
   padding: 8px 16px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  margin: 0 5px;
 }
 
 .pagination-button:disabled {
-  background-color: #d1d1d1;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.pagination-button:not(:disabled):hover {
-  background-color: #8a7660;
+.page-numbers {
+  display: flex;
+  margin: 0 10px;
 }
 
-.page-info {
-  color: #666;
+.page-number {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  background-color: white;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.page-number.active {
+  background-color: #A79277;
+  color: white;
+  border-color: #A79277;
 }
 
 /* Modal */

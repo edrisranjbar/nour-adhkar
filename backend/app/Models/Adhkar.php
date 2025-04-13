@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Adhkar extends Model
 {
@@ -13,14 +13,17 @@ class Adhkar extends Model
         'prefix',
         'arabic_text',
         'translation',
-        'collection_id'
+        'user_id',
+        'is_custom',
     ];
 
-    /**
-     * The collections that belong to the adhkar.
-     */
-    public function collections(): BelongsToMany
+    protected $casts = [
+        'is_custom' => 'boolean',
+        'count' => 'integer'
+    ];
+
+    public function user(): BelongsTo
     {
-        return $this->belongsToMany(Collection::class, 'collection_adhkars');
+        return $this->belongsTo(User::class);
     }
 } 

@@ -15,10 +15,6 @@
       <section class="adhkars-section">
         <div class="section-header">
           <h2>اذکار</h2>
-          <button class="add-dhikr-button" @click="showCustomDhikrModal = true">
-            <font-awesome-icon icon="fa-solid fa-plus" />
-            افزودن ذکر
-          </button>
         </div>
         <div v-if="adhkars.length > 0" class="carousel-container">
           <button class="carousel-button prev" @click="prevSlide" :disabled="currentPage === 0">
@@ -76,50 +72,6 @@
 
     </main>
 
-    <!-- Custom Dhikr Modal -->
-    <div v-if="showCustomDhikrModal" class="modal">
-      <header>
-        <div class="d-flex">
-          <button class="appbar-action-button-wrapper" @click="showCustomDhikrModal = false">
-            <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
-          </button>
-          <h1 id="modal-title">افزودن ذکر جدید</h1>
-        </div>
-      </header>
-
-      <div class="modal-container">
-        <div class="custom-dhikr-form">
-          <div class="form-group">
-            <label for="title">عنوان ذکر</label>
-            <input type="text" id="title" v-model="customDhikr.title" placeholder="عنوان ذکر را وارد کنید"
-              class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="arabic_text">متن عربی</label>
-            <textarea id="arabic_text" v-model="customDhikr.arabic_text" placeholder="متن عربی ذکر را وارد کنید"
-              class="form-control" rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="translation">ترجمه فارسی</label>
-            <input type="text" id="translation" v-model="customDhikr.translation" placeholder="ترجمه فارسی را وارد کنید"
-              class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="prefix">پیشوند</label>
-            <input type="text" id="prefix" v-model="customDhikr.prefix" placeholder="پیشوند ذکر (اختیاری)"
-              class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="count">تعداد تکرار</label>
-            <input type="number" id="count" v-model="customDhikr.count" min="1" class="form-control">
-          </div>
-          <button class="btn-primary" @click="createCustomDhikr" :disabled="!isCustomDhikrValid">
-            ایجاد ذکر جدید
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Toast Notifications -->
     <div class="toast-container">
       <transition-group name="toast">
@@ -145,29 +97,15 @@ export default {
       adhkars: [],
       currentPage: 0,
       itemsPerPage: 3,
-      customDhikr: {
-        title: '',
-        translation: '',
-        count: 33,
-        arabic_text: '',
-        prefix: ''
-      },
       currentDhikr: {},
       currentCount: 0,
       hasCompleted: false,
-      showCustomDhikrModal: false,
       toasts: []
     }
   },
   computed: {
     ...mapState(['user']),
     ...mapGetters(['isAuthenticated']),
-    isCustomDhikrValid() {
-      return this.customDhikr.title.trim() &&
-        this.customDhikr.arabic_text.trim() &&
-        this.customDhikr.translation.trim() &&
-        this.customDhikr.count > 0;
-    },
     progressPercentage() {
       if (!this.currentDhikr.count) return 0;
       return (this.currentCount / this.currentDhikr.count) * 100;
@@ -227,41 +165,10 @@ export default {
         this.itemsPerPage = 3;
       }
     },
-    async createCustomDhikr() {
-      if (!this.isCustomDhikrValid) return;
-
-      try {
-        const response = await axios.post(`${BASE_API_URL}/adhkars`,
-          this.customDhikr,
-          {
-            headers: {
-              Authorization: `Bearer ${this.$store.state.token}`
-            }
-          }
-        );
-
-        this.adhkars.push(response.data);
-        this.resetCustomDhikr();
-        this.showCustomDhikrModal = false;
-        this.addToast('ذکر جدید با موفقیت ایجاد شد', 'success');
-      } catch (error) {
-        console.error('Error creating custom dhikr:', error);
-        this.addToast('خطا در ایجاد ذکر جدید', 'error');
-      }
-    },
     selectDhikr(dhikr) {
       this.currentDhikr = dhikr;
       this.currentCount = 0;
       this.hasCompleted = false;
-    },
-    resetCustomDhikr() {
-      this.customDhikr = {
-        title: '',
-        translation: '',
-        count: 33,
-        arabic_text: '',
-        prefix: ''
-      };
     },
     handleCounterClick() {
       // Only increment if we have a current dhikr selected

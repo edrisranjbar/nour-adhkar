@@ -58,6 +58,20 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::put('/users/{id}', [AuthController::class, 'adminUpdate']);
     Route::patch('/users/{id}/toggle-status', [AuthController::class, 'toggleStatus']);
 
+    // Collection management routes
+    Route::get('/collections', [CollectionController::class, 'adminIndex']);
+    Route::post('/collections', [CollectionController::class, 'adminStore']);
+    Route::get('/collections/{id}', [CollectionController::class, 'adminShow']);
+    Route::put('/collections/{id}', [CollectionController::class, 'adminUpdate']);
+    Route::delete('/collections/{id}', [CollectionController::class, 'adminDestroy']);
+
+    // Adhkar management routes
+    Route::get('/adhkar', [AdhkarController::class, 'adminIndex']);
+    Route::post('/adhkar', [AdhkarController::class, 'adminStore']);
+    Route::get('/adhkar/{id}', [AdhkarController::class, 'adminShow']);
+    Route::put('/adhkar/{id}', [AdhkarController::class, 'adminUpdate']);
+    Route::delete('/adhkar/{id}', [AdhkarController::class, 'adminDestroy']);
+
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::get('/categories/{category}', [CategoryController::class, 'show']);

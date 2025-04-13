@@ -67,7 +67,7 @@
                     :value="dhikr.id"
                     v-model="formData.adhkarIds"
                   />
-                  <span class="dhikr-title">{{ dhikr.title }}</span>
+                  <span class="dhikr-title">{{ dhikr.title || dhikr.arabic_text.substring(0, 30) + '...' }}</span>
                 </label>
               </div>
             </div>
@@ -85,7 +85,7 @@
       </div>
     </div>
 
-    <!-- Collections List -->
+    <!-- Collections Table -->
     <div v-if="loading" class="loading-state">
       <font-awesome-icon icon="fa-solid fa-spinner" spin />
       <span>در حال بارگذاری...</span>
@@ -97,34 +97,44 @@
       <p class="subtitle">برای افزودن مجموعه جدید روی دکمه بالا کلیک کنید</p>
     </div>
 
-    <div v-else class="collections-list">
-      <div v-for="collection in filteredCollections" :key="collection.id" class="collection-card">
-        <div class="collection-header">
-          <h3>{{ collection.title }}</h3>
-          <div class="card-actions">
-            <button class="edit-button" @click="editCollection(collection)">
-              <font-awesome-icon icon="fa-solid fa-edit" />
-            </button>
-            <button class="delete-button" @click="confirmDelete(collection)">
-              <font-awesome-icon icon="fa-solid fa-trash" />
-            </button>
-          </div>
-        </div>
-        
-        <div class="collection-content">
-          <p class="description">{{ collection.description }}</p>
-          <div class="collection-meta">
-            <span class="count">
-              تعداد اذکار: {{ collection.adhkar?.length || 0 }}
-            </span>
-          </div>
-          <div class="adhkar-list" v-if="collection.adhkar?.length">
-            <div v-for="dhikr in collection.adhkar" :key="dhikr.id" class="dhikr-tag">
-              {{ dhikr.title }}
-            </div>
-          </div>
-        </div>
-      </div>
+    <div v-else class="collections-table-container">
+      <table class="collections-table">
+        <thead>
+          <tr>
+            <th>شناسه</th>
+            <th>عنوان</th>
+            <th>تعداد اذکار</th>
+            <th>توضیحات</th>
+            <th>عملیات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="collection in paginatedCollections" :key="collection.id">
+            <td>{{ collection.id }}</td>
+            <td>{{ collection.title }}</td>
+            <td>{{ collection.adhkar?.length || 0 }}</td>
+            <td class="description-cell">{{ truncateDescription(collection.description) }}</td>
+            <td class="actions">
+              <ActionButton
+                type="edit"
+                title="ویرایش"
+                @click="editCollection(collection)"
+              />
+              <ActionButton
+                type="delete"
+                title="حذف"
+                @click="confirmDelete(collection)"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Pagination -->
+      <Pagination
+        :pagination="pagination"
+        @page-change="changePage"
+      />
     </div>
 
     <!-- Delete Confirmation Modal -->
@@ -157,6 +167,8 @@
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
 import NotificationToast from '@/components/Admin/NotificationToast.vue';
+import ActionButton from '@/components/Admin/ActionButton.vue';
+import Pagination from '@/components/Admin/Pagination.vue';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { 
   faPlus, 
@@ -173,7 +185,9 @@ library.add(faPlus, faSearch, faEdit, faTrash, faBook, faSpinner);
 export default {
   name: 'AdminCollectionsView',
   components: {
-    NotificationToast
+    NotificationToast,
+    ActionButton,
+    Pagination
   },
   data() {
     return {
@@ -194,6 +208,13 @@ export default {
       notification: {
         type: '',
         message: ''
+      },
+      // Pagination
+      pagination: {
+        current_page: 1,
+        last_page: 1,
+        total: 0,
+        per_page: 10
       }
     }
   },
@@ -205,23 +226,28 @@ export default {
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(collection => 
-          collection.title.toLowerCase().includes(query) ||
-          collection.description.toLowerCase().includes(query)
+          (collection.title && collection.title.toLowerCase().includes(query)) ||
+          (collection.description && collection.description.toLowerCase().includes(query))
         );
       }
       
       // Apply sorting
       const [field, order] = this.sortBy.split('_');
       filtered.sort((a, b) => {
-        const aValue = a[field];
-        const bValue = b[field];
+        let aValue = a[field] || '';
+        let bValue = b[field] || '';
+        
         return order === 'asc' ? 
           (aValue > bValue ? 1 : -1) : 
           (aValue < bValue ? 1 : -1);
       });
       
       return filtered;
-    }
+    },
+    paginatedCollections() {
+      const startIndex = (this.pagination.current_page - 1) * this.pagination.per_page;
+      return this.filteredCollections.slice(startIndex, startIndex + this.pagination.per_page);
+    },
   },
   methods: {
     async loadCollections() {
@@ -254,11 +280,23 @@ export default {
       }
     },
     handleSearch() {
-      // Debounce search if needed
-      this.applyFilters();
+      this.pagination.current_page = 1; // Reset to first page on search
+      this.updatePagination();
     },
     applyFilters() {
-      // Filters are applied through computed property
+      this.updatePagination();
+    },
+    updatePagination() {
+      this.pagination.total = this.filteredCollections.length;
+      this.pagination.last_page = Math.ceil(this.filteredCollections.length / this.pagination.per_page);
+    },
+    changePage(page) {
+      this.pagination.current_page = page;
+      window.scrollTo(0, 0);
+    },
+    truncateDescription(description) {
+      if (!description) return '';
+      return description.length > 50 ? description.substring(0, 50) + '...' : description;
     },
     resetForm() {
       this.formData = {
@@ -277,7 +315,7 @@ export default {
       this.formData = {
         title: collection.title,
         description: collection.description,
-        adhkarIds: collection.adhkar.map(dhikr => dhikr.id)
+        adhkarIds: collection.adhkar?.map(dhikr => dhikr.id) || []
       };
       this.showAddForm = true;
     },
@@ -359,11 +397,17 @@ export default {
       };
     }
   },
+  watch: {
+    filteredCollections() {
+      this.updatePagination();
+    }
+  },
   async created() {
     await Promise.all([
       this.loadCollections(),
       this.loadAdhkar()
     ]);
+    this.updatePagination();
   }
 }
 </script>
@@ -440,6 +484,49 @@ export default {
   font-family: inherit;
 }
 
+/* Table Styles */
+.collections-table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.collections-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.collections-table th,
+.collections-table td {
+  padding: 1rem;
+  text-align: right;
+  border-bottom: 1px solid #eee;
+}
+
+.collections-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.collections-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+.description-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Form Styles */
 .form-overlay {
   position: fixed;
   top: 0;
@@ -552,6 +639,7 @@ export default {
   background-color: #8a7660;
 }
 
+/* Other States */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -581,95 +669,7 @@ export default {
   margin-top: 0.5rem;
 }
 
-.collections-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem;
-}
-
-.collection-card {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.collection-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.collection-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.card-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.edit-button,
-.delete-button {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: inherit;
-}
-
-.edit-button {
-  color: #2196f3;
-}
-
-.delete-button {
-  color: #dc3545;
-}
-
-.edit-button:hover {
-  background-color: rgba(33, 150, 243, 0.1);
-}
-
-.delete-button:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-}
-
-.collection-content {
-  margin-top: 1rem;
-}
-
-.description {
-  color: #666;
-  margin-bottom: 1rem;
-}
-
-.collection-meta {
-  display: flex;
-  gap: 1rem;
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.adhkar-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.dhikr-tag {
-  background: #f8f9fa;
-  color: #666;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.9rem;
-}
-
+/* Modal Styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -686,139 +686,82 @@ export default {
 .modal-container {
   background: white;
   border-radius: 8px;
-  padding: 2rem;
+  padding: 1.5rem;
   width: 90%;
-  max-width: 500px;
+  max-width: 400px;
+  text-align: center;
 }
 
 .modal-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.modal-header h2 {
-  margin: 0;
-  color: #333;
-}
-
 .delete-icon {
+  font-size: 2rem;
   color: #dc3545;
-  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .modal-actions {
   display: flex;
+  justify-content: center;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 .btn-danger {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: #dc3545;
+  background-color: #dc3545;
   color: white;
   border: none;
+  padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .btn-danger:hover {
   background-color: #c82333;
 }
 
-.btn-secondary {
-  padding: 0.75rem 1.5rem;
-  background: #f8f9fa;
-  color: #666;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: inherit;
-}
-
 .btn-secondary:hover {
-  background-color: #e9ecef;
+  background-color: #5a6268;
 }
 
-/* Dark mode styles */
-body.dark-mode {
-  .form-container,
-  .modal-container,
-  .collection-card,
-  .empty-state {
-    background-color: #333;
-  }
-
-  .form-group label,
-  .collection-header h3,
-  .modal-header h2 {
-    color: #fff;
-  }
-
-  .description,
-  .collection-meta,
-  .subtitle {
-    color: #aaa;
-  }
-
-  .search-input,
-  .filter-select,
-  .form-group input,
-  .form-group textarea {
-    background-color: #444;
-    border-color: #555;
-    color: #fff;
-  }
-
-  .adhkar-selection {
-    background-color: #444;
-    border-color: #555;
-  }
-
-  .dhikr-item {
-    border-color: #555;
-  }
-
-  .dhikr-tag {
-    background-color: #444;
-    color: #aaa;
-  }
-
-  .cancel-button,
-  .btn-secondary {
-    background-color: #444;
-    color: #fff;
-  }
-
-  .cancel-button:hover,
-  .btn-secondary:hover {
-    background-color: #555;
-  }
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .filters {
     flex-direction: column;
   }
-
-  .filter-actions {
-    flex-direction: column;
+  
+  .collections-table th:nth-child(1),
+  .collections-table td:nth-child(1) {
+    display: none;
   }
-
-  .filter-select {
-    width: 100%;
+  
+  .description-cell {
+    max-width: 100px;
   }
-
-  .collections-list {
-    grid-template-columns: 1fr;
+  
+  .form-container {
+    padding: 1.5rem;
+    width: 95%;
+  }
+  
+  .modal-container {
+    width: 95%;
   }
 }
 </style> 

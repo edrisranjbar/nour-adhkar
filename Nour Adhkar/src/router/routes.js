@@ -28,7 +28,6 @@ const DashboardLayout = () => import('../views/dashboard/DashboardLayout.vue');
 const DashboardView = () => import('../views/dashboard/DashboardView.vue');
 const DailyAdhkarView = () => import('../views/dashboard/DailyAdhkarView.vue');
 const FavoriteAdhkarView = () => import('../views/dashboard/FavoriteAdhkarView.vue');
-const CustomAdhkarView = () => import('../views/dashboard/CustomAdhkarView.vue');
 const ProfileSettingsView = () => import('../views/dashboard/ProfileSettingsView.vue');
 const ProfileStatsView = () => import('../views/dashboard/ProfileStatsView.vue');
 
@@ -302,14 +301,6 @@ export const protectedRoutes = [
         component: FavoriteAdhkarView,
         meta: {
           title: 'اذکار مورد علاقه | داشبورد'
-        }
-      },
-      {
-        path: 'adhkar/custom',
-        name: 'custom-adhkar',
-        component: CustomAdhkarView,
-        meta: {
-          title: 'اذکار شخصی | داشبورد'
         }
       },
       {
