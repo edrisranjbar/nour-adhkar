@@ -27,6 +27,12 @@ section#morning {
 }
 
 @media (max-width: 767px) {
+  .modal-container {
+    width: calc(100% - 16px);
+    max-width: calc(100vw - 16px);
+    margin: 16px auto 0 auto;
+  }
+
   .bottom-nav-bar {
     z-index: 999;
     position: relative;
@@ -75,7 +81,6 @@ section#morning {
 
 .favorite-button:hover {
   transform: scale(1.1);
-  color: #dc3545;
 }
 
 .favorite-button.is-favorite {
@@ -109,31 +114,41 @@ section#morning {
   </div>
 
   <section id="morning" class="modal" v-if="!showCongratsModal">
-
     <header>
       <div class="d-flex">
         <RouterLink to="/" class="d-flex align-items-center">
           <img class="appbar-action-button" src="@/assets/icons/back-button.svg" alt="برگشتن">
         </RouterLink>
-        <h1 id="modal-title">{{ title }}</h1>
+        <h1 id="modal-title">{{ openedCollection.name }}</h1>
       </div>
       <span class="progressbar-container" v-if="openedCollection.adhkar.length > 1">
         <span class="progressbar-fill" :style="{ width: totalProgress + '%' }"></span>
       </span>
     </header>
 
-    <main class="modal-container" @click="handleDhikrBodyClick">
+    <div v-if="loading" class="loading-state">
+      <font-awesome-icon icon="spinner" spin />
+      <p>در حال بارگذاری...</p>
+    </div>
+
+    <div v-else-if="error" class="error-state">
+      <font-awesome-icon icon="exclamation-circle" />
+      <p>{{ error }}</p>
+      <button @click="loadCollection" class="retry-button">تلاش مجدد</button>
+    </div>
+
+    <main v-else class="modal-container" @click="handleDhikrBodyClick">
       <div class="content-top-bar">
         <h2 id="dhikr-title"></h2>
         <div class="action-buttons">
           <button class="favorite-button" @click="handleToggleFavorite" :class="{ 'is-favorite': isFavorite }">
-            <font-awesome-icon :icon="['fas', isFavorite ? 'heart' : 'heart']" />
+            <font-awesome-icon :icon="['fas', 'heart']" />
           </button>
           <img id="share-button" class="share-button" src="@/assets/icons/share.svg" alt="اشتراک گذاری" @click="share()">
         </div>
       </div>
       <p id="dhikr-prefix">{{ openedDhikr.prefix }}</p>
-      <p id="dhikr-text">{{ openedDhikr.text }}</p>
+      <p id="dhikr-text">{{ openedDhikr.arabic_text }}</p>
       <hr>
       <p id="dhikr-translation">{{ openedDhikr.translation }}</p>
     </main>
@@ -151,7 +166,6 @@ section#morning {
 import { mapState, mapGetters, mapActions } from 'vuex';
 import axios from 'axios';
 import CongratsModal from "@/components/Congrats.vue";
-import Collection from "@/models/collection.js";
 import tapSound from "@/assets/audios/click.mp3"
 import { BASE_API_URL } from '@/config';
 
@@ -161,14 +175,14 @@ export default {
     CongratsModal
   },
   props: {
-    title: String,
-    openedCollection: Collection
+    title: String
   },
   data() {
     return {
       counters: {}, // Object to store counter for each dhikr by its text (used as key)
       dhikrIndex: 0,
-      openedDhikr: this.openedCollection.adhkar[0],
+      openedCollection: { adhkar: [] },
+      openedDhikr: {},
       tapSoundAudioPath: tapSound,
       touchstartX: 0,
       touchendX: 0,
@@ -176,16 +190,13 @@ export default {
       touchendY: 0,
       showToast: false,
       toastMessage: '',
-      loading: false
+      loading: true,
+      error: null
     }
   },
   watch: {
     '$route'() {
-      // Reset to first dhikr when route changes
-      this.dhikrIndex = 0;
-      this.openedDhikr = this.openedCollection.adhkar[0];
-      // Initialize counters for the new collection
-      this.initializeCounters();
+      this.loadCollection();
     }
   },
   computed: {
@@ -193,7 +204,7 @@ export default {
     ...mapGetters(['isAuthenticated']),
     counter() {
       // Get counter for current dhikr, default to 0 if not set
-      return this.counters[this.openedDhikr.text] || 0;
+      return this.counters[this.openedDhikr.arabic_text] || 0;
     },
     isFirstDhikr() {
       return this.openedCollection.adhkar[0].text === this.openedDhikr.text;
@@ -222,6 +233,27 @@ export default {
   },
   methods: {
     ...mapActions(['toggleFavorite', 'loadFavorites']),
+    async loadCollection() {
+      try {
+        this.loading = true;
+        this.error = null;
+        const { slug } = this.$route.params;
+        const response = await axios.get(`${BASE_API_URL}/collections/${slug}`);
+        
+        if (response.data.success) {
+          this.openedCollection = response.data.collection;
+          this.openedDhikr = this.openedCollection.adhkar[0];
+          this.initializeCounters();
+        } else {
+          this.error = 'Failed to load collection';
+        }
+      } catch (error) {
+        console.error('Error loading collection:', error);
+        this.error = 'Failed to load collection';
+      } finally {
+        this.loading = false;
+      }
+    },
     initializeCounters() {
       // Create an object with a counter for each dhikr in the collection
       const newCounters = {};
@@ -235,13 +267,13 @@ export default {
         return;
       }
       
-      const currentCount = this.counters[this.openedDhikr.text] || 0;
+      const currentCount = this.counters[this.openedDhikr.arabic_text] || 0;
       if (currentCount >= this.openedDhikr.count) {
         return;
       }
       
       // Update the counter for the current dhikr
-      this.counters[this.openedDhikr.text] = currentCount + 1;
+      this.counters[this.openedDhikr.arabic_text] = currentCount + 1;
       
       if (currentCount + 1 >= this.openedDhikr.count && this.isThereANextDhikr) {
         this.gotoNextDhikr();
@@ -384,21 +416,16 @@ export default {
     },
     async handleToggleFavorite() {
       if (!this.$store.state.token) {
-        this.$toast.error('Please login to add favorites');
+        this.showToastMessage('لطفا برای افزودن به علاقه‌مندی‌ها وارد شوید');
         return;
       }
       
       try {
-        this.loading = true;
         const response = await this.toggleFavorite(this.openedDhikr.id);
-        if (response.success) {
-          this.$toast.success(response.isFavorite ? 'Added to favorites' : 'Removed from favorites');
-        }
+        this.showToastMessage(response.isFavorite ? 'به علاقه‌مندی‌ها اضافه شد' : 'از علاقه‌مندی‌ها حذف شد');
       } catch (error) {
         console.error('Error toggling favorite:', error);
-        this.$toast.error('Failed to update favorite');
-      } finally {
-        this.loading = false;
+        this.showToastMessage('خطا در بروزرسانی علاقه‌مندی‌ها');
       }
     }
   },
@@ -406,6 +433,7 @@ export default {
     if (this.$store.state.token) {
       await this.loadFavorites();
     }
+    await this.loadCollection();
   },
   mounted() {
     this.initializeCounters();

@@ -35,10 +35,14 @@ const store = createStore({
             state.favorites = favorites;
         },
         addFavorite(state, favorite) {
-            state.favorites.push(favorite);
+            if (favorite && typeof favorite === 'object') {
+                state.favorites.push(favorite);
+            }
         },
         removeFavorite(state, id) {
-            state.favorites = state.favorites.filter(f => f.id !== id);
+            if (id) {
+                state.favorites = state.favorites.filter(f => f && f.id && f.id !== id);
+            }
         }
     },
     actions: {
@@ -102,8 +106,7 @@ const store = createStore({
                 );
                 if (response.data.success) {
                     if (response.data.isFavorite) {
-                        const dhikr = await axios.get(`${BASE_API_URL}/adhkar/${id}`);
-                        commit('addFavorite', dhikr.data);
+                        commit('addFavorite', response.data.dhikr);
                     } else {
                         commit('removeFavorite', id);
                     }

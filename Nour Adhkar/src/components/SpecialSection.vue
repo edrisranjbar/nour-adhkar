@@ -2,7 +2,7 @@
   <section class="special-section">
     <h2 class="section-title">{{ title }}</h2>
     <div class="special-cards-row">
-      <RouterLink to="morning" class="special-card morning-card">
+      <RouterLink to="/collections/morning" class="special-card morning-card">
         <div class="special-card-content">
           <div class="special-card-icon">
             <font-awesome-icon icon="fa-solid fa-sun" />
@@ -13,7 +13,7 @@
         </div>
       </RouterLink>
       
-      <RouterLink to="night" class="special-card night-card">
+      <RouterLink to="/collections/night" class="special-card night-card">
         <div class="special-card-content">
           <div class="special-card-icon">
             <font-awesome-icon icon="fa-solid fa-moon" />

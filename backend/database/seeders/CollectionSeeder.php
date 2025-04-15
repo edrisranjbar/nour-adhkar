@@ -13,26 +13,32 @@ class CollectionSeeder extends Seeder
             [
                 'name' => 'اذکار روزانه',
                 'type' => 'daily',
+                'slug' => 'daily',
             ],
             [
                 'name' => 'اذکار صبحگاه',
                 'type' => 'daily',
+                'slug' => 'morning',
             ],
             [
                 'name' => 'اذکار شامگاه',
                 'type' => 'daily',
+                'slug' => 'night',
             ],
             [
                 'name' => 'دعای خواب',
                 'type' => 'daily',
+                'slug' => 'sleep',
             ],
             [
                 'name' => 'اذکار ماه رمضان',
                 'type' => 'special',
+                'slug' => 'ramadan',
             ],
             [
                 'name' => 'دعاء استخاره',
                 'type' => 'special',
+                'slug' => 'istikhara',
             ],
         ];
 

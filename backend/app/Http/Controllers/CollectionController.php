@@ -19,6 +19,28 @@ class CollectionController extends Controller
         ]);
     }
 
+    /**
+     * Get a collection by its slug
+     */
+    public function show($slug)
+    {
+        try {
+            $collection = Collection::where('slug', $slug)
+                ->with('adhkar')
+                ->firstOrFail();
+
+            return response()->json([
+                'success' => true,
+                'collection' => $collection
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Collection not found'
+            ], 404);
+        }
+    }
+
     // Admin methods for collection management
     
     public function adminIndex()

@@ -20,6 +20,17 @@ class AdhkarController extends Controller
         ]);
     }
 
+    public function show($slug)
+    {
+        $collection = Collection::where('slug', $slug)->first();
+        $adhkar = Adhkar::where('collection_id', $collection->id)->get();
+        return response()->json([
+            'success' => true,
+            'collection_name' => $collection->name,
+            'dhikrs' => $adhkar
+        ]);
+    }
+
     public function getFavorites()
     {
         try {
@@ -74,7 +85,8 @@ class AdhkarController extends Controller
             return response()->json([
                 'success' => true,
                 'isFavorite' => !$isFavorite,
-                'message' => !$isFavorite ? 'Added to favorites' : 'Removed from favorites'
+                'message' => !$isFavorite ? 'Added to favorites' : 'Removed from favorites',
+                'dhikr' => $adhkar
             ]);
         } catch (\Exception $e) {
             return response()->json([

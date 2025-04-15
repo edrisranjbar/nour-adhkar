@@ -12,8 +12,8 @@
         <div class="footer-section quick-links">
           <h4>لینک‌های سریع</h4>
           <ul class="footer-links-list">
-            <li><RouterLink to="/morning" class="footer-link">اذکار صبحگاه</RouterLink></li>
-            <li><RouterLink to="/night" class="footer-link">اذکار شامگاه</RouterLink></li>
+            <li><RouterLink to="/collections/morning" class="footer-link">اذکار صبحگاه</RouterLink></li>
+            <li><RouterLink to="/collections/night" class="footer-link">اذکار شامگاه</RouterLink></li>
             <li><RouterLink to="/counter" class="footer-link">تسبیح شمار</RouterLink></li>
             <li><RouterLink to="/blog" class="footer-link">مقالات</RouterLink></li>
           </ul>

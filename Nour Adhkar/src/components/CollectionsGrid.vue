@@ -1,7 +1,7 @@
 <template>
   <section class="collections-grid">
     <section class="small-cards-row">
-      <RouterLink to="morning" class="card-sm">
+      <RouterLink to="/collections/morning" class="card-sm">
         <CategoryCard image-src="src/assets/images/morning.png">
           <div class="card-overlay">
             <h2 class="card-text-top">اذکار صبحگاه</h2>
@@ -10,7 +10,7 @@
         </CategoryCard>
       </RouterLink>
 
-      <RouterLink to="night" class="card-sm">
+      <RouterLink to="/collections/night" class="card-sm">
         <CategoryCard image-src="src/assets/images/night.png">
           <div class="card-overlay">
             <h2 class="card-text-left">اذکار شامگاه</h2>
@@ -21,7 +21,7 @@
     </section>
 
     <section class="small-cards-row">
-      <RouterLink to="daily" class="card-sm">
+      <RouterLink to="/collections/daily" class="card-sm">
         <CategoryCard image-src="src/assets/images/daily.svg">
           <div class="card-overlay">
             <h2 class="card-text-top">اذکار روزانه</h2>
@@ -30,7 +30,7 @@
         </CategoryCard>
       </RouterLink>
 
-      <RouterLink to="ramadan" class="card-sm">
+      <RouterLink to="/collections/ramadan" class="card-sm">
         <CategoryCard image-src="src/assets/images/ramadan.svg">
           <div class="card-overlay">
             <h2 class="card-text-left">اذکار ماه رمضان</h2>
@@ -41,7 +41,7 @@
     </section>
 
     <section class="small-cards-row">
-      <RouterLink to="sleep" class="card-sm">
+      <RouterLink to="/collections/sleep" class="card-sm">
         <CategoryCard image-src="src/assets/images/sleep.jpg" size="small">
           <div class="card-overlay">
             <h2 class="card-text-top card-text-top">دعای خواب</h2>
@@ -49,7 +49,7 @@
           </div>
         </CategoryCard>
       </RouterLink>
-      <RouterLink to="istikhara" class="card-sm">
+      <RouterLink to="/collections/istikhara" class="card-sm">
         <CategoryCard image-src="src/assets/images/prayer.png" size="small">
           <div class="card-overlay">
             <h2 class="card-text-bottom card-text-left">دعای استخاره</h2>
@@ -60,7 +60,7 @@
     </section>
     
     <section class="small-cards-row">
-      <RouterLink to="special" class="card-sm">
+      <RouterLink to="/collections/special" class="card-sm">
         <CategoryCard image-src="src/assets/images/special.svg" size="small" alt="Special occasions">
           <div class="card-overlay">
             <h2 class="card-text-top card-text-center">مناسبت‌های خاص</h2>
@@ -68,7 +68,7 @@
           </div>
         </CategoryCard>
       </RouterLink>
-      <RouterLink to="counter" class="card-sm">
+      <RouterLink to="/collections/counter" class="card-sm">
         <CategoryCard image-src="src/assets/images/counter.svg" style="background-position: center;">
           <div class="card-overlay">
             <h2 class="card-text-left">تسبیح شمار</h2>

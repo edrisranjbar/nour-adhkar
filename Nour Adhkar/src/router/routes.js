@@ -11,14 +11,6 @@ import ContributionView from '../views/ContributionView.vue'
 import AboutView from '../views/AboutView.vue'
 import { authGuard, adminGuard } from './guards';
 
-import { morningCollection } from '@/assets/js/collections/morning';
-import { nightCollection } from '@/assets/js/collections/night';
-import { istikharaCollection } from '@/assets/js/collections/istikhara';
-import { sleepCollection } from '@/assets/js/collections/sleep';
-import { dailyCollection } from '@/assets/js/collections/daily';
-import { ramadanCollection } from '@/assets/js/collections/ramadan';
-import { specialCollection } from '@/assets/js/collections/special';
-
 // Lazy loading for blog components
 const BlogView = () => import('../views/BlogView.vue');
 const BlogPostView = () => import('../views/BlogPostView.vue');
@@ -83,108 +75,14 @@ export const publicRoutes = [
     }
   },
   {
-    path: '/morning',
-    name: 'morning',
+    path: '/collections/:slug',
+    name: 'collection',
     component: DhikrView,
-    props: {
-      title: 'اذکار صبحگاه',
-      openedCollection: morningCollection
-    },
     meta: {
-      title: 'اذکار صبحگاهی | اذکار نور',
-      description: 'مجموعه کامل اذکار و دعاهای صبحگاهی با ترجمه فارسی و منبع',
+      title: 'مجموعه اذکار | اذکار نور',
+      description: 'مجموعه اذکار و ادعیه با ترجمه فارسی و منبع',
       changefreq: 'weekly',
-      priority: '0.9'
-    }
-  },
-  {
-    path: '/night',
-    name: 'night',
-    component: DhikrView,
-    props: {
-      title: 'اذکار شامگاه',
-      openedCollection: nightCollection
-    },
-    meta: {
-      title: 'اذکار شامگاهی | اذکار نور',
-      description: 'مجموعه کامل اذکار و دعاهای شامگاهی با ترجمه فارسی و منبع',
-      changefreq: 'weekly',
-      priority: '0.9'
-    }
-  },
-  {
-    path: '/sleep',
-    name: 'sleep',
-    component: DhikrView,
-    props: {
-      title: 'دعای خواب',
-      openedCollection: sleepCollection
-    },
-    meta: {
-      title: 'دعای خواب | اذکار نور',
-      description: 'اذکار و دعاهای هنگام خواب با ترجمه فارسی و منبع',
-      changefreq: 'monthly',
-      priority: '0.7'
-    }
-  },
-  {
-    path: '/istikhara',
-    name: 'istikhara',
-    component: DhikrView,
-    props: {
-      title: 'دعای استخاره',
-      openedCollection: istikharaCollection
-    },
-    meta: {
-      title: 'دعای استخاره | اذکار نور',
-      description: 'دعای استخاره به همراه آموزش روش‌های صحیح انجام استخاره',
-      changefreq: 'monthly',
       priority: '0.8'
-    }
-  },
-  {
-    path: '/daily',
-    name: 'daily',
-    component: DhikrView,
-    props: {
-      title: 'اذکار روزانه',
-      openedCollection: dailyCollection
-    },
-    meta: {
-      title: 'اذکار روزانه | اذکار نور',
-      description: 'مجموعه اذکار روزانه برای استفاده در موقعیت‌های مختلف روزمره',
-      changefreq: 'monthly',
-      priority: '0.7'
-    }
-  },
-  {
-    path: '/ramadan',
-    name: 'ramadan',
-    component: DhikrView,
-    props: {
-      title: 'اذکار ماه رمضان',
-      openedCollection: ramadanCollection
-    },
-    meta: {
-      title: 'اذکار ماه رمضان | اذکار نور',
-      description: 'دعاها و اذکار مخصوص ماه مبارک رمضان، شب‌های قدر و عید فطر',
-      changefreq: 'yearly',
-      priority: '0.6'
-    }
-  },
-  {
-    path: '/special',
-    name: 'special',
-    component: DhikrView,
-    props: {
-      title: 'اذکار مناسبت‌های خاص',
-      openedCollection: specialCollection
-    },
-    meta: {
-      title: 'اذکار مناسبت‌های خاص | اذکار نور',
-      description: 'مجموعه اذکار و ادعیه برای مناسبت‌های خاص مانند عید، عرفه و ...',
-      changefreq: 'yearly',
-      priority: '0.6'
     }
   },
   {

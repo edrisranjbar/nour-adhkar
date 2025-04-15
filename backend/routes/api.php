@@ -28,6 +28,7 @@ Route::middleware('auth:api')->group(function () {
 // Adhkar routes
 Route::get('/adhkars', [AdhkarController::class, 'index']);
 Route::get('/collections', [CollectionController::class, 'index']);
+Route::get('/collections/{slug}', [CollectionController::class, 'show']);
 
 // Donation routes
 Route::prefix('donations')->group(function () {
