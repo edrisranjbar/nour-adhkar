@@ -62,6 +62,25 @@ const store = createStore({
                 localStorage.removeItem('token');
             }
         },
+        async refreshToken({ commit, state }) {
+            try {
+                const response = await axios.post(`${BASE_API_URL}/refresh`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${state.token}`
+                    }
+                });
+                
+                if (response.data.token) {
+                    commit('setToken', response.data.token);
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Token refresh error:', error);
+                commit('clearUser');
+                return false;
+            }
+        },
         async loadUserStats({ state }) {
             try {
                 const response = await axios.get(`${BASE_API_URL}/user/stats`, {

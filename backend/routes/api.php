@@ -13,6 +13,7 @@ use App\Http\Controllers\MediaController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/refresh', [AuthController::class, 'refresh']);
 Route::middleware('auth:api')->group(function () {
     // User related routes with UserController
     Route::post('user/avatar', [UserController::class, 'updateAvatar']);

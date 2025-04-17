@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Passport\Token;
 
 class AuthController extends Controller
 {
@@ -38,7 +37,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            $token = $user->createToken('Personal Access Token')->accessToken;
+            $token = auth()->login($user);
 
             return response()->json([
                 'user' => new UserResource($user),
@@ -61,12 +60,11 @@ class AuthController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        if (!$token = auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $user = Auth::user();
-        $token = $user->createToken('Personal Access Token')->accessToken;
+        $user = auth()->user();
 
         return response()->json([
             'user' => new UserResource($user),
@@ -78,12 +76,27 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            $request->user()->token()->revoke();
+            auth()->logout();
             return response()->json([
                 'message' => 'Successfully logged out'
             ]);
         } catch (Exception $e) {
             return response()->json(['message' => 'Logout failed', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    // Add a refresh token method for JWT
+    public function refresh()
+    {
+        try {
+            $token = auth()->refresh();
+            
+            return response()->json([
+                'token' => $token,
+                'message' => 'Token refreshed successfully'
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Token refresh failed', 'error' => $e->getMessage()], 401);
         }
     }
 
@@ -126,11 +139,6 @@ class AuthController extends Controller
     {
         try {
             $user = User::findOrFail($id);
-
-            // Revoke all tokens
-            $user->tokens->each(function (Token $token) {
-                $token->revoke();
-            });
 
             // Delete user avatar if exists
             if ($user->avatar && $user->avatar != 'avatars/default.png') {

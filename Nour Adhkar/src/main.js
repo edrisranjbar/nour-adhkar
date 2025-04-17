@@ -62,11 +62,37 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(
     response => response,
-    error => {
-        if (error.response?.status === 401) {
-            store.commit('clearUser');
-            router.push('/login');
+    async error => {
+        const originalRequest = error.config;
+        
+        // If error is 401 and we haven't already tried to refresh the token
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            
+            try {
+                // Try to refresh the token
+                const refreshed = await store.dispatch('refreshToken');
+                
+                if (refreshed) {
+                    // If token refresh was successful, update the Authorization header and retry the request
+                    const token = store.state.token;
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                    return axios(originalRequest);
+                } else {
+                    // If token refresh failed, clear user and redirect to login
+                    store.commit('clearUser');
+                    router.push('/login');
+                    return Promise.reject(error);
+                }
+            } catch (refreshError) {
+                // If there's an error during token refresh, clear user and redirect to login
+                store.commit('clearUser');
+                router.push('/login');
+                return Promise.reject(refreshError);
+            }
         }
+        
         return Promise.reject(error);
     }
 );
