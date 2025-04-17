@@ -23,7 +23,15 @@
                     <ErrorMessage name="passwordConfirm" class="error" />
                 </div>
                 
-                <button type="submit" :disabled="Object.keys(errors).length > 0">ثبت نام</button>
+                <button 
+                    type="submit" 
+                    :disabled="Object.keys(errors).length > 0 || isProcessing"
+                >
+                    <span v-if="isProcessing" class="loading-spinner">
+                        <font-awesome-icon icon="fa-solid fa-spinner" spin />
+                    </span>
+                    ثبت نام
+                </button>
                 <div v-if="serverError" class="error server-error">{{ serverError }}</div>
             </Form>
             <div class="footer">
@@ -96,6 +104,10 @@ button,a,input {
     cursor: pointer;
     transition: background-color 0.3s;
     margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .register-form button:hover:not(:disabled) {
@@ -131,6 +143,10 @@ button,a,input {
 .footer a:hover {
     text-decoration: underline;
 }
+
+.loading-spinner {
+    font-size: 0.9rem;
+}
 </style>
 
 <script>
@@ -154,6 +170,7 @@ export default {
             nameRules: 'required|min:3',
             emailRules: 'required|email',
             passwordRules: 'required|min:8',
+            isProcessing: false
         };
     },
     computed: {
@@ -165,6 +182,7 @@ export default {
         async register() {
             try {
                 this.serverError = '';
+                this.isProcessing = true;
                 const response = await axios.post(`${BASE_API_URL}/register`, {
                     name: this.name,
                     email: this.email,
@@ -195,6 +213,8 @@ export default {
                 } else {
                     this.serverError = err.response?.data?.message || 'ثبت نام با مشکل مواجه شد';
                 }
+            } finally {
+                this.isProcessing = false;
             }
         },
     },

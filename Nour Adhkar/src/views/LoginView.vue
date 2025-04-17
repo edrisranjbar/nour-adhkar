@@ -12,7 +12,16 @@
         <ErrorMessage name="password" class="error-message" />
       </div>
       
-      <button type="submit" class="login-button" :disabled="Object.keys(errors).length > 0">ورود</button>
+      <button 
+        type="submit" 
+        class="login-button" 
+        :disabled="Object.keys(errors).length > 0 || isProcessing"
+      >
+        <span v-if="isProcessing" class="loading-spinner">
+          <font-awesome-icon icon="fa-solid fa-spinner" spin />
+        </span>
+        ورود
+      </button>
       <div v-if="serverError" class="error-message">{{ serverError }}</div>
     </Form>
     <div class="footer">
@@ -81,6 +90,10 @@ button,a,input {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .login-button:hover:not(:disabled) {
@@ -112,6 +125,10 @@ button,a,input {
 .footer a:hover {
   text-decoration: underline;
 }
+
+.loading-spinner {
+  font-size: 0.9rem;
+}
 </style>
 
 <script>
@@ -132,7 +149,8 @@ export default {
       password: '',
       serverError: '',
       emailRules: 'required|email',
-      passwordRules: 'required|min:6'
+      passwordRules: 'required|min:6',
+      isProcessing: false
     };
   },
   methods: {
@@ -141,6 +159,7 @@ export default {
     async requestLogin() {
       try {
         this.serverError = '';
+        this.isProcessing = true;
         const response = await axios.post(`${BASE_API_URL}/login`, {
           email: this.email,
           password: this.password,
@@ -160,6 +179,8 @@ export default {
       } catch (err) {
         this.serverError = err.response?.data?.error || 'خطایی رخ داد';
         console.error(err);
+      } finally {
+        this.isProcessing = false;
       }
     }
   }
