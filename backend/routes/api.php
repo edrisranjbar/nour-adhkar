@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\DhikrController;
 use App\Http\Controllers\AdhkarController;
 use App\Http\Controllers\CollectionController;
@@ -13,13 +14,18 @@ use App\Http\Controllers\MediaController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
-    Route::post('user/avatar', [AuthController::class, 'updateAvatar']);
+    // User related routes with UserController
+    Route::post('user/avatar', [UserController::class, 'updateAvatar']);
+    Route::patch('/user/name', [UserController::class, 'updateName']);
+    Route::patch('/user/password', [UserController::class, 'updatePassword']);
+    Route::patch('/user/heart', [UserController::class, 'updateHeartScore']);
+    Route::get('/user/stats', [UserController::class, 'getUserStats']);
+    
+    // Auth related routes
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'get']);
-    Route::patch('/user/name', [AuthController::class, 'changeName']);
-    Route::patch('/user/password', [AuthController::class, 'changePassword']);
-    Route::patch('/user/heart', [AuthController::class, 'updateHeartScore']);
-    Route::get('/user/stats', [AuthController::class, 'getUserStats']);
+    
+    // Other routes
     Route::post('/dhikr', [DhikrController::class, 'store']);
     Route::post('/adhkar/favorites/{id}', [AdhkarController::class, 'toggleFavorite']);
     Route::get('/adhkar/favorites', [AdhkarController::class, 'getFavorites']);
