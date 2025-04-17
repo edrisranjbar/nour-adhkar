@@ -8,7 +8,8 @@ export default {
   },
   data() {
     return {
-      showSplash: false
+      showSplash: false,
+      settingsStore: null
     }
   },
   computed: {
@@ -29,10 +30,15 @@ export default {
       }
     }
   },
-  mounted() {
+  created() {
     // Initialize settings from the Pinia store
-    const settingsStore = useSettingsStore()
-    settingsStore.init()
+    this.settingsStore = useSettingsStore()
+  },
+  mounted() {
+    // Initialize settings
+    if (this.settingsStore) {
+      this.settingsStore.init()
+    }
 
     // Set initial meta tags
     if (this.$route.meta && (this.$route.meta.title || this.$route.meta.description)) {

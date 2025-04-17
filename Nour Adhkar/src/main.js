@@ -16,14 +16,9 @@ import './assets/css/fonts.css'
 import './assets/css/style.css'
 import './assets/css/dark-mode.css'
 
-// Import additional FontAwesome icons
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faMinus, faPlus, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
-
-// Add icons to the library
-library.add(faMinus, faPlus, faChevronLeft)
-
 const app = createApp(App)
+
+app.use(createPinia())
 
 app.use(router)
 app.use(store)
@@ -73,7 +68,5 @@ axios.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-
-app.use(createPinia())
 
 app.mount('#app')
