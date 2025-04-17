@@ -18,15 +18,25 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = store.state.token;
-  if (to.path == '/dashboard' && !token) {
+  
+  // Check authentication for dashboard routes
+  if (to.path.startsWith('/dashboard') && !token) {
     next('/login');
-  } else {
-    // Set document title based on meta
-    if (to.meta.title) {
-      document.title = to.meta.title;
-    }
-    next();
+    return;
   }
+  
+  // Redirect logged-in users away from login and register pages
+  if ((to.path === '/login' || to.path === '/register') && token) {
+    next('/dashboard');
+    return;
+  }
+  
+  // Set document title based on meta
+  if (to.meta.title) {
+    document.title = to.meta.title;
+  }
+  
+  next();
 });
 
 export default router
