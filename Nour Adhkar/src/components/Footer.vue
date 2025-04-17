@@ -40,14 +40,11 @@
             <span>www.adhkar.ir</span>
           </p>
           <div class="social-links">
-            <a href="#" class="social-link" aria-label="تلگرام">
-              <font-awesome-icon icon="fa-brands fa-telegram" />
-            </a>
-            <a href="#" class="social-link" aria-label="اینستاگرام">
-              <font-awesome-icon icon="fa-brands fa-instagram" />
-            </a>
-            <a href="#" class="social-link" aria-label="گیت‌هاب">
+            <a href="https://github.com/edrisranjbar/nour-adhkar" class="social-link" aria-label="گیت‌هاب">
               <font-awesome-icon icon="fa-brands fa-github" />
+            </a>
+            <a href="mailto:edrisranjbar.dev@gmail.com" class="social-link" aria-label="ایمیل">
+              <font-awesome-icon icon="fa-solid fa-envelope" />
             </a>
           </div>
         </div>
