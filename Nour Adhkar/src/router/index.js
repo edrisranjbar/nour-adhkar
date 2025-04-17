@@ -39,4 +39,16 @@ router.beforeEach((to, from, next) => {
   next();
 });
 
+// Handle 404 status code
+router.afterEach((to) => {
+  // When the route is not-found, set proper HTTP status for SEO
+  if (to.name === 'not-found') {
+    // Only in production, set the HTTP status code
+    if (import.meta.env.PROD) {
+      // This works when using SSR or prerendering, otherwise it's ignored
+      document.querySelector('html').setAttribute('http-equiv-status', '404');
+    }
+  }
+});
+
 export default router

@@ -9,6 +9,7 @@ import DonationSuccessView from '../views/DonationSuccessView.vue'
 import DonationFailedView from '../views/DonationFailedView.vue'
 import ContributionView from '../views/ContributionView.vue'
 import AboutView from '../views/AboutView.vue'
+import NotFoundView from '../views/NotFoundView.vue'
 import { authGuard, adminGuard } from './guards';
 
 // Lazy loading for blog components
@@ -328,4 +329,14 @@ export const routes = [
   ...publicRoutes,
   ...protectedRoutes,
   ...adminRoutes,
+  // 404 catch-all route must be the last one
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: NotFoundView,
+    meta: {
+      title: 'صفحه یافت نشد | اذکار نور',
+      noindex: true
+    }
+  }
 ];
