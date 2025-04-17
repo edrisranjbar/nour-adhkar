@@ -578,3 +578,90 @@ header h1 {
   font-weight: var(--font-weight-medium);
   color: var(--brand-primary);
 }
+
+/* Error States */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  min-height: 200px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  margin: 1.5rem 1rem;
+}
+
+.error-state svg,
+.error-state .fa-exclamation-circle {
+  font-size: 2.5rem;
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.error-state p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+  max-width: 500px;
+}
+
+.error-state .retry-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #A79277;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.error-state .retry-button:hover {
+  background-color: #8a7660;
+}
+
+/* Loading States */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  min-height: 200px;
+}
+
+.loading-state svg,
+.loading-state .fa-spinner {
+  font-size: 2.5rem;
+  color: #A79277;
+  margin-bottom: 1rem;
+}
+
+.loading-state p {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* Dark mode styles */
+body.dark-mode .error-state {
+  background-color: #2a2a2a;
+}
+
+body.dark-mode .error-state p {
+  color: #bbb;
+}
+
+body.dark-mode .loading-state p {
+  color: #bbb;
+}
+
+body.dark-mode .retry-button {
+  background-color: #A79277;
+}
+
+body.dark-mode .retry-button:hover {
+  background-color: #8a7660;
+}

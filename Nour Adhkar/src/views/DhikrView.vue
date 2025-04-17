@@ -245,11 +245,11 @@ export default {
           this.openedDhikr = this.openedCollection.adhkar[0];
           this.initializeCounters();
         } else {
-          this.error = 'Failed to load collection';
+          this.error = 'خطایی رخ داده است';
         }
       } catch (error) {
         console.error('Error loading collection:', error);
-        this.error = 'Failed to load collection';
+        this.error = 'خطایی رخ داده است';
       } finally {
         this.loading = false;
       }
