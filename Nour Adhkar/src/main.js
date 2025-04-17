@@ -8,6 +8,7 @@ import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import FontAwesomeIcon from './plugins/fontawesome'
 import metaPlugin from './plugins/meta'
+import validationPlugin from './plugins/validation'
 import axios from 'axios';
 
 // Import CSS
@@ -22,6 +23,7 @@ app.use(createPinia())
 
 app.use(router)
 app.use(store)
+app.use(validationPlugin)
 app.use(Toast, {
     position: "top-center",
     timeout: 3000,

@@ -1,14 +1,22 @@
 <template>
   <div class="login-container">
     <h1 class="login-title">وارد شوید</h1>
-    <form @submit.prevent="requestLogin" class="login-form">
-      <input v-model="email" type="email" placeholder="ایمیل" required class="login-input" />
-      <input v-model="password" type="password" placeholder="رمز عبور" required class="login-input" />
-      <button type="submit" class="login-button">ورود</button>
-      <div v-if="error" class="error-message">{{ error }}</div>
-    </form>
+    <Form @submit="requestLogin" class="login-form" v-slot="{ errors }">
+      <div class="form-group">
+        <Field name="email" v-model="email" type="email" placeholder="ایمیل" :rules="emailRules" class="login-input" />
+        <ErrorMessage name="email" class="error-message" />
+      </div>
+      
+      <div class="form-group">
+        <Field name="password" v-model="password" type="password" placeholder="رمز عبور" :rules="passwordRules" class="login-input" />
+        <ErrorMessage name="password" class="error-message" />
+      </div>
+      
+      <button type="submit" class="login-button" :disabled="Object.keys(errors).length > 0">ورود</button>
+      <div v-if="serverError" class="error-message">{{ serverError }}</div>
+    </Form>
     <div class="footer">
-      <p>حساب کاربری ندارید؟ <a href="/register">اینجا ثبت نام کنید</a></p>
+      <p>حساب کاربری ندارید؟ <RouterLink to="/register">اینجا ثبت نام کنید</RouterLink></p>
     </div>
   </div>
 </template>
@@ -45,10 +53,14 @@ button,a,input {
   padding: 20px;
 }
 
+.form-group {
+  margin-bottom: 15px;
+}
+
 .login-input {
   width: 100%;
   padding: 10px;
-  margin: 10px 0;
+  margin-bottom: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
@@ -71,14 +83,19 @@ button,a,input {
   transition: background-color 0.3s;
 }
 
-.login-button:hover {
+.login-button:hover:not(:disabled) {
   background-color: #9C8466;
+}
+
+.login-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
 .error-message {
   color: red;
-  margin-top: 10px;
   font-size: 0.875rem;
+  margin-top: 4px;
 }
 
 .footer {
@@ -100,21 +117,30 @@ button,a,input {
 <script>
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
-import { mapActions } from 'vuex'; // Import mapActions to bind Vuex actions
+import { mapActions } from 'vuex';
+import { Form, Field, ErrorMessage } from 'vee-validate';
 
 export default {
+  components: {
+    Form,
+    Field,
+    ErrorMessage
+  },
   data() {
     return {
       email: '',
       password: '',
-      error: '',
+      serverError: '',
+      emailRules: 'required|email',
+      passwordRules: 'required|min:6'
     };
   },
   methods: {
-    ...mapActions(['login']), // Bind the login action from Vuex
+    ...mapActions(['login']),
 
     async requestLogin() {
       try {
+        this.serverError = '';
         const response = await axios.post(`${BASE_API_URL}/login`, {
           email: this.email,
           password: this.password,
@@ -129,13 +155,13 @@ export default {
           // Redirect to dashboard
           this.$router.push('/dashboard');
         } else {
-          this.error = response.data.message || 'ورود ناموفق بود';
+          this.serverError = response.data.message || 'ورود ناموفق بود';
         }
       } catch (err) {
-        this.error = err.response?.data?.error || 'خطایی رخ داد';
+        this.serverError = err.response?.data?.error || 'خطایی رخ داد';
         console.error(err);
       }
     }
-  },
+  }
 };
 </script>
