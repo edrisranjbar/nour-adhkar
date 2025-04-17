@@ -13,7 +13,7 @@
       <RouterLink to="/collections/night" class="card-sm">
         <CategoryCard image-src="src/assets/images/night.png">
           <div class="card-overlay">
-            <h2 class="card-text-left">اذکار شامگاه</h2>
+            <h2 class="card-text-top">اذکار شامگاه</h2>
             <span class="card-items-count">{{ nightCollection?.adhkar?.length || 0 }} ذکر</span>
           </div>
         </CategoryCard>
@@ -33,7 +33,7 @@
       <RouterLink to="/collections/ramadan" class="card-sm">
         <CategoryCard image-src="src/assets/images/ramadan.svg">
           <div class="card-overlay">
-            <h2 class="card-text-left">اذکار ماه رمضان</h2>
+            <h2 class="card-text-top">اذکار ماه رمضان</h2>
             <span class="card-items-count">{{ ramadanCollection?.adhkar?.length || 0 }} ذکر</span>
           </div>
         </CategoryCard>
@@ -44,7 +44,7 @@
       <RouterLink to="/collections/sleep" class="card-sm">
         <CategoryCard image-src="src/assets/images/sleep.jpg" size="small">
           <div class="card-overlay">
-            <h2 class="card-text-top card-text-top">دعای خواب</h2>
+            <h2 class="card-text-top">دعای خواب</h2>
             <span class="card-items-count">{{ sleepCollection?.adhkar?.length || 0 }} ذکر</span>
           </div>
         </CategoryCard>
@@ -52,7 +52,7 @@
       <RouterLink to="/collections/istikhara" class="card-sm">
         <CategoryCard image-src="src/assets/images/prayer.png" size="small">
           <div class="card-overlay">
-            <h2 class="card-text-bottom card-text-left">دعای استخاره</h2>
+            <h2 class="card-text-top">دعای استخاره</h2>
             <span class="card-items-count">{{ istikharaCollection?.adhkar?.length || 0 }} ذکر</span>
           </div>
         </CategoryCard>
@@ -63,7 +63,7 @@
       <RouterLink to="/collections/special" class="card-sm">
         <CategoryCard image-src="src/assets/images/special.svg" size="small" alt="Special occasions">
           <div class="card-overlay">
-            <h2 class="card-text-top card-text-center">مناسبت‌های خاص</h2>
+            <h2 class="card-text-top">مناسبت‌های خاص</h2>
             <span class="card-items-count">{{ specialCollection?.adhkar?.length || 0 }} ذکر</span>
           </div>
         </CategoryCard>
@@ -71,7 +71,7 @@
       <RouterLink to="/collections/counter" class="card-sm">
         <CategoryCard image-src="src/assets/images/counter.svg" style="background-position: center;">
           <div class="card-overlay">
-            <h2 class="card-text-left">تسبیح شمار</h2>
+            <h2 class="card-text-top">تسبیح شمار</h2>
           </div>
         </CategoryCard>
       </RouterLink>
@@ -124,31 +124,8 @@ export default {
 .card-sm {
   flex: 1;
   min-width: 0;
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.card-sm:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-.card-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 1rem;
-  color: white;
-  z-index: 1;
+  text-decoration: none;
+  border-radius: 16px;
 }
 
 .card-text-center {
@@ -162,12 +139,17 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .collections-grid {
+    gap: 12px;
+  }
+
   .small-cards-row {
     flex-wrap: wrap;
+    gap: 12px;
   }
   
   .card-sm {
-    flex-basis: calc(50% - 8px);
+    flex-basis: calc(50% - 6px);
   }
 }
 

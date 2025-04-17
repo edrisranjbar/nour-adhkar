@@ -21,22 +21,14 @@
         </div>
         
         <div class="favorite-content">
-          <p class="arabic-text">{{ dhikr.arabicText }}</p>
+          <p class="arabic-text">{{ dhikr.arabic_text }}</p>
           <p class="translation">{{ dhikr.translation }}</p>
-          <div class="favorite-meta">
-            <span class="source">{{ dhikr.source }}</span>
-            <span class="category">{{ dhikr.category }}</span>
-          </div>
         </div>
 
         <div class="favorite-actions">
           <button class="action-button counter-button" @click="startCounter(dhikr)">
             <font-awesome-icon icon="fa-solid fa-play" />
             شروع ذکر
-          </button>
-          <button class="action-button share-button" @click="shareDhikr(dhikr)">
-            <font-awesome-icon icon="fa-solid fa-share-alt" />
-            اشتراک‌گذاری
           </button>
         </div>
       </div>
@@ -45,49 +37,36 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: 'FavoriteAdhkarView',
-  data() {
-    return {
-      favorites: [] // Will be populated from Vuex store
-    }
+  computed: {
+    ...mapState(['favorites'])
   },
   methods: {
     async removeFavorite(id) {
       try {
-        await this.$store.dispatch('removeFavorite', id);
-        // Show success toast
+        await this.$store.dispatch('toggleFavorite', id);
+        this.$toast.success('ذکر از علاقه‌مندی‌ها حذف شد');
       } catch (error) {
-        // Show error toast
         console.error('Error removing favorite:', error);
+        this.$toast.error('خطا در حذف ذکر از علاقه‌مندی‌ها');
       }
     },
     startCounter(dhikr) {
-      // Navigate to counter view with pre-filled dhikr
       this.$router.push({
         name: 'counter',
-        query: { dhikr: dhikr.id }
+        params: { id: dhikr.id }
       });
-    },
-    shareDhikr(dhikr) {
-      // Implement sharing functionality
-      if (navigator.share) {
-        navigator.share({
-          title: dhikr.title,
-          text: `${dhikr.arabicText}\n${dhikr.translation}`,
-          url: window.location.href
-        }).catch(console.error);
-      }
     }
   },
   async created() {
     try {
-      // Load favorites from store
       await this.$store.dispatch('loadFavorites');
-      this.favorites = this.$store.state.favorites;
     } catch (error) {
       console.error('Error loading favorites:', error);
-      // Show error toast
+      this.$toast.error('خطا در بارگذاری علاقه‌مندی‌ها');
     }
   }
 }
@@ -163,55 +142,50 @@ export default {
   color: #dc3545;
   cursor: pointer;
   padding: 0.5rem;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
 }
 
 .remove-button:hover {
-  background-color: rgba(220, 53, 69, 0.1);
+  color: #c82333;
 }
 
 .favorite-content {
-  margin: 1rem 0;
+  margin-bottom: 1.5rem;
 }
 
 .arabic-text {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   text-align: center;
   margin: 1rem 0;
   color: #333;
+  line-height: 2;
 }
 
 .translation {
+  font-size: 0.95rem;
   color: #666;
-  text-align: center;
-  margin: 0.5rem 0;
-}
-
-.favorite-meta {
-  display: flex;
-  justify-content: space-between;
+  text-align: justify;
+  line-height: 1.6;
   margin-top: 1rem;
-  font-size: 0.9rem;
-  color: #666;
 }
 
 .favorite-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: 0.75rem;
 }
 
 .action-button {
   flex: 1;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
@@ -224,19 +198,10 @@ export default {
   background-color: #8a7660;
 }
 
-.share-button {
-  background-color: #f8f9fa;
-  color: #333;
-  border: 1px solid #dee2e6;
-}
-
-.share-button:hover {
-  background-color: #e9ecef;
-}
-
+/* Dark mode styles */
 body.dark-mode {
-  .empty-state,
-  .favorite-card {
+  .favorite-card,
+  .empty-state {
     background-color: #333;
   }
 
@@ -245,19 +210,8 @@ body.dark-mode {
     color: #fff;
   }
 
-  .translation,
-  .favorite-meta {
-    color: #aaa;
-  }
-
-  .share-button {
-    background-color: #444;
-    color: #fff;
-    border-color: #555;
-  }
-
-  .share-button:hover {
-    background-color: #555;
+  .translation {
+    color: #bbb;
   }
 }
 

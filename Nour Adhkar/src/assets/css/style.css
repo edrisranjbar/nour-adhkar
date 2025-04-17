@@ -108,6 +108,10 @@ body {
     direction: rtl;
 }
 
+input,textarea,select,button,radio,checkbox{
+    font-family: var(--font-primary);
+}
+
 /* RTL Support */
 [dir="rtl"] {
     text-align: right;
@@ -273,11 +277,6 @@ header h1 {
 
 .align-items-center {
     align-items: center;
-}
-
-.card-sm {
-    width: 100%;
-    background-color: #A79277;
 }
 
 .card-text-top {
@@ -490,13 +489,6 @@ header h1 {
   cursor: pointer;
   transition: all .3s ease-in-out;
   user-select: none;
-}
-
-.category-card:hover {
-  font-size: var(--font-size-2xl);
-  filter: grayscale(100%);
-  -webkit-filter: grayscale(100%);
-  box-shadow: rgba(149, 157, 165, 0.5) 0 8px 24px;
 }
 
 .category-card h2 {

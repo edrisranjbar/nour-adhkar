@@ -9,9 +9,15 @@ use Illuminate\Support\Facades\Validator;
 
 class CollectionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $collections = Collection::all();
+        $query = Collection::query();
+
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
+        }
+
+        $collections = $query->with('adhkar')->get();
 
         return response()->json([
             'success' => true,

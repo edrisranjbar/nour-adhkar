@@ -18,10 +18,9 @@ const BlogPostView = () => import('../views/BlogPostView.vue');
 // Lazy loading for dashboard components
 const DashboardLayout = () => import('../views/dashboard/DashboardLayout.vue');
 const DashboardView = () => import('../views/dashboard/DashboardView.vue');
-const DailyAdhkarView = () => import('../views/dashboard/DailyAdhkarView.vue');
+// const DailyAdhkarView = () => import('../views/dashboard/DailyAdhkarView.vue');
 const FavoriteAdhkarView = () => import('../views/dashboard/FavoriteAdhkarView.vue');
 const ProfileSettingsView = () => import('../views/dashboard/ProfileSettingsView.vue');
-const ProfileStatsView = () => import('../views/dashboard/ProfileStatsView.vue');
 
 // Lazy loading for admin components
 const AdminLayout = () => import('../views/admin/AdminLayout.vue');
@@ -185,14 +184,11 @@ export const protectedRoutes = [
           title: 'داشبورد | اذکار نور'
         }
       },
-      {
-        path: 'adhkar/daily',
-        name: 'daily-adhkar',
-        component: DailyAdhkarView,
-        meta: {
-          title: 'اذکار روزانه | داشبورد'
-        }
-      },
+      // {
+      //   path: 'adhkar/daily',
+      //   name: 'daily-adhkar',
+      //   component: DailyAdhkarView,
+      // },
       {
         path: 'adhkar/favorites',
         name: 'favorite-adhkar',
@@ -206,17 +202,9 @@ export const protectedRoutes = [
         name: 'profile-settings',
         component: ProfileSettingsView,
         meta: {
-          title: 'تنظیمات پروفایل | داشبورد'
+          title: 'تنظیمات حساب کاربری | داشبورد'
         }
       },
-      {
-        path: 'profile/stats',
-        name: 'profile-stats',
-        component: ProfileStatsView,
-        meta: {
-          title: 'آمار و گزارشات | داشبورد'
-        }
-      }
     ]
   }
 ];

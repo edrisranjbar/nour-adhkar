@@ -25,19 +25,9 @@ export default {
           icon: 'fa-solid fa-pray',
           items: [
             {
-              path: '/dashboard/adhkar/daily',
-              title: 'اذکار روزانه',
-              icon: 'fa-solid fa-sun'
-            },
-            {
               path: '/dashboard/adhkar/favorites',
               title: 'اذکار مورد علاقه',
               icon: 'fa-solid fa-heart'
-            },
-            {
-              path: '/dashboard/adhkar/custom',
-              title: 'اذکار شخصی',
-              icon: 'fa-solid fa-edit'
             }
           ]
         },
@@ -50,11 +40,6 @@ export default {
               path: '/dashboard/profile/settings',
               title: 'تنظیمات',
               icon: 'fa-solid fa-cog'
-            },
-            {
-              path: '/dashboard/profile/stats',
-              title: 'آمار و گزارشات',
-              icon: 'fa-solid fa-chart-bar'
             }
           ]
         }

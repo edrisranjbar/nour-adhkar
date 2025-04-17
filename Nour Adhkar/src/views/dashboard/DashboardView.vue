@@ -3,59 +3,9 @@
         <div class="main-content">
             <h1>داشبورد</h1>
 
-            <!-- Stats Cards -->
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <font-awesome-icon icon="fa-solid fa-pray" />
-                    </div>
-                    <div class="stat-content">
-                        <h3>اذکار امروز</h3>
-                        <p class="stat-value">{{ todayDhikrCount }}</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <font-awesome-icon icon="fa-solid fa-heart" />
-                    </div>
-                    <div class="stat-content">
-                        <h3>اذکار مورد علاقه</h3>
-                        <p class="stat-value">{{ favoriteCount }}</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <font-awesome-icon icon="fa-solid fa-calendar-check" />
-                    </div>
-                    <div class="stat-content">
-                        <h3>روزهای متوالی</h3>
-                        <p class="stat-value">{{ user?.streak || 0 }} روز</p>
-                    </div>
-                </div>
-            </div>
-
             <ProfileCard :user="user" />
             <BadgesSection :user="user" />
-
-            <!-- Profile Card and Badges -->
             <StreakCalendar :user="user" />
-            <div class="quick-actions">
-                <h2>دسترسی سریع</h2>
-                <div class="action-buttons">
-                    <RouterLink to="/dashboard/adhkar/daily" class="action-button">
-                        <font-awesome-icon icon="fa-solid fa-sun" />
-                        <span>اذکار روزانه</span>
-                    </RouterLink>
-                    <RouterLink to="/dashboard/adhkar/favorites" class="action-button">
-                        <font-awesome-icon icon="fa-solid fa-heart" />
-                        <span>اذکار مورد علاقه</span>
-                    </RouterLink>
-                    <RouterLink to="/dashboard/adhkar/custom" class="action-button">
-                        <font-awesome-icon icon="fa-solid fa-edit" />
-                        <span>اذکار شخصی</span>
-                    </RouterLink>
-                </div>
-            </div>
         </div>
 
         <!-- Modals -->
@@ -96,13 +46,6 @@ export default {
         BadgesSection,
         StreakCalendar
     },
-    watch: {
-        'user.total_dhikrs': {
-            handler() {
-                this.loadStats();
-            }
-        }
-    },
     async mounted() {
         try {
             const response = await axios.get(`${BASE_API_URL}/user`, {
@@ -117,8 +60,6 @@ export default {
                 this.$store.commit('setUser', response.data.user);
                 this.$store.commit('setToken', this.$store.state.token);
             }
-
-            await this.loadStats();
         } catch (error) {
             if (error.response?.status === 401) {
                 this.toast.error('لطفا دوباره وارد شوید');
@@ -134,21 +75,10 @@ export default {
     data() {
         return {
             user: store.state.user,
-            isLogoutModalOpen: false,
-            todayDhikrCount: 0,
-            favoriteCount: 0
+            isLogoutModalOpen: false
         };
     },
     methods: {
-        async loadStats() {
-            try {
-                const stats = await this.$store.dispatch('loadUserStats');
-                this.todayDhikrCount = stats.todayCount || 0;
-                this.favoriteCount = stats.favoriteCount || 0;
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        },
         closeModals() {
             this.isLogoutModalOpen = false;
         },
@@ -182,48 +112,6 @@ export default {
     color: #333;
 }
 
-.dashboard-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    background: #A79277;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.5rem;
-}
-
-.stat-content h3 {
-    margin: 0;
-    font-size: 1rem;
-    color: #666;
-}
-
-.stat-value {
-    margin: 0.25rem 0 0;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-}
-
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -234,43 +122,6 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 2rem;
-}
-
-.quick-actions {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.quick-actions h2 {
-    margin: 0 0 1rem;
-    font-size: 1.25rem;
-    color: #333;
-}
-
-.action-buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.action-button {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    color: #333;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.action-button:hover {
-    background: #A79277;
-    color: white;
-    transform: translateY(-2px);
 }
 
 .modal-overlay {
@@ -357,14 +208,6 @@ export default {
 @media (max-width: 768px) {
     .main-content {
         padding: 1rem;
-    }
-
-    .dashboard-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .action-buttons {
-        grid-template-columns: 1fr;
     }
 }
 </style>
