@@ -73,10 +73,11 @@ section#morning {
   border: none;
   color: #9C8466;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0;
   border-radius: 50%;
   transition: all 0.3s ease;
   font-size: 1.5rem;
+  display: flex;
 }
 
 .favorite-button:hover {
