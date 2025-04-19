@@ -54,9 +54,6 @@ export default {
     }
   },
   created() {
-    // Initialize settings store
-    this.$store.dispatch('settings/initializeSettings');
-    
     // Refresh user data if authenticated
     if (this.isAuthenticated) {
       console.log('App created - refreshing user data');
@@ -64,8 +61,7 @@ export default {
     }
   },
   mounted() {
-    // Initialize settings and set initial meta tags
-    this.$store.dispatch('settings/initializeSettings');
+    // Set initial meta tags
     this.updateMetaTags();
     
     // Check splash screen visibility
@@ -73,12 +69,6 @@ export default {
     
     // Listen for splash screen events
     window.addEventListener('splashScreenHidden', this.handleSplashScreenHidden);
-    
-    // Refresh user data again after component is mounted
-    if (this.isAuthenticated) {
-      console.log('App mounted - refreshing user data');
-      this.refreshUserData();
-    }
   },
   beforeUnmount() {
     window.removeEventListener('splashScreenHidden', this.handleSplashScreenHidden);
