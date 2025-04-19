@@ -1,6 +1,7 @@
 <script>
 import { RouterLink, RouterView } from 'vue-router'
 import { useSettingsStore } from './stores/settings'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -13,9 +14,31 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['isAuthenticated']),
     isAdminRoute() {
       // Check if the current route path starts with /admin
       return this.$route.path.startsWith('/admin')
+    }
+  },
+  methods: {
+    ...mapActions(['refreshUserData']),
+    checkSplashScreen() {
+      // Get from local storage to check if the splash is currently showing
+      const hasSplashBeenShown = localStorage.getItem('splashShown')
+      this.showSplash = !hasSplashBeenShown
+    },
+    handleSplashScreenHidden() {
+      this.showSplash = false
+    },
+    updateMetaTags() {
+      // Update meta tags when route changes
+      if (this.$route.meta && (this.$route.meta.title || this.$route.meta.description)) {
+        this.$setMeta({
+          title: this.$route.meta.title,
+          description: this.$route.meta.description,
+          url: `https://nour-adhkar.ir${this.$route.path}`
+        });
+      }
     }
   },
   watch: {
@@ -31,49 +54,34 @@ export default {
     }
   },
   created() {
-    // Initialize settings from the Pinia store
-    this.settingsStore = useSettingsStore()
+    // Initialize settings store
+    this.$store.dispatch('settings/initializeSettings');
+    
+    // Refresh user data if authenticated
+    if (this.isAuthenticated) {
+      console.log('App created - refreshing user data');
+      this.refreshUserData();
+    }
   },
   mounted() {
-    // Initialize settings
-    if (this.settingsStore) {
-      this.settingsStore.init()
-    }
-
-    // Set initial meta tags
-    if (this.$route.meta && (this.$route.meta.title || this.$route.meta.description)) {
-      this.$setMeta({
-        title: this.$route.meta.title,
-        description: this.$route.meta.description,
-        url: `https://nour-adhkar.ir${this.$route.path}`
-      });
-    }
-
-    // Check if splash screen should be shown
-    this.checkSplashScreen()
-
+    // Initialize settings and set initial meta tags
+    this.$store.dispatch('settings/initializeSettings');
+    this.updateMetaTags();
+    
+    // Check splash screen visibility
+    this.checkSplashScreen();
+    
     // Listen for splash screen events
-    window.addEventListener('splash-shown', () => {
-      this.showSplash = true
-    })
-    window.addEventListener('splash-hidden', () => {
-      this.showSplash = false
-    })
+    window.addEventListener('splashScreenHidden', this.handleSplashScreenHidden);
+    
+    // Refresh user data again after component is mounted
+    if (this.isAuthenticated) {
+      console.log('App mounted - refreshing user data');
+      this.refreshUserData();
+    }
   },
   beforeUnmount() {
-    window.removeEventListener('splash-shown', () => {
-      this.showSplash = true
-    })
-    window.removeEventListener('splash-hidden', () => {
-      this.showSplash = false
-    })
-  },
-  methods: {
-    checkSplashScreen() {
-      // Get from local storage to check if the splash is currently showing
-      const hasSplashBeenShown = localStorage.getItem('splashShown')
-      this.showSplash = !hasSplashBeenShown
-    }
+    window.removeEventListener('splashScreenHidden', this.handleSplashScreenHidden);
   }
 }
 </script>
