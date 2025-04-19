@@ -2,7 +2,6 @@
   <div class="dashboard-layout">
     <TopBar :user="user" @open-logout-modal="isLogoutModalOpen = true" />
     <div class="dashboard-content">
-      <UserSidebar @sidebar-toggle="onSidebarToggle" />
       <main class="dashboard-main">
         <RouterView />
       </main>
@@ -30,13 +29,11 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import UserSidebar from '@/components/user/UserSidebar.vue';
 import TopBar from '@/components/common/TopBar.vue';
 
 export default {
   name: 'DashboardLayout',
   components: {
-    UserSidebar,
     TopBar
   },
   data() {
@@ -48,21 +45,24 @@ export default {
     ...mapState(['user'])
   },
   methods: {
-    ...mapActions(['logoutUser']),
+    ...mapActions(['logoutUser', 'loadProfile']),
     async logout() {
       await this.logoutUser();
       this.$router.push('/');
     },
     closeModal() {
       this.isLogoutModalOpen = false;
-    },
-    onSidebarToggle(isCollapsed) {
-      // You can handle sidebar collapse state here if needed
-      // For example, add a class to the layout or store in state
     }
   },
-  created() {
+  async created() {
     if (!this.$store.getters.isAuthenticated) {
+      this.$router.push('/login');
+      return;
+    }
+    try {
+      await this.loadProfile();
+    } catch (error) {
+      console.error('Failed to load user profile:', error);
       this.$router.push('/login');
     }
   },
@@ -84,15 +84,16 @@ export default {
 }
 
 .dashboard-content {
-  display: flex;
   flex: 1;
 }
 
 .dashboard-main {
   flex: 1;
-  padding: 1.5rem;
+  padding: 2rem;
   background-color: #f5f5f5;
   overflow-y: auto;
+  margin: 0;
+  width: 100%;
 }
 
 .modal-overlay {
@@ -170,6 +171,7 @@ export default {
   background: #dee2e6;
 }
 
+/* Dark mode styles */
 body.dark-mode .dashboard-main {
   background-color: #222;
 }
@@ -178,10 +180,6 @@ body.dark-mode .dashboard-main {
 @media (max-width: 768px) {
   .dashboard-main {
     padding: 1rem;
-  }
-
-  .dashboard-content {
-    flex-direction: column;
   }
 }
 </style> 

@@ -142,9 +142,6 @@ section#morning {
       <div class="content-top-bar">
         <h2 id="dhikr-title"></h2>
         <div class="action-buttons">
-          <button class="favorite-button" @click="handleToggleFavorite" :class="{ 'is-favorite': isFavorite }">
-            <font-awesome-icon :icon="['fas', 'heart']" />
-          </button>
           <img id="share-button" class="share-button" src="@/assets/icons/share.svg" alt="اشتراک گذاری" @click="share()">
         </div>
       </div>
@@ -164,7 +161,7 @@ section#morning {
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import axios from 'axios';
 import CongratsModal from "@/components/Congrats.vue";
 import tapSound from "@/assets/audios/click.mp3"
@@ -201,7 +198,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['user', 'favorites']),
+    ...mapState(['user']),
     ...mapGetters(['isAuthenticated']),
     counter() {
       // Get counter for current dhikr, default to 0 if not set
@@ -227,13 +224,9 @@ export default {
         this.storeDhikr();
       }
       return result;
-    },
-    isFavorite() {
-      return this.favorites.some(f => f.id === this.openedDhikr?.id);
     }
   },
   methods: {
-    ...mapActions(['toggleFavorite', 'loadFavorites']),
     async loadCollection() {
       try {
         this.loading = true;
@@ -414,26 +407,9 @@ export default {
       setTimeout(() => {
         this.showToast = false;
       }, 3000);
-    },
-    async handleToggleFavorite() {
-      if (!this.$store.state.token) {
-        this.showToastMessage('لطفا برای افزودن به علاقه‌مندی‌ها وارد شوید');
-        return;
-      }
-      
-      try {
-        const response = await this.toggleFavorite(this.openedDhikr.id);
-        this.showToastMessage(response.isFavorite ? 'به علاقه‌مندی‌ها اضافه شد' : 'از علاقه‌مندی‌ها حذف شد');
-      } catch (error) {
-        console.error('Error toggling favorite:', error);
-        this.showToastMessage('خطا در بروزرسانی علاقه‌مندی‌ها');
-      }
     }
   },
   async created() {
-    if (this.$store.state.token) {
-      await this.loadFavorites();
-    }
     await this.loadCollection();
   },
   mounted() {

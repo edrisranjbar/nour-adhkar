@@ -7,8 +7,7 @@ import { BASE_API_URL } from '@/config';
 const store = createStore({
     state: {
         user: {heart_score:0},
-        token: null,
-        favorites: []
+        token: null
     },
     getters: {
         isAuthenticated: state => !!state.token,
@@ -24,28 +23,51 @@ const store = createStore({
         clearUser(state) {
             state.user = null;
             state.token = null;
-            state.favorites = [];
         },
         updateHeartScore(state, score) {
             if (state.user) {
                 state.user.heart_score = score;
             }
         },
-        setFavorites(state, favorites) {
-            state.favorites = favorites;
-        },
-        addFavorite(state, favorite) {
-            if (favorite && typeof favorite === 'object') {
-                state.favorites.push(favorite);
-            }
-        },
-        removeFavorite(state, id) {
-            if (id) {
-                state.favorites = state.favorites.filter(f => f && f.id && f.id !== id);
+        updateProfile(state, profile) {
+            if (state.user) {
+                state.user = { ...state.user, ...profile };
             }
         }
     },
     actions: {
+        async loadProfile({ commit, state }) {
+            try {
+                const response = await axios.get(`${BASE_API_URL}/user/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${state.token}`
+                    }
+                });
+                if (response.data.success) {
+                    commit('updateProfile', response.data.profile);
+                }
+                return response.data.profile;
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                throw error;
+            }
+        },
+        async updateProfile({ commit, state }, profileData) {
+            try {
+                const response = await axios.put(`${BASE_API_URL}/user/profile`, profileData, {
+                    headers: {
+                        Authorization: `Bearer ${state.token}`
+                    }
+                });
+                if (response.data.success) {
+                    commit('updateProfile', response.data.profile);
+                }
+                return response.data;
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                throw error;
+            }
+        },
         async logoutUser({ commit }) {
             try {
                 if (this.state.token) {
@@ -95,45 +117,6 @@ const store = createStore({
                     todayCount: 0,
                     favoriteCount: 0
                 };
-            }
-        },
-        async loadFavorites({ commit, state }) {
-            try {
-                const response = await axios.get(`${BASE_API_URL}/adhkar/favorites`, {
-                    headers: {
-                        Authorization: `Bearer ${state.token}`
-                    }
-                });
-                if (response.data.success) {
-                    commit('setFavorites', response.data.favorites);
-                }
-            } catch (error) {
-                console.error('Error loading favorites:', error);
-                throw error;
-            }
-        },
-        async toggleFavorite({ commit, state }, id) {
-            try {
-                const response = await axios.post(
-                    `${BASE_API_URL}/adhkar/favorites/${id}`,
-                    {},
-                    {
-                        headers: {
-                            Authorization: `Bearer ${state.token}`
-                        }
-                    }
-                );
-                if (response.data.success) {
-                    if (response.data.isFavorite) {
-                        commit('addFavorite', response.data.dhikr);
-                    } else {
-                        commit('removeFavorite', id);
-                    }
-                }
-                return response.data;
-            } catch (error) {
-                console.error('Error toggling favorite:', error);
-                throw error;
             }
         }
     },

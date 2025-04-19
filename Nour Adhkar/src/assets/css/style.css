@@ -665,3 +665,7 @@ body.dark-mode .retry-button {
 body.dark-mode .retry-button:hover {
   background-color: #8a7660;
 }
+
+.dashboard-page{
+  padding: 0 !important;
+}

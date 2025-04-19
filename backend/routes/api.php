@@ -16,6 +16,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
 Route::middleware('auth:api')->group(function () {
     // User related routes with UserController
+    Route::get('/user/profile', [UserController::class, 'getProfile']);
+    Route::put('/user/profile', [UserController::class, 'updateProfile']);
     Route::post('user/avatar', [UserController::class, 'updateAvatar']);
     Route::patch('/user/name', [UserController::class, 'updateName']);
     Route::patch('/user/password', [UserController::class, 'updatePassword']);

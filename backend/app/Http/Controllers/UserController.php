@@ -22,6 +22,73 @@ class UserController extends Controller
     }
 
     /**
+     * Get user profile
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProfile()
+    {
+        try {
+            $user = Auth::user();
+            return response()->json([
+                'success' => true,
+                'profile' => new UserResource($user)
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در دریافت پروفایل',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update user profile
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateProfile(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'sometimes|string|max:255',
+                'email' => 'sometimes|email|unique:users,email,' . Auth::id(),
+                'password' => 'sometimes|string|min:6'
+            ]);
+
+            $user = Auth::user();
+            
+            if ($request->has('name')) {
+                $user->name = $request->name;
+            }
+            
+            if ($request->has('email')) {
+                $user->email = $request->email;
+            }
+            
+            if ($request->has('password')) {
+                $user->password = Hash::make($request->password);
+            }
+
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'پروفایل با موفقیت به‌روزرسانی شد',
+                'profile' => new UserResource($user)
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در به‌روزرسانی پروفایل',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Update user's name
      *
      * @param Request $request

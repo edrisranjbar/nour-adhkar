@@ -1,20 +1,20 @@
 <template>
     <div class="top-bar">
         <div class="user-brief">
-            <img :src="user.avatar || defaultAvatar" :key="user.avatar" @error="handleImageError" class="mini-avatar" />
-            <span class="user-name">{{ user.name }}</span>
+            <img :src="userAvatar" :key="userAvatar" @error="handleImageError" class="mini-avatar" />
+            <span class="user-name">{{ userName }}</span>
         </div>
         <div class="stats">
             <div class="stat-item score-item">
                 <font-awesome-icon icon="fa-solid fa-trophy" class="trophy-icon" />
-                <span class="score-value">{{ user.score || 0 }}</span>
+                <span class="score-value">{{ userScore }}</span>
             </div>
             <div class="stat-item text-danger">
-                <Heart3D :score="user.heart_score || 0" />
-                <span>{{ user.heart_score ?? 0 }}</span>
+                <Heart3D :score="heartScore" />
+                <span>{{ heartScore }}</span>
             </div>
             <div class="stat-item text-danger">
-                <StreakIndicator :streak="user.streak || 0" />
+                <StreakIndicator :streak="userStreak" />
             </div>
             <button @click="$emit('open-logout-modal')" class="logout-button">
                 <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
@@ -135,6 +135,23 @@ export default {
         }
     },
     emits: ['open-logout-modal'],
+    computed: {
+        userAvatar() {
+            return this.user?.avatar || this.defaultAvatar;
+        },
+        userName() {
+            return this.user?.name || 'کاربر';
+        },
+        userScore() {
+            return this.user?.score || 0;
+        },
+        heartScore() {
+            return this.user?.heart_score || 0;
+        },
+        userStreak() {
+            return this.user?.streak || 0;
+        }
+    },
     methods: {
         handleImageError(e) {
             e.target.src = this.defaultAvatar;

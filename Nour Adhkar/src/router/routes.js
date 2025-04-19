@@ -20,7 +20,6 @@ const BlogPostView = () => import('../views/BlogPostView.vue');
 const DashboardLayout = () => import('../views/dashboard/DashboardLayout.vue');
 const DashboardView = () => import('../views/dashboard/DashboardView.vue');
 // const DailyAdhkarView = () => import('../views/dashboard/DailyAdhkarView.vue');
-const FavoriteAdhkarView = () => import('../views/dashboard/FavoriteAdhkarView.vue');
 const ProfileSettingsView = () => import('../views/dashboard/ProfileSettingsView.vue');
 
 // Lazy loading for admin components
@@ -183,19 +182,6 @@ export const protectedRoutes = [
         component: DashboardView,
         meta: {
           title: 'داشبورد | اذکار نور'
-        }
-      },
-      // {
-      //   path: 'adhkar/daily',
-      //   name: 'daily-adhkar',
-      //   component: DailyAdhkarView,
-      // },
-      {
-        path: 'adhkar/favorites',
-        name: 'favorite-adhkar',
-        component: FavoriteAdhkarView,
-        meta: {
-          title: 'اذکار مورد علاقه | داشبورد'
         }
       },
       {
