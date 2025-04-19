@@ -114,3 +114,30 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+  position: relative;
+  padding-right: 1rem;
+  margin-top: 0.5rem;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background-color: #A79277;
+  border-radius: 2px;
+}
+
+body.dark-mode .section-title {
+  color: #eee;
+}
+</style>

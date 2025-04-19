@@ -69,7 +69,7 @@
         </CategoryCard>
       </RouterLink>
       <RouterLink to="/counter" class="card-sm">
-        <CategoryCard image-src="src/assets/images/counter.svg" style="background-position: center;">
+      <CategoryCard image-src="src/assets/images/counter.svg">
           <div class="card-overlay">
             <h2 class="card-text-top">تسبیح شمار</h2>
           </div>
