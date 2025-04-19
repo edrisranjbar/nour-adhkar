@@ -277,8 +277,9 @@ export default {
       this.playAudio(this.tapSoundAudioPath);
     },
     gotoPrevDhikr() {
-      if (!this.isFirstDhikr) {
-        this.openedDhikr = this.openedCollection.adhkar[--this.dhikrIndex];
+      if (this.dhikrIndex > 0) {
+        this.dhikrIndex--;
+        this.openedDhikr = this.openedCollection.adhkar[this.dhikrIndex];
       }
     },
     gotoNextDhikr() {
