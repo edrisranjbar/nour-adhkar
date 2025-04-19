@@ -6,12 +6,13 @@ import { BASE_API_URL } from '@/config';
 
 const store = createStore({
     state: {
-        user: {heart_score:0},
+        user: null,
         token: null
     },
     getters: {
         isAuthenticated: state => !!state.token,
-        isAdmin: state => state.user && state.user.role === 'admin'
+        isAdmin: state => state.user && state.user.role === 'admin',
+        user: state => state.user
     },
     mutations: {
         setUser(state, user) {
@@ -23,49 +24,35 @@ const store = createStore({
         clearUser(state) {
             state.user = null;
             state.token = null;
-        },
-        updateHeartScore(state, score) {
-            if (state.user) {
-                state.user.heart_score = score;
-            }
-        },
-        updateProfile(state, profile) {
-            if (state.user) {
-                state.user = { ...state.user, ...profile };
-            }
         }
     },
     actions: {
-        async loadProfile({ commit, state }) {
+        async login({ commit }, credentials) {
             try {
-                const response = await axios.get(`${BASE_API_URL}/user/profile`, {
-                    headers: {
-                        Authorization: `Bearer ${state.token}`
-                    }
-                });
-                if (response.data.success) {
-                    commit('updateProfile', response.data.profile);
+                const response = await axios.post(`${BASE_API_URL}/login`, credentials);
+                if (response.data.token) {
+                    commit('setToken', response.data.token);
+                    commit('setUser', response.data.user);
+                    return true;
                 }
-                return response.data.profile;
+                return false;
             } catch (error) {
-                console.error('Error loading profile:', error);
-                throw error;
+                console.error('Login error:', error);
+                return false;
             }
         },
-        async updateProfile({ commit, state }, profileData) {
+        async register({ commit }, userData) {
             try {
-                const response = await axios.put(`${BASE_API_URL}/user/profile`, profileData, {
-                    headers: {
-                        Authorization: `Bearer ${state.token}`
-                    }
-                });
-                if (response.data.success) {
-                    commit('updateProfile', response.data.profile);
+                const response = await axios.post(`${BASE_API_URL}/register`, userData);
+                if (response.data.token) {
+                    commit('setToken', response.data.token);
+                    commit('setUser', response.data.user);
+                    return true;
                 }
-                return response.data;
+                return false;
             } catch (error) {
-                console.error('Error updating profile:', error);
-                throw error;
+                console.error('Registration error:', error);
+                return false;
             }
         },
         async logoutUser({ commit }) {
@@ -102,25 +89,9 @@ const store = createStore({
                 commit('clearUser');
                 return false;
             }
-        },
-        async loadUserStats({ state }) {
-            try {
-                const response = await axios.get(`${BASE_API_URL}/user/stats`, {
-                    headers: {
-                        Authorization: `Bearer ${state.token}`
-                    }
-                });
-                return response.data;
-            } catch (error) {
-                console.error('Error loading user stats:', error);
-                return {
-                    todayCount: 0,
-                    favoriteCount: 0
-                };
-            }
         }
     },
-    plugins: [createPersistedState()] // This will persist the state in localStorage
+    plugins: [createPersistedState()]
 });
 
 export default store;

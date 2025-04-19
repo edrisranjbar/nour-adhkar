@@ -189,7 +189,8 @@ export default {
       showToast: false,
       toastMessage: '',
       loading: true,
-      error: null
+      error: null,
+      hasUpdatedScore: false
     }
   },
   watch: {
@@ -219,7 +220,8 @@ export default {
     },
     showCongratsModal() {
       const result = !this.isThereANextDhikr && this.counter == this.openedDhikr.count;
-      if (result) {
+      if (result && !this.hasUpdatedScore) {
+        this.hasUpdatedScore = true;
         this.updateHeartScore();
         this.storeDhikr();
       }

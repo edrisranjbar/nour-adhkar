@@ -176,8 +176,8 @@ export default {
           // Set default authorization header for future requests
           axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
           
-          // Redirect to dashboard
-          this.$router.push('/dashboard');
+          // Redirect to home
+          this.$router.push('/');
         } else {
           this.serverError = response.data.message || 'خطایی رخ داد';
         }

@@ -11,24 +11,20 @@
       
       <div class="header-right">
         <div v-if="isAuthenticated" class="user-stats">
-          <button class="dashboard-button" @click="goToDashboard">
-            <font-awesome-icon icon="fa-solid fa-user" />
-            داشبورد
-          </button>
-          <div class="stat-item">
-            <font-awesome-icon icon="fa-solid fa-star" class="stat-icon" />
-            <span>{{ userScore }}</span>
-          </div>
           <div class="stat-item">
             <font-awesome-icon icon="fa-solid fa-heart" class="stat-icon" />
-            <span>{{ heartScore }}</span>
+            <span>{{ user?.heart_score || 0 }}</span>
           </div>
           <div class="stat-item">
             <font-awesome-icon icon="fa-solid fa-fire" class="stat-icon" />
-            <span>{{ streak }}</span>
+            <span>{{ user?.streak || 0 }}</span>
           </div>
+          <button @click="logout" class="logout-button">
+            <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
+            خروج
+          </button>
         </div>
-        <button v-else @click="goToLogin" class="login-button">
+        <button v-if="!isAuthenticated" @click="goToLogin" class="login-button">
           <font-awesome-icon icon="fa-solid fa-sign-in-alt" />
           ورود
         </button>
@@ -39,7 +35,7 @@
 
 <script>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { mapState, mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -51,24 +47,16 @@ export default {
   },
   name: 'AppHeader',
   computed: {
-    ...mapState(['user']),
-    ...mapGetters(['isAuthenticated']), // Use isAuthenticated instead of isLoggedIn
-    userScore() {
-      return this.user?.score || 0
-    },
-    heartScore() {
-      return this.user?.heart_score || 0
-    },
-    streak() {
-      return this.user?.streak || 0
-    }
+    ...mapGetters(['isAuthenticated', 'user'])
   },
   methods: {
+    ...mapActions(['logoutUser']),
     goToLogin() {
-      this.$router.push('/login'); // Navigate to the login page
+      this.$router.push('/login');
     },
-    goToDashboard() {
-      this.$router.push('/dashboard'); // Navigate to the dashboard
+    async logout() {
+      await this.logoutUser();
+      this.$router.push('/');
     }
   }
 }
@@ -195,21 +183,21 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #8A7559;
   padding: 6px 12px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 }
 
 body.dark-mode .stat-item {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .stat-item span {
   color: #fff;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.9rem;
 }
 
@@ -225,13 +213,13 @@ body.dark-mode .stat-item span {
 /* Hover effect */
 .stat-item:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #76644A;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 body.dark-mode .stat-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: #444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .dashboard-button {
@@ -272,6 +260,27 @@ body.dark-mode .stat-item:hover {
 
 .login-button:hover {
   background: #76644A;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #76644A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: #8A7559;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }

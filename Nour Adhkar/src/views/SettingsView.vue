@@ -88,14 +88,6 @@
           </div>
         </div>
 
-        <RouterLink to="/dashboard/profile/settings" class="settings-item clickable">
-          <div class="setting-label">
-            <div class="setting-title">حساب کاربری</div>
-            <div class="setting-description">مدیریت حساب کاربری</div>
-          </div>
-          <font-awesome-icon icon="fa-solid fa-chevron-left" />
-        </RouterLink>
-
         <div v-if="isAuthenticated" class="settings-item clickable" @click="logoutUser">
           <div class="setting-label">
             <div class="setting-title danger">خروج از حساب کاربری</div>
@@ -108,7 +100,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useSettingsStore } from '@/stores/settings';
 
@@ -118,16 +110,16 @@ export default {
     FontAwesomeIcon
   },
   computed: {
-    ...mapState(['user']),
     ...mapGetters(['isAuthenticated']),
     settingsStore() {
       return useSettingsStore();
     }
   },
   methods: {
-    logoutUser() {
+    ...mapActions(['logoutUser']),
+    async handleLogout() {
       if (confirm('آیا مطمئن هستید که می‌خواهید از حساب کاربری خود خارج شوید؟')) {
-        this.$store.commit('logout');
+        await this.logoutUser();
         this.$router.push('/');
       }
     }

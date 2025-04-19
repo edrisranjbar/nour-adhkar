@@ -194,8 +194,8 @@ export default {
                     this.$store.commit('setUser', response.data.user);
                     this.$store.commit('setToken', response.data.token);
                     
-                    // Redirect to dashboard
-                    this.$router.push('/dashboard');
+                    // Redirect to home
+                    this.$router.push('/');
                 }
             } catch (err) {
                 if (err.response?.data?.errors) {
