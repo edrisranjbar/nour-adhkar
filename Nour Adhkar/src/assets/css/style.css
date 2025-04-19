@@ -233,70 +233,6 @@ header h1 {
     padding: 24px 16px;
 }
 
-.category-card {
-    height: 200px;
-    border-radius: 8px;
-    background-color: var(--brand-secondary);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-light);
-    background-size: cover;
-    color: var(--text-light);
-    position: relative;
-    cursor: pointer;
-    transition: all .3s ease-in-out;
-    user-select: none;
-}
-
-.category-card:hover {
-    font-size: var(--font-size-2xl);
-    filter: grayscale(100%);
-    -webkit-filter: grayscale(100%);
-    box-shadow: rgba(149, 157, 165, 0.5) 0 8px 24px;
-}
-
-.category-card h2 {
-    position: absolute;
-    bottom: 8px;
-    font-size: inherit;
-    font-weight: inherit;
-}
-
-.row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 8px;
-}
-
-.d-flex {
-    display: flex;
-}
-
-.justify-content-center {
-    justify-content: center;
-}
-
-.align-items-center {
-    align-items: center;
-}
-
-.card-text-top {
-    top: 8px;
-    bottom: unset;
-}
-
-.card-text-bottom {
-    bottom: 8px;
-    top: unset;
-}
-
-.card-text-left {
-    left: 16px;
-}
-
-.card-text-right {
-    right: 16px;
-}
-
 #app>div>footer {
     font-weight: var(--font-weight-thin);
     font-size: var(--font-size-lg);
@@ -470,51 +406,27 @@ header h1 {
     .modal-container {
         margin: 16px auto;
     }
+
+    .category-card {
+        font-size: var(--font-size-2xl);
+    }
+
+    .card-text-bottom {
+        bottom: 24px;
+    }
+
+    .card-text-left {
+        left: 24px;
+    }
+
+    .card-text-right {
+        right: 24px;
+    }
 }
 
 /* Custom Styles */
 
 /* Any specific styles that don't fit in the component or layout categories */
-
-/* Category Card Styles */
-.category-card {
-  height: 200px;
-  border-radius: 8px;
-  background-color: var(--brand-secondary);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-light);
-  background-size: cover;
-  color: var(--text-light);
-  position: relative;
-  cursor: pointer;
-  transition: all .3s ease-in-out;
-  user-select: none;
-}
-
-.category-card h2 {
-  position: absolute;
-  bottom: 8px;
-  font-size: inherit;
-  font-weight: inherit;
-}
-
-.card-text-top {
-  top: 8px;
-  bottom: unset;
-}
-
-.card-text-bottom {
-  bottom: 8px;
-  top: unset;
-}
-
-.card-text-left {
-  left: 16px;
-}
-
-.card-text-right {
-  right: 16px;
-}
 
 /* Progress Bar */
 .progressbar-container {

@@ -95,6 +95,13 @@ import {
     faTimesCircle,
     faPray,
     faLayerGroup,
+    // Collection Grid icons
+    faCalendarDay,
+    faStarAndCrescent,
+    faBed,
+    faHandsPraying,
+    faGift,
+    faCircleNotch,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -207,6 +214,13 @@ library.add(
     faTimesCircle,
     faPray,
     faLayerGroup,
+    // Collection Grid icons
+    faCalendarDay,
+    faStarAndCrescent,
+    faBed,
+    faHandsPraying,
+    faGift,
+    faCircleNotch,
 );
 
 export default FontAwesomeIcon; 
