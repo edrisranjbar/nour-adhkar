@@ -122,12 +122,17 @@ export default {
   methods: {
     async fetchAdhkars() {
       try {
-        const response = await axios.get(`${BASE_API_URL}/adhkars`, {
-          headers: {
-            Authorization: `Bearer ${this.$store.state.token}`
-          }
-        });
-        this.adhkars = response.data.adhkar || [];
+        // First get the daily collection
+        const collectionsResponse = await axios.get(`${BASE_API_URL}/collections/daily`);
+        const dailyCollection = collectionsResponse.data.collection;
+        
+        if (!dailyCollection) {
+          console.error('Daily collection not found');
+          this.addToast('مجموعه اذکار روزانه یافت نشد', 'error');
+          return;
+        }
+        
+        this.adhkars = dailyCollection.adhkar || [];
         
         // Select the first dhikr by default if available
         if (this.adhkars.length > 0 && !this.currentDhikr.id) {
@@ -138,6 +143,7 @@ export default {
         this.updateItemsPerPage();
       } catch (error) {
         console.error('Error fetching adhkars:', error);
+        this.addToast('خطا در دریافت اذکار', 'error');
       }
     },
     prevSlide() {
