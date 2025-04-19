@@ -97,10 +97,6 @@ export default {
           <font-awesome-icon icon="fa-solid fa-calculator" />
           <span>تسبیح</span>
         </RouterLink>
-        <RouterLink to="/dashboard" class="nav-item" active-class="active">
-          <font-awesome-icon icon="fa-solid fa-user" />
-          <span>پروفایل</span>
-        </RouterLink>
         <RouterLink to="/settings" class="nav-item" active-class="active">
           <font-awesome-icon icon="fa-solid fa-gear" />
           <span>تنظیمات</span>

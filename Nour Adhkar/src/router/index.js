@@ -19,15 +19,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = store.state.token;
   
-  // Check authentication for dashboard routes
-  if (to.path.startsWith('/dashboard') && !token) {
-    next('/login');
-    return;
-  }
-  
   // Redirect logged-in users away from login and register pages
   if ((to.path === '/login' || to.path === '/register') && token) {
-    next('/dashboard');
+    next('/');
     return;
   }
   

@@ -16,12 +16,6 @@ import { authGuard, adminGuard } from './guards';
 const BlogView = () => import('../views/BlogView.vue');
 const BlogPostView = () => import('../views/BlogPostView.vue');
 
-// Lazy loading for dashboard components
-const DashboardLayout = () => import('../views/dashboard/DashboardLayout.vue');
-const DashboardView = () => import('../views/dashboard/DashboardView.vue');
-// const DailyAdhkarView = () => import('../views/dashboard/DailyAdhkarView.vue');
-const ProfileSettingsView = () => import('../views/dashboard/ProfileSettingsView.vue');
-
 // Lazy loading for admin components
 const AdminLayout = () => import('../views/admin/AdminLayout.vue');
 const AdminDashboardView = () => import('../views/admin/AdminDashboardView.vue');
@@ -167,34 +161,7 @@ export const publicRoutes = [
 ];
 
 // Protected routes that require authentication
-export const protectedRoutes = [
-  {
-    path: '/dashboard',
-    component: DashboardLayout,
-    meta: { 
-      requiresAuth: true,
-      noindex: true
-    },
-    children: [
-      {
-        path: '',
-        name: 'dashboard',
-        component: DashboardView,
-        meta: {
-          title: 'داشبورد | اذکار نور'
-        }
-      },
-      {
-        path: 'profile/settings',
-        name: 'profile-settings',
-        component: ProfileSettingsView,
-        meta: {
-          title: 'تنظیمات حساب کاربری | داشبورد'
-        }
-      },
-    ]
-  }
-];
+export const protectedRoutes = [];
 
 // Admin routes that require admin privileges
 export const adminRoutes = [
