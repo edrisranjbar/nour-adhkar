@@ -47,7 +47,7 @@ class AdhkarController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching favorites',
+                'message' => 'خطا در دریافت لیست موارد مورد علاقه',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -64,7 +64,7 @@ class AdhkarController extends Controller
             if (!$adhkar) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Adhkar not found'
+                    'message' => 'ذکر مورد نظر یافت نشد'
                 ], 404);
             }
             
@@ -85,13 +85,13 @@ class AdhkarController extends Controller
             return response()->json([
                 'success' => true,
                 'isFavorite' => !$isFavorite,
-                'message' => !$isFavorite ? 'Added to favorites' : 'Removed from favorites',
+                'message' => !$isFavorite ? 'به لیست مورد علاقه اضافه شد' : 'از لیست مورد علاقه حذف شد',
                 'dhikr' => $adhkar
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error toggling favorite',
+                'message' => 'خطا در تغییر وضعیت علاقه‌مندی',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -139,7 +139,7 @@ class AdhkarController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Adhkar created successfully',
+            'message' => 'ذکر با موفقیت ایجاد شد',
             'adhkar' => $adhkar
         ], 201);
     }
@@ -182,7 +182,7 @@ class AdhkarController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Adhkar updated successfully',
+            'message' => 'ذکر با موفقیت به‌روزرسانی شد',
             'adhkar' => $adhkar
         ]);
     }
@@ -194,7 +194,7 @@ class AdhkarController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Adhkar deleted successfully'
+            'message' => 'ذکر با موفقیت حذف شد'
         ]);
     }
 }

@@ -42,7 +42,7 @@ class CollectionController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Collection not found'
+                'message' => 'مجموعه مورد نظر یافت نشد'
             ], 404);
         }
     }
@@ -101,7 +101,7 @@ class CollectionController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Collection created successfully',
+            'message' => 'مجموعه با موفقیت ایجاد شد',
             'collection' => $collection->fresh('adhkar')
         ], 201);
     }
@@ -163,7 +163,7 @@ class CollectionController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Collection updated successfully',
+            'message' => 'مجموعه با موفقیت به‌روزرسانی شد',
             'collection' => $collection->fresh('adhkar')
         ]);
     }
@@ -177,7 +177,7 @@ class CollectionController extends Controller
         if ($adhkarCount > 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot delete collection with adhkar. Remove adhkar first.'
+                'message' => 'نمی‌توان مجموعه حاوی اذکار را حذف کرد. ابتدا اذکار را حذف کنید.'
             ], 422);
         }
         
@@ -185,7 +185,7 @@ class CollectionController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Collection deleted successfully'
+            'message' => 'مجموعه با موفقیت حذف شد'
         ]);
     }
 } 

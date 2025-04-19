@@ -1,6 +1,4 @@
 <template>
-
-    <!-- Top Bar -->
     <div class="top-bar">
         <div class="user-brief">
             <img :src="user.avatar || defaultAvatar" :key="user.avatar" @error="handleImageError" class="mini-avatar" />
@@ -68,7 +66,6 @@
 
 .score-item {
     color: #ffc107;
-    /* Gold color for score */
     background: rgba(255, 193, 7, 0.1);
     padding: 0.5rem 0.8rem;
     border-radius: 8px;
@@ -106,55 +103,6 @@
     font-size: 1.1em;
 }
 
-.logout-modal {
-    max-width: 360px;
-}
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.logout-icon {
-    font-size: 1.5rem;
-    color: #ff4b4b;
-}
-
-.modal-header h2 {
-    color: #ff4b4b;
-    margin: 0;
-}
-
-.logout-modal p {
-    color: #666;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
-}
-
-.btn-danger {
-    background: #ff4b4b;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-}
-
-.btn-danger:hover {
-    background: #ff3333;
-    transform: translateY(-1px);
-}
-
-.btn-danger svg {
-    font-size: 1.1em;
-}
-
 @media (max-width: 768px) {
     .logout-button span {
         display: none;
@@ -168,7 +116,7 @@
 
 <script>
 import Heart3D from '@/components/Heart3D.vue';
-import StreakIndicator from '@/components/Admin/StreakIndicator.vue';
+import StreakIndicator from '@/components/common/StreakIndicator.vue';
 
 export default {
     name: 'TopBar',
@@ -186,12 +134,11 @@ export default {
             default: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNFMkU4RjAiLz48cGF0aCBkPSJNMTAwIDEwNUM4NS4wMzggMTA1IDczIDkyLjk2MiA3MyA3OEM3MyA2My4wMzggODUuMDM4IDUxIDEwMCA1MUMxMTQuOTYyIDUxIDEyNyA2My4wMzggMTI3IDc4QzEyNyA5Mi45NjIgMTE0Ljk2MiAxMDUgMTAwIDEwNVoiIGZpbGw9IiM5NEEzQjgiLz48cGF0aCBkPSJNMTY1IDE2NS41QzE2NSAxNjUuNSAxNTQuNSAxMzUgMTAwIDEzNUM0NS41IDEzNSAzNSAxNjUuNSAzNSAxNjUuNVYxODBIMTY1VjE2NS41WiIgZmlsbD0iIzk0QTNCOCIvPjwvc3ZnPg=='
         }
     },
-    emits: ['open-logout-modal'], // Define the emit
+    emits: ['open-logout-modal'],
     methods: {
-        // Remove openLogoutModal method as we're now emitting an event
         handleImageError(e) {
             e.target.src = this.defaultAvatar;
         }
     }
 }
-</script>
+</script> 

@@ -33,7 +33,7 @@ import store from '@/store';
 import axios from 'axios';
 import { BASE_API_URL } from '@/config';
 import { useToast } from "vue-toastification";
-import TopBar from '@/components/Admin/TopBar.vue';
+import TopBar from '@/components/common/TopBar.vue';
 import ProfileCard from '@/components/Admin/ProfileCard.vue';
 import BadgesSection from '@/components/Admin/BadgesSection.vue';
 import StreakCalendar from '@/components/StreakCalendar.vue';

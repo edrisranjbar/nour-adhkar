@@ -1,5 +1,5 @@
 <template>
-  <Sidebar :items="menuItems" @sidebar-toggle="onSidebarToggle" />
+  <Sidebar :items="menuItems" />
 </template>
 
 <script>
@@ -20,35 +20,16 @@ export default {
           exact: true
         },
         {
-          id: 'adhkar',
-          title: 'اذکار',
-          icon: 'fa-solid fa-pray',
-          items: [
-            {
-              path: '/dashboard/adhkar/favorites',
-              title: 'اذکار مورد علاقه',
-              icon: 'fa-solid fa-heart'
-            }
-          ]
+          path: '/dashboard/adhkar/favorites',
+          title: 'اذکار مورد علاقه',
+          icon: 'fa-solid fa-heart'
         },
         {
-          id: 'profile',
-          title: 'پروفایل',
-          icon: 'fa-solid fa-user',
-          items: [
-            {
-              path: '/dashboard/profile/settings',
-              title: 'تنظیمات',
-              icon: 'fa-solid fa-cog'
-            }
-          ]
+          path: '/dashboard/profile/settings',
+          title: 'تنظیمات پروفایل',
+          icon: 'fa-solid fa-cog'
         }
       ]
-    }
-  },
-  methods: {
-    onSidebarToggle(isCollapsed) {
-      this.$emit('sidebar-toggle', isCollapsed);
     }
   }
 }

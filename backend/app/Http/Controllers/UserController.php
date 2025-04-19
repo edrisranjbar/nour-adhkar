@@ -36,7 +36,7 @@ class UserController extends Controller
         $user->save();
 
         return response()->json([
-            'message' => 'Name updated successfully',
+            'message' => 'نام با موفقیت به‌روزرسانی شد',
             'user' => new UserResource($user)
         ]);
     }
@@ -56,7 +56,7 @@ class UserController extends Controller
         $user->save();
 
         return response()->json([
-            'message' => 'Password updated successfully'
+            'message' => 'رمز عبور با موفقیت به‌روزرسانی شد'
         ]);
     }
 
@@ -83,14 +83,14 @@ class UserController extends Controller
             $user->refresh();
 
             return response()->json([
-                'message' => 'Heart score updated successfully',
+                'message' => 'امتیاز قلب با موفقیت به‌روزرسانی شد',
                 'user' => new UserResource($user),
                 'badges' => $user->badges,
                 'badge_awarded' => $badgeAwarded
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'message' => 'Failed to update heart score',
+                'message' => 'خطا در به‌روزرسانی امتیاز قلب',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -122,7 +122,7 @@ class UserController extends Controller
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'message' => 'Failed to retrieve user stats',
+                'message' => 'خطا در دریافت آمار کاربر',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -139,7 +139,7 @@ class UserController extends Controller
         try {
             if (!$request->hasFile('avatar')) {
                 return response()->json([
-                    'message' => 'No avatar file provided'
+                    'message' => 'فایل تصویر پروفایل ارسال نشده است'
                 ], 400);
             }
 
@@ -159,7 +159,7 @@ class UserController extends Controller
             $user->save();
 
             return response()->json([
-                'message' => 'Avatar updated successfully',
+                'message' => 'تصویر پروفایل با موفقیت به‌روزرسانی شد',
                 'avatar_url' => url('storage/' . $path),
                 'user' => new UserResource($user)
             ]);
@@ -167,7 +167,7 @@ class UserController extends Controller
         } catch (Exception $e) {
             Log::error('Avatar upload error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Failed to upload avatar',
+                'message' => 'خطا در آپلود تصویر پروفایل',
                 'error' => $e->getMessage()
             ], 500);
         }

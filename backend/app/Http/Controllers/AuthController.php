@@ -42,10 +42,10 @@ class AuthController extends Controller
             return response()->json([
                 'user' => new UserResource($user),
                 'token' => $token,
-                'message' => 'User registered successfully'
+                'message' => 'ثبت نام با موفقیت انجام شد'
             ], 201);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Registration failed', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'ثبت نام با خطا مواجه شد', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -61,7 +61,7 @@ class AuthController extends Controller
         }
 
         if (!$token = auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            return response()->json(['message' => 'نام کاربری یا رمز عبور اشتباه است'], 401);
         }
 
         $user = auth()->user();
@@ -69,7 +69,7 @@ class AuthController extends Controller
         return response()->json([
             'user' => new UserResource($user),
             'token' => $token,
-            'message' => 'Login successful'
+            'message' => 'ورود موفقیت‌آمیز'
         ]);
     }
 
@@ -78,10 +78,10 @@ class AuthController extends Controller
         try {
             auth()->logout();
             return response()->json([
-                'message' => 'Successfully logged out'
+                'message' => 'خروج با موفقیت انجام شد'
             ]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Logout failed', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'خطا در خروج از حساب کاربری', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -93,10 +93,10 @@ class AuthController extends Controller
             
             return response()->json([
                 'token' => $token,
-                'message' => 'Token refreshed successfully'
+                'message' => 'توکن با موفقیت به‌روزرسانی شد'
             ]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Token refresh failed', 'error' => $e->getMessage()], 401);
+            return response()->json(['message' => 'خطا در به‌روزرسانی توکن', 'error' => $e->getMessage()], 401);
         }
     }
 
@@ -110,11 +110,11 @@ class AuthController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'User status updated successfully',
+                'message' => 'وضعیت کاربر با موفقیت به‌روزرسانی شد',
                 'user' => new UserResource($user)
             ]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Failed to update user status', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'خطا در به‌روزرسانی وضعیت کاربر', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -127,11 +127,11 @@ class AuthController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'User role updated successfully',
+                'message' => 'نقش کاربر با موفقیت به‌روزرسانی شد',
                 'user' => new UserResource($user)
             ]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Failed to update user role', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'خطا در به‌روزرسانی نقش کاربر', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -148,10 +148,10 @@ class AuthController extends Controller
             $user->delete();
 
             return response()->json([
-                'message' => 'User deleted successfully'
+                'message' => 'کاربر با موفقیت حذف شد'
             ]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Failed to delete user', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'خطا در حذف کاربر', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -160,7 +160,7 @@ class AuthController extends Controller
         try {
             return UserResource::collection(User::latest()->paginate(10));
         } catch (Exception $e) {
-            return response()->json(['message' => 'Failed to fetch users', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'خطا در دریافت لیست کاربران', 'error' => $e->getMessage()], 500);
         }
     }
 }

@@ -31,7 +31,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import UserSidebar from '@/components/user/UserSidebar.vue';
-import TopBar from '@/components/Admin/TopBar.vue';
+import TopBar from '@/components/common/TopBar.vue';
 
 export default {
   name: 'DashboardLayout',

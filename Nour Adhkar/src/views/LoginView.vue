@@ -165,19 +165,24 @@ export default {
           password: this.password,
         });
 
-        if (response.data.success) {
-          // Directly commit mutations to update Vuex store
+        if (response.data.token) {
+          // Store user data and token in Vuex
           this.$store.commit('setUser', response.data.user);
           this.$store.commit('setToken', response.data.token);
-          this.$store.commit('updateHeartScore', response.data.heart_score);
-
+          
+          // Store token in localStorage for persistence
+          localStorage.setItem('token', response.data.token);
+          
+          // Set default authorization header for future requests
+          axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+          
           // Redirect to dashboard
           this.$router.push('/dashboard');
         } else {
-          this.serverError = response.data.message || 'ورود ناموفق بود';
+          this.serverError = response.data.message || 'خطایی رخ داد';
         }
       } catch (err) {
-        this.serverError = err.response?.data?.error || 'خطایی رخ داد';
+        this.serverError = err.response?.data?.message || 'خطایی رخ داد';
         console.error(err);
       } finally {
         this.isProcessing = false;
