@@ -105,11 +105,11 @@ export default {
     },
     navigateToResult(result) {
       if (result.type === 'category') {
-        this.$router.push({ path: `/${result.path}` });
+        this.$router.push({ path: `/collections/${result.path}` });
       } else {
         // Navigate to specific item in collection
         this.$router.push({ 
-          path: `/${result.path}`,
+          path: `/collections/${result.path}`,
           query: { highlight: result.itemId }
         });
       }
