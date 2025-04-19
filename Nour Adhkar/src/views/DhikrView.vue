@@ -142,6 +142,13 @@ section#morning {
       <div class="content-top-bar">
         <h2 id="dhikr-title"></h2>
         <div class="action-buttons">
+          <button 
+            class="favorite-button" 
+            :class="{ 'is-favorite': isFavorite }"
+            @click="toggleFavorite"
+          >
+            <font-awesome-icon :icon="isFavorite ? 'heart' : ['fa', 'heart']" />
+          </button>
           <img id="share-button" class="share-button" src="@/assets/icons/share.svg" alt="اشتراک گذاری" @click="share()">
         </div>
       </div>
@@ -190,12 +197,21 @@ export default {
       toastMessage: '',
       loading: true,
       error: null,
-      hasUpdatedScore: false
+      hasUpdatedScore: false,
+      favorites: new Set() // Store favorite dhikr IDs
     }
   },
   watch: {
     '$route'() {
       this.loadCollection();
+    },
+    'openedDhikr': {
+      immediate: true,
+      handler(newDhikr) {
+        if (newDhikr && newDhikr.id) {
+          this.checkIfFavorite(newDhikr.id);
+        }
+      }
     }
   },
   computed: {
@@ -226,6 +242,9 @@ export default {
         this.storeDhikr();
       }
       return result;
+    },
+    isFavorite() {
+      return this.favorites.has(this.openedDhikr.id);
     }
   },
   methods: {
@@ -240,6 +259,7 @@ export default {
           this.openedCollection = response.data.collection;
           this.openedDhikr = this.openedCollection.adhkar[0];
           this.initializeCounters();
+          await this.loadFavorites();
         } else {
           this.error = 'خطایی رخ داده است';
         }
@@ -410,6 +430,60 @@ export default {
       setTimeout(() => {
         this.showToast = false;
       }, 3000);
+    },
+    async loadFavorites() {
+      if (!this.isAuthenticated) return;
+      
+      try {
+        const response = await axios.get(`${BASE_API_URL}/adhkar/favorites`, {
+          headers: {
+            Authorization: `Bearer ${this.$store.state.token}`
+          }
+        });
+        
+        if (response.data.success) {
+          this.favorites = new Set(response.data.favorites.map(f => f.id));
+          // Check if current dhikr is favorite after loading favorites
+          if (this.openedDhikr && this.openedDhikr.id) {
+            this.checkIfFavorite(this.openedDhikr.id);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+      }
+    },
+    checkIfFavorite(dhikrId) {
+      if (this.favorites.has(dhikrId)) {
+        this.favorites.add(dhikrId);
+      } else {
+        this.favorites.delete(dhikrId);
+      }
+    },
+    async toggleFavorite() {
+      if (!this.isAuthenticated) {
+        this.showToastMessage('لطفا ابتدا وارد شوید');
+        return;
+      }
+
+      try {
+        const response = await axios.post(`${BASE_API_URL}/adhkar/favorites/${this.openedDhikr.id}`, {}, {
+          headers: {
+            Authorization: `Bearer ${this.$store.state.token}`
+          }
+        });
+
+        if (response.data.success) {
+          this.showToastMessage(this.isFavorite ? 'ذکر از علاقه‌مندی‌ها حذف شد' : 'ذکر به علاقه‌مندی‌ها اضافه شد');
+          if (this.isFavorite) {
+            this.favorites.delete(this.openedDhikr.id);
+          } else {
+            this.favorites.add(this.openedDhikr.id);
+          }
+        }
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
+        this.showToastMessage('خطا در ثبت علاقه‌مندی');
+      }
     }
   },
   async created() {
