@@ -215,7 +215,7 @@ export default {
 
 .card-text-top {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 500;
   color: var(--text-light);
 }
@@ -248,7 +248,7 @@ export default {
   }
 
   .card-text-top {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
 }
 
@@ -262,7 +262,7 @@ export default {
   }
 
   .card-text-top {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
 }
 </style> 
