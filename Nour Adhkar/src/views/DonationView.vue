@@ -5,9 +5,6 @@
     <main class="donation-content">
       <section class="donation-section">
         <div class="intro-card">
-          <div class="intro-icon">
-            <font-awesome-icon icon="fa-solid fa-heart" />
-          </div>
           <div class="intro-text">
             <h2>چرا حمایت کنیم؟</h2>
             <p>اذکار نور یک پروژه منبع باز و رایگان است که برای ترویج فرهنگ اسلامی و دسترسی آسان به اذکار و ادعیه ایجاد شده است. حمایت شما به ما کمک می‌کند تا:</p>
@@ -299,19 +296,6 @@ body.dark-mode .section-title {
   align-items: center;
   text-align: center;
   gap: 1.5rem;
-}
-
-.intro-icon {
-  width: 60px;
-  height: 60px;
-  aspect-ratio: 1 / 1;
-  background-color: #A79277;
-  color: #fff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
 }
 
 .intro-text h2 {
@@ -648,8 +632,7 @@ body.dark-mode .supporter-date {
     padding: 2rem;
   }
   
-  .intro-icon {
-    margin-bottom: 0;
+  .intro-text {
     margin-left: 2rem;
   }
   

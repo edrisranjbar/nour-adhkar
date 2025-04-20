@@ -2,7 +2,9 @@
   <header class="app-header">
     <div class="header-container">
       <div class="header-left">
-        <img src="@/assets/icons/logo.png" alt="اذکار نور" class="app-logo" />
+        <router-link to="/" class="logo-link">
+          <img src="@/assets/icons/logo.png" alt="اذکار نور" class="app-logo" />
+        </router-link>
         <div class="header-titles">
           <h1>{{ title }}</h1>
           <p class="description">{{ description }}</p>
@@ -92,6 +94,16 @@ body.dark-mode .app-header {
   gap: 16px;
 }
 
+.logo-link {
+  display: block;
+  text-decoration: none;
+}
+
+.logo-link:hover .app-logo {
+  transform: translateY(-3px) rotate(5deg);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
 .app-logo {
   width: 50px;
   height: 50px;
@@ -106,11 +118,6 @@ body.dark-mode .app-header {
 body.dark-mode .app-logo {
   background-color: #333;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.app-logo:hover {
-  transform: translateY(-3px) rotate(5deg);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .header-titles {
