@@ -19,8 +19,7 @@ class PostSeeder extends Seeder
             ->state(['status' => 'published'])
             ->create()
             ->each(function ($post) use ($categories) {
-                $post->category()->associate($categories->random());
-                $post->save();
+                $post->categories()->attach($categories->random());
             });
 
         // Create 5 draft posts
@@ -29,8 +28,7 @@ class PostSeeder extends Seeder
             ->state(['status' => 'draft'])
             ->create()
             ->each(function ($post) use ($categories) {
-                $post->category()->associate($categories->random());
-                $post->save();
+                $post->categories()->attach($categories->random());
             });
     }
 } 
