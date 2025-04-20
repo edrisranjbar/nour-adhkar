@@ -17,7 +17,6 @@ class DatabaseSeeder extends Seeder
             CollectionSeeder::class,
             AdhkarSeeder::class,
             CategorySeeder::class,
-            BlogPostSeeder::class,
             PostSeeder::class,
         ]);
     }
