@@ -16,7 +16,6 @@ class CategorySeeder extends Seeder
      */
     private function generateSlug($title)
     {
-        // Transliteration map for Persian/Arabic characters
         $persian = ['ا', 'ب', 'پ', 'ت', 'ث', 'ج', 'چ', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'ژ', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق', 'ک', 'گ', 'ل', 'م', 'ن', 'و', 'ه', 'ی', ' و ', 'آ', 'ئ'];
         $latin = ['a', 'b', 'p', 't', 's', 'j', 'ch', 'h', 'kh', 'd', 'z', 'r', 'z', 'zh', 's', 'sh', 's', 'z', 't', 'z', 'a', 'gh', 'f', 'q', 'k', 'g', 'l', 'm', 'n', 'v', 'h', 'y', '-o-', 'a', 'e'];
         

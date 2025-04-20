@@ -15,7 +15,6 @@ class UserDhikr extends Model
         'title',
         'arabic_text',
         'translation',
-        'transliteration',
         'count',
         'user_id',
         'is_completed',

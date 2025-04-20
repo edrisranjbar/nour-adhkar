@@ -47,6 +47,7 @@ Route::prefix('donations')->group(function () {
     Route::get('/recent', [DonationController::class, 'getRecentDonations']);
     Route::post('/create', [DonationController::class, 'create']);
     Route::get('/verify', [DonationController::class, 'verify']);
+    Route::middleware('auth:api')->get('/user', [DonationController::class, 'getUserDonations']);
 });
 
 // Post routes

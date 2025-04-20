@@ -16,7 +16,6 @@ class UserDhikrFactory extends Factory
             'title' => $this->faker->sentence(),
             'arabic_text' => 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ',
             'translation' => $this->faker->paragraph(),
-            'transliteration' => 'Allahumma salli ala Muhammad',
             'count' => $this->faker->numberBetween(1, 100),
             'user_id' => User::factory(),
             'is_completed' => false,

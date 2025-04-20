@@ -26,13 +26,11 @@ class DhikrTest extends TestCase
             'title' => 'Test Dhikr',
             'arabic_text' => 'اللَّهُمَّ',
             'translation' => 'O Allah',
-            'transliteration' => 'Allahumma'
         ]);
 
         $this->assertEquals('Test Dhikr', $dhikr->title);
         $this->assertEquals('اللَّهُمَّ', $dhikr->arabic_text);
         $this->assertEquals('O Allah', $dhikr->translation);
-        $this->assertEquals('Allahumma', $dhikr->transliteration);
     }
 
     public function test_dhikr_has_default_values()
@@ -42,7 +40,6 @@ class DhikrTest extends TestCase
         $this->assertNotNull($dhikr->title);
         $this->assertNotNull($dhikr->arabic_text);
         $this->assertNotNull($dhikr->translation);
-        $this->assertNotNull($dhikr->transliteration);
         $this->assertFalse($dhikr->is_completed);
         $this->assertEquals(0, $dhikr->completed_count);
     }
@@ -57,7 +54,6 @@ class DhikrTest extends TestCase
         $this->assertNotNull($dhikr->title);
         $this->assertNotNull($dhikr->arabic_text);
         $this->assertNotNull($dhikr->translation);
-        $this->assertNotNull($dhikr->transliteration);
         $this->assertNotNull($dhikr->count);
         $this->assertFalse($dhikr->is_completed);
         $this->assertEquals(0, $dhikr->completed_count);

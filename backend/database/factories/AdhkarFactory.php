@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Adhkar;
+use App\Models\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AdhkarFactory extends Factory
@@ -12,12 +13,12 @@ class AdhkarFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->sentence(3),
-            'prefix' => $this->faker->optional(0.7)->sentence(2),
-            'arabic_text' => $this->faker->paragraph,
+            'title' => $this->faker->sentence,
+            'arabic_text' => 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ',
             'translation' => $this->faker->paragraph,
             'count' => $this->faker->numberBetween(1, 100),
-            'collection_id' => null
+            'prefix' => $this->faker->optional(0.7)->randomElement(['سبحان الله', 'الحمد لله', 'الله أكبر']),
+            'collection_id' => Collection::factory()
         ];
     }
 } 

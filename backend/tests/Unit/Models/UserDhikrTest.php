@@ -27,7 +27,6 @@ class UserDhikrTest extends TestCase
         $this->assertNotNull($userDhikr->user_id);
         $this->assertNotNull($userDhikr->arabic_text);
         $this->assertNotNull($userDhikr->translation);
-        $this->assertNotNull($userDhikr->transliteration);
         $this->assertNotNull($userDhikr->count);
     }
 
@@ -48,7 +47,6 @@ class UserDhikrTest extends TestCase
         $this->assertNotNull($userDhikr->user_id);
         $this->assertNotNull($userDhikr->arabic_text);
         $this->assertNotNull($userDhikr->translation);
-        $this->assertNotNull($userDhikr->transliteration);
         $this->assertNotNull($userDhikr->count);
     }
 } 

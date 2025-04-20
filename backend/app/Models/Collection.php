@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
 class Collection extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'type',
@@ -50,7 +53,7 @@ class Collection extends Model
     protected function generateUniqueSlug($name)
     {
         $slug = Str::slug($name);
-        $count = static::whereRaw("slug RLIKE '^{$slug}(-[0-9]+)?$'")->count();
+        $count = static::where('slug', 'LIKE', $slug . '%')->count();
 
         return $count ? "{$slug}-{$count}" : $slug;
     }

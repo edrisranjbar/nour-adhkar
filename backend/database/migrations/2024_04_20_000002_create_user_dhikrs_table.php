@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('title');
             $table->text('arabic_text');
             $table->text('translation');
-            $table->text('transliteration');
             $table->integer('count')->default(1);
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();

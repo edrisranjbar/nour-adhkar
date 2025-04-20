@@ -30,7 +30,6 @@ class DhikrListTest extends TestCase
                         'title',
                         'arabic_text',
                         'translation',
-                        'transliteration',
                         'count',
                         'user' => [
                             'id',
