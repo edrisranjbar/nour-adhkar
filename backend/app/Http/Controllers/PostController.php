@@ -46,6 +46,7 @@ class PostController extends Controller
 
         return response()->json([
             'data' => $posts->items(),
+            'success' => true,
             'meta' => [
                 'current_page' => $posts->currentPage(),
                 'total' => $posts->total(),

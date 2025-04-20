@@ -90,14 +90,19 @@ export default {
           params: { page }
         });
         
-        if (response.data.success) {
-          this.posts = response.data.posts.data;
-          this.pagination = {
-            current_page: response.data.posts.current_page,
-            last_page: response.data.posts.last_page,
-            per_page: response.data.posts.per_page,
-            total: response.data.posts.total
-          };
+        // Check if response has data property
+        if (response.data && response.data.data) {
+          this.posts = response.data.data;
+          
+          // Handle pagination if available
+          if (response.data.meta) {
+            this.pagination = {
+              current_page: response.data.meta.current_page,
+              last_page: response.data.meta.last_page,
+              per_page: response.data.meta.per_page,
+              total: response.data.meta.total
+            };
+          }
         } else {
           this.error = 'خطا در دریافت مقالات';
         }
