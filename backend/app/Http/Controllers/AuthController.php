@@ -93,6 +93,7 @@ class AuthController extends Controller
             
             return response()->json([
                 'token' => $token,
+                'expires_in' => auth()->factory()->getTTL() * 60,
                 'message' => 'توکن با موفقیت به‌روزرسانی شد'
             ]);
         } catch (Exception $e) {

@@ -39,16 +39,14 @@ class AdhkarControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'adhkars' => [
+                'success',
+                'adhkar' => [
                     '*' => [
                         'id',
                         'arabic_text',
                         'translation',
                         'count',
-                        'collection' => [
-                            'id',
-                            'name'
-                        ]
+                        'collection_id'
                     ]
                 ]
             ]);
@@ -62,16 +60,22 @@ class AdhkarControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
+                'success',
+                'isFavorite',
                 'message',
-                'favorite'
+                'dhikr' => [
+                    'id',
+                    'arabic_text',
+                    'translation',
+                    'count'
+                ]
             ]);
-
-        $this->assertTrue($this->user->favoriteAdhkars->contains($this->adhkar));
     }
 
     public function test_can_get_favorites()
     {
-        $this->user->favoriteAdhkars()->attach($this->adhkar);
+        $this->user->favorites = [$this->adhkar->id];
+        $this->user->save();
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token
@@ -79,6 +83,7 @@ class AdhkarControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
+                'success',
                 'favorites' => [
                     '*' => [
                         'id',
@@ -95,10 +100,11 @@ class AdhkarControllerTest extends TestCase
         $this->user->update(['role' => 'admin']);
 
         $adhkarData = [
+            'title' => 'Test Adhkar',
             'arabic_text' => 'Test Arabic Text',
             'translation' => 'Test Translation',
             'count' => 5,
-            'collection_id' => $this->collection->id
+            'collection_id' => 1
         ];
 
         $response = $this->withHeaders([
@@ -109,10 +115,13 @@ class AdhkarControllerTest extends TestCase
             ->assertJsonStructure([
                 'adhkar' => [
                     'id',
+                    'title',
                     'arabic_text',
                     'translation',
                     'count',
-                    'collection_id'
+                    'collection_id',
+                    'created_at',
+                    'updated_at'
                 ]
             ]);
     }

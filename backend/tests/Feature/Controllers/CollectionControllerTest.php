@@ -70,6 +70,7 @@ class CollectionControllerTest extends TestCase
         $collectionData = [
             'title' => 'Test Collection',
             'description' => 'Test Description',
+            'icon' => 'test-icon',
             'type' => 'custom'
         ];
 
@@ -79,12 +80,17 @@ class CollectionControllerTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonStructure([
+                'success',
+                'message',
                 'collection' => [
                     'id',
                     'name',
-                    'slug',
                     'description',
-                    'type'
+                    'icon',
+                    'slug',
+                    'type',
+                    'created_at',
+                    'updated_at'
                 ]
             ]);
     }
@@ -168,18 +174,26 @@ class CollectionControllerTest extends TestCase
     {
         $this->user->update(['role' => 'admin']);
 
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token
-        ])->postJson('/api/admin/collections', [
+        $collectionData = [
             'title' => 'Test Collection Name',
             'description' => 'Test Description',
+            'icon' => 'test-icon',
             'type' => 'custom'
-        ]);
+        ];
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token
+        ])->postJson('/api/admin/collections', $collectionData);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'collection' => [
                     'slug'
+                ]
+            ])
+            ->assertJson([
+                'collection' => [
+                    'slug' => 'test-collection-name'
                 ]
             ]);
     }

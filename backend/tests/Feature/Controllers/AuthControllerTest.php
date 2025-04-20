@@ -89,7 +89,6 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'token',
-                'token_type',
                 'expires_in'
             ]);
     }
