@@ -3,7 +3,7 @@
     <AppHeader title="حمایت از ما" description="با حمایت شما، اذکار نور به رشد و توسعه ادامه می‌دهد" />
     
     <main class="donation-content">
-      <section class="donation-intro">
+      <section class="donation-section">
         <div class="intro-card">
           <div class="intro-icon">
             <font-awesome-icon icon="fa-solid fa-heart" />
@@ -19,11 +19,7 @@
             </ul>
           </div>
         </div>
-      </section>
-      
-      <section class="donation-options">
-        <h2 class="section-title">مبلغ دلخواه خود را انتخاب کنید</h2>
-        
+
         <div class="donation-amounts">
           <div 
             v-for="amount in donationAmounts" 
@@ -35,36 +31,28 @@
             <span class="amount-description">{{ amount.description }}</span>
           </div>
           
-          <div class="amount-option custom-amount full-width">
+          <div 
+            class="amount-option"
+            :class="{ 'active': showCustomInput }"
+            @click="showCustomAmountInput"
+          >
+            <span class="amount-value">مبلغ دلخواه</span>
+            <span class="amount-description">تعیین مبلغ دلخواه</span>
+          </div>
+
+          <div v-if="showCustomInput" class="amount-option custom-amount full-width">
             <input 
-              type="number" 
-              v-model="customAmount" 
+              type="text" 
+              v-model="displayAmount"
               @input="selectCustomAmount"
               placeholder="مبلغ دلخواه"
               class="custom-amount-input"
+              ref="customInput"
             />
             <span class="amount-description">تومان</span>
           </div>
         </div>
-      </section>
-      
-      <section class="payment-methods">
-        <h2 class="section-title">روش پرداخت</h2>
-        
-        <div class="payment-method-card">
-          <div class="payment-header">
-            <div class="payment-icon">
-              <font-awesome-icon icon="fa-solid fa-credit-card" />
-            </div>
-            <h3 class="payment-title">درگاه زرین‌پال</h3>
-          </div>
-          <p class="payment-description">
-            پرداخت امن و سریع از طریق درگاه پرداخت زرین‌پال
-          </p>
-        </div>
-      </section>
-      
-      <section class="donation-action">
+
         <div class="donation-summary">
           <div class="summary-amount">
             <span class="summary-label">مبلغ حمایت:</span>
@@ -84,7 +72,6 @@
           <span v-if="isLoading">در حال اتصال به درگاه...</span>
           <span v-else>
             پرداخت و حمایت
-            <font-awesome-icon icon="fa-solid fa-heart" class="button-icon" />
           </span>
         </button>
         
@@ -92,22 +79,22 @@
           <div class="secure-icon">
             <font-awesome-icon icon="fa-solid fa-lock" />
           </div>
-          <p class="secure-text">تمام تراکنش‌ها از طریق درگاه‌های امن پرداخت انجام می‌شوند</p>
+          <p class="secure-text">پرداخت امن از طریق درگاه زرین‌پال</p>
         </div>
-      </section>
-      
-      <section class="recent-supporters" v-if="recentSupporters.length > 0">
-        <h2 class="section-title">حامیان اخیر</h2>
-        
-        <div class="supporters-list">
-          <div v-for="(supporter, index) in recentSupporters" :key="index" class="supporter-card">
-            <div class="supporter-avatar">
-              {{ supporter.name.substring(0, 1) }}
-            </div>
-            <div class="supporter-info">
-              <h3 class="supporter-name">{{ supporter.name }}</h3>
-              <p class="supporter-amount">{{ formatAmount(supporter.amount) }} تومان</p>
-              <p class="supporter-date">{{ supporter.date }}</p>
+
+        <div class="recent-supporters" v-if="recentSupporters.length > 0">
+          <h2 class="section-title">حامیان اخیر</h2>
+          
+          <div class="supporters-list">
+            <div v-for="(supporter, index) in recentSupporters" :key="index" class="supporter-card">
+              <div class="supporter-avatar">
+                {{ supporter.name.substring(0, 1) }}
+              </div>
+              <div class="supporter-info">
+                <h3 class="supporter-name">{{ supporter.name }}</h3>
+                <p class="supporter-amount">{{ formatAmount(supporter.amount) }} تومان</p>
+                <p class="supporter-date">{{ supporter.date }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -122,7 +109,7 @@
 import AppHeader from '@/components/Header.vue';
 import AppFooter from '@/components/Footer.vue';
 import { donationService } from '@/services/donationService';
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, nextTick } from 'vue';
 
 export default {
   name: 'DonationView',
@@ -131,14 +118,18 @@ export default {
     AppFooter
   },
   setup() {
-    const selectedAmount = ref(500000);
+    const selectedAmount = ref(1000000);
     const customAmount = ref(null);
+    const displayAmount = ref('۱,۰۰۰,۰۰۰');
     const isLoading = ref(false);
     const errorMessage = ref('');
+    const showCustomInput = ref(false);
+    const customInput = ref(null);
     const donationAmounts = [
       { value: 100000, label: '۱۰۰,۰۰۰', description: 'حمایت کوچک' },
       { value: 500000, label: '۵۰۰,۰۰۰', description: 'حمایت خوب' },
       { value: 1000000, label: '۱,۰۰۰,۰۰۰', description: 'حمایت متوسط' },
+      { value: 5000000, label: '۵,۰۰۰,۰۰۰', description: 'حمایت برتر' },
       { value: 10000000, label: '۱۰,۰۰۰,۰۰۰', description: 'حمایت عالی' }
     ];
     const recentSupporters = ref([]);
@@ -154,17 +145,33 @@ export default {
     const selectAmount = (amount) => {
       selectedAmount.value = amount;
       customAmount.value = null;
+      showCustomInput.value = false;
+      displayAmount.value = donationAmounts.find(a => a.value === amount)?.label || formatAmount(amount);
+    };
+    
+    const showCustomAmountInput = () => {
+      showCustomInput.value = true;
+      selectedAmount.value = null;
+      customAmount.value = null;
+      displayAmount.value = '';
+      // Focus the input after the next tick to ensure it's rendered
+      nextTick(() => {
+        customInput.value?.focus();
+      });
     };
     
     const selectCustomAmount = () => {
-      if (customAmount.value && customAmount.value > 0) {
-        selectedAmount.value = null;
-      } else if (customAmount.value === null || customAmount.value === '') {
-        selectedAmount.value = 500000;
+      if (displayAmount.value) {
+        const numericValue = parseInt(displayAmount.value.toString().replace(/,/g, ''));
+        if (!isNaN(numericValue) && numericValue > 0) {
+          customAmount.value = numericValue;
+          displayAmount.value = formatAmount(numericValue);
+        }
       }
     };
     
     const formatAmount = (amount) => {
+      if (amount === null || amount === undefined) return '۰';
       return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
     
@@ -212,6 +219,7 @@ export default {
     return {
       selectedAmount,
       customAmount,
+      displayAmount,
       isLoading,
       errorMessage,
       donationAmounts,
@@ -221,7 +229,10 @@ export default {
       selectAmount,
       selectCustomAmount,
       formatAmount,
-      proceedToDonation
+      proceedToDonation,
+      showCustomInput,
+      showCustomAmountInput,
+      customInput
     };
   }
 };
@@ -240,6 +251,21 @@ export default {
   padding: 16px;
   margin: 0 auto;
   flex: 1;
+}
+
+.donation-section {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+body.dark-mode .donation-section {
+  background-color: #262626;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .section-title {
@@ -266,25 +292,13 @@ body.dark-mode .section-title {
   color: #eee;
 }
 
-/* Intro Section */
-.donation-intro {
-  margin-bottom: 2rem;
-}
-
+/* Intro Card */
 .intro-card {
-  background-color: #fff;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-}
-
-body.dark-mode .intro-card {
-  background-color: #262626;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  gap: 1.5rem;
 }
 
 .intro-icon {
@@ -298,7 +312,6 @@ body.dark-mode .intro-card {
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
-  margin-bottom: 1.5rem;
 }
 
 .intro-text h2 {
@@ -336,19 +349,15 @@ body.dark-mode .benefits-list li {
   color: #bbb;
 }
 
-/* Donation Options */
-.donation-options, .payment-methods, .donation-action, .recent-supporters {
-  margin-bottom: 2.5rem;
-}
-
+/* Donation Amounts */
 .donation-amounts {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
 
 .amount-option {
-  background-color: #fff;
+  background-color: rgba(167, 146, 119, 0.05);
   border-radius: 12px;
   padding: 1.25rem 1rem;
   display: flex;
@@ -358,12 +367,14 @@ body.dark-mode .benefits-list li {
   cursor: pointer;
   transition: all 0.3s ease;
   border: 2px solid transparent;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 body.dark-mode .amount-option {
-  background-color: #262626;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  background-color: rgba(167, 146, 119, 0.1);
 }
 
 .amount-option:hover {
@@ -372,11 +383,18 @@ body.dark-mode .amount-option {
 
 .amount-option.active {
   border-color: #A79277;
-  background-color: rgba(167, 146, 119, 0.05);
+  background-color: rgba(167, 146, 119, 0.1);
 }
 
 body.dark-mode .amount-option.active {
-  background-color: rgba(167, 146, 119, 0.15);
+  background-color: rgba(167, 146, 119, 0.2);
+}
+
+.amount-value, .amount-description {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .amount-value {
@@ -402,8 +420,8 @@ body.dark-mode .amount-description {
 .amount-option.full-width {
   grid-column: 1 / -1;
   margin-top: 1rem;
-  background-color: rgba(167, 146, 119, 0.05);
-  border: 2px dashed rgba(167, 146, 119, 0.3);
+  background-color: rgba(167, 146, 119, 0.1);
+  border: 2px solid #A79277;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -411,8 +429,8 @@ body.dark-mode .amount-description {
 }
 
 body.dark-mode .amount-option.full-width {
-  background-color: rgba(167, 146, 119, 0.1);
-  border: 2px dashed rgba(167, 146, 119, 0.4);
+  background-color: rgba(167, 146, 119, 0.2);
+  border: 2px solid #A79277;
 }
 
 .custom-amount-input {
@@ -436,80 +454,8 @@ body.dark-mode .custom-amount-input {
   color: #aaa;
 }
 
-/* Payment Methods */
-.payment-method-card {
-  background-color: #fff;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-  border-left: 4px solid #A79277;
-}
-
-body.dark-mode .payment-method-card {
-  background-color: #262626;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-}
-
-.payment-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.payment-icon {
-  width: 50px;
-  height: 50px;
-  background-color: rgba(167, 146, 119, 0.1);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 1rem;
-  color: #A79277;
-  font-size: 1.5rem;
-}
-
-.payment-title {
-  font-size: 1.2rem;
-  color: #333;
-  margin: 0;
-}
-
-body.dark-mode .payment-title {
-  color: #eee;
-}
-
-.payment-description {
-  color: #555;
-  margin: 0;
-  line-height: 1.6;
-}
-
-body.dark-mode .payment-description {
-  color: #bbb;
-}
-
-/* Donation Action */
-.donation-action {
-  background-color: #fff;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-body.dark-mode .donation-action {
-  background-color: #262626;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-}
-
+/* Donation Summary */
 .donation-summary {
-  margin-bottom: 2rem;
-  width: 100%;
   background-color: rgba(167, 146, 119, 0.05);
   padding: 1.5rem;
   border-radius: 12px;
@@ -617,10 +563,16 @@ body.dark-mode .error-message {
 }
 
 .button-icon {
-  margin-right: 0.75rem;
+  display: none;
 }
 
 /* Recent Supporters */
+.recent-supporters {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(167, 146, 119, 0.2);
+}
+
 .supporters-list {
   display: grid;
   grid-template-columns: 1fr;
@@ -628,17 +580,15 @@ body.dark-mode .error-message {
 }
 
 .supporter-card {
-  background-color: #fff;
+  background-color: rgba(167, 146, 119, 0.05);
   border-radius: 12px;
   padding: 1rem;
   display: flex;
   align-items: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 body.dark-mode .supporter-card {
-  background-color: #262626;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  background-color: rgba(167, 146, 119, 0.1);
 }
 
 .supporter-avatar {
@@ -704,7 +654,7 @@ body.dark-mode .supporter-date {
   }
   
   .donation-amounts {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
   
   .supporters-list {
