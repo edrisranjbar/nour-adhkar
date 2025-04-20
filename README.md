@@ -33,6 +33,30 @@ Nour Adhkar is a web application that provides a collection of Islamic adhkar (r
 - Composer
 - MySQL or PostgreSQL
 
+### Branch Strategy
+
+This project follows a branch strategy where:
+- `main` branch is reserved for production releases
+- `development` branch is the primary branch for development work
+
+When starting development:
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/nour-adhkar.git
+   ```
+
+2. Switch to the development branch
+   ```bash
+   git checkout development
+   ```
+
+3. Create a feature branch from development
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+4. After completing your work, create a pull request to merge into the `development` branch, not `main`
+
 ### Frontend Setup
 
 1. Navigate to the frontend directory
@@ -109,11 +133,12 @@ We welcome contributions from the community! Here's how you can help:
 
 2. **Contribute code**
    - Fork the repository
-   - Create a new branch (`git checkout -b feature/your-feature-name`)
+   - Switch to the `development` branch (`git checkout development`)
+   - Create a new branch from development (`git checkout -b feature/your-feature-name`)
    - Make your changes
    - Commit with clear, descriptive messages
    - Push to your fork
-   - Submit a pull request
+   - Submit a pull request to the `development` branch
 
 3. **Improve documentation**
    - Help us improve this README or add documentation
