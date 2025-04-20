@@ -236,8 +236,18 @@ export default {
 </script>
 
 <style scoped>
+
+.container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  flex: 1;
+}
+
 .contribution-container {
   min-height: 100vh;
+  max-width: 1000px;
+  margin: auto;
   display: flex;
   flex-direction: column;
 }

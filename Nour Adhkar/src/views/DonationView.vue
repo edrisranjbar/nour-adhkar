@@ -230,13 +230,14 @@ export default {
 <style scoped>
 .donation-container {
   min-height: 100vh;
+  max-width: 1000px;
+  margin: auto;
   display: flex;
   flex-direction: column;
 }
 
 .donation-content {
   padding: 16px;
-  max-width: 800px;
   margin: 0 auto;
   flex: 1;
 }
