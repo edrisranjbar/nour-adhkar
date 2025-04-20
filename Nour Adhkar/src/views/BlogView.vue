@@ -86,7 +86,7 @@ export default {
       this.error = null;
       
       try {
-        const response = await axios.get(`${BASE_API_URL}/blog`, {
+        const response = await axios.get(`${BASE_API_URL}/posts`, {
           params: { page }
         });
         

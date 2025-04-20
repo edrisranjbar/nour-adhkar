@@ -36,24 +36,12 @@ class CategoryFactory extends Factory
      */
     public function definition()
     {
-        // Set Faker to use Persian locale
-        $this->faker->locale('fa_IR');
-        
-        // Persian category names related to Islamic topics
-        $categoryNames = [
-            'احادیث', 'تفسیر قرآن', 'اخلاق اسلامی', 'فقه', 'عقاید', 
-            'تاریخ اسلام', 'سیره اهل بیت', 'ادعیه', 'اذکار', 'معارف قرآن',
-            'اخلاق', 'عبادات', 'معاملات', 'خانواده', 'اجتماع',
-            'اقتصاد اسلامی', 'سیاست اسلامی', 'علم و دین', 'فلسفه اسلامی', 'عرفان'
-        ];
-        
-        $name = $this->faker->unique()->randomElement($categoryNames);
-        
         return [
-            'name' => $name,
-            'slug' => Str::slug($name),
-            'description' => $this->faker->realText(rand(50, 150)),
-            'parent_id' => null, // Default to no parent
+            'name' => $this->faker->word,
+            'slug' => $this->faker->slug,
+            'description' => $this->faker->sentence,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 

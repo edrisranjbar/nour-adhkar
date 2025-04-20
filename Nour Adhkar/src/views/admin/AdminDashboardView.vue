@@ -240,7 +240,7 @@ export default {
     
     async getBlogPostsCount() {
       try {
-        const response = await axios.get(`${BASE_API_URL}/admin/blog`, {
+        const response = await axios.get(`${BASE_API_URL}/admin/posts`, {
           headers: {
             Authorization: `Bearer ${this.token}`
           }

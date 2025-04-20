@@ -167,7 +167,7 @@ export default {
       
       try {
         const token = this.$store.state.token;
-        const response = await axios.get(`${BASE_API_URL}/admin/blog`, {
+        const response = await axios.get(`${BASE_API_URL}/admin/posts`, {
           params: { page },
           headers: {
             Authorization: `Bearer ${token}`
@@ -213,7 +213,7 @@ export default {
       
       try {
         const token = this.$store.state.token;
-        const response = await axios.delete(`${BASE_API_URL}/admin/blog/${this.postToDelete.id}`, {
+        const response = await axios.delete(`${BASE_API_URL}/admin/posts/${this.postToDelete.id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
