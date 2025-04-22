@@ -589,4 +589,103 @@ class PostControllerTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_handles_error_in_upload_featured_image()
+    {
+        $token = JWTAuth::fromUser($this->admin);
+        $file = UploadedFile::fake()->image('post.jpg');
+
+        // Simulate storage error
+        Storage::shouldReceive('disk')
+            ->once()
+            ->with('public')
+            ->andThrow(new \Exception('Storage error'));
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->postJson('/api/admin/posts/' . $this->post->id . '/featured-image', [
+            'image' => $file
+        ]);
+
+        $response->assertStatus(500)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Featured image upload failed'
+            ]);
+    }
+
+    public function test_handles_validation_error_in_upload_featured_image()
+    {
+        $token = JWTAuth::fromUser($this->admin);
+        $file = UploadedFile::fake()->create('document.txt', 100);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->postJson('/api/admin/posts/' . $this->post->id . '/featured-image', [
+            'image' => $file
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonStructure([
+                'errors' => [
+                    'image'
+                ]
+            ]);
+    }
+
+    public function test_handles_missing_image_in_upload_featured_image()
+    {
+        $token = JWTAuth::fromUser($this->admin);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->postJson('/api/admin/posts/' . $this->post->id . '/featured-image', []);
+
+        $response->assertStatus(422)
+            ->assertJsonStructure([
+                'errors' => [
+                    'image'
+                ]
+            ]);
+    }
+
+    public function test_handles_error_in_upload_file()
+    {
+        $token = JWTAuth::fromUser($this->admin);
+        $file = UploadedFile::fake()->image('test.jpg');
+
+        // Simulate storage error
+        Storage::shouldReceive('disk')
+            ->once()
+            ->with('public')
+            ->andThrow(new \Exception('Storage error'));
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->postJson('/api/admin/posts/upload', [
+            'file' => $file
+        ]);
+
+        $response->assertStatus(500)
+            ->assertJson([
+                'success' => false,
+                'message' => 'File upload failed'
+            ]);
+    }
+
+    public function test_handles_missing_file_in_upload_file()
+    {
+        $token = JWTAuth::fromUser($this->admin);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->postJson('/api/admin/posts/upload', []);
+
+        $response->assertStatus(422)
+            ->assertJsonStructure([
+                'errors' => [
+                    'file'
+                ]
+            ]);
+    }
 } 
