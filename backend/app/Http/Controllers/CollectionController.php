@@ -71,6 +71,7 @@ class CollectionController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
+            'type' => 'required|string|in:daily,special,custom',
             'adhkarIds' => 'nullable|array',
             'adhkarIds.*' => 'exists:adhkars,id',
         ]);
@@ -86,7 +87,11 @@ class CollectionController extends Controller
             'name' => $request->title,
             'description' => $request->description,
             'icon' => $request->icon ?? null,
+            'type' => $request->type
         ]);
+
+        // Transform the collection to match frontend expectations
+        $collection->title = $collection->name;
 
         // If adhkarIds are provided, update the associated adhkar
         if ($request->has('adhkarIds') && is_array($request->adhkarIds)) {

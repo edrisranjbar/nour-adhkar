@@ -16,16 +16,16 @@ class Donation extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'amount',
+        'status',
+        'transaction_id',
+        'reference_id',
+        'paid_at',
         'user_id',
         'name',
         'email',
-        'amount',
-        'transaction_id',
-        'reference_id',
         'card_pan',
-        'status',
-        'description',
-        'paid_at',
+        'description'
     ];
     
     /**
@@ -35,7 +35,7 @@ class Donation extends Model
      */
     protected $casts = [
         'amount' => 'integer',
-        'paid_at' => 'datetime',
+        'paid_at' => 'datetime'
     ];
     
     /**

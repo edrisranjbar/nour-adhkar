@@ -7,9 +7,11 @@ use App\Http\Controllers\DhikrController;
 use App\Http\Controllers\AdhkarController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\DonationController;
-use App\Http\Controllers\BlogController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MediaController;
+use App\Http\Middleware\AdminMiddleware;
+
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -28,7 +30,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'get']);
     
-    // Other routes
+    // Dhikr routes
+    Route::get('/dhikr', [DhikrController::class, 'index']);
     Route::post('/dhikr', [DhikrController::class, 'store']);
     Route::post('/adhkar/favorites/{id}', [AdhkarController::class, 'toggleFavorite']);
     Route::get('/adhkar/favorites', [AdhkarController::class, 'getFavorites']);
@@ -44,22 +47,24 @@ Route::prefix('donations')->group(function () {
     Route::get('/recent', [DonationController::class, 'getRecentDonations']);
     Route::post('/create', [DonationController::class, 'create']);
     Route::get('/verify', [DonationController::class, 'verify']);
+    Route::middleware('auth:api')->get('/user', [DonationController::class, 'getUserDonations']);
 });
 
-// Blog routes
-Route::get('/blog', [BlogController::class, 'index']);
-Route::get('/blog/{slug}', [BlogController::class, 'show']);
+// Post routes
+Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/{slug}', [PostController::class, 'show']);
+Route::get('/posts/{post}/related', [PostController::class, 'related']);
 
-// Admin blog routes
-Route::middleware('auth:api')->prefix('admin')->group(function () {
-    Route::post('/blog', [BlogController::class, 'store']);
-    Route::put('/blog/{id}', [BlogController::class, 'update']);
-    Route::delete('/blog/{id}', [BlogController::class, 'destroy']);
+// Admin post routes
+Route::middleware(['auth:api', AdminMiddleware::class])->prefix('admin')->group(function () {
+    Route::post('/posts', [PostController::class, 'store']);
+    Route::put('/posts/{post}', [PostController::class, 'update']);
+    Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+    Route::post('/posts/{post}/featured-image', [PostController::class, 'uploadFeaturedImage']);
     
-    // File upload for blog
-    Route::post('/blog/upload', [BlogController::class, 'uploadFile']);
-    Route::get('/blog', [BlogController::class, 'adminIndex']);
-    Route::get('/blog/{id}', [BlogController::class, 'adminShow']);
+    // File upload for posts
+    Route::post('/posts/upload', [PostController::class, 'uploadFile']);
+    Route::get('/posts', [PostController::class, 'adminIndex']);
     
     // User management routes
     Route::get('/users', [AuthController::class, 'adminIndex']);
@@ -98,8 +103,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
 
     // Logs routes
     Route::get('/logs', [App\Http\Controllers\Admin\LogController::class, 'index']);
+    Route::get('/logs/export', [App\Http\Controllers\Admin\LogController::class, 'export']);
     Route::get('/logs/{id}', [App\Http\Controllers\Admin\LogController::class, 'show']);
     Route::delete('/logs', [App\Http\Controllers\Admin\LogController::class, 'destroy']);
 });
-
-Route::get('/blog/related/{id}', [BlogController::class, 'related']);

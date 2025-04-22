@@ -2,32 +2,28 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Adhkar extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'title',
-        'count',
-        'prefix',
         'arabic_text',
         'translation',
-        'user_id',
-        'is_custom',
+        'count',
+        'prefix',
+        'collection_id'
     ];
 
     protected $casts = [
-        'is_custom' => 'boolean',
         'count' => 'integer'
     ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function collection()
+    public function collection(): BelongsTo
     {
         return $this->belongsTo(Collection::class);
     }

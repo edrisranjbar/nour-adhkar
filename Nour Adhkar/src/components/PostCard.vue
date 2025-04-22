@@ -2,7 +2,7 @@
   <div class="post-card">
     <RouterLink :to="`/blog/${post.slug}`" class="post-link">
       <div class="post-image">
-        <img v-if="post.image" :src="post.image" :alt="post.title">
+        <img v-if="post.featured_image" :src="post.featured_image" :alt="post.title">
         <div v-else class="placeholder-image"></div>
       </div>
       <div class="post-content">
@@ -142,6 +142,7 @@ export default {
   margin-bottom: 16px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex-grow: 1;

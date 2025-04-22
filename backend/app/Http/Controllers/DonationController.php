@@ -163,4 +163,30 @@ class DonationController extends Controller
         
         return redirect(config('app.frontend_url') . '/donation/failed?message=' . urlencode($result['message']));
     }
+    
+    /**
+     * Get user donations
+     * 
+     * @return JsonResponse
+     */
+    public function getUserDonations(): JsonResponse
+    {
+        $donations = Donation::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($donation) {
+                return [
+                    'id' => $donation->id,
+                    'amount' => $donation->amount,
+                    'status' => $donation->status,
+                    'authority' => $donation->transaction_id,
+                    'ref_id' => $donation->reference_id,
+                    'created_at' => $donation->created_at
+                ];
+            });
+            
+        return response()->json([
+            'donations' => $donations
+        ]);
+    }
 }

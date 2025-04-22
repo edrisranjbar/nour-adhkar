@@ -51,13 +51,13 @@ class UserController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        try {
-            $request->validate([
-                'name' => 'sometimes|string|max:255',
-                'email' => 'sometimes|email|unique:users,email,' . Auth::id(),
-                'password' => 'sometimes|string|min:6'
-            ]);
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . Auth::id(),
+            'password' => 'nullable|string|min:6'
+        ]);
 
+        try {
             $user = Auth::user();
             
             if ($request->has('name')) {
@@ -116,9 +116,19 @@ class UserController extends Controller
      */
     public function updatePassword(Request $request)
     {
-        $request->validate(['password' => 'required|string|min:6']);
+        $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed'
+        ]);
 
         $user = Auth::user();
+        
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'رمز عبور فعلی اشتباه است'
+            ], 422);
+        }
+
         $user->password = Hash::make($request->password);
         $user->save();
 
@@ -181,11 +191,12 @@ class UserController extends Controller
             $favoriteCount = count($user->completed_dates ?? []);
             
             return response()->json([
-                'todayCount' => $todayCount,
-                'favoriteCount' => $favoriteCount,
+                'today_count' => $todayCount,
+                'favorite_count' => $favoriteCount,
                 'streak' => $user->streak,
-                'heartScore' => $user->heart_score ?? 0,
-                'totalDhikrs' => $user->total_dhikrs ?? 0
+                'heart_score' => $user->heart_score ?? 0,
+                'total_dhikrs' => $user->total_dhikrs ?? 0,
+                'completed_dates' => $user->completed_dates ?? []
             ]);
         } catch (Exception $e) {
             return response()->json([

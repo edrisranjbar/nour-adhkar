@@ -67,7 +67,7 @@ class Category extends Model
      */
     public function posts()
     {
-        return $this->belongsToMany(BlogPost::class, 'blog_post_category', 'category_id', 'blog_post_id');
+        return $this->belongsToMany(Post::class);
     }
 
     /**
@@ -75,12 +75,12 @@ class Category extends Model
      */
     public function allPosts()
     {
-        $postIds = $this->posts()->pluck('blog_posts.id');
+        $postIds = $this->posts()->pluck('posts.id');
         
         foreach ($this->children as $child) {
-            $postIds = $postIds->merge($child->allPosts()->pluck('blog_posts.id'));
+            $postIds = $postIds->merge($child->posts()->pluck('posts.id'));
         }
         
-        return BlogPost::whereIn('id', $postIds);
+        return Post::whereIn('id', $postIds);
     }
 } 

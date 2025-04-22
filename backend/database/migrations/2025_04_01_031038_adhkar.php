@@ -16,6 +16,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('type');
+            $table->text('description')->nullable();
+            $table->string('icon')->nullable();
+            $table->string('slug')->unique();
             $table->timestamps();
         });
 
@@ -23,7 +26,7 @@ return new class extends Migration
         Schema::create('adhkars', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('prefix');
+            $table->string('prefix')->nullable();
             $table->text('arabic_text');
             $table->text('translation');
             $table->integer('count');

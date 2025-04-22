@@ -218,7 +218,7 @@ export default {
     async fetchPost(id) {
       try {
         const token = this.$store.state.token;
-        const response = await axios.get(`${BASE_API_URL}/admin/blog/${id}`, {
+        const response = await axios.get(`${BASE_API_URL}/admin/posts/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -277,7 +277,7 @@ export default {
         formData.append('category_ids', JSON.stringify(this.selectedCategories));
         
         const token = this.$store.state.token;
-        const endpoint = `${BASE_API_URL}/admin/blog${this.isEditing ? `/${this.postId}/draft` : '/draft'}`;
+        const endpoint = `${BASE_API_URL}/admin/posts${this.isEditing ? `/${this.postId}/draft` : '/draft'}`;
         
         const response = await axios({
           method: this.isEditing ? 'put' : 'post',
@@ -321,7 +321,7 @@ export default {
         formData.append('category_ids', JSON.stringify(this.selectedCategories));
         
         const token = this.$store.state.token;
-        const endpoint = `${BASE_API_URL}/admin/blog${this.isEditing ? `/${this.postId}` : ''}`;
+        const endpoint = `${BASE_API_URL}/admin/posts${this.isEditing ? `/${this.postId}` : ''}`;
         
         const response = await axios({
           method: this.isEditing ? 'put' : 'post',

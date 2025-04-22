@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserDhikr;
 use App\Services\BadgeService;
 use Illuminate\Http\Request;
 
@@ -12,6 +13,26 @@ class DhikrController extends Controller
     public function __construct(BadgeService $badgeService)
     {
         $this->badgeService = $badgeService;
+    }
+
+    public function index(Request $request)
+    {
+        $query = UserDhikr::query();
+
+        if ($request->has('search')) {
+            $search = $request->get('search');
+            $query->where('title', 'like', "%{$search}%")
+                  ->orWhere('arabic_text', 'like', "%{$search}%")
+                  ->orWhere('translation', 'like', "%{$search}%");
+        }
+
+        $dhikrs = $query->with('user:id,name')
+                       ->latest()
+                       ->get();
+
+        return response()->json([
+            'data' => $dhikrs
+        ]);
     }
 
     public function store(Request $request)

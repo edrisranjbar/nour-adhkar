@@ -136,7 +136,7 @@ export default {
       
       try {
         const slug = this.$route.params.slug;
-        const response = await axios.get(`${BASE_API_URL}/blog/${slug}`);
+        const response = await axios.get(`${BASE_API_URL}/posts/${slug}`);
         
         if (response.data.success) {
           this.post = response.data.post;

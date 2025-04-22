@@ -95,26 +95,20 @@ class BadgeService
     public function updateStreak(User $user)
     {
         $today = Carbon::today();
-        $lastDhikrDate = $user->last_dhikr_date ? Carbon::parse($user->last_dhikr_date) : null;
-
-        if (!$lastDhikrDate) {
-            $user->streak = 1;
-        } else {
-            $daysDifference = $today->diffInDays($lastDhikrDate);
-
-            if ($daysDifference === 0) {
-                // Already recorded today
-                return;
-            } elseif ($daysDifference === 1) {
-                // Consecutive day
-                $user->streak++;
-            } else {
-                // Streak broken
-                $user->streak = 1;
-            }
+        $todayString = $today->toDateString();
+        
+        // Initialize completed_dates if null
+        $completedDates = $user->completed_dates ?? [];
+        
+        // If already completed today, no need to update
+        if (in_array($todayString, $completedDates)) {
+            return;
         }
-
-        $user->last_dhikr_date = $today;
+        
+        // Add today to completed dates
+        $completedDates[] = $todayString;
+        $user->completed_dates = $completedDates;
+        $user->last_dhikr_completed_at = $today;
         $user->save();
     }
 

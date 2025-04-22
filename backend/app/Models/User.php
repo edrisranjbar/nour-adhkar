@@ -7,11 +7,99 @@ use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'active',
+        'avatar',
+        'score',
+        'streak',
+        'badges',
+        'last_login_at',
+        'last_dhikr_completed_at',
+        'favorites',
+        'total_dhikrs'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'id' => 'integer',
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'active' => 'boolean',
+        'score' => 'integer',
+        'badges' => 'json',
+        'favorites' => 'json',
+        'completed_dates' => 'json',
+        'heart_score' => 'integer',
+        'last_login_at' => 'datetime',
+        'last_dhikr_completed_at' => 'datetime',
+        'total_dhikrs' => 'integer'
+    ];
+
+    protected $attributes = [
+        'role' => 'user',
+        'active' => true,
+        'score' => 0,
+        'streak' => 0,
+        'badges' => '[]',
+        'favorites' => '[]',
+        'total_dhikrs' => 0
+    ];
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    public function donations()
+    {
+        return $this->hasMany(Donation::class);
+    }
+
+    public function userDhikrs()
+    {
+        return $this->hasMany(UserDhikr::class);
+    }
+
+    public function scopeAdmin($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
+
+    public function scopeFavorite($query, $postId)
+    {
+        return $query->whereJsonContains('favorites', $postId);
+    }
 
     public function hasNewBadge(): Attribute
     {
@@ -34,44 +122,6 @@ class User extends Authenticatable implements JWTSubject
         'has_new_badge',
         'streak'
     ];
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'avatar',
-        'heart_score',
-        'streak',
-        'completed_dates',
-        'role',
-        'active'
-    ];
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'badges' => 'array',
-        'last_dhikr_date' => 'date',
-        'password' => 'hashed',
-        'completed_dates' => 'array',
-        'favorites' => 'array'
-    ];
-
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
-
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
-
-    public function dhikrs()
-    {
-        return $this->hasMany(Dhikr::class);
-    }
 
     public function getStreakAttribute()
     {
@@ -105,5 +155,4 @@ class User extends Authenticatable implements JWTSubject
         
         return $streak;
     }
-
 }
