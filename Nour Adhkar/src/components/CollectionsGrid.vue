@@ -78,19 +78,8 @@
     </section>
     
     <section class="small-cards-row">
-      <RouterLink to="/collections/special" class="card-sm">
-        <CategoryCard image-src="src/assets/images/special.svg" size="small" alt="Special occasions">
-          <div class="card-content">
-            <div class="card-icon">
-              <font-awesome-icon icon="fa-solid fa-gift" />
-            </div>
-            <h2 class="card-text-top">مناسبت‌های خاص</h2>
-            <span class="card-items-count">{{ specialCollection?.adhkar?.length || 0 }} ذکر</span>
-          </div>
-        </CategoryCard>
-      </RouterLink>
       <RouterLink to="/counter" class="card-sm">
-      <CategoryCard image-src="src/assets/images/counter.svg">
+        <CategoryCard image-src="src/assets/images/counter.svg">
           <div class="card-content">
             <div class="card-icon">
               <font-awesome-icon icon="fa-solid fa-circle-notch" />
