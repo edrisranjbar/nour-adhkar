@@ -103,4 +103,7 @@ Route::middleware(['auth:api', AdminMiddleware::class])->prefix('admin')->group(
 
     // Logs routes
     Route::get('/logs', [App\Http\Controllers\Admin\LogController::class, 'index']);
+    Route::get('/logs/export', [App\Http\Controllers\Admin\LogController::class, 'export']);
+    Route::get('/logs/{id}', [App\Http\Controllers\Admin\LogController::class, 'show']);
+    Route::delete('/logs', [App\Http\Controllers\Admin\LogController::class, 'destroy']);
 });
