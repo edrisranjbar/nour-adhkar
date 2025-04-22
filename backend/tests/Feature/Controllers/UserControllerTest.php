@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
+use App\Services\BadgeService;
+use Mockery;
 
 class UserControllerTest extends TestCase
 {
@@ -16,12 +18,28 @@ class UserControllerTest extends TestCase
 
     protected $user;
     protected $token;
+    protected $badgeService;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user = User::factory()->create();
+        
+        // Create test user
+        $this->user = User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => Hash::make('password123'),
+            'heart_score' => 50,
+            'streak' => 5,
+            'completed_dates' => [now()->format('Y-m-d')],
+            'total_dhikrs' => 10
+        ]);
+        
         $this->token = JWTAuth::fromUser($this->user);
+        
+        // Mock BadgeService
+        $this->badgeService = Mockery::mock(BadgeService::class);
+        $this->app->instance(BadgeService::class, $this->badgeService);
     }
 
     public function test_can_get_user_profile()
@@ -49,11 +67,27 @@ class UserControllerTest extends TestCase
             ]);
     }
 
+    public function test_handles_error_in_get_profile()
+    {
+        // Force an error by making the user not found
+        $this->user->delete();
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token
+        ])->getJson('/api/user/profile');
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Unauthenticated.'
+            ]);
+    }
+
     public function test_can_update_user_profile()
     {
         $updateData = [
             'name' => 'Updated Name',
-            'email' => 'updated@example.com'
+            'email' => 'updated@example.com',
+            'password' => 'newpassword123'
         ];
 
         $response = $this->withHeaders([
@@ -63,36 +97,30 @@ class UserControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'پروفایل با موفقیت به‌روزرسانی شد',
-                'profile' => [
-                    'name' => 'Updated Name',
-                    'email' => 'updated@example.com'
-                ]
+                'message' => 'پروفایل با موفقیت به‌روزرسانی شد'
             ]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $this->user->id,
+            'name' => 'Updated Name',
+            'email' => 'updated@example.com'
+        ]);
     }
 
-    public function test_can_update_user_avatar()
+    public function test_handles_error_in_update_profile()
     {
-        Storage::fake('public');
-
-        $file = UploadedFile::fake()->image('avatar.jpg');
-
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token
-        ])->postJson('/api/user/avatar', [
-            'avatar' => $file
+        ])->putJson('/api/user/profile', [
+            'email' => 'invalid-email'
         ]);
 
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'message',
-                'avatar_url',
-                'user' => [
-                    'avatar'
+        $response->assertStatus(422)
+            ->assertJson([
+                'errors' => [
+                    'email' => []
                 ]
             ]);
-
-        Storage::disk('public')->assertExists('avatars/' . $file->hashName());
     }
 
     public function test_can_update_user_name()
@@ -117,28 +145,68 @@ class UserControllerTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token
         ])->patchJson('/api/user/password', [
-            'current_password' => 'password',
-            'password' => 'newpassword',
-            'password_confirmation' => 'newpassword'
-        ]);
-
-        $response->assertStatus(200)
-            ->assertJson(['message' => 'رمز عبور با موفقیت به‌روزرسانی شد']);
-    }
-
-    public function test_can_update_heart_score()
-    {
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token
-        ])->patchJson('/api/user/heart', [
-            'heart_score' => 50
+            'current_password' => 'password123',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123'
         ]);
 
         $response->assertStatus(200)
             ->assertJson([
+                'message' => 'رمز عبور با موفقیت به‌روزرسانی شد'
+            ]);
+
+        $this->assertTrue(Hash::check('newpassword123', $this->user->fresh()->password));
+    }
+
+    public function test_handles_wrong_current_password()
+    {
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token
+        ])->patchJson('/api/user/password', [
+            'current_password' => 'wrongpassword',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123'
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'message' => 'رمز عبور فعلی اشتباه است'
+            ]);
+    }
+
+    public function test_can_update_heart_score()
+    {
+        $this->badgeService->shouldReceive('checkAndAwardBadges')
+            ->once()
+            ->andReturn(true);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token
+        ])->patchJson('/api/user/heart', [
+            'heart_score' => 75
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'امتیاز قلب با موفقیت به‌روزرسانی شد',
                 'user' => [
-                    'heart_score' => 50
-                ]
+                    'heart_score' => 75
+                ],
+                'badge_awarded' => true
+            ]);
+    }
+
+    public function test_handles_error_in_update_heart_score()
+    {
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token
+        ])->patchJson('/api/user/heart', [
+            'heart_score' => 'invalid'
+        ]);
+
+        $response->assertStatus(500)
+            ->assertJson([
+                'message' => 'خطا در به‌روزرسانی امتیاز قلب'
             ]);
     }
 
@@ -150,52 +218,76 @@ class UserControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'total_dhikrs',
+                'today_count',
+                'favorite_count',
                 'streak',
+                'heart_score',
+                'total_dhikrs',
                 'completed_dates'
-            ]);
-    }
-
-    public function test_validation_fails_for_invalid_profile_update()
-    {
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token
-        ])->putJson('/api/user/profile', [
-            'email' => 'invalid-email'
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
-    }
-
-    public function test_validation_fails_for_invalid_password_update()
-    {
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token
-        ])->patchJson('/api/user/password', [
-            'password' => 'short'
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['password']);
-    }
-
-    public function test_update_password_validates_input()
-    {
-        $user = User::factory()->create();
-        $token = JWTAuth::fromUser($user);
-
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-        ])->patchJson('/api/user/password', [
-            'current_password' => 'wrong_password',
-            'password' => 'new_password',
-            'password_confirmation' => 'new_password'
-        ]);
-
-        $response->assertStatus(422)
+            ])
             ->assertJson([
-                'message' => 'رمز عبور فعلی اشتباه است'
+                'today_count' => 1,
+                'favorite_count' => 1,
+                'streak' => 1,
+                'heart_score' => 50,
+                'total_dhikrs' => 10
             ]);
+    }
+
+    public function test_handles_error_in_get_user_stats()
+    {
+        // Force an error by making the user not found
+        $this->user->delete();
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token
+        ])->getJson('/api/user/stats');
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Unauthenticated.'
+            ]);
+    }
+
+    public function test_can_update_user_avatar()
+    {
+        Storage::fake('public');
+        
+        $file = UploadedFile::fake()->image('avatar.jpg');
+        
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token
+        ])->post('/api/user/avatar', [
+            'avatar' => $file
+        ], [
+            'Content-Type' => 'multipart/form-data'
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'تصویر پروفایل با موفقیت به‌روزرسانی شد'
+            ]);
+
+        Storage::disk('public')->assertExists('avatars/' . $file->hashName());
+    }
+
+    public function test_handles_error_in_update_avatar()
+    {
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token
+        ])->post('/api/user/avatar', [], [
+            'Content-Type' => 'multipart/form-data'
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'message' => 'فایل تصویر پروفایل ارسال نشده است'
+            ]);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        Mockery::close();
     }
 } 

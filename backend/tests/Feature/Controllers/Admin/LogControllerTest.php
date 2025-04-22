@@ -213,9 +213,10 @@ class LogControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
             
-        // Check Content-Disposition header using regex
+        // Check Content-Disposition header
         $contentDisposition = $response->headers->get('Content-Disposition');
-        $this->assertMatchesRegularExpression('/^attachment; filename=logs-export-.*\.csv$/', $contentDisposition);
+        $this->assertStringStartsWith('attachment; filename=logs-export-', $contentDisposition);
+        $this->assertStringEndsWith('.csv', $contentDisposition);
     }
 
     public function test_non_admin_cannot_access_logs()
