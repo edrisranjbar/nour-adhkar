@@ -11,16 +11,17 @@ class MediaFactory extends Factory
 
     public function definition()
     {
+        $name = $this->faker->word . '.' . $this->faker->fileExtension;
+        $path = 'uploads/media/' . $this->faker->uuid . '.' . $this->faker->fileExtension;
+        
         return [
-            'name' => $this->faker->word . '.' . $this->faker->fileExtension,
-            'file_name' => $this->faker->uuid . '.' . $this->faker->fileExtension,
-            'mime_type' => $this->faker->mimeType,
-            'path' => $this->faker->filePath,
-            'disk' => 'public',
-            'conversions_disk' => 'public',
+            'name' => $name,
+            'path' => $path,
+            'url' => asset('storage/' . $path),
+            'type' => $this->faker->mimeType,
             'size' => $this->faker->numberBetween(1000, 1000000),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'description' => $this->faker->sentence,
+            'tags' => $this->faker->words(3),
         ];
     }
 } 
