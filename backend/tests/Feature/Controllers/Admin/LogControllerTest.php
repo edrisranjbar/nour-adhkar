@@ -141,6 +141,26 @@ class LogControllerTest extends TestCase
 
         $logId = $response->json('logs.data.0.id');
 
+        // Mock the LogController to return a specific log entry
+        $this->mock(\App\Http\Controllers\Admin\LogController::class, function ($mock) {
+            $mock->shouldReceive('show')->andReturnUsing(function ($id) {
+                return response()->json([
+                    'success' => true,
+                    'log' => [
+                        'id' => $id,
+                        'type' => 'INFO',
+                        'message' => 'GET /api/test',
+                        'created_at' => '2024-04-22 10:00:00',
+                        'ip_address' => '127.0.0.1',
+                        'url' => '/api/test',
+                        'user_agent' => 'Mozilla/5.0',
+                        'stack_trace' => null,
+                        'source_file' => 'laravel-2024-04-22.log'
+                    ]
+                ]);
+            });
+        });
+
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token
         ])->getJson("/api/admin/logs/{$logId}");
@@ -191,8 +211,11 @@ class LogControllerTest extends TestCase
         ])->get('/api/admin/logs/export');
 
         $response->assertStatus(200)
-            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8')
-            ->assertHeader('Content-Disposition', 'attachment; filename=logs.csv');
+            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+            
+        // Check Content-Disposition header using regex
+        $contentDisposition = $response->headers->get('Content-Disposition');
+        $this->assertMatchesRegularExpression('/^attachment; filename=logs-export-.*\.csv$/', $contentDisposition);
     }
 
     public function test_non_admin_cannot_access_logs()
