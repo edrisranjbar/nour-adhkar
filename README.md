@@ -16,6 +16,31 @@ Nour Adhkar is a web application that provides a collection of Islamic adhkar (r
 - Theme customization (light/dark mode)
 - User profiles and achievements
 
+## Dependencies
+
+### Frontend Dependencies
+- Node.js (v14 or higher)
+- npm (v7 or higher)
+- Vue.js 3
+- Vite
+- Other dependencies listed in `package.json`
+
+### Backend Dependencies
+- PHP 8.1 or higher
+- Composer 2.0 or higher
+- Laravel 11
+- MySQL 8.0 or higher / PostgreSQL 13 or higher
+- PHP Extensions:
+  - BCMath PHP Extension
+  - Ctype PHP Extension
+  - JSON PHP Extension
+  - Mbstring PHP Extension
+  - OpenSSL PHP Extension
+  - PDO PHP Extension
+  - Tokenizer PHP Extension
+  - XML PHP Extension
+  - FileInfo PHP Extension
+
 ## Tech Stack
 
 - Frontend: Vue.js 3 with Vite
@@ -24,14 +49,6 @@ Nour Adhkar is a web application that provides a collection of Islamic adhkar (r
 - Icons: Font Awesome
 
 ## Local Development Setup
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- npm or yarn
-- PHP 8.1 or higher
-- Composer
-- MySQL or PostgreSQL
 
 ### Branch Strategy
 
@@ -116,6 +133,29 @@ When starting development:
 
 8. The backend API will be available at `http://localhost:8000`
 
+## Testing
+
+### Running Backend Tests
+
+1. Configure your testing environment in `backend/.env.testing`
+   ```bash
+   cp .env.example .env.testing
+   # Update database and other settings for testing
+   ```
+
+2. Run all tests
+   ```bash
+   cd backend
+   php artisan test
+   ```
+
+3. Run tests with coverage report
+   ```bash
+   php artisan test --coverage
+   # Or for HTML coverage report
+   php artisan test --coverage-html reports/
+   ```
+
 ## Building for Production
 
 ```bash
@@ -136,6 +176,7 @@ We welcome contributions from the community! Here's how you can help:
    - Switch to the `development` branch (`git checkout development`)
    - Create a new branch from development (`git checkout -b feature/your-feature-name`)
    - Make your changes
+   - Run tests and ensure they pass
    - Commit with clear, descriptive messages
    - Push to your fork
    - Submit a pull request to the `development` branch
@@ -152,7 +193,10 @@ We welcome contributions from the community! Here's how you can help:
 - Follow the existing code style
 - Write meaningful commit messages
 - Add comments for complex logic
-- Test your changes before submitting
+- Write tests for new features
+- Maintain or improve code coverage
+- Follow PSR-12 coding standard for PHP
+- Use Vue.js style guide recommendations
 
 ## License
 
