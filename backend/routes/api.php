@@ -50,6 +50,7 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('heart', [UserController::class, 'updateHeartScore']);
         Route::get('stats', [UserController::class, 'getUserStats']);
         Route::get('dashboard', [UserController::class, 'getDashboard']);
+        Route::get('completed-days', [UserController::class, 'getCompletedDays']);
     });
 
     // Auth routes

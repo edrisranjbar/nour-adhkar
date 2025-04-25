@@ -334,4 +334,19 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function getCompletedDays()
+    {
+        try {
+            $user = Auth::user();
+            return response()->json([
+                'dates' => $user->completed_dates ?? []
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'خطا در دریافت تاریخ‌های تکمیل شده',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 } 

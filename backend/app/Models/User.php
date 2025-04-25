@@ -133,11 +133,11 @@ class User extends Authenticatable implements JWTSubject
             $lastDate = end($dates);
             $currentStreak = 1;
             
-            // If last completion was yesterday or today, count the streak
+            // If last completion was today, count the streak
             $lastCompletion = \Carbon\Carbon::parse($lastDate);
             $now = now();
             
-            if ($lastCompletion->diffInDays($now) <= 1) {
+            if ($lastCompletion->isToday()) {
                 // Count backwards from the last date
                 for ($i = count($dates) - 2; $i >= 0; $i--) {
                     $currentDate = \Carbon\Carbon::parse($dates[$i]);
