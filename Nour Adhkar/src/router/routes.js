@@ -11,6 +11,7 @@ import ContributionView from '../views/ContributionView.vue'
 import AboutView from '../views/AboutView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import { authGuard, adminGuard } from './guards';
+import DashboardView from '../views/DashboardView.vue'
 
 // Lazy loading for blog components
 const BlogView = () => import('../views/BlogView.vue');
@@ -161,7 +162,20 @@ export const publicRoutes = [
 ];
 
 // Protected routes that require authentication
-export const protectedRoutes = [];
+export const protectedRoutes = [
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: DashboardView,
+    beforeEnter: authGuard,
+    meta: {
+      title: 'داشبورد | اذکار نور',
+      description: 'داشبورد کاربری اذکار نور',
+      changefreq: 'daily',
+      priority: '0.9'
+    }
+  }
+];
 
 // Admin routes that require admin privileges
 export const adminRoutes = [

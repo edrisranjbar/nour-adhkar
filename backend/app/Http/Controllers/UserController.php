@@ -250,4 +250,88 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get user dashboard data
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDashboard()
+    {
+        try {
+            $user = Auth::user();
+            
+            // Get user stats
+            $stats = [
+                'totalDhikr' => $user->total_dhikrs ?? 0,
+                'totalContributions' => $user->contributions()->count(),
+                'totalDonations' => $user->donations()->count(),
+                'streak' => $user->streak,
+                'heartScore' => $user->heart_score ?? 0
+            ];
+
+            // Get recent activities
+            $recentActivities = collect();
+            
+            // Add recent dhikr completions
+            $recentDhikrs = $user->completed_dates ?? [];
+            foreach ($recentDhikrs as $date) {
+                $recentActivities->push([
+                    'id' => 'dhikr-' . $date,
+                    'type' => 'dhikr',
+                    'description' => 'تکمیل ذکر در تاریخ ' . $date,
+                    'date' => $date
+                ]);
+            }
+
+            // Add recent contributions
+            $contributions = $user->contributions()
+                ->latest()
+                ->take(5)
+                ->get()
+                ->map(function ($contribution) {
+                    return [
+                        'id' => 'contribution-' . $contribution->id,
+                        'type' => 'contribution',
+                        'description' => 'مشارکت جدید: ' . $contribution->title,
+                        'date' => $contribution->created_at
+                    ];
+                });
+            $recentActivities = $recentActivities->concat($contributions);
+
+            // Add recent donations
+            $donations = $user->donations()
+                ->latest()
+                ->take(5)
+                ->get()
+                ->map(function ($donation) {
+                    return [
+                        'id' => 'donation-' . $donation->id,
+                        'type' => 'donation',
+                        'description' => 'حمایت مالی: ' . number_format($donation->amount) . ' تومان',
+                        'date' => $donation->created_at
+                    ];
+                });
+            $recentActivities = $recentActivities->concat($donations);
+
+            // Sort activities by date and take the 10 most recent
+            $recentActivities = $recentActivities
+                ->sortByDesc('date')
+                ->take(10)
+                ->values();
+
+            return response()->json([
+                'success' => true,
+                'user' => new UserResource($user),
+                'stats' => $stats,
+                'recentActivities' => $recentActivities
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در دریافت اطلاعات داشبورد',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 } 

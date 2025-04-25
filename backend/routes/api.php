@@ -49,6 +49,7 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('password', [UserController::class, 'updatePassword']);
         Route::patch('heart', [UserController::class, 'updateHeartScore']);
         Route::get('stats', [UserController::class, 'getUserStats']);
+        Route::get('dashboard', [UserController::class, 'getDashboard']);
     });
 
     // Auth routes

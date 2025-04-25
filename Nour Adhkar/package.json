@@ -29,10 +29,13 @@
     "@rushstack/eslint-patch": "^1.8.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/eslint-config-prettier": "^9.0.0",
+    "autoprefixer": "^10.4.17",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
     "globby": "^14.1.0",
+    "postcss": "^8.4.35",
     "prettier": "^3.2.5",
+    "tailwindcss": "^3.4.1",
     "vite": "^5.2.8"
   }
 }
