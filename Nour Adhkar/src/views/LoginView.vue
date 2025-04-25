@@ -160,7 +160,7 @@ export default {
       try {
         this.serverError = '';
         this.isProcessing = true;
-        const response = await axios.post(`${BASE_API_URL}/login`, {
+        const response = await axios.post(`${BASE_API_URL}/auth/login`, {
           email: this.email,
           password: this.password,
         });

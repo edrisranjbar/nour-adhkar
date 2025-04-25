@@ -63,7 +63,7 @@ const store = createStore({
         },
         async login({ commit }, credentials) {
             try {
-                const response = await axios.post(`${BASE_API_URL}/login`, credentials);
+                const response = await axios.post(`${BASE_API_URL}/auth/login`, credentials);
                 if (response.data.token) {
                     commit('setToken', response.data.token);
                     commit('setUser', response.data.user);
@@ -77,7 +77,7 @@ const store = createStore({
         },
         async register({ commit }, userData) {
             try {
-                const response = await axios.post(`${BASE_API_URL}/register`, userData);
+                const response = await axios.post(`${BASE_API_URL}/auth/register`, userData);
                 if (response.data.token) {
                     commit('setToken', response.data.token);
                     commit('setUser', response.data.user);
@@ -92,7 +92,7 @@ const store = createStore({
         async logoutUser({ commit }) {
             try {
                 if (this.state.token) {
-                    await axios.post(`${BASE_API_URL}/logout`, {}, {
+                    await axios.post(`${BASE_API_URL}/auth/logout`, {}, {
                         headers: {
                             Authorization: `Bearer ${this.state.token}`
                         }
@@ -107,7 +107,7 @@ const store = createStore({
         },
         async refreshToken({ commit, state }) {
             try {
-                const response = await axios.post(`${BASE_API_URL}/refresh`, {}, {
+                const response = await axios.post(`${BASE_API_URL}/auth/refresh`, {}, {
                     headers: {
                         Authorization: `Bearer ${state.token}`
                     }
