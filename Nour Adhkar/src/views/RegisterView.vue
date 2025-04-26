@@ -213,7 +213,13 @@ export default {
           
           for (const field in errors) {
             if (Array.isArray(errors[field])) {
-              errorMessages.push(errors[field][0]);
+              // Translate specific error messages
+              const errorMsg = errors[field][0];
+              if (errorMsg === "The email has already been taken.") {
+                errorMessages.push("این ایمیل قبلاً استفاده شده است.");
+              } else {
+                errorMessages.push(errorMsg);
+              }
             }
           }
           
