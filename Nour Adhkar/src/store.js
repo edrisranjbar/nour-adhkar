@@ -7,12 +7,14 @@ import { BASE_API_URL } from '@/config';
 const store = createStore({
     state: {
         user: null,
-        token: null
+        token: localStorage.getItem('token') || null,
+        completedDays: []
     },
     getters: {
         isAuthenticated: state => !!state.token,
         isAdmin: state => state.user && state.user.role === 'admin',
-        user: state => state.user
+        user: state => state.user,
+        completedDays: state => state.completedDays
     },
     mutations: {
         setUser(state, user) {
@@ -20,50 +22,91 @@ const store = createStore({
         },
         setToken(state, token) {
             state.token = token;
+            localStorage.setItem('token', token);
         },
-        clearUser(state) {
+        setCompletedDays(state, days) {
+            state.completedDays = days;
+        },
+        clearAuth(state) {
             state.user = null;
             state.token = null;
+            localStorage.removeItem('token');
         }
     },
     actions: {
-        async refreshUserData({ commit, state }) {
+        async fetchUserStats({ commit, state }) {
             try {
-                if (!state.token) {
-                    console.log('No token available, skipping user data refresh');
-                    return;
+                const response = await axios.get(`${BASE_API_URL}/user/stats`, {
+                    headers: {
+                        Authorization: `Bearer ${state.token}`
+                    }
+                });
+                console.log('API Response:', response.data); // Debug log
+                if (response.data) {
+                    // Create a user object with the stats
+                    const userData = {
+                        ...state.user, // Preserve existing user data including name
+                        streak: response.data.streak,
+                        heart_score: response.data.heart_score,
+                        today_count: response.data.today_count,
+                        favorite_count: response.data.favorite_count,
+                        total_dhikrs: response.data.total_dhikrs
+                    };
+                    console.log('User data to commit:', userData); // Debug log
+                    commit('setUser', userData);
+                    return response.data;
                 }
-                
-                console.log('Refreshing user data with token:', state.token.substring(0, 10) + '...');
-                
-                // Set the token in axios headers
-                axios.defaults.headers.common['Authorization'] = `Bearer ${state.token}`;
-                
-                const response = await axios.get(`${BASE_API_URL}/user/profile`);
+                throw new Error('Invalid response format');
+            } catch (error) {
+                console.error('Error fetching user stats:', error);
+                throw error;
+            }
+        },
+        async fetchCompletedDays({ commit, state }) {
+            try {
+                const response = await axios.get(`${BASE_API_URL}/user/completed-days`, {
+                    headers: {
+                        Authorization: `Bearer ${state.token}`
+                    }
+                });
+                console.log('Completed days response:', response.data); // Debug log
+                if (response.data && response.data.dates) {
+                    commit('setCompletedDays', response.data.dates);
+                    return response.data.dates;
+                }
+                throw new Error('Invalid response format');
+            } catch (error) {
+                console.error('Error fetching completed days:', error);
+                throw error;
+            }
+        },
+        async refreshUserData({ commit, state }) {
+            if (!state.token) return;
+
+            try {
+                console.log('Refreshing user data with token:', state.token);
+                const response = await axios.get(`${BASE_API_URL}/user/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${state.token}`
+                    }
+                });
                 console.log('User profile response:', response.data);
-                
-                if (response.data.success) {
-                    console.log('Updating user data in store:', response.data.profile);
-                    commit('setUser', response.data.profile);
-                } else {
-                    console.warn('User profile response indicated failure:', response.data);
+                if (response.data.profile) {
+                    const userData = {
+                        ...response.data.profile,
+                        name: response.data.profile.name || 'کاربر'
+                    };
+                    commit('setUser', userData);
+                    console.log('Updating user data in store:', userData);
                 }
             } catch (error) {
                 console.error('Error refreshing user data:', error);
-                if (error.response) {
-                    console.error('Error response:', error.response.status, error.response.data);
-                }
-                
-                if (error.response?.status === 401) {
-                    console.log('Unauthorized, clearing user data');
-                    commit('clearUser');
-                    localStorage.removeItem('token');
-                }
+                commit('clearAuth');
             }
         },
         async login({ commit }, credentials) {
             try {
-                const response = await axios.post(`${BASE_API_URL}/login`, credentials);
+                const response = await axios.post(`${BASE_API_URL}/auth/login`, credentials);
                 if (response.data.token) {
                     commit('setToken', response.data.token);
                     commit('setUser', response.data.user);
@@ -77,7 +120,7 @@ const store = createStore({
         },
         async register({ commit }, userData) {
             try {
-                const response = await axios.post(`${BASE_API_URL}/register`, userData);
+                const response = await axios.post(`${BASE_API_URL}/auth/register`, userData);
                 if (response.data.token) {
                     commit('setToken', response.data.token);
                     commit('setUser', response.data.user);
@@ -90,24 +133,11 @@ const store = createStore({
             }
         },
         async logoutUser({ commit }) {
-            try {
-                if (this.state.token) {
-                    await axios.post(`${BASE_API_URL}/logout`, {}, {
-                        headers: {
-                            Authorization: `Bearer ${this.state.token}`
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Logout error:', error);
-            } finally {
-                commit('clearUser');
-                localStorage.removeItem('token');
-            }
+            commit('clearAuth');
         },
         async refreshToken({ commit, state }) {
             try {
-                const response = await axios.post(`${BASE_API_URL}/refresh`, {}, {
+                const response = await axios.post(`${BASE_API_URL}/auth/refresh`, {}, {
                     headers: {
                         Authorization: `Bearer ${state.token}`
                     }
@@ -120,7 +150,7 @@ const store = createStore({
                 return false;
             } catch (error) {
                 console.error('Token refresh error:', error);
-                commit('clearUser');
+                commit('clearAuth');
                 return false;
             }
         }

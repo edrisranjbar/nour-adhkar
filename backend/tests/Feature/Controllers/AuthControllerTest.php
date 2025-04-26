@@ -21,7 +21,7 @@ class AuthControllerTest extends TestCase
             'password_confirmation' => 'password123'
         ];
 
-        $response = $this->postJson('/api/register', $userData);
+        $response = $this->postJson('/api/auth/register', $userData);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
@@ -48,7 +48,7 @@ class AuthControllerTest extends TestCase
             'password' => Hash::make('password123')
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
             'password' => 'password123'
         ]);
@@ -71,7 +71,7 @@ class AuthControllerTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token
-        ])->postJson('/api/logout');
+        ])->postJson('/api/auth/logout');
 
         $response->assertStatus(200)
             ->assertJson(['message' => 'خروج با موفقیت انجام شد']);
@@ -84,7 +84,7 @@ class AuthControllerTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token
-        ])->postJson('/api/refresh');
+        ])->postJson('/api/auth/refresh');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -116,7 +116,7 @@ class AuthControllerTest extends TestCase
 
     public function test_validation_fails_for_invalid_registration()
     {
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson('/api/auth/register', [
             'name' => '',
             'email' => 'invalid-email',
             'password' => 'short',
@@ -129,7 +129,7 @@ class AuthControllerTest extends TestCase
 
     public function test_validation_fails_for_invalid_credentials()
     {
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
             'password' => 'wrongpassword'
         ]);

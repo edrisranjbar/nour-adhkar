@@ -21,6 +21,10 @@
             <font-awesome-icon icon="fa-solid fa-fire" class="stat-icon" />
             <span>{{ user?.streak || 0 }}</span>
           </div>
+          <RouterLink to="/dashboard" class="dashboard-button">
+            <font-awesome-icon icon="fa-solid fa-user" />
+            داشبورد
+          </RouterLink>
           <button @click="logout" class="logout-button">
             <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
             خروج

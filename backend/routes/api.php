@@ -10,100 +10,135 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\Admin\LogController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Controllers\BadgeController;
 
-
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/refresh', [AuthController::class, 'refresh']);
-Route::middleware('auth:api')->group(function () {
-    // User related routes with UserController
-    Route::get('/user/profile', [UserController::class, 'getProfile']);
-    Route::put('/user/profile', [UserController::class, 'updateProfile']);
-    Route::post('user/avatar', [UserController::class, 'updateAvatar']);
-    Route::patch('/user/name', [UserController::class, 'updateName']);
-    Route::patch('/user/password', [UserController::class, 'updatePassword']);
-    Route::patch('/user/heart', [UserController::class, 'updateHeartScore']);
-    Route::get('/user/stats', [UserController::class, 'getUserStats']);
-    
-    // Auth related routes
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', [AuthController::class, 'get']);
-    
-    // Dhikr routes
-    Route::get('/dhikr', [DhikrController::class, 'index']);
-    Route::post('/dhikr', [DhikrController::class, 'store']);
-    Route::post('/adhkar/favorites/{id}', [AdhkarController::class, 'toggleFavorite']);
-    Route::get('/adhkar/favorites', [AdhkarController::class, 'getFavorites']);
+// Public routes
+Route::prefix('auth')->group(function () {
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::middleware('auth:api')->group(function () {
+        Route::post('logout', [AuthController::class, 'logout']);
+    });
 });
 
-// Adhkar routes
-Route::get('/adhkars', [AdhkarController::class, 'index']);
-Route::get('/collections', [CollectionController::class, 'index']);
-Route::get('/collections/{slug}', [CollectionController::class, 'show']);
+// Public content routes
+Route::get('adhkars', [AdhkarController::class, 'index']);
+Route::get('collections', [CollectionController::class, 'index']);
+Route::get('collections/{slug}', [CollectionController::class, 'show']);
+Route::get('posts', [PostController::class, 'index']);
+Route::get('posts/{slug}', [PostController::class, 'show']);
+Route::get('posts/{post}/related', [PostController::class, 'related']);
 
-// Donation routes
+// Public donation routes
 Route::prefix('donations')->group(function () {
-    Route::get('/recent', [DonationController::class, 'getRecentDonations']);
-    Route::post('/create', [DonationController::class, 'create']);
-    Route::get('/verify', [DonationController::class, 'verify']);
-    Route::middleware('auth:api')->get('/user', [DonationController::class, 'getUserDonations']);
+    Route::get('recent', [DonationController::class, 'getRecentDonations']);
+    Route::post('create', [DonationController::class, 'create']);
+    Route::get('verify', [DonationController::class, 'verify']);
 });
 
-// Post routes
-Route::get('/posts', [PostController::class, 'index']);
-Route::get('/posts/{slug}', [PostController::class, 'show']);
-Route::get('/posts/{post}/related', [PostController::class, 'related']);
+// Authenticated routes
+Route::middleware('auth:api')->group(function () {
+    // User profile routes
+    Route::prefix('user')->group(function () {
+        Route::get('profile', [UserController::class, 'getProfile']);
+        Route::put('profile', [UserController::class, 'updateProfile']);
+        Route::post('avatar', [UserController::class, 'updateAvatar']);
+        Route::patch('name', [UserController::class, 'updateName']);
+        Route::patch('password', [UserController::class, 'updatePassword']);
+        Route::patch('heart', [UserController::class, 'updateHeartScore']);
+        Route::get('stats', [UserController::class, 'getUserStats']);
+        Route::get('dashboard', [UserController::class, 'getDashboard']);
+        Route::get('completed-days', [UserController::class, 'getCompletedDays']);
+    });
 
-// Admin post routes
-Route::middleware(['auth:api', AdminMiddleware::class])->prefix('admin')->group(function () {
-    Route::post('/posts', [PostController::class, 'store']);
-    Route::put('/posts/{post}', [PostController::class, 'update']);
-    Route::delete('/posts/{post}', [PostController::class, 'destroy']);
-    Route::post('/posts/{post}/featured-image', [PostController::class, 'uploadFeaturedImage']);
-    
-    // File upload for posts
-    Route::post('/posts/upload', [PostController::class, 'uploadFile']);
-    Route::get('/posts', [PostController::class, 'adminIndex']);
-    
-    // User management routes
-    Route::get('/users', [AuthController::class, 'adminIndex']);
-    Route::get('/users/{id}', [AuthController::class, 'adminShow']);
-    Route::post('/users', [AuthController::class, 'adminStore']);
-    Route::put('/users/{id}', [AuthController::class, 'adminUpdate']);
-    Route::patch('/users/{id}/toggle-status', [AuthController::class, 'toggleStatus']);
+    // Auth routes
+    Route::get('user', [AuthController::class, 'get']);
 
-    // Collection management routes
-    Route::get('/collections', [CollectionController::class, 'adminIndex']);
-    Route::post('/collections', [CollectionController::class, 'adminStore']);
-    Route::get('/collections/{id}', [CollectionController::class, 'adminShow']);
-    Route::put('/collections/{id}', [CollectionController::class, 'adminUpdate']);
-    Route::delete('/collections/{id}', [CollectionController::class, 'adminDestroy']);
+    // Dhikr routes
+    Route::get('dhikr', [DhikrController::class, 'index']);
+    Route::post('dhikr', [DhikrController::class, 'store']);
+    Route::post('adhkar/favorites/{id}', [AdhkarController::class, 'toggleFavorite']);
+    Route::get('adhkar/favorites', [AdhkarController::class, 'getFavorites']);
 
-    // Adhkar management routes
-    Route::get('/adhkar', [AdhkarController::class, 'adminIndex']);
-    Route::post('/adhkar', [AdhkarController::class, 'adminStore']);
-    Route::get('/adhkar/{id}', [AdhkarController::class, 'adminShow']);
-    Route::put('/adhkar/{id}', [AdhkarController::class, 'adminUpdate']);
-    Route::delete('/adhkar/{id}', [AdhkarController::class, 'adminDestroy']);
+    // Authenticated donation routes
+    Route::get('donations/user', [DonationController::class, 'getUserDonations']);
 
-    Route::get('/categories', [CategoryController::class, 'index']);
-    Route::post('/categories', [CategoryController::class, 'store']);
-    Route::get('/categories/{category}', [CategoryController::class, 'show']);
-    Route::put('/categories/{category}', [CategoryController::class, 'update']);
-    Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
-
-    // Media management routes
-    Route::get('/media', [MediaController::class, 'index']);
-    Route::get('/media/{id}', [MediaController::class, 'show']);
-    Route::post('/media/upload', [MediaController::class, 'upload']);
-    Route::put('/media/{id}', [MediaController::class, 'update']);
-    Route::delete('/media/{id}', [MediaController::class, 'destroy']);
-    Route::post('/media/delete-multiple', [MediaController::class, 'deleteMultiple']);
-
-    // Logs routes
-    Route::get('/logs', [App\Http\Controllers\Admin\LogController::class, 'index']);
-    Route::get('/logs/export', [App\Http\Controllers\Admin\LogController::class, 'export']);
-    Route::get('/logs/{id}', [App\Http\Controllers\Admin\LogController::class, 'show']);
-    Route::delete('/logs', [App\Http\Controllers\Admin\LogController::class, 'destroy']);
+    // Badge routes
+    Route::get('/badges', [BadgeController::class, 'index']);
+    Route::get('/user/badges', [BadgeController::class, 'userBadges']);
+    Route::post('/user/check-badges', [BadgeController::class, 'checkAndAwardBadges']);
+    Route::post('/user/badges/{badge}', [BadgeController::class, 'awardBadge']);
+    Route::delete('/user/badges/{badge}', [BadgeController::class, 'removeBadge']);
 });
+
+// Admin routes
+Route::middleware(['auth:api', AdminMiddleware::class])
+    ->prefix('admin')
+    ->group(function () {
+        // Posts management
+        Route::prefix('posts')->group(function () {
+            Route::get('/', [PostController::class, 'adminIndex']);
+            Route::post('/', [PostController::class, 'store']);
+            Route::put('{post}', [PostController::class, 'update']);
+            Route::delete('{post}', [PostController::class, 'destroy']);
+            Route::post('{post}/featured-image', [PostController::class, 'uploadFeaturedImage']);
+            Route::post('upload', [PostController::class, 'uploadFile']);
+        });
+
+        // User management
+        Route::prefix('users')->group(function () {
+            Route::get('/', [AuthController::class, 'adminIndex']);
+            Route::get('{id}', [AuthController::class, 'adminShow']);
+            Route::post('/', [AuthController::class, 'adminStore']);
+            Route::put('{id}', [AuthController::class, 'adminUpdate']);
+            Route::patch('{id}/toggle-status', [AuthController::class, 'toggleStatus']);
+        });
+
+        // Collections management
+        Route::prefix('collections')->group(function () {
+            Route::get('/', [CollectionController::class, 'adminIndex']);
+            Route::post('/', [CollectionController::class, 'adminStore']);
+            Route::get('{id}', [CollectionController::class, 'adminShow']);
+            Route::put('{id}', [CollectionController::class, 'adminUpdate']);
+            Route::delete('{id}', [CollectionController::class, 'adminDestroy']);
+        });
+
+        // Adhkar management
+        Route::prefix('adhkar')->group(function () {
+            Route::get('/', [AdhkarController::class, 'adminIndex']);
+            Route::post('/', [AdhkarController::class, 'adminStore']);
+            Route::get('{id}', [AdhkarController::class, 'adminShow']);
+            Route::put('{id}', [AdhkarController::class, 'adminUpdate']);
+            Route::delete('{id}', [AdhkarController::class, 'adminDestroy']);
+        });
+
+        // Categories management
+        Route::prefix('categories')->group(function () {
+            Route::get('/', [CategoryController::class, 'index']);
+            Route::post('/', [CategoryController::class, 'store']);
+            Route::get('{category}', [CategoryController::class, 'show']);
+            Route::put('{category}', [CategoryController::class, 'update']);
+            Route::delete('{category}', [CategoryController::class, 'destroy']);
+        });
+
+        // Media management
+        Route::prefix('media')->group(function () {
+            Route::get('/', [MediaController::class, 'index']);
+            Route::get('{id}', [MediaController::class, 'show']);
+            Route::post('upload', [MediaController::class, 'upload']);
+            Route::put('{id}', [MediaController::class, 'update']);
+            Route::delete('{id}', [MediaController::class, 'destroy']);
+            Route::post('delete-multiple', [MediaController::class, 'deleteMultiple']);
+        });
+
+        // Logs management
+        Route::prefix('logs')->group(function () {
+            Route::get('/', [LogController::class, 'index']);
+            Route::get('export', [LogController::class, 'export']);
+            Route::get('{id}', [LogController::class, 'show']);
+            Route::delete('/', [LogController::class, 'destroy']);
+        });
+    });

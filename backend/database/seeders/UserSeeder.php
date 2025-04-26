@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Services\BadgeService;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 
@@ -10,6 +11,9 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
+        // Create BadgeService instance
+        $badgeService = new BadgeService();
+        
         // Persian names for regular users
         $persianNames = [
             'سارا رضایی',
@@ -39,6 +43,14 @@ class UserSeeder extends Seeder
                 ['email' => $userData['email']],
                 $userData
             );
+            
+            // Initialize badges for the user
+            $badgeService->initializeBadges($user);
+            
+            // Check for streak-based badges
+            if ($user->streak >= 7) {
+                $badgeService->checkAndAwardBadges($user);
+            }
         }
     }
 } 

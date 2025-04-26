@@ -183,7 +183,7 @@ export default {
             try {
                 this.serverError = '';
                 this.isProcessing = true;
-                const response = await axios.post(`${BASE_API_URL}/register`, {
+                const response = await axios.post(`${BASE_API_URL}/auth/register`, {
                     name: this.name,
                     email: this.email,
                     password: this.password,
