@@ -31,6 +31,30 @@ const store = createStore({
             state.user = null;
             state.token = null;
             localStorage.removeItem('token');
+        },
+        updateUserPhoto(state, photoUrl) {
+            if (state.user) {
+                state.user = {
+                    ...state.user,
+                    photo: photoUrl
+                };
+            }
+        },
+        updateUserName(state, name) {
+            if (state.user) {
+                state.user = {
+                    ...state.user,
+                    name: name
+                };
+            }
+        },
+        updateUser(state, userData) {
+            if (state.user) {
+                state.user = {
+                    ...state.user,
+                    ...userData
+                };
+            }
         }
     },
     actions: {

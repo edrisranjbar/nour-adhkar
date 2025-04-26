@@ -10,7 +10,16 @@
               @photo-change="handlePhotoUpload"
               @error="handlePhotoError"
             />
-            <span class="text-xl font-medium text-gray-900">{{ user?.name || 'کاربر' }}</span>
+            <div class="flex items-center">
+              <span class="text-xl font-medium text-gray-900">{{ user?.name || 'کاربر' }}</span>
+              <button 
+                @click="showProfileSettings = true" 
+                class="mr-2 p-1 text-gray-500 hover:text-gray-700 focus:outline-none"
+                title="ویرایش پروفایل"
+              >
+                <font-awesome-icon icon="fa-solid fa-user-pen" class="text-sm" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -24,6 +33,14 @@
         <BadgesList />
       </div>
     </main>
+
+    <!-- Profile Settings Modal -->
+    <ProfileSettingsModal 
+      :show="showProfileSettings"
+      :user-name="user?.name"
+      @close="showProfileSettings = false"
+      @name-updated="handleNameUpdated"
+    />
   </div>
 </template>
 
@@ -32,10 +49,12 @@ import ProfilePhoto from '@/components/dashboard/ProfilePhoto.vue'
 import UserStats from '@/components/dashboard/UserStats.vue'
 import StreakCalendar from '@/components/dashboard/StreakCalendar.vue'
 import BadgesList from '@/components/dashboard/BadgesList.vue'
+import ProfileSettingsModal from '@/components/dashboard/ProfileSettingsModal.vue'
 import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
 import { useToast } from 'vue-toastification'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 export default {
   name: 'DashboardView',
@@ -43,13 +62,16 @@ export default {
     ProfilePhoto,
     UserStats,
     StreakCalendar,
-    BadgesList
+    BadgesList,
+    ProfileSettingsModal,
+    FontAwesomeIcon
   },
   setup() {
     const store = useStore()
     const toast = useToast()
     const loading = ref(true)
     const user = computed(() => store.state.user)
+    const showProfileSettings = ref(false)
 
     const fetchUserData = async () => {
       try {
@@ -85,9 +107,9 @@ export default {
 
       try {
         const formData = new FormData()
-        formData.append('photo', file)
+        formData.append('avatar', file)
 
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/user/profile-photo`, formData, {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/avatar`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Accept': 'application/json',
@@ -96,12 +118,12 @@ export default {
           withCredentials: true
         })
 
-        if (response.data.status === 'success') {
+        if (response.data.avatar_url) {
           // Update user photo in store
-          store.commit('updateUserPhoto', response.data.photo_url)
+          store.commit('updateUserPhoto', response.data.avatar_url)
           
           // Show success message
-          toast.success(response.data.message)
+          toast.success(response.data.message || 'تصویر پروفایل با موفقیت به‌روزرسانی شد')
         }
       } catch (error) {
         console.error('Upload error:', error.response?.data)
@@ -114,11 +136,21 @@ export default {
       toast.error(message)
     }
 
+    const handleNameUpdated = (newName) => {
+      // Update user name in store if needed
+      if (user.value) {
+        store.commit('updateUserName', newName)
+      }
+      toast.success('نام شما با موفقیت به‌روزرسانی شد')
+    }
+
     return {
       user,
       loading,
+      showProfileSettings,
       handlePhotoUpload,
-      handlePhotoError
+      handlePhotoError,
+      handleNameUpdated
     }
   }
 }

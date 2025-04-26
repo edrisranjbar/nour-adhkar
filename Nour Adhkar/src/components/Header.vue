@@ -195,7 +195,7 @@ button:hover {
   align-items: center;
   gap: 6px;
   background: #8A7559;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
@@ -332,24 +332,12 @@ body.dark-mode .stat-item:hover {
 }
 
 @media (max-width: 480px) {
+
   .user-stats {
     gap: 8px;
   }
   
-  .stat-item {
-    padding: 4px 8px;
-  }
-  
-  .stat-item span {
-    font-size: 0.8rem;
-  }
-  
   .stat-icon {
-    font-size: 0.8rem;
-  }
-  
-  .dashboard-button, .login-button {
-    padding: 6px 10px;
     font-size: 0.8rem;
   }
   
