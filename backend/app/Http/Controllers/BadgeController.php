@@ -16,8 +16,9 @@ class BadgeController extends Controller
         return BadgeResource::collection($badges);
     }
 
-    public function userBadges(User $user)
+    public function userBadges()
     {
+        $user = Auth::user();
         $badges = $user->badges()->withPivot('earned_at')->get();
         return BadgeResource::collection($badges);
     }

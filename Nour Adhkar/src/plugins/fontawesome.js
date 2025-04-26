@@ -102,6 +102,8 @@ import {
     faHandsPraying,
     faGift,
     faCircleNotch,
+    // Badge icons
+    faSeedling, // Beginner badge
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -221,6 +223,8 @@ library.add(
     faHandsPraying,
     faGift,
     faCircleNotch,
+    // Badge icons
+    faSeedling, // Beginner badge
 );
 
 export default FontAwesomeIcon; 
