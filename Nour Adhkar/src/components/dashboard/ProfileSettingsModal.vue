@@ -8,29 +8,30 @@
       <div class="inline-block overflow-hidden text-right align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
         <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
           <div class="sm:flex sm:items-start">
-            <div class="mt-3 text-center sm:mt-0 sm:mr-4 sm:text-right w-full">
+            <div class="mt-3 text-right sm:mt-0 sm:mr-4 sm:text-right w-full">
               <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">
                 تنظیمات حساب کاربری
               </h3>
               
               <!-- Name Change Form -->
-              <form @submit.prevent="updateName" class="mt-4">
+              <Form @submit="updateName" class="mt-4" v-slot="{ errors }">
                 <div class="form-group">
                   <label for="name" class="form-label">نام و نام خانوادگی</label>
                   <div class="input-with-button">
-                    <input 
-                      type="text" 
+                    <Field 
+                      name="name" 
                       id="name" 
                       v-model="nameForm.name" 
                       :disabled="nameForm.isSubmitting" 
                       placeholder="نام خود را وارد کنید"
+                      :rules="nameRules"
                       class="form-input"
-                    >
+                    />
                     <button 
                       type="submit" 
-                      :disabled="!nameForm.name || nameForm.isSubmitting"
+                      :disabled="Object.keys(errors).length > 0 || !nameForm.name || nameForm.isSubmitting"
                       class="btn btn-primary btn-sm"
-                      :class="{ 'btn-disabled': !nameForm.name || nameForm.isSubmitting }"
+                      :class="{ 'btn-disabled': Object.keys(errors).length > 0 || !nameForm.name || nameForm.isSubmitting }"
                     >
                       <font-awesome-icon 
                         v-if="nameForm.isSubmitting" 
@@ -41,27 +42,30 @@
                       <font-awesome-icon v-else icon="fa-solid fa-check" />
                     </button>
                   </div>
-                  <div v-if="nameForm.message" :class="[nameForm.error ? 'form-error' : 'form-success']">
+                  <ErrorMessage name="name" class="form-error text-right" />
+                  <div v-if="nameForm.message" :class="[nameForm.error ? 'form-error' : 'form-success', 'text-right']">
                     {{ nameForm.message }}
                   </div>
                 </div>
-              </form>
+              </Form>
 
               <!-- Password Change Form -->
-              <form @submit.prevent="updatePassword" class="mt-6 pb-3 border-t border-gray-200 pt-4">
+              <Form @submit="updatePassword" class="mt-6 pb-3 border-t border-gray-200 pt-4" v-slot="{ errors }">
                 <h4 class="font-medium text-gray-900 mb-3">تغییر رمز عبور</h4>
                 
                 <div class="form-group">
                   <label for="current_password" class="form-label">رمز عبور فعلی</label>
                   <div class="password-input-wrapper">
-                    <input 
+                    <Field 
+                      name="current_password"
                       :type="passwordVisibility.current ? 'text' : 'password'" 
                       id="current_password" 
                       v-model="passwordForm.current_password" 
                       :disabled="passwordForm.isSubmitting" 
                       placeholder="رمز عبور فعلی خود را وارد کنید"
+                      :rules="currentPasswordRules"
                       class="form-input"
-                    >
+                    />
                     <button 
                       type="button" 
                       class="password-toggle" 
@@ -70,19 +74,22 @@
                       <font-awesome-icon :icon="passwordVisibility.current ? 'eye-slash' : 'eye'" />
                     </button>
                   </div>
+                  <ErrorMessage name="current_password" class="form-error text-right" />
                 </div>
                 
                 <div class="form-group">
                   <label for="password" class="form-label">رمز عبور جدید</label>
                   <div class="password-input-wrapper">
-                    <input 
+                    <Field 
+                      name="password"
                       :type="passwordVisibility.new ? 'text' : 'password'" 
                       id="password" 
                       v-model="passwordForm.password" 
                       :disabled="passwordForm.isSubmitting" 
                       placeholder="رمز عبور جدید را وارد کنید"
+                      :rules="passwordRules"
                       class="form-input"
-                    >
+                    />
                     <button 
                       type="button" 
                       class="password-toggle" 
@@ -91,19 +98,22 @@
                       <font-awesome-icon :icon="passwordVisibility.new ? 'eye-slash' : 'eye'" />
                     </button>
                   </div>
+                  <ErrorMessage name="password" class="form-error text-right" />
                 </div>
                 
                 <div class="form-group">
                   <label for="password_confirmation" class="form-label">تکرار رمز عبور جدید</label>
                   <div class="password-input-wrapper">
-                    <input 
+                    <Field 
+                      name="password_confirmation"
                       :type="passwordVisibility.confirm ? 'text' : 'password'" 
                       id="password_confirmation" 
                       v-model="passwordForm.password_confirmation" 
                       :disabled="passwordForm.isSubmitting" 
                       placeholder="رمز عبور جدید را تکرار کنید"
+                      :rules="passwordConfirmationRules"
                       class="form-input"
-                    >
+                    />
                     <button 
                       type="button" 
                       class="password-toggle" 
@@ -112,13 +122,14 @@
                       <font-awesome-icon :icon="passwordVisibility.confirm ? 'eye-slash' : 'eye'" />
                     </button>
                   </div>
+                  <ErrorMessage name="password_confirmation" class="form-error text-right" />
                 </div>
                 
                 <button 
                   type="submit" 
-                  :disabled="!isPasswordFormValid || passwordForm.isSubmitting"
+                  :disabled="Object.keys(errors).length > 0 || passwordForm.isSubmitting"
                   class="btn btn-primary w-full"
-                  :class="{ 'btn-disabled': !isPasswordFormValid || passwordForm.isSubmitting }"
+                  :class="{ 'btn-disabled': Object.keys(errors).length > 0 || passwordForm.isSubmitting }"
                 >
                   <font-awesome-icon 
                     v-if="passwordForm.isSubmitting" 
@@ -129,10 +140,10 @@
                   <span v-else>تغییر رمز عبور</span>
                 </button>
                 
-                <div v-if="passwordForm.message" :class="[passwordForm.error ? 'form-error' : 'form-success']">
+                <div v-if="passwordForm.message" :class="[passwordForm.error ? 'form-error' : 'form-success', 'text-right']">
                   {{ passwordForm.message }}
                 </div>
-              </form>
+              </Form>
             </div>
           </div>
         </div>
@@ -154,6 +165,7 @@
 
 <script>
 import { ref, computed, onMounted, watch } from 'vue';
+import { Form, Field, ErrorMessage } from 'vee-validate';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import axios from 'axios';
 import { useStore } from 'vuex';
@@ -161,7 +173,10 @@ import { useStore } from 'vuex';
 export default {
   name: 'ProfileSettingsModal',
   components: {
-    FontAwesomeIcon
+    FontAwesomeIcon,
+    Form,
+    Field,
+    ErrorMessage
   },
   props: {
     show: {
@@ -195,6 +210,16 @@ export default {
       error: false
     });
     
+    // Validation rules
+    const nameRules = 'required|min:3';
+    const currentPasswordRules = 'required|min:6';
+    const passwordRules = 'required|min:6';
+    
+    // Password confirmation rule that depends on the password value
+    const passwordConfirmationRules = computed(() => {
+      return `required|confirmed:${passwordForm.value.password}`;
+    });
+    
     // Password visibility state
     const passwordVisibility = ref({
       current: false,
@@ -212,19 +237,8 @@ export default {
       nameForm.value.name = newName || '';
     });
 
-    // Check if password form is valid
-    const isPasswordFormValid = computed(() => {
-      return passwordForm.value.current_password && 
-             passwordForm.value.password && 
-             passwordForm.value.password_confirmation &&
-             passwordForm.value.password === passwordForm.value.password_confirmation &&
-             passwordForm.value.password.length >= 6;
-    });
-
     // Update name
-    const updateName = async () => {
-      if (!nameForm.value.name) return;
-      
+    const updateName = async (values) => {
       nameForm.value.isSubmitting = true;
       nameForm.value.message = '';
       nameForm.value.error = false;
@@ -233,9 +247,9 @@ export default {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('No authentication token found');
         
-        const response = await axios.put(
-          `${import.meta.env.VITE_API_URL}/profile`, 
-          { name: nameForm.value.name },
+        const response = await axios.patch(
+          `${import.meta.env.VITE_API_URL}/user/name`, 
+          { name: values.name },
           {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -247,12 +261,15 @@ export default {
         nameForm.value.message = 'نام شما با موفقیت به‌روزرسانی شد';
         nameForm.value.error = false;
         
+        // Update local form value
+        nameForm.value.name = values.name;
+        
         // Emit event to update parent component
-        emit('name-updated', nameForm.value.name);
+        emit('name-updated', values.name);
         
         // Update user in store
-        if (response.data?.profile) {
-          store.commit('updateUser', response.data.profile);
+        if (response.data?.user) {
+          store.commit('updateUser', response.data.user);
         }
       } catch (error) {
         console.error('Error updating name:', error);
@@ -264,9 +281,7 @@ export default {
     };
 
     // Update password
-    const updatePassword = async () => {
-      if (!isPasswordFormValid.value) return;
-      
+    const updatePassword = async (values) => {
       passwordForm.value.isSubmitting = true;
       passwordForm.value.message = '';
       passwordForm.value.error = false;
@@ -275,12 +290,12 @@ export default {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('No authentication token found');
         
-        const response = await axios.put(
-          `${import.meta.env.VITE_API_URL}/profile`, 
+        const response = await axios.patch(
+          `${import.meta.env.VITE_API_URL}/user/password`, 
           {
-            password: passwordForm.value.password,
-            current_password: passwordForm.value.current_password,
-            password_confirmation: passwordForm.value.password_confirmation
+            current_password: values.current_password,
+            password: values.password,
+            password_confirmation: values.password_confirmation
           },
           {
             headers: {
@@ -320,7 +335,10 @@ export default {
       nameForm,
       passwordForm,
       passwordVisibility,
-      isPasswordFormValid,
+      nameRules,
+      currentPasswordRules,
+      passwordRules,
+      passwordConfirmationRules,
       updateName,
       updatePassword,
       togglePasswordVisibility,
