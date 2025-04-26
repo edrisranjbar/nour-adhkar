@@ -7,17 +7,17 @@
     <div v-else-if="error" class="text-red-500 text-center py-4">
       {{ error }}
     </div>
-    <div v-else-if="!badges.length" class="text-center py-8 text-gray-500">
-      هنوز هیچ نشان‌ای دریافت نکرده‌اید
+    <div v-else-if="!allBadges.length" class="text-center py-8 text-gray-500">
+      هیچ نشانی برای نمایش وجود ندارد
     </div>
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <Badge v-for="badge in badges" :key="badge.id" :badge="badge" />
+      <Badge v-for="badge in allBadges" :key="badge.id" :badge="badge" />
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import Badge from './Badge.vue'
 import axios from 'axios'
 
@@ -27,34 +27,63 @@ export default {
     Badge
   },
   setup() {
-    const badges = ref([])
+    const allBadges = ref([])
+    const availableBadges = ref([])
+    const userBadges = ref([])
     const loading = ref(true)
     const error = ref(null)
 
-    const fetchBadges = async () => {
+    const fetchAllBadges = async () => {
       try {
-        loading.value = true
-        error.value = null
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/user/badges`, {
+        loading.value = true;
+        error.value = null;
+        
+        // Get all available badges
+        const badgesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/badges`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           },
           withCredentials: true
-        })
-        console.log('Badges API Response:', response.data)
-        badges.value = response.data.data || []
+        });
+        
+        availableBadges.value = badgesResponse.data.data || [];
+        
+        // Get user's earned badges
+        const userBadgesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/user/badges`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          },
+          withCredentials: true
+        });
+        
+        userBadges.value = userBadgesResponse.data.data || [];
+        console.log('User Badges:', userBadges.value);
+        
+        // Combine the data - mark earned badges
+        allBadges.value = availableBadges.value.map(badge => {
+          const userBadge = userBadges.value.find(ub => ub.id === badge.id);
+          if (userBadge) {
+            return {
+              ...badge,
+              earned_at: userBadge.earned_at
+            };
+          }
+          return badge;
+        });
+        
+        console.log('Combined Badges:', allBadges.value);
       } catch (err) {
-        console.error('Error fetching badges:', err)
-        error.value = 'خطا در دریافت نشان‌ها'
+        console.error('Error fetching badges:', err);
+        error.value = 'خطا در دریافت نشان‌ها';
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    }
+    };
 
-    onMounted(fetchBadges)
+    onMounted(fetchAllBadges);
 
     return {
-      badges,
+      allBadges,
       loading,
       error
     }
