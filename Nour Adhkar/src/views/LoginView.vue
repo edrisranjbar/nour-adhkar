@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <h1 class="login-title">وارد شوید</h1>
-    <Form @submit="requestLogin" class="login-form" v-slot="{ errors }">
+    <Form @submit="requestLogin" class="login-form" v-slot="{ errors, isSubmitting }">
       <div class="form-group">
         <Field name="email" v-model="email" type="email" placeholder="ایمیل" :rules="emailRules" class="login-input" />
         <ErrorMessage name="email" class="error-message" />
@@ -32,7 +32,7 @@
       <button 
         type="submit" 
         class="login-button" 
-        :disabled="Object.keys(errors).length > 0 || isProcessing"
+        :disabled="Object.keys(errors).length > 0 || isProcessing || isSubmitting"
       >
         <span v-if="isProcessing" class="loading-spinner">
           <font-awesome-icon icon="fa-solid fa-spinner" spin />
@@ -179,6 +179,16 @@ import { BASE_API_URL } from '@/config';
 import { mapActions } from 'vuex';
 import { Form, Field, ErrorMessage } from 'vee-validate';
 
+// Create a clean axios instance for auth requests that won't trigger the interceptor
+const authAxios = axios.create({
+  baseURL: BASE_API_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
+
 export default {
   components: {
     Form,
@@ -204,15 +214,22 @@ export default {
     },
 
     async requestLogin() {
+      // Return early if already processing to prevent duplicate requests
+      if (this.isProcessing) {
+        return;
+      }
+      
       try {
         this.serverError = '';
         this.isProcessing = true;
-        const response = await axios.post(`${BASE_API_URL}/auth/login`, {
+        
+        // Use the clean authAxios instance that doesn't have the refresh interceptor
+        const response = await authAxios.post('/auth/login', {
           email: this.email,
           password: this.password,
         });
 
-        if (response.data.token) {
+        if (response.data?.token) {
           // Store user data and token in Vuex
           this.$store.commit('setUser', response.data.user);
           this.$store.commit('setToken', response.data.token);
@@ -226,11 +243,24 @@ export default {
           // Redirect to home
           this.$router.push('/');
         } else {
-          this.serverError = response.data.message || 'خطایی رخ داد';
+          this.serverError = response.data?.message || 'خطای نامشخص در ورود';
         }
       } catch (err) {
-        this.serverError = err.response?.data?.message || 'خطایی رخ داد';
-        console.error(err);
+        console.error('Login error:', err);
+        
+        if (err.code === 'ECONNABORTED') {
+          this.serverError = 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.';
+        } else if (err.response?.status === 401) {
+          // Handle 401 error for login specifically - clear password
+          this.password = '';
+          this.serverError = 'ایمیل یا رمز عبور اشتباه است';
+        } else if (err.response?.data?.message) {
+          this.serverError = err.response.data.message;
+        } else if (!navigator.onLine) {
+          this.serverError = 'اتصال اینترنت خود را بررسی کنید';
+        } else {
+          this.serverError = 'خطا در ورود به سیستم';
+        }
       } finally {
         this.isProcessing = false;
       }
