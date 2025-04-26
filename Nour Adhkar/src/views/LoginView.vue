@@ -8,7 +8,24 @@
       </div>
       
       <div class="form-group">
-        <Field name="password" v-model="password" type="password" placeholder="رمز عبور" :rules="passwordRules" class="login-input" />
+        <div class="password-field">
+          <Field 
+            name="password" 
+            v-model="password" 
+            :type="passwordVisible ? 'text' : 'password'" 
+            placeholder="رمز عبور" 
+            :rules="passwordRules" 
+            class="login-input password-input" 
+          />
+          <button 
+            type="button" 
+            class="password-toggle" 
+            @click="togglePasswordVisibility" 
+            tabindex="-1"
+          >
+            <font-awesome-icon :icon="passwordVisible ? 'eye-slash' : 'eye'" />
+          </button>
+        </div>
         <ErrorMessage name="password" class="error-message" />
       </div>
       
@@ -73,6 +90,31 @@ button,a,input {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input {
+  padding-left: 40px; /* Make space for the eye icon */
+}
+
+.password-toggle {
+  position: absolute;
+  left: 10px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+}
+
+.password-toggle:hover {
+  color: #333;
 }
 
 .login-input:focus {
@@ -150,11 +192,16 @@ export default {
       serverError: '',
       emailRules: 'required|email',
       passwordRules: 'required|min:6',
-      isProcessing: false
+      isProcessing: false,
+      passwordVisible: false
     };
   },
   methods: {
     ...mapActions(['login']),
+
+    togglePasswordVisibility() {
+      this.passwordVisible = !this.passwordVisible;
+    },
 
     async requestLogin() {
       try {
