@@ -26,7 +26,7 @@ class MediaController extends Controller
             if ($request->has('type')) {
                 $type = $request->type;
                 if ($type === 'image') {
-                    $query->where('type', 'like', 'image/%');
+                    $query->where('type', 'image/jpeg');
                 } elseif ($type === 'audio') {
                     $query->where('type', 'like', 'audio/%');
                 } elseif ($type === 'other') {

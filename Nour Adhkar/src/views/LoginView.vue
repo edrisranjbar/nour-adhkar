@@ -1,177 +1,85 @@
 <template>
-  <div class="login-container">
-    <h1 class="login-title">وارد شوید</h1>
-    <Form @submit="requestLogin" class="login-form" v-slot="{ errors, isSubmitting }">
-      <div class="form-group">
-        <Field name="email" v-model="email" type="email" placeholder="ایمیل" :rules="emailRules" class="login-input" />
-        <ErrorMessage name="email" class="error-message" />
-      </div>
+  <div class="flex flex-col justify-center items-center min-h-screen bg-gray-50 p-4">
+    <div class="w-full max-w-md">
+      <!-- Logo/Branding could go here -->
+      <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">وارد شوید</h1>
       
-      <div class="form-group">
-        <div class="password-field">
-          <Field 
-            name="password" 
-            v-model="password" 
-            :type="passwordVisible ? 'text' : 'password'" 
-            placeholder="رمز عبور" 
-            :rules="passwordRules" 
-            class="login-input password-input" 
-          />
+      <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <Form @submit="requestLogin" class="space-y-5" v-slot="{ errors, isSubmitting }">
+          <!-- Email Field -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">ایمیل</label>
+            <Field 
+              id="email"
+              name="email" 
+              v-model="email" 
+              type="email" 
+              placeholder="example@email.com" 
+              :rules="emailRules" 
+              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 text-gray-900" 
+            />
+            <ErrorMessage name="email" class="mt-1 text-sm text-red-600" />
+          </div>
+          
+          <!-- Password Field -->
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">رمز عبور</label>
+            <div class="relative">
+              <Field 
+                id="password"
+                name="password" 
+                v-model="password" 
+                :type="passwordVisible ? 'text' : 'password'" 
+                placeholder="******" 
+                :rules="passwordRules" 
+                class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 text-gray-900" 
+              />
+              <button 
+                type="button" 
+                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                @click="togglePasswordVisibility" 
+                tabindex="-1"
+                aria-label="Toggle password visibility"
+              >
+                <font-awesome-icon :icon="passwordVisible ? 'eye-slash' : 'eye'" class="text-lg" />
+              </button>
+            </div>
+            <ErrorMessage name="password" class="mt-1 text-sm text-red-600" />
+          </div>
+          
+          <!-- Submit Button -->
           <button 
-            type="button" 
-            class="password-toggle" 
-            @click="togglePasswordVisibility" 
-            tabindex="-1"
+            type="submit" 
+            class="w-full flex justify-center items-center py-3 px-4 rounded-lg text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 font-medium text-base disabled:bg-gray-300 disabled:cursor-not-allowed"
+            :disabled="Object.keys(errors).length > 0 || isProcessing || isSubmitting"
           >
-            <font-awesome-icon :icon="passwordVisible ? 'eye-slash' : 'eye'" />
+            <span v-if="isProcessing" class="inline-block mr-2">
+              <font-awesome-icon icon="fa-solid fa-spinner" spin class="text-base" />
+            </span>
+            ورود
           </button>
+          
+          <div 
+            v-if="serverError" 
+            class="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-medium"
+          >
+            {{ serverError }}
+          </div>
+        </Form>
+        
+        <!-- Additional Links -->
+        <div class="mt-6 text-center">
+          <p class="text-sm text-gray-600">
+            حساب کاربری ندارید؟ 
+            <RouterLink to="/register" class="text-primary-600 hover:text-primary-700 font-medium">
+              اینجا ثبت نام کنید
+            </RouterLink>
+          </p>
         </div>
-        <ErrorMessage name="password" class="error-message" />
       </div>
-      
-      <button 
-        type="submit" 
-        class="login-button" 
-        :disabled="Object.keys(errors).length > 0 || isProcessing || isSubmitting"
-      >
-        <span v-if="isProcessing" class="loading-spinner">
-          <font-awesome-icon icon="fa-solid fa-spinner" spin />
-        </span>
-        ورود
-      </button>
-      <div v-if="serverError" class="error-message">{{ serverError }}</div>
-    </Form>
-    <div class="footer">
-      <p>حساب کاربری ندارید؟ <RouterLink to="/register">اینجا ثبت نام کنید</RouterLink></p>
     </div>
   </div>
 </template>
-
-<style scoped>
-body {
-  margin: 0;
-  font-family: "Vazirmatn FD", sans-serif !important;
-}
-button,a,input {
-  font-family: "Vazirmatn FD", sans-serif !important;
-}
-.login-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  padding: 20px;
-}
-
-.login-title {
-  margin-bottom: 20px;
-  font-size: 2rem;
-  color: #333;
-}
-
-.login-form {
-  width: 100%;
-  max-width: 400px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.login-input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.password-field {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-input {
-  padding-left: 40px; /* Make space for the eye icon */
-}
-
-.password-toggle {
-  position: absolute;
-  left: 10px;
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 0;
-  font-size: 1rem;
-}
-
-.password-toggle:hover {
-  color: #333;
-}
-
-.login-input:focus {
-  border-color: #007bff;
-  outline: none;
-}
-
-.login-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #A79277;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.login-button:hover:not(:disabled) {
-  background-color: #9C8466;
-}
-
-.login-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.error-message {
-  color: red;
-  font-size: 0.875rem;
-  margin-top: 4px;
-}
-
-.footer {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 0.875rem;
-}
-
-.footer a {
-  color: #A79277;
-  text-decoration: none;
-}
-
-.footer a:hover {
-  text-decoration: underline;
-}
-
-.loading-spinner {
-  font-size: 0.9rem;
-}
-</style>
 
 <script>
 import axios from 'axios';
