@@ -341,6 +341,10 @@ body.dark-mode .placeholder-image {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
   .post-grid {
     grid-template-columns: 1fr;
   }

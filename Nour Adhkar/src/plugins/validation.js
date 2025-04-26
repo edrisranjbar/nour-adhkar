@@ -47,7 +47,24 @@ configure({
       confirmed: 'تکرار رمز عبور مطابقت ندارد'
     };
 
-    return messages[context.rule.name] || `مقدار وارد شده برای ${context.field} معتبر نیست`;
+    const fieldNames = {
+      name: 'نام و نام خانوادگی',
+      email: 'ایمیل',
+      password: 'رمز عبور',
+      password_confirmation: 'تکرار رمز عبور',
+      current_password: 'رمز عبور فعلی'
+    };
+
+    const message = messages[context.rule.name];
+    if (message) {
+      // Replace generic field reference with the Persian field name if available
+      if (fieldNames[context.field]) {
+        return message.replace('این فیلد', fieldNames[context.field]);
+      }
+      return message;
+    }
+
+    return `مقدار وارد شده برای ${fieldNames[context.field] || context.field} معتبر نیست`;
   }
 });
 

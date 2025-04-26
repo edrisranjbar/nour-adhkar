@@ -3,12 +3,12 @@
     <div class="bg-white rounded-lg shadow p-6">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="p-3 bg-blue-100 rounded-full">
-            <FontAwesomeIcon :icon="['fas', 'fire']" class="text-blue-600 text-2xl" />
+          <div class="p-3 bg-primary-100 rounded-full">
+            <FontAwesomeIcon :icon="['fas', 'fire']" class="text-primary-600 text-2xl" />
           </div>
           <div>
             <h3 class="text-lg font-medium text-gray-900">روزهای متوالی</h3>
-            <p v-if="!loading" class="text-3xl font-bold text-blue-600">{{ streak }}</p>
+            <p v-if="!loading" class="text-3xl font-bold text-primary-600">{{ streak }}</p>
             <div v-else class="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
           </div>
         </div>
@@ -18,12 +18,12 @@
     <div class="bg-white rounded-lg shadow p-6">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="p-3 bg-red-100 rounded-full">
-            <FontAwesomeIcon :icon="['fas', 'heart']" class="text-red-600 text-2xl" />
+          <div class="p-3 bg-primary-100 rounded-full">
+            <FontAwesomeIcon :icon="['fas', 'heart']" class="text-primary-600 text-2xl" />
           </div>
           <div>
             <h3 class="text-lg font-medium text-gray-900">امتیاز قلب</h3>
-            <p v-if="!loading" class="text-3xl font-bold text-red-600">{{ heartScore }}</p>
+            <p v-if="!loading" class="text-3xl font-bold text-primary-600">{{ heartScore }}</p>
             <div v-else class="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
           </div>
         </div>
