@@ -155,4 +155,11 @@ class User extends Authenticatable implements JWTSubject
         
         return $streak;
     }
+
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+            ->withPivot('earned_at')
+            ->withTimestamps();
+    }
 }

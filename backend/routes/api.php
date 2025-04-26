@@ -12,6 +12,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Controllers\BadgeController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -64,6 +65,13 @@ Route::middleware('auth:api')->group(function () {
 
     // Authenticated donation routes
     Route::get('donations/user', [DonationController::class, 'getUserDonations']);
+
+    // Badge routes
+    Route::get('/badges', [BadgeController::class, 'index']);
+    Route::get('/user/badges', [BadgeController::class, 'userBadges']);
+    Route::post('/user/check-badges', [BadgeController::class, 'checkAndAwardBadges']);
+    Route::post('/user/badges/{badge}', [BadgeController::class, 'awardBadge']);
+    Route::delete('/user/badges/{badge}', [BadgeController::class, 'removeBadge']);
 });
 
 // Admin routes

@@ -20,6 +20,8 @@
         />
 
         <StreakCalendar />
+
+        <BadgesList />
       </div>
     </main>
   </div>
@@ -29,6 +31,7 @@
 import ProfilePhoto from '@/components/dashboard/ProfilePhoto.vue'
 import UserStats from '@/components/dashboard/UserStats.vue'
 import StreakCalendar from '@/components/dashboard/StreakCalendar.vue'
+import BadgesList from '@/components/dashboard/BadgesList.vue'
 import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
@@ -39,7 +42,8 @@ export default {
   components: {
     ProfilePhoto,
     UserStats,
-    StreakCalendar
+    StreakCalendar,
+    BadgesList
   },
   setup() {
     const store = useStore()
