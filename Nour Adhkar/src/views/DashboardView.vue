@@ -23,10 +23,14 @@
           </div>
         </div>
 
-        <UserStats 
-          :streak="user?.streak || 0"
-          :heart-score="user?.heartScore || 0"
-        />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <UserStats 
+            :streak="user?.streak || 0"
+            :heart-score="user?.heartScore || 0"
+          />
+
+          <LeagueProgress />
+        </div>
 
         <StreakCalendar />
 
@@ -50,6 +54,7 @@ import UserStats from '@/components/dashboard/UserStats.vue'
 import StreakCalendar from '@/components/dashboard/StreakCalendar.vue'
 import BadgesList from '@/components/dashboard/BadgesList.vue'
 import ProfileSettingsModal from '@/components/dashboard/ProfileSettingsModal.vue'
+import LeagueProgress from '@/components/dashboard/LeagueProgress.vue'
 import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
@@ -64,6 +69,7 @@ export default {
     StreakCalendar,
     BadgesList,
     ProfileSettingsModal,
+    LeagueProgress,
     FontAwesomeIcon
   },
   setup() {
@@ -167,4 +173,4 @@ export default {
   padding: 0 !important;
   margin: 0 !important;
 }
-</style> 
+</style>

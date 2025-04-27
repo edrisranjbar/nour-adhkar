@@ -29,7 +29,8 @@ class User extends Authenticatable implements JWTSubject
         'last_dhikr_completed_at',
         'last_activity_date',
         'favorites',
-        'total_dhikrs'
+        'total_dhikrs',
+        'league_id'
     ];
 
     protected $hidden = [
@@ -163,5 +164,10 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(Badge::class, 'user_badges')
             ->withPivot('earned_at')
             ->withTimestamps();
+    }
+
+    public function league()
+    {
+        return $this->belongsTo(League::class);
     }
 }
