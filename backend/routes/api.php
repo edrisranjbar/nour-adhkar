@@ -13,6 +13,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\BadgeController;
+use App\Http\Controllers\Api\LeagueController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -72,6 +73,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/user/check-badges', [BadgeController::class, 'checkAndAwardBadges']);
     Route::post('/user/badges/{badge}', [BadgeController::class, 'awardBadge']);
     Route::delete('/user/badges/{badge}', [BadgeController::class, 'removeBadge']);
+
+    // League progress route
+    Route::get('/user/league-progress', [LeagueController::class, 'getProgress']);
 });
 
 // Admin routes

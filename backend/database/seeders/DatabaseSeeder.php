@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AdhkarSeeder::class,
             CategorySeeder::class,
             PostSeeder::class,
+            LeagueSeeder::class,
         ]);
     }
 }
