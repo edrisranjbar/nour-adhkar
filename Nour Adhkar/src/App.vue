@@ -95,6 +95,10 @@ export default {
           <font-awesome-icon icon="fa-solid fa-calculator" />
           <span>تسبیح</span>
         </RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/dashboard" class="nav-item" active-class="active">
+          <font-awesome-icon icon="fa-solid fa-user" />
+          <span>داشبورد</span>
+        </RouterLink>
         <RouterLink to="/settings" class="nav-item" active-class="active">
           <font-awesome-icon icon="fa-solid fa-gear" />
           <span>تنظیمات</span>
@@ -176,7 +180,7 @@ body.admin-page {
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   padding: 0 10px;
 }
@@ -194,7 +198,7 @@ body.dark-mode .bottom-navigation {
   color: #777;
   text-decoration: none;
   padding: 8px 0;
-  width: 16.66%;
+  width: 20%;
   transition: all 0.25s ease;
 }
 
@@ -237,6 +241,16 @@ body.dark-mode .nav-item.active {
 
   .nav-item svg {
     font-size: 1.7rem;
+  }
+}
+
+@media (max-width: 350px) {
+  .nav-item span {
+    font-size: 0.75rem;
+  }
+  
+  .nav-item svg {
+    font-size: 1.2rem;
   }
 }
 </style>
