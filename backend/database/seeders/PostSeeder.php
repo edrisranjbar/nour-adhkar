@@ -28,42 +28,6 @@ class PostSeeder extends Seeder
                 'published_at' => Carbon::now()->subDays(2),
                 'categories' => ['معارف قرآن', 'خانواده و اجتماع']
             ],
-            [
-                'title' => 'آداب و مستحبات ماه رمضان',
-                'content' => 'ماه رمضان ماه مهمانی خدا و زمان مناسبی برای تقرب به درگاه الهی است. در این ماه، علاوه بر روزه، اعمال و اذکار خاصی سفارش شده که انجام آنها ثواب فراوانی دارد.',
-                'excerpt' => 'معرفی آداب و مستحبات ماه مبارک رمضان',
-                'featured_image' => 'https://example.com/images/ramadan.jpg',
-                'status' => 'published',
-                'published_at' => Carbon::now()->subDays(5),
-                'categories' => ['معارف قرآن']
-            ],
-            [
-                'title' => 'نقش اذکار در زندگی روزمره',
-                'content' => 'اذکار اسلامی نه تنها یک عبادت محسوب می‌شوند، بلکه تأثیرات مثبت بسیاری در زندگی روزمره ما دارند. از آرامش روانی گرفته تا موفقیت در کار و زندگی.',
-                'excerpt' => 'بررسی تأثیرات مثبت اذکار در زندگی روزمره',
-                'featured_image' => 'https://example.com/images/daily-life.jpg',
-                'status' => 'published',
-                'published_at' => Carbon::now()->subDays(7),
-                'categories' => ['خانواده و اجتماع']
-            ],
-            [
-                'title' => 'دعاهای قرآنی برای رفع مشکلات',
-                'content' => 'قرآن کریم سرشار از دعاها و اذکاری است که می‌توانند در رفع مشکلات و سختی‌های زندگی به ما کمک کنند. در این مقاله به معرفی برخی از این دعاها می‌پردازیم.',
-                'excerpt' => 'معرفی دعاهای قرآنی مؤثر در رفع مشکلات',
-                'featured_image' => 'https://example.com/images/quran-prayers.jpg',
-                'status' => 'published',
-                'published_at' => Carbon::now()->subDays(10),
-                'categories' => ['معارف قرآن']
-            ],
-            [
-                'title' => 'آداب و اذکار قبل از خواب',
-                'content' => 'خوابیدن با اذکار و دعاهای مأثور از پیامبر اکرم (ص) و ائمه اطهار (ع) باعث آرامش بیشتر و محافظت از شر شیطان می‌شود.',
-                'excerpt' => 'معرفی اذکار و دعاهای قبل از خواب',
-                'featured_image' => 'https://example.com/images/sleep-prayer.jpg',
-                'status' => 'published',
-                'published_at' => Carbon::now()->subDays(12),
-                'categories' => ['خانواده و اجتماع']
-            ]
         ];
 
         foreach ($posts as $postData) {

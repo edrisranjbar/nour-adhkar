@@ -42,6 +42,9 @@ class DhikrController extends Controller
         // Update user statistics
         $user->total_dhikrs++;
         
+        // Add 10 points to the user's score
+        $user->score += 10;
+        
         // Track completion date
         $today = now()->format('Y-m-d');
         $completedDates = $user->completed_dates ?? [];
@@ -49,6 +52,9 @@ class DhikrController extends Controller
             $completedDates[] = $today;
             $user->completed_dates = $completedDates;
         }
+        
+        // Update last_dhikr_completed_at for consistency
+        $user->last_dhikr_completed_at = now();
         
         $user->save();
         
