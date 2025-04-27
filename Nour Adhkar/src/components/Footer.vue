@@ -86,7 +86,10 @@
         <p class="copyright">
           © {{ new Date().getFullYear() }} اذکار نور - تمامی حقوق محفوظ است.
         </p>
-        <p class="version">نسخه آزمایشی ۰.۱</p>
+        <p class="version">
+          {{ version }}
+          نسخه آزمایشی
+        </p>
       </div>
     </div>
   
@@ -94,6 +97,8 @@
 </template>
 
 <script>
+import { version } from '../../package.json'
+
 export default {
   name: 'AppFooter',
   methods: {
@@ -102,6 +107,11 @@ export default {
         top: 0,
         behavior: 'smooth'
       });
+    }
+  },
+  data() {
+    return {
+      version
     }
   }
 }
