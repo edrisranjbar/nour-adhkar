@@ -15,14 +15,9 @@ export default defineConfig({
   server: {
     cors: true,
     allowedHosts: ['adhkar.ir', 'www.adhkar.ir', 'localhost', '127.0.0.1', '85.198.10.144'],
-  },
-  // Disable HMR in production
-  build: {
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-      },
+    hmr: {
+      host: 'adhkar.ir',
+      port: 8888,
     },
-  }
+  },
 })
