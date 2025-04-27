@@ -15,5 +15,11 @@ export default defineConfig({
   server: {
     cors: true,
     allowedHosts: ['adhkar.ir', 'www.adhkar.ir', 'localhost', '127.0.0.1', '85.198.10.144'],
+    proxy: {
+      '/ws': {
+        target: 'ws://localhost:8888',
+        ws: true,
+      },
+    },
   },
 })
