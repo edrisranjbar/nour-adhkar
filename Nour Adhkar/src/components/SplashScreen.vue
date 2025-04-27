@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import { version } from '../../package.json'
+
 export default {
     name: 'SplashScreen',
     props: {
@@ -29,6 +31,11 @@ export default {
             type: Number,
             required: true,
         },
+    },
+    data() {
+        return {
+            version
+        }
     }
 };
 </script>

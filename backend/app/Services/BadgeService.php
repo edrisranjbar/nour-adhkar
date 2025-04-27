@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Badge;
 use Carbon\Carbon;
 use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Schema;
 
 class BadgeService
 {
@@ -58,6 +59,12 @@ class BadgeService
         if (!$lastActivity) {
             $user->streak = 1;
             $user->last_activity_date = $today;
+            
+            // Also update last_dhikr_completed_at for backward compatibility
+            if (Schema::hasColumn('users', 'last_dhikr_completed_at')) {
+                $user->last_dhikr_completed_at = $today;
+            }
+            
             $user->save();
             return;
         }
@@ -77,6 +84,12 @@ class BadgeService
         }
 
         $user->last_activity_date = $today;
+        
+        // Also update last_dhikr_completed_at for backward compatibility
+        if (Schema::hasColumn('users', 'last_dhikr_completed_at')) {
+            $user->last_dhikr_completed_at = $today;
+        }
+        
         $user->save();
 
         // Check for badges after updating streak
