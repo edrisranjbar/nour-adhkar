@@ -16,12 +16,12 @@ body.dark-mode .dhikr-card {
 /* Headers */
 body.dark-mode header {
   background-color: var(--bg-tertiary);
-  background-image: url('../images/pattern-dark.svg');
+  background-image: url('/images/pattern-dark.svg');
 }
 
 body.dark-mode .modal > header {
   background-color: var(--bg-tertiary);
-  background-image: url('../images/pattern-dark.svg');
+  background-image: url('/images/pattern-dark.svg');
 }
 
 /* Text colors */

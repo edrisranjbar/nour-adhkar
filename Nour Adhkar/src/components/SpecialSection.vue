@@ -143,7 +143,7 @@ body.dark-mode .section-title {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('src/assets/images/pattern-dark.svg') no-repeat;
+  background: url('/images/pattern-dark.svg') no-repeat;
   background-size: cover;
   opacity: 0.1;
   z-index: 1;
