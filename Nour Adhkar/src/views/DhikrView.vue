@@ -122,9 +122,7 @@ section#morning {
         </RouterLink>
         <h1 id="modal-title">{{ openedCollection.name }}</h1>
       </div>
-      <span class="progressbar-container" v-if="openedCollection.adhkar.length > 1">
-        <span class="progressbar-fill" :style="{ width: totalProgress + '%' }"></span>
-      </span>
+      <ProgressBar v-if="openedCollection.adhkar.length > 1" :progress="totalProgress" />
     </header>
 
     <div v-if="loading" class="loading-state">
@@ -171,13 +169,15 @@ section#morning {
 import { mapState, mapGetters } from 'vuex';
 import axios from 'axios';
 import CongratsModal from "@/components/Congrats.vue";
+import ProgressBar from "@/components/ProgressBar.vue";
 import tapSound from "@/assets/audios/click.mp3"
 import { BASE_API_URL } from '@/config';
 
 export default {
   name: 'DhikrView',
   components: {
-    CongratsModal
+    CongratsModal,
+    ProgressBar
   },
   props: {
     title: String
@@ -222,7 +222,7 @@ export default {
       return this.counters[this.openedDhikr.arabic_text] || 0;
     },
     isFirstDhikr() {
-      return this.openedCollection.adhkar[0].text === this.openedDhikr.text;
+      return this.openedCollection.adhkar[0].arabic_text === this.openedDhikr.arabic_text;
     },
     isThereANextDhikr() {
       return this.openedCollection.adhkar[this.dhikrIndex + 1] !== undefined;
@@ -230,7 +230,7 @@ export default {
     totalProgress() {
       const total = this.openedCollection.adhkar.length;
       const currentDhikrIndex = this.openedCollection.adhkar.findIndex(
-        (element) => element.text === this.openedDhikr.text
+        (element) => element.arabic_text === this.openedDhikr.arabic_text
       ) + 1;
       return Math.max((currentDhikrIndex / total) * 100, 5);
     },
@@ -274,7 +274,7 @@ export default {
       // Create an object with a counter for each dhikr in the collection
       const newCounters = {};
       this.openedCollection.adhkar.forEach(dhikr => {
-        newCounters[dhikr.text] = this.counters[dhikr.text] || 0;
+        newCounters[dhikr.arabic_text] = this.counters[dhikr.arabic_text] || 0;
       });
       this.counters = newCounters;
     },

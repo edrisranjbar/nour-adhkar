@@ -199,6 +199,7 @@ input,textarea,select,button,radio,checkbox{
 .home-container{
     max-width: 1000px;
     margin: auto;
+    padding-top: 1px;
 }
 
 header {
@@ -280,28 +281,6 @@ header h1 {
 .modal>header h1, #modal-title {
     font-size: var(--font-size-xl);
     margin-right: 8px;
-}
-
-.progressbar-container {
-    display: inline-block;
-    width: 178px;
-    height: 20px;
-    border-radius: 8px;
-    background-color: rgba(156, 132, 102, 0.3);
-    position: relative;
-    overflow: hidden;
-    box-shadow: inset 0 1px 3px var(--ui-shadow-light);
-}
-
-.progressbar-fill {
-    display: inline-block;
-    height: 100%;
-    background-color: var(--brand-primary);
-    border-radius: 8px;
-    position: absolute;
-    left: 0px;
-    transition: width 0.5s ease-in-out;
-    box-shadow: 0 0 5px rgba(156, 132, 102, 0.5);
 }
 
 .modal-container {
@@ -427,29 +406,6 @@ header h1 {
 /* Custom Styles */
 
 /* Any specific styles that don't fit in the component or layout categories */
-
-/* Progress Bar */
-.progressbar-container {
-  display: inline-block;
-  width: 178px;
-  height: 20px;
-  border-radius: 8px;
-  background-color: rgba(156, 132, 102, 0.3);
-  position: relative;
-  overflow: hidden;
-  box-shadow: inset 0 1px 3px var(--ui-shadow-light);
-}
-
-.progressbar-fill {
-  display: inline-block;
-  height: 100%;
-  background-color: var(--brand-primary);
-  border-radius: 8px;
-  position: absolute;
-  left: 0px;
-  transition: width 0.5s ease-in-out;
-  box-shadow: 0 0 5px rgba(156, 132, 102, 0.5);
-}
 
 /* Counter Button */
 .bottom-nav-bar .counter-button {
