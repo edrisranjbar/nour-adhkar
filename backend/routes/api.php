@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\LogController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\Api\LeagueController;
+use App\Http\Controllers\CommentController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -30,8 +31,12 @@ Route::get('adhkars', [AdhkarController::class, 'index']);
 Route::get('collections', [CollectionController::class, 'index']);
 Route::get('collections/{slug}', [CollectionController::class, 'show']);
 Route::get('posts', [PostController::class, 'index']);
-Route::get('posts/{slug}', [PostController::class, 'show']);
+Route::get('/posts/{slug}', [PostController::class, 'show']);
+Route::get('/posts/{id}/views', [PostController::class, 'getViews']);
+Route::get('/posts/views/total', [PostController::class, 'getTotalViews']);
 Route::get('posts/{post}/related', [PostController::class, 'related']);
+Route::get('posts/{postId}/comments', [CommentController::class, 'getPostComments']);
+Route::post('comments', [CommentController::class, 'store']);
 
 // Public donation routes
 Route::prefix('donations')->group(function () {
@@ -144,5 +149,13 @@ Route::middleware(['auth:api', AdminMiddleware::class])
             Route::get('export', [LogController::class, 'export']);
             Route::get('{id}', [LogController::class, 'show']);
             Route::delete('/', [LogController::class, 'destroy']);
+        });
+
+        // Comments management
+        Route::prefix('comments')->group(function () {
+            Route::get('/', [CommentController::class, 'index']);
+            Route::put('{comment}', [CommentController::class, 'update']);
+            Route::delete('{comment}', [CommentController::class, 'destroy']);
+            Route::get('pending/count', [CommentController::class, 'getPendingCount']);
         });
     });

@@ -13,6 +13,8 @@ class Post extends Model
     use HasFactory;
     protected $fillable = [
         'title',
+        'meta_title',
+        'meta_description',
         'slug',
         'content',
         'featured_image',
@@ -20,10 +22,12 @@ class Post extends Model
         'published_at',
         'user_id',
         'status', // draft, published
+        'views'
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
+        'views' => 'integer'
     ];
 
     protected $attributes = [
@@ -85,5 +89,20 @@ class Post extends Model
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function approvedComments()
+    {
+        return $this->comments()->where('status', 'approved');
+    }
+
+    public function incrementViews()
+    {
+        $this->increment('views');
     }
 } 

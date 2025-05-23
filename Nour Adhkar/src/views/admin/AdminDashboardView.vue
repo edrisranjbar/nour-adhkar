@@ -8,7 +8,7 @@
           <font-awesome-icon icon="fa-solid fa-newspaper" />
         </div>
         <div class="stat-content">
-          <span class="stat-value">{{ stats.blogPostsCount || 0 }}</span>
+          <span class="stat-value">{{ formatNumber(stats.blogPostsCount || 0) }}</span>
           <span class="stat-label">مقالات</span>
         </div>
       </div>
@@ -18,7 +18,7 @@
           <font-awesome-icon icon="fa-solid fa-users" />
         </div>
         <div class="stat-content">
-          <span class="stat-value">{{ stats.usersCount || 0 }}</span>
+          <span class="stat-value">{{ formatNumber(stats.usersCount || 0) }}</span>
           <span class="stat-label">کاربران</span>
         </div>
       </div>
@@ -38,7 +38,7 @@
           <font-awesome-icon icon="fa-solid fa-comments" />
         </div>
         <div class="stat-content">
-          <span class="stat-value">{{ stats.commentsCount || 0 }}</span>
+          <span class="stat-value">{{ formatNumber(stats.commentsCount || 0) }}</span>
           <span class="stat-label">نظرات</span>
         </div>
       </div>
@@ -92,7 +92,7 @@
                   </span>
                 </td>
                 <td>{{ formatDate(post.published_at) }}</td>
-                <td>{{ post.views || 0 }}</td>
+                <td>{{ formatNumber(post.views || 0) }}</td>
                 <td class="actions-cell">
                   <RouterLink 
                     :to="`/blog/${post.slug}`" 
@@ -222,29 +222,28 @@ export default {
     
     async fetchStats() {
       try {
-        // Try to get blog post count
-        const blogCountResponse = await this.getBlogPostsCount();
-        this.stats.blogPostsCount = blogCountResponse;
-        
-        // Get users count 
-        const usersResponse = await this.getUsersCount();
-        this.stats.usersCount = usersResponse;
-        
-        // Use mock data for metrics that don't have specific endpoints yet
-        this.stats.totalViews = 150;
-        this.stats.commentsCount = 8;
+        const [postsResponse, viewsResponse, commentsResponse, usersCount] = await Promise.all([
+          axios.get('admin/posts'),
+          axios.get('posts/views/total'),
+          axios.get('admin/comments/pending/count'),
+          this.getUsersCount()
+        ]);
+
+        this.stats = {
+          blogPostsCount: postsResponse.data.posts.total || 0,
+          totalViews: viewsResponse.data.total_views || 0,
+          commentsCount: commentsResponse.data.count || 0,
+          usersCount: usersCount
+        };
       } catch (error) {
         console.error('Error fetching stats:', error);
+        this.$toast.error('خطا در دریافت آمار');
       }
     },
     
     async getBlogPostsCount() {
       try {
-        const response = await axios.get(`${BASE_API_URL}/admin/posts`, {
-          headers: {
-            Authorization: `Bearer ${this.token}`
-          }
-        });
+        const response = await axios.get('admin/posts');
         
         if (response.data.success && response.data.posts) {
           return response.data.posts.total || 0;
@@ -258,12 +257,9 @@ export default {
     
     async getUsersCount() {
       try {
-        const response = await axios.get(`${BASE_API_URL}/admin/users`, {
+        const response = await axios.get('admin/users', {
           params: {
             per_page: 1
-          },
-          headers: {
-            Authorization: `Bearer ${this.token}`
           }
         });
         
@@ -279,21 +275,16 @@ export default {
     
     async fetchRecentPosts() {
       try {
-        const response = await axios.get(`${BASE_API_URL}/admin/blog`, {
+        const response = await axios.get('admin/posts', {
           params: {
-            per_page: 5
-          },
-          headers: {
-            Authorization: `Bearer ${this.token}`
+            per_page: 5,
+            sort: '-created_at'
           }
         });
-        
-        if (response.data.success && response.data.posts && response.data.posts.data) {
-          this.recentPosts = response.data.posts.data;
-        }
+        this.recentPosts = response.data.posts.data;
       } catch (error) {
         console.error('Error fetching recent posts:', error);
-        this.recentPosts = [];
+        this.$toast.error('خطا در دریافت مقالات اخیر');
       }
     },
     
@@ -310,7 +301,9 @@ export default {
     },
     
     formatNumber(num) {
-      return new Intl.NumberFormat('fa-IR').format(num);
+      const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+      return new Intl.NumberFormat('fa-IR').format(num)
+        .replace(/[0-9]/g, (match) => persianDigits[parseInt(match)]);
     },
     
     getStatusClass(post) {
