@@ -80,21 +80,25 @@
         <div class="h-1 bg-primary-500"></div>
         <div class="p-5">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <FontAwesomeIcon :icon="league.icon || 'fa-solid fa-trophy'" class="text-xl text-primary-600" />
+            <div class="flex flex-col">
               <span class="text-sm font-medium text-primary-700 mb-1">{{ league.name }}</span>
+              <div class="flex items-end gap-1">
+                <span v-if="!loading" class="text-3xl font-bold text-primary-800">{{ leagueScore }}</span>
+                <div v-else class="h-8 w-16 bg-primary-200 rounded animate-pulse"></div>
+                <span class="text-xs text-primary-600 mb-1">امتیاز</span>
+              </div>
             </div>
-            <span v-if="!loading" class="text-3xl font-bold text-primary-800">{{ leagueScore }}</span>
+            <div class="p-3 bg-primary-500 text-white rounded-lg">
+              <FontAwesomeIcon :icon="league.icon || 'fa-solid fa-trophy'" class="text-xl" />
+            </div>
           </div>
           <div v-if="nextLeague" class="mt-1 text-xs text-gray-500">
             لیگ بعدی: <span class="font-semibold text-primary-700">{{ nextLeague.name }}</span>
             <span class="text-primary-600">({{ nextLeaguePoints - leagueScore }} امتیاز تا ارتقا)</span>
           </div>
-        </div>
-        <div class="mt-3 w-full bg-primary-200 rounded-full h-1.5">
-          <div class="bg-primary-500 h-1.5 rounded-full transition-all duration-700 ease-out"
-          :style="{ width: `${Math.min(100, nextLeague ? (leagueScore / nextLeaguePoints) * 100 : 100)}%` }">
-        </div>
+          <div class="mt-3 w-full bg-primary-200 rounded-full h-1.5">
+            <div class="bg-primary-500 h-1.5 rounded-full transition-all duration-700 ease-out" :style="{ width: `${Math.min(100, nextLeague ? (leagueScore / nextLeaguePoints) * 100 : 100)}%` }"></div>
+          </div>
         </div>
       </div>
     </div>
