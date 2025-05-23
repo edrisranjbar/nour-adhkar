@@ -1,27 +1,42 @@
 <template>
-  <div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-xl font-bold text-gray-900 mb-4">روزهای متوالی</h2>
-    <div class="flex justify-between items-center">
-      <div v-for="(date, index) in lastWeekDates" :key="index" 
-           class="flex flex-col items-center gap-2">
-        <div class="w-10 h-10 rounded-full flex items-center justify-center"
-             :class="{
-               'bg-green-100': isCompletedDay(date),
-               'bg-red-100': isMissedDay(date),
-               'bg-gray-100': !isCompletedDay(date) && !isMissedDay(date)
-             }">
+  <div class="grid grid-cols-7 gap-3">
+    <div v-for="(date, index) in lastWeekDates" :key="index" 
+         class="flex flex-col items-center gap-2">
+      <div class="p-4 w-full aspect-square rounded-lg flex flex-col items-center justify-center transition-all duration-300"
+           :class="{
+             'bg-primary-50 border border-primary-200 shadow-sm hover:shadow-md hover:bg-primary-100': isCompletedDay(date),
+             'bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md hover:bg-gray-100': isMissedDay(date),
+             'bg-gray-50 border border-gray-200': !isCompletedDay(date) && !isMissedDay(date)
+           }">
+        <div class="relative flex items-center justify-center">
           <FontAwesomeIcon 
             v-if="isCompletedDay(date)"
-            :icon="['fas', 'check']" 
-            class="text-green-600 text-sm"
+            icon="fa-solid fa-check" 
+            class="text-primary-600 text-xl"
           />
           <FontAwesomeIcon 
             v-else-if="isMissedDay(date)"
-            :icon="['fas', 'xmark']" 
-            class="text-red-600 text-sm"
+            icon="fa-solid fa-xmark" 
+            class="text-gray-500 text-xl"
           />
+          <span v-else class="text-gray-400 text-lg">-</span>
         </div>
-        <span class="text-xs text-gray-500">{{ getDayName(date) }}</span>
+        <div class="mt-2 text-xs font-medium"
+             :class="{
+               'text-primary-800': isCompletedDay(date),
+               'text-gray-600': isMissedDay(date),
+               'text-gray-500': !isCompletedDay(date) && !isMissedDay(date)
+             }">
+          {{ getJalaliDay(date) }}
+        </div>
+        <div class="text-xs"
+             :class="{
+               'text-primary-600': isCompletedDay(date),
+               'text-gray-500': isMissedDay(date),
+               'text-gray-400': !isCompletedDay(date) && !isMissedDay(date)
+             }">
+          {{ getDayName(date) }}
+        </div>
       </div>
     </div>
   </div>
@@ -32,6 +47,14 @@ import { ref, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { toJalaali, toGregorian } from 'jalaali-js'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { 
+  faCheck, 
+  faXmark
+} from '@fortawesome/free-solid-svg-icons'
+
+// Add icons to the library
+library.add(faCheck, faXmark)
 
 export default {
   name: 'StreakCalendar',
@@ -47,7 +70,7 @@ export default {
     const today = new Date()
 
     // Generate last 7 days dates in Jalali
-    for (let i = 0; i < 7; i++) {
+    for (let i = 6; i >= 0; i--) {
       const date = new Date(today)
       date.setDate(date.getDate() - i)
       const jDate = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate())
@@ -62,6 +85,11 @@ export default {
     const getDayName = (date) => {
       const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه']
       return days[date.dayIndex]
+    }
+    
+    const getJalaliDay = (date) => {
+      const jDate = date.jalali.split('/')
+      return jDate[2] // Return just the day part
     }
 
     const fetchCompletedDays = async () => {
@@ -105,6 +133,7 @@ export default {
       loading,
       lastWeekDates,
       getDayName,
+      getJalaliDay,
       isCompletedDay,
       isMissedDay
     }
