@@ -1,42 +1,82 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <main class="container mx-auto px-4 py-8">
-      <div class="max-w-4xl mx-auto space-y-8">
-        <div class="flex flex-col items-center gap-4">
-          <h1 class="text-2xl font-bold text-gray-900">داشبورد</h1>
-          <div class="flex items-center gap-4">
-            <ProfilePhoto 
-              :photo-url="user?.photo"
-              @photo-change="handlePhotoUpload"
-              @error="handlePhotoError"
-            />
-            <div class="flex items-center">
-              <span class="text-xl font-medium text-gray-900">{{ user?.name || 'کاربر' }}</span>
+  <div class="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen pb-12">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-xl relative z-10">
+      <div class="container mx-auto px-4 py-6">
+        <!-- Pattern Overlay -->
+        <div class="absolute inset-0 opacity-10 overflow-hidden">
+          <div class="absolute -right-24 -top-24 w-64 h-64 rounded-full bg-white/20"></div>
+          <div class="absolute -left-20 -bottom-16 w-48 h-48 rounded-full bg-white/20"></div>
+        </div>
+        
+        <!-- Unified Layout -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 relative">
+          <h1 class="text-2xl font-bold">داشبورد</h1>
+          
+          <div class="flex items-center gap-3">
+            <!-- User Avatar on small screens -->
+            <div class="flex sm:hidden h-12 w-12 bg-white/20 rounded-full items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-user" class="text-xl" />
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
+              <div class="text-center sm:text-right">
+                <span class="text-xl font-medium">{{ user?.name || 'کاربر' }}</span>
+                <span class="hidden sm:block text-sm text-white/70">خوش آمدید</span>
+              </div>
+              
+              <!-- User Avatar on larger screens -->
+              <div class="hidden sm:flex h-12 w-12 bg-white/20 rounded-full items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-user" class="text-xl" />
+              </div>
+              
               <button 
                 @click="showProfileSettings = true" 
-                class="mr-2 p-1 text-gray-500 hover:text-gray-700 focus:outline-none"
-                title="ویرایش پروفایل"
+                class="mt-2 sm:mt-0 px-4 py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-full sm:rounded-lg flex items-center gap-1.5 sm:gap-2 transition-colors"
               >
-                <font-awesome-icon icon="fa-solid fa-user-pen" class="text-sm" />
+                <font-awesome-icon icon="fa-solid fa-user-pen" class="text-xs sm:text-sm" />
+                <span>ویرایش پروفایل</span>
               </button>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <UserStats 
-            :streak="user?.streak || 0"
-            :heart-score="user?.heartScore || 0"
-          />
+    <!-- Stats Section: full width -->
+    <div class="container mx-auto px-4 mt-8">
+      <div class="w-full">
+        <UserStats />
+      </div>
+    </div>
 
-          <LeagueProgress />
+    <!-- Main Content: centered -->
+    <div class="container mx-auto px-2 sm:px-4 mt-8">
+      <div class="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+        <!-- Activity & Progress -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div class="lg:col-span-3">
+            <!-- Daily activity timeline -->
+            <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100">
+              <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2">
+                <font-awesome-icon icon="fa-solid fa-calendar-day" class="text-primary-600" />
+                فعالیت روزانه
+              </h2>
+              <StreakCalendar />
+            </div>
+          </div>
         </div>
 
-        <StreakCalendar />
-
-        <BadgesList />
+        <!-- Achievements & Badges -->
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100">
+          <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2">
+            <font-awesome-icon icon="fa-solid fa-award" class="text-primary-600" />
+            دستاوردها
+          </h2>
+          <BadgesList />
+        </div>
       </div>
-    </main>
+    </div>
 
     <!-- Profile Settings Modal -->
     <ProfileSettingsModal 
@@ -49,27 +89,33 @@
 </template>
 
 <script>
-import ProfilePhoto from '@/components/dashboard/ProfilePhoto.vue'
 import UserStats from '@/components/dashboard/UserStats.vue'
 import StreakCalendar from '@/components/dashboard/StreakCalendar.vue'
 import BadgesList from '@/components/dashboard/BadgesList.vue'
 import ProfileSettingsModal from '@/components/dashboard/ProfileSettingsModal.vue'
-import LeagueProgress from '@/components/dashboard/LeagueProgress.vue'
 import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
 import { useToast } from 'vue-toastification'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { 
+  faUserPen, 
+  faCalendarDay, 
+  faAward,
+  faUser
+} from '@fortawesome/free-solid-svg-icons'
+
+// Add icons to the library
+library.add(faUserPen, faCalendarDay, faAward, faUser)
 
 export default {
   name: 'DashboardView',
   components: {
-    ProfilePhoto,
     UserStats,
     StreakCalendar,
     BadgesList,
     ProfileSettingsModal,
-    LeagueProgress,
     FontAwesomeIcon
   },
   setup() {
