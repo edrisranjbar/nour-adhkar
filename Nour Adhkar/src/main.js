@@ -11,6 +11,9 @@ import metaPlugin from './plugins/meta'
 import validationPlugin from './plugins/validation'
 import axios from 'axios';
 
+// Set axios base URL
+axios.defaults.baseURL = BASE_API_URL;
+
 // Import CSS
 import './assets/main.css'
 import './assets/css/fonts.css'

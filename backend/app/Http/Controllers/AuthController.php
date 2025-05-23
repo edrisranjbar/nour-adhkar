@@ -164,4 +164,54 @@ class AuthController extends Controller
             return response()->json(['message' => 'خطا در دریافت لیست کاربران', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function adminIndex(Request $request)
+    {
+        try {
+            $query = User::query();
+
+            // Search by name or email
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            // Filter by role
+            if ($request->has('role') && $request->role) {
+                $query->where('role', $request->role);
+            }
+
+            // Sort
+            if ($request->has('sort')) {
+                $sort = $request->sort;
+                if ($sort === 'created_at_desc') {
+                    $query->orderBy('created_at', 'desc');
+                } elseif ($sort === 'created_at_asc') {
+                    $query->orderBy('created_at', 'asc');
+                } elseif ($sort === 'name_asc') {
+                    $query->orderBy('name', 'asc');
+                } elseif ($sort === 'name_desc') {
+                    $query->orderBy('name', 'desc');
+                }
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
+            $users = $query->paginate($request->input('per_page', 10));
+
+            return response()->json([
+                'success' => true,
+                'users' => $users
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در دریافت لیست کاربران',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

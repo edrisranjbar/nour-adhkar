@@ -162,10 +162,12 @@ import axios from 'axios';
 import { BASE_API_URL } from '@/config';
 import { mapGetters } from 'vuex';
 import ImageUploadField from '@/components/Admin/ImageUploadField.vue';
+import AppHeader from '@/components/Admin/AppHeader.vue';
 
 export default {
   components: {
-    ImageUploadField
+    ImageUploadField,
+    AppHeader
   },
   data() {
     return {
@@ -239,25 +241,27 @@ export default {
       
       try {
         const token = this.$store.state.token;
-        const response = await axios.get(`${BASE_API_URL}/admin/categories`, {
+        const response = await axios.get('admin/categories', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
         
-        if (response.data.success) {
-          this.categories = response.data.categories;
+        // Handle direct array response
+        if (Array.isArray(response.data)) {
+          this.categories = response.data;
           
           // If editing, set selected categories
           if (this.isEditing && this.post.categories) {
             this.selectedCategories = this.post.categories.map(category => category.id);
           }
         } else {
+          console.error('Unexpected API response structure:', response.data);
           this.showToastMessage('خطا در دریافت لیست دسته‌بندی‌ها');
         }
       } catch (error) {
-        console.error('Error fetching categories:', error);
-        this.showToastMessage('خطا در دریافت لیست دسته‌بندی‌ها');
+        console.error('Error fetching categories:', error.response?.data || error);
+        this.showToastMessage(error.response?.data?.message || 'خطا در دریافت لیست دسته‌بندی‌ها');
       } finally {
         this.loadingCategories = false;
       }
@@ -309,16 +313,28 @@ export default {
     async publishPost() {
       try {
         const formData = new FormData();
-        Object.keys(this.post).forEach(key => {
-          if (key === 'featured_image' && this.post[key]) {
-            formData.append('featured_image', this.post[key]);
-          } else if (key !== 'featured_image') {
-            formData.append(key, this.post[key]);
-          }
-        });
+        
+        // Add basic post data
+        formData.append('title', this.post.title);
+        formData.append('slug', this.post.slug);
+        formData.append('excerpt', this.post.excerpt);
+        formData.append('content', this.post.content);
+        formData.append('status', 'published');
+        
+        // Add published_at if set
+        if (this.post.published_at) {
+          formData.append('published_at', this.post.published_at);
+        }
+        
+        // Add featured image if exists
+        if (this.post.featured_image && typeof this.post.featured_image === 'object') {
+          formData.append('featured_image', this.post.featured_image);
+        }
         
         // Add selected categories
-        formData.append('category_ids', JSON.stringify(this.selectedCategories));
+        if (this.selectedCategories.length > 0) {
+          formData.append('category_ids', JSON.stringify(this.selectedCategories));
+        }
         
         const token = this.$store.state.token;
         const endpoint = `${BASE_API_URL}/admin/posts${this.isEditing ? `/${this.postId}` : ''}`;
@@ -343,11 +359,17 @@ export default {
             }, 1000);
           }
         } else {
-          this.showToastMessage(this.isEditing ? 'خطا در بروزرسانی مقاله' : 'خطا در انتشار مقاله');
+          this.showToastMessage(response.data.message || 'خطا در انتشار مقاله');
         }
       } catch (error) {
-        console.error('Error publishing post:', error);
-        this.showToastMessage(this.isEditing ? 'خطا در بروزرسانی مقاله' : 'خطا در انتشار مقاله');
+        console.error('Error publishing post:', error.response?.data || error);
+        if (error.response?.status === 422) {
+          const errors = error.response.data.errors;
+          const errorMessage = Object.values(errors).flat().join('\n');
+          this.showToastMessage(errorMessage);
+        } else {
+          this.showToastMessage(error.response?.data?.message || 'خطا در انتشار مقاله');
+        }
       }
     },
     generateSlug() {

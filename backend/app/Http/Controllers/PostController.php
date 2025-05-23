@@ -63,6 +63,8 @@ class PostController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:255',
             'slug' => 'nullable|string|max:255|unique:posts',
             'excerpt' => 'nullable|string',
             'content' => 'required|string',
@@ -124,13 +126,26 @@ class PostController extends Controller
     public function show($slug)
     {
         $post = Post::where('slug', $slug)
-            ->with(['user:id,name,avatar', 'categories'])
+            ->where('status', 'published')
+            ->with(['user', 'categories'])
             ->firstOrFail();
 
-        return response()->json([
-            'success' => true,
-            'post' => $post
-        ]);
+        // Increment views
+        $post->incrementViews();
+
+        return response()->json($post);
+    }
+
+    public function getViews($id)
+    {
+        $post = Post::findOrFail($id);
+        return response()->json(['views' => $post->views]);
+    }
+
+    public function getTotalViews()
+    {
+        $totalViews = Post::sum('views');
+        return response()->json(['total_views' => $totalViews]);
     }
 
     /**

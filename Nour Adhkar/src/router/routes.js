@@ -286,6 +286,12 @@ export const adminRoutes = [
           title: 'گزارش‌ها و لاگ‌ها | اذکار نور',
           noindex: true
         }
+      },
+      {
+        path: 'comments',
+        name: 'admin-comments',
+        component: () => import('@/views/admin/CommentsManageView.vue'),
+        meta: { title: 'مدیریت نظرات' }
       }
     ]
   }

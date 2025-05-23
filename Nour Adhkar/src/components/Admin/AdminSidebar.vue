@@ -39,21 +39,26 @@ export default {
         {
           id: 'content',
           title: 'مدیریت محتوا',
-          icon: 'fa-solid fa-file-alt',
+          icon: 'fa-solid fa-newspaper',
           items: [
             {
-              path: '/admin/blog',
               title: 'مقالات',
-              icon: 'fa-solid fa-newspaper'
+              path: '/admin/blog',
+              icon: 'fa-solid fa-file-lines'
             },
             {
-              path: '/admin/categories',
               title: 'دسته‌بندی‌ها',
-              icon: 'fa-solid fa-tags'
+              path: '/admin/categories',
+              icon: 'fa-solid fa-folder'
             },
             {
-              path: '/admin/media',
+              title: 'نظرات',
+              path: '/admin/comments',
+              icon: 'fa-solid fa-comments'
+            },
+            {
               title: 'رسانه‌ها',
+              path: '/admin/media',
               icon: 'fa-solid fa-images'
             }
           ]
