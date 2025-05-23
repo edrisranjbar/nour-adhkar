@@ -21,7 +21,7 @@ section#morning {
   flex: 1; /* Take up all available space between header and footer */
   overflow-y: auto;
   padding: 20px;
-  height: calc(100vh - 80px - 70px); /* viewport height minus header and footer heights */
+  height: calc(100dvh - 80px - 70px); /* viewport height minus header and footer heights */
   display: flex;
   flex-direction: column;
 }
