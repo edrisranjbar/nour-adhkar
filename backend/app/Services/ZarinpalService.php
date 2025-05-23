@@ -50,7 +50,6 @@ class ZarinpalService
                 'callback_url' => $this->callbackUrl,
                 'metadata' => [
                     'email' => $donation->email,
-                    'mobile' => null, // We don't collect mobile number in our form
                 ],
             ]);
             
