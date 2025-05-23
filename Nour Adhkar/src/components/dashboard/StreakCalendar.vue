@@ -1,8 +1,8 @@
 <template>
-  <div class="grid grid-cols-7 gap-3">
+  <div class="grid grid-cols-7 gap-1 sm:gap-3">
     <div v-for="(date, index) in lastWeekDates" :key="index" 
-         class="flex flex-col items-center gap-2">
-      <div class="p-4 w-full aspect-square rounded-lg flex flex-col items-center justify-center transition-all duration-300"
+         class="flex flex-col items-center gap-1 sm:gap-2">
+      <div class="p-1 sm:p-4 w-full aspect-square rounded-lg flex flex-col items-center justify-center transition-all duration-300"
            :class="{
              'bg-primary-50 border border-primary-200 shadow-sm hover:shadow-md hover:bg-primary-100': isCompletedDay(date),
              'bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md hover:bg-gray-100': isMissedDay(date),
@@ -12,16 +12,16 @@
           <FontAwesomeIcon 
             v-if="isCompletedDay(date)"
             icon="fa-solid fa-check" 
-            class="text-primary-600 text-xl"
+            class="text-primary-600 text-base sm:text-xl"
           />
           <FontAwesomeIcon 
             v-else-if="isMissedDay(date)"
             icon="fa-solid fa-xmark" 
-            class="text-gray-500 text-xl"
+            class="text-gray-500 text-base sm:text-xl"
           />
-          <span v-else class="text-gray-400 text-lg">-</span>
+          <span v-else class="text-gray-400 text-base sm:text-lg">-</span>
         </div>
-        <div class="mt-2 text-xs font-medium"
+        <div class="mt-1 sm:mt-2 text-2xs sm:text-xs font-medium"
              :class="{
                'text-primary-800': isCompletedDay(date),
                'text-gray-600': isMissedDay(date),
@@ -29,13 +29,13 @@
              }">
           {{ getJalaliDay(date) }}
         </div>
-        <div class="text-xs"
+        <div class="text-2xs sm:text-xs"
              :class="{
                'text-primary-600': isCompletedDay(date),
                'text-gray-500': isMissedDay(date),
                'text-gray-400': !isCompletedDay(date) && !isMissedDay(date)
              }">
-          {{ getDayName(date) }}
+          {{ getDayShortName(date) }}
         </div>
       </div>
     </div>
@@ -87,6 +87,11 @@ export default {
       return days[date.dayIndex]
     }
     
+    const getDayShortName = (date) => {
+      const shortDays = ['یک', 'دو', 'سه', 'چهار', 'پنج', 'جمعه', 'شنبه']
+      return shortDays[date.dayIndex]
+    }
+    
     const getJalaliDay = (date) => {
       const jDate = date.jalali.split('/')
       return jDate[2] // Return just the day part
@@ -133,10 +138,18 @@ export default {
       loading,
       lastWeekDates,
       getDayName,
+      getDayShortName,
       getJalaliDay,
       isCompletedDay,
       isMissedDay
     }
   }
 }
-</script> 
+</script>
+
+<style scoped>
+.text-2xs {
+  font-size: 0.65rem;
+  line-height: 1rem;
+}
+</style> 
