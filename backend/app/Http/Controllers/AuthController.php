@@ -214,4 +214,17 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id);
+        $user->active = !$user->active;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'وضعیت کاربر با موفقیت به روزرسانی شد'
+        ]);
+    }
+
 }
