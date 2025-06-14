@@ -93,6 +93,7 @@ section#morning {
   height: 24px;
   cursor: pointer;
   transition: transform 0.3s ease;
+  color: #9c8466;
 }
 
 .share-button:hover {
@@ -147,7 +148,7 @@ section#morning {
           >
             <font-awesome-icon :icon="isFavorite ? 'heart' : ['fa', 'heart']" />
           </button>
-          <img id="share-button" class="share-button" src="@/assets/icons/share.svg" alt="اشتراک گذاری" @click="share()">
+          <font-awesome-icon icon="fa-copy" class="share-button" @click="share" />
         </div>
       </div>
       <p id="dhikr-prefix">{{ openedDhikr.prefix }}</p>
