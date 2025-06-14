@@ -26,7 +26,7 @@ class CollectionSeeder extends Seeder
                 'slug' => 'night',
             ],
             [
-                'name' => 'دعای خواب',
+                'name' => 'اذکار خواب',
                 'type' => 'daily',
                 'slug' => 'sleep',
             ],
