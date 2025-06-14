@@ -172,6 +172,7 @@ import CongratsModal from "@/components/Congrats.vue";
 import ProgressBar from "@/components/ProgressBar.vue";
 import tapSound from "@/assets/audios/click.mp3"
 import { BASE_API_URL } from '@/config';
+import { useSettingsStore } from '@/stores/settings'
 
 export default {
   name: 'DhikrView',
@@ -383,6 +384,10 @@ export default {
       window.navigator.vibrate([200]);
     },
     playAudio(audioPath) {
+      const settings = useSettingsStore();
+      if (!settings.sound) {
+        return;
+      }
       const audio = new Audio(audioPath);
       audio.play().catch(e => console.error('Audio play failed:', e));
     },
