@@ -27,7 +27,7 @@ import {
     faEnvelope,
     faGlobe,
     faHome,
-    faCalculator,
+    faHandsPraying,
     faCreditCard,
     faBitcoinSign,
     faDonate,
@@ -99,7 +99,6 @@ import {
     faCalendarDay,
     faStarAndCrescent,
     faBed,
-    faHandsPraying,
     faGift,
     faCircleNotch,
     // Badge icons
@@ -118,6 +117,7 @@ import {
 
 // Add icons to library
 library.add(
+    faHandsPraying,
     faSignOutAlt,
     faUser,
     faLock,
@@ -142,7 +142,6 @@ library.add(
     faEnvelope,
     faGlobe,
     faHome,
-    faCalculator,
     faCreditCard,
     faBitcoinSign,
     faTelegram,
@@ -220,7 +219,6 @@ library.add(
     faCalendarDay,
     faStarAndCrescent,
     faBed,
-    faHandsPraying,
     faGift,
     faCircleNotch,
     // Badge icons

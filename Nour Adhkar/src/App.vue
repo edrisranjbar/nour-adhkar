@@ -92,7 +92,7 @@ export default {
           <span>مقالات</span>
         </RouterLink>
         <RouterLink to="/counter" class="nav-item" active-class="active">
-          <font-awesome-icon icon="fa-solid fa-calculator" />
+          <font-awesome-icon icon="fa-solid fa-hands-praying" />
           <span>تسبیح</span>
         </RouterLink>
         <RouterLink v-if="isAuthenticated" to="/dashboard" class="nav-item" active-class="active">
