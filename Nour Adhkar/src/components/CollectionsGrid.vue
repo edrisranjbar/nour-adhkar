@@ -243,7 +243,7 @@ export default {
 
 @media (max-width: 480px) {
   .card-sm {
-    flex-basis: 100%;
+    flex-basis: calc(50% - 6px);
   }
 
   .card-icon {
