@@ -50,38 +50,6 @@
         </div>
       </div>
       
-      <div class="footer-middle">
-        <div class="app-features">
-          <div class="feature-item">
-            <div class="feature-icon">
-              <font-awesome-icon icon="fa-solid fa-heart" />
-            </div>
-            <div class="feature-text">
-              <h5>رابط کاربری زیبا</h5>
-              <p>طراحی ساده و کاربرپسند</p>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon">
-              <font-awesome-icon icon="fa-solid fa-moon" />
-            </div>
-            <div class="feature-text">
-              <h5>حالت شب</h5>
-              <p>استفاده آسان در شب</p>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon">
-              <font-awesome-icon icon="fa-solid fa-bookmark" />
-            </div>
-            <div class="feature-text">
-              <h5>اذکار متنوع</h5>
-              <p>مجموعه کامل اذکار روزانه</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
       <div class="footer-bottom">
         <p class="copyright">
           © {{ new Date().getFullYear() }} اذکار نور - تمامی حقوق محفوظ است.

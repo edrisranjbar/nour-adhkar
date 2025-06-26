@@ -24,7 +24,7 @@ export default {
   width: 100%;
   position: relative;
   transition: all 0.3s ease;
-  background: linear-gradient(135deg, #A79277 0%, #9C8466 100%);
+  background: var(--brand-secondary);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 

@@ -168,7 +168,6 @@ export default {
 .category-card {
   height: 180px;
   border-radius: 8px;
-  background-color: var(--brand-secondary);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-light);
   background-size: cover;
@@ -243,7 +242,7 @@ export default {
 
 @media (max-width: 480px) {
   .card-sm {
-    flex-basis: 100%;
+    flex-basis: calc(50% - 6px);
   }
 
   .card-icon {
