@@ -168,7 +168,6 @@ export default {
 .category-card {
   height: 180px;
   border-radius: 8px;
-  background-color: var(--brand-secondary);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-light);
   background-size: cover;
