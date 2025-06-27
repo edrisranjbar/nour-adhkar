@@ -1,7 +1,7 @@
 <template>
   <header class="app-header">
     <div class="header-container">
-      <div class="header-left">
+      <div class="header-main-row">
         <router-link to="/" class="logo-link">
           <img src="@/assets/icons/logo.png" alt="اذکار نور" class="app-logo" />
         </router-link>
@@ -90,6 +90,12 @@ body.dark-mode .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.header-main-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .header-left {
@@ -300,20 +306,27 @@ body.dark-mode .stat-item:hover {
 @media (max-width: 768px) {
   .header-container {
     flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    text-align: center;
+    align-items: stretch;
+    gap: 8px;
   }
   
-  .header-left {
-    flex-direction: column;
+  .header-main-row {
+    flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+  }
+  
+  .header-titles {
+    align-items: flex-start;
+    text-align: left;
+    flex: 1;
   }
   
   .app-logo {
-    width: 70px;
-    height: 70px;
-    margin-bottom: 10px;
+    width: 60px;
+    height: 60px;
   }
   
   .header-right {
@@ -325,13 +338,25 @@ body.dark-mode .stat-item:hover {
     flex-wrap: wrap;
     justify-content: center;
   }
-  
-  .description {
-    font-size: 1.5rem;
-  }
 }
 
 @media (max-width: 480px) {
+  .header-main-row {
+    gap: 8px;
+  }
+  
+  .app-logo {
+    width: 48px;
+    height: 48px;
+  }
+  
+  h1 {
+    font-size: 1.1rem;
+  }
+  
+  .description {
+    font-size: 0.9rem;
+  }
 
   .user-stats {
     gap: 8px;
@@ -339,20 +364,6 @@ body.dark-mode .stat-item:hover {
   
   .stat-icon {
     font-size: 0.8rem;
-  }
-  
-  .app-logo {
-    width: 65px;
-    height: 65px;
-  }
-  
-  h1 {
-    font-size: 1.3rem;
-  }
-  
-  .description {
-    font-size: 1.3rem;
-    line-height: 1.5;
   }
 }
 </style>
