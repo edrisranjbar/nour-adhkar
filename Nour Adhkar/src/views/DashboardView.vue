@@ -1,38 +1,38 @@
 <template>
-  <div class="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen pb-12">
+  <div class="bg-gradient-to-b from-gray-50 to-gray-100 dark:bg-gray-950 min-h-screen pb-12">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-xl relative z-10">
+    <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-xl relative z-10 dark:from-gray-900 dark:to-gray-800">
       <div class="container mx-auto px-4 py-6">
         <!-- Pattern Overlay -->
         <div class="absolute inset-0 opacity-10 overflow-hidden">
-          <div class="absolute -right-24 -top-24 w-64 h-64 rounded-full bg-white/20"></div>
-          <div class="absolute -left-20 -bottom-16 w-48 h-48 rounded-full bg-white/20"></div>
+          <div class="absolute -right-24 -top-24 w-64 h-64 rounded-full bg-white/20 dark:bg-white/10"></div>
+          <div class="absolute -left-20 -bottom-16 w-48 h-48 rounded-full bg-white/20 dark:bg-white/10"></div>
         </div>
         
         <!-- Unified Layout -->
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4 relative">
-          <h1 class="text-2xl font-bold">داشبورد</h1>
+          <h1 class="text-2xl font-bold dark:text-white">داشبورد</h1>
           
           <div class="flex items-center gap-3">
             <!-- User Avatar on small screens -->
-            <div class="flex sm:hidden h-12 w-12 bg-white/20 rounded-full items-center justify-center">
+            <div class="flex sm:hidden h-12 w-12 bg-white/20 rounded-full items-center justify-center dark:bg-gray-800/60">
               <font-awesome-icon icon="fa-solid fa-user" class="text-xl" />
             </div>
             
             <div class="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
               <div class="text-center sm:text-right">
-                <span class="text-xl font-medium">{{ user?.name || 'کاربر' }}</span>
-                <span class="hidden sm:block text-sm text-white/70">خوش آمدید</span>
+                <span class="text-xl font-medium dark:text-white">{{ user?.name || 'کاربر' }}</span>
+                <span class="hidden sm:block text-sm text-white/70 dark:text-gray-300">خوش آمدید</span>
               </div>
               
               <!-- User Avatar on larger screens -->
-              <div class="hidden sm:flex h-12 w-12 bg-white/20 rounded-full items-center justify-center">
+              <div class="hidden sm:flex h-12 w-12 bg-white/20 rounded-full items-center justify-center dark:bg-gray-800/60">
                 <font-awesome-icon icon="fa-solid fa-user" class="text-xl" />
               </div>
               
               <button 
                 @click="showProfileSettings = true" 
-                class="mt-2 sm:mt-0 px-4 py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-full sm:rounded-lg flex items-center gap-1.5 sm:gap-2 transition-colors"
+                class="mt-2 sm:mt-0 px-4 py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-full sm:rounded-lg flex items-center gap-1.5 sm:gap-2 transition-colors dark:bg-gray-800/60 dark:hover:bg-gray-700/70"
               >
                 <font-awesome-icon icon="fa-solid fa-user-pen" class="text-xs sm:text-sm" />
                 <span>ویرایش پروفایل</span>
@@ -44,21 +44,21 @@
     </div>
 
     <!-- Stats Section: full width -->
-    <div class="container mx-auto px-4 mt-8">
+    <div class="container mx-auto px-2">
       <div class="w-full">
         <UserStats />
       </div>
     </div>
 
     <!-- Main Content: centered -->
-    <div class="container mx-auto px-2 sm:px-4 mt-8">
+    <div class="container mx-auto px-2">
       <div class="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         <!-- Activity & Progress -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div class="lg:col-span-3">
             <!-- Daily activity timeline -->
-            <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100">
-              <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2">
+            <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100 dark:bg-gray-900 dark:border-gray-800">
+              <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2 dark:text-white">
                 <font-awesome-icon icon="fa-solid fa-calendar-day" class="text-primary-600" />
                 فعالیت روزانه
               </h2>
@@ -68,8 +68,8 @@
         </div>
 
         <!-- Achievements & Badges -->
-        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100">
-          <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2">
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100 dark:bg-gray-900 dark:border-gray-800">
+          <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2 dark:text-white">
             <font-awesome-icon icon="fa-solid fa-award" class="text-primary-600" />
             دستاوردها
           </h2>

@@ -23,7 +23,6 @@ Nour Adhkar is a web application that provides a collection of Islamic adhkar (r
 - npm (v7 or higher)
 - Vue.js 3
 - Vite
-- Other dependencies listed in `package.json`
 
 ### Backend Dependencies
 - PHP 8.1 or higher
@@ -45,8 +44,6 @@ Nour Adhkar is a web application that provides a collection of Islamic adhkar (r
 
 - Frontend: Vue.js 3 with Vite
 - Backend: Laravel 11
-- Styling: CSS3 with responsive design
-- Icons: Font Awesome
 
 ## Local Development Setup
 
@@ -108,7 +105,6 @@ When starting development:
 3. Create and configure your `.env` file
    ```bash
    cp .env.example .env
-   # Configure your database connection in the .env file
    ```
 
 4. Generate application key
