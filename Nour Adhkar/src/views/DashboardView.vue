@@ -10,9 +10,6 @@
                 <img v-if="user.avatar" :src="user.avatar" alt="avatar" class="w-full h-full object-cover rounded-full" />
                 <span v-else>{{ getInitial }}</span>
               </div>
-              <div class="absolute -bottom-1 -left-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-xs font-bold text-white border-2 border-white">
-                {{ user.streak }}
-              </div>
             </div>
             <div>
               <h2 class="text-2xl font-bold text-gray-800">{{ user.name }}</h2>
