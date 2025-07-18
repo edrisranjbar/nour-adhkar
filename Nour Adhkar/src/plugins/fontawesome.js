@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 // Import icons you need
 import { 
+    faBullseye,
     faSignOutAlt, 
     faUser,
     faLock,
@@ -117,6 +118,7 @@ import {
 
 // Add icons to library
 library.add(
+    faBullseye,
     faHandsPraying,
     faSignOutAlt,
     faUser,
