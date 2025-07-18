@@ -1,222 +1,264 @@
 <template>
-  <div class="bg-gradient-to-b from-gray-50 to-gray-100 dark:bg-gray-950 min-h-screen pb-12">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-xl relative z-10 dark:from-gray-900 dark:to-gray-800">
-      <div class="container mx-auto px-4 py-6">
-        <!-- Pattern Overlay -->
-        <div class="absolute inset-0 opacity-10 overflow-hidden">
-          <div class="absolute -right-24 -top-24 w-64 h-64 rounded-full bg-white/20 dark:bg-white/10"></div>
-          <div class="absolute -left-20 -bottom-16 w-48 h-48 rounded-full bg-white/20 dark:bg-white/10"></div>
+  <div class="dashboard-bg">
+    <div class="dashboard-container">
+      <!-- Profile -->
+      <section class="profile-card">
+        <div class="profile-avatar">
+          <img :src="user?.avatar || defaultAvatar" alt="avatar" />
         </div>
-        
-        <!-- Unified Layout -->
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 relative">
-          <h1 class="text-2xl font-bold dark:text-white">داشبورد</h1>
-          
-          <div class="flex items-center gap-3">
-            <!-- User Avatar on small screens -->
-            <div class="flex sm:hidden h-12 w-12 bg-white/20 rounded-full items-center justify-center dark:bg-gray-800/60">
-              <font-awesome-icon icon="fa-solid fa-user" class="text-xl" />
-            </div>
-            
-            <div class="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
-              <div class="text-center sm:text-right">
-                <span class="text-xl font-medium dark:text-white">{{ user?.name || 'کاربر' }}</span>
-                <span class="hidden sm:block text-sm text-white/70 dark:text-gray-300">خوش آمدید</span>
-              </div>
-              
-              <!-- User Avatar on larger screens -->
-              <div class="hidden sm:flex h-12 w-12 bg-white/20 rounded-full items-center justify-center dark:bg-gray-800/60">
-                <font-awesome-icon icon="fa-solid fa-user" class="text-xl" />
-              </div>
-              
-              <button 
-                @click="showProfileSettings = true" 
-                class="mt-2 sm:mt-0 px-4 py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-full sm:rounded-lg flex items-center gap-1.5 sm:gap-2 transition-colors dark:bg-gray-800/60 dark:hover:bg-gray-700/70"
-              >
-                <font-awesome-icon icon="fa-solid fa-user-pen" class="text-xs sm:text-sm" />
-                <span>ویرایش پروفایل</span>
-              </button>
-            </div>
+        <div class="profile-info">
+          <div class="profile-name">{{ user?.name || 'کاربر' }}</div>
+          <div class="profile-score-badge">{{ user?.xp || 0 }}</div>
+        </div>
+      </section>
+      <!-- Stats -->
+      <section class="stats-row">
+        <div class="stat-card streak">
+          <span class="stat-icon">🔥</span>
+          <div class="stat-label">استریک</div>
+          <div class="stat-value">{{ user?.streak || 0 }}</div>
+        </div>
+        <div class="stat-card points">
+          <span class="stat-icon">⭐</span>
+          <div class="stat-label">امتیاز</div>
+          <div class="stat-value">{{ user?.xp || 0 }}</div>
+        </div>
+      </section>
+      <!-- Weekly Activity -->
+      <section class="activity-card">
+        <div class="activity-title">فعالیت هفتگی</div>
+        <div class="activity-calendar">
+          <div
+            v-for="(day, i) in lastWeek"
+            :key="i"
+            class="activity-day"
+            :class="{
+              active: day.completed,
+              today: day.isToday,
+              missed: !day.completed && !day.isToday
+            }"
+            :title="day.label"
+          >
+            <span v-if="day.completed">✔️</span>
+            <span v-else-if="day.isToday">●</span>
+            <span v-else>○</span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Stats Section: full width -->
-    <div class="container mx-auto px-2">
-      <div class="w-full">
-        <UserStats />
-      </div>
-    </div>
-
-    <!-- Main Content: centered -->
-    <div class="container mx-auto px-2">
-      <div class="max-w-6xl mx-auto space-y-6 sm:space-y-8">
-        <!-- Activity & Progress -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div class="lg:col-span-3">
-            <!-- Daily activity timeline -->
-            <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100 dark:bg-gray-900 dark:border-gray-800">
-              <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2 dark:text-white">
-                <font-awesome-icon icon="fa-solid fa-calendar-day" class="text-primary-600" />
-                فعالیت روزانه
-              </h2>
-              <StreakCalendar />
-            </div>
-          </div>
+        <div class="activity-progress-bar">
+          <div class="activity-progress" :style="{ width: weekProgress + '%' }"></div>
         </div>
-
-        <!-- Achievements & Badges -->
-        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100 dark:bg-gray-900 dark:border-gray-800">
-          <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2 dark:text-white">
-            <font-awesome-icon icon="fa-solid fa-award" class="text-primary-600" />
-            دستاوردها
-          </h2>
-          <BadgesList />
-        </div>
-      </div>
+      </section>
     </div>
-
-    <!-- Profile Settings Modal -->
-    <ProfileSettingsModal 
-      :show="showProfileSettings"
-      :user-name="user?.name"
-      @close="showProfileSettings = false"
-      @name-updated="handleNameUpdated"
-    />
   </div>
 </template>
 
 <script>
-import UserStats from '@/components/dashboard/UserStats.vue'
-import StreakCalendar from '@/components/dashboard/StreakCalendar.vue'
-import BadgesList from '@/components/dashboard/BadgesList.vue'
-import ProfileSettingsModal from '@/components/dashboard/ProfileSettingsModal.vue'
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
-import axios from 'axios'
-import { useToast } from 'vue-toastification'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { 
-  faUserPen, 
-  faCalendarDay, 
-  faAward,
-  faUser
-} from '@fortawesome/free-solid-svg-icons'
-
-// Add icons to the library
-library.add(faUserPen, faCalendarDay, faAward, faUser)
+import defaultAvatar from '@/assets/icons/back-button.svg' // Replace with a real default avatar
 
 export default {
   name: 'DashboardView',
-  components: {
-    UserStats,
-    StreakCalendar,
-    BadgesList,
-    ProfileSettingsModal,
-    FontAwesomeIcon
-  },
   setup() {
     const store = useStore()
-    const toast = useToast()
-    const loading = ref(true)
     const user = computed(() => store.state.user)
-    const showProfileSettings = ref(false)
-
-    const fetchUserData = async () => {
-      try {
-        loading.value = true
-        const response = await store.dispatch('fetchUserStats')
-        console.log('User stats response:', response) // Debug log
-        await store.dispatch('fetchCompletedDays')
-      } catch (error) {
-        console.error('Error fetching user data:', error)
-        toast.error('خطا در دریافت اطلاعات کاربر')
-      } finally {
-        loading.value = false
-      }
-    }
-
-    // Watch for changes in the user state
-    watch(() => store.state.user, (newUser) => {
-      console.log('User state changed:', newUser) // Debug log
-      if (newUser) {
-        loading.value = false
-      }
-    }, { immediate: true })
-
-    onMounted(() => {
-      fetchUserData()
-    })
-
-    const handlePhotoUpload = async (file) => {
-      if (!file) {
-        toast.error('لطفاً یک فایل انتخاب کنید')
-        return
-      }
-
-      try {
-        const formData = new FormData()
-        formData.append('avatar', file)
-
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/avatar`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${store.state.token}`
-          },
-          withCredentials: true
+    // Dummy data for lastWeek, replace with real logic
+    const lastWeek = computed(() => {
+      const days = []
+      const today = new Date()
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today)
+        date.setDate(date.getDate() - i)
+        days.push({
+          label: date.toLocaleDateString('fa-IR', { weekday: 'long', day: 'numeric', month: 'short' }),
+          completed: Math.random() > 0.3, // Replace with real completion logic
+          isToday: i === 0
         })
-
-        if (response.data.avatar_url) {
-          // Update user photo in store
-          store.commit('updateUserPhoto', response.data.avatar_url)
-          
-          // Show success message
-          toast.success(response.data.message || 'تصویر پروفایل با موفقیت به‌روزرسانی شد')
-        }
-      } catch (error) {
-        console.error('Upload error:', error.response?.data)
-        const message = error.response?.data?.message || 'خطا در بروزرسانی تصویر پروفایل'
-        toast.error(message)
       }
-    }
-
-    const handlePhotoError = (message) => {
-      toast.error(message)
-    }
-
-    const handleNameUpdated = (newName) => {
-      // Update user name in store if needed
-      if (user.value) {
-        store.commit('updateUserName', newName)
-      }
-      toast.success('نام شما با موفقیت به‌روزرسانی شد')
-    }
-
-    return {
-      user,
-      loading,
-      showProfileSettings,
-      handlePhotoUpload,
-      handlePhotoError,
-      handleNameUpdated
-    }
+      return days
+    })
+    const weekProgress = computed(() => {
+      const completed = lastWeek.value.filter(d => d.completed).length
+      return Math.round((completed / 7) * 100)
+    })
+    return { user, lastWeek, weekProgress, defaultAvatar }
   }
 }
 </script>
 
 <style>
-/* Global styles for user panel pages */
-:global(.user-panel) {
-  padding: 0 !important;
-  margin: 0 !important;
+@import '@/assets/css/fonts.css';
+.dashboard-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7fafd 0%, #e0f7fa 100%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: 'Vazirmatn', Arial, sans-serif;
+  padding: 0 0 40px 0;
 }
-
-:global(.user-panel .container) {
-  padding: 0 !important;
-  margin: 0 !important;
+.dashboard-container {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 24px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.profile-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(60,80,120,0.10);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 24px;
+}
+.profile-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: #e0f7fa;
+  box-shadow: 0 2px 8px rgba(60,80,120,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.profile-avatar img {
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: 50%;
+}
+.profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.profile-name {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #222;
+}
+.profile-score-badge {
+  background: #e0f7fa;
+  color: #009688;
+  font-size: 1.1rem;
+  font-weight: 900;
+  border-radius: 12px;
+  padding: 2px 12px;
+  display: inline-block;
+  margin-top: 2px;
+}
+.stats-row {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+.stat-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(60,80,120,0.10);
+  padding: 16px 0 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.2s, transform 0.2s;
+  min-width: 0;
+}
+.stat-icon {
+  font-size: 1.7rem;
+  margin-bottom: 2px;
+  display: block;
+}
+.stat-card.streak .stat-icon { color: #f59e42; }
+.stat-card.points .stat-icon { color: #58cc02; }
+.stat-label {
+  font-size: 1rem;
+  color: #888;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #222;
+}
+.activity-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(60,80,120,0.10);
+  padding: 18px 14px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.activity-title {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #1cb0f6;
+  margin-bottom: 8px;
+}
+.activity-calendar {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.activity-day {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  color: #bbb;
+  border: 2px solid transparent;
+  transition: background 0.2s, border 0.2s;
+  cursor: pointer;
+  font-weight: 900;
+}
+.activity-day.active {
+  background: #bbf7d0;
+  color: #58cc02;
+  border-color: #58cc02;
+}
+.activity-day.today {
+  background: #dbeafe;
+  color: #1cb0f6;
+  border-color: #1cb0f6;
+}
+.activity-day.missed {
+  background: #ffe066;
+  color: #f59e42;
+  border-color: #ffe066;
+}
+.activity-progress-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.activity-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #58cc02 0%, #1cb0f6 100%);
+  border-radius: 8px;
+  transition: width 0.5s;
+}
+@media (min-width: 600px) {
+  .dashboard-container { max-width: 540px; }
+  .profile-card, .activity-card { padding: 28px 32px; }
+  .stats-row { gap: 24px; }
+  .activity-calendar { gap: 14px; }
+  .activity-day { width: 40px; height: 40px; font-size: 1.2rem; }
+}
+@media (min-width: 900px) {
+  .dashboard-container { max-width: 800px; gap: 32px; }
+  .profile-card, .activity-card { padding: 36px 48px; }
+  .stats-row { gap: 32px; }
+  .activity-calendar { gap: 22px; }
+  .activity-day { width: 52px; height: 52px; font-size: 1.5rem; }
 }
 </style>
