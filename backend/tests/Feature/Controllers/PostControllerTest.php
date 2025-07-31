@@ -140,7 +140,6 @@ class PostControllerTest extends TestCase
     public function test_can_get_post_by_slug()
     {
         $response = $this->getJson('/api/posts/' . $this->post->slug);
-
         $response->assertStatus(200)
             ->assertJsonStructure(
             [
