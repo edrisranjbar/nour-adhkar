@@ -11,21 +11,21 @@
         </div>
       </div>
       
-      <!-- Header Content -->
-      <div class="relative z-10 container mx-auto px-4 py-10">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          <!-- Welcome Section -->
-          <div class="flex-1">
-            <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">
-              سلام {{ user?.name || 'کاربر' }} 👋
-            </h1>
-            <p class="text-primary-100 text-lg">
-              امروز چطور می‌خواهید ذکر بخوانید؟
-            </p>
-          </div>
-          
-          <!-- User Actions -->
-          <div class="flex flex-col sm:flex-row items-center gap-4">
+             <!-- Header Content -->
+       <div class="relative z-10 container mx-auto px-4 py-10">
+         <div class="flex flex-col lg:flex-row justify-between items-center lg:items-center gap-6">
+           <!-- Welcome Section -->
+           <div class="flex-1 text-center lg:text-right">
+             <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">
+               سلام {{ user?.name || 'کاربر' }} 👋
+             </h1>
+             <p class="text-primary-100 text-lg">
+               امروز چطور می‌خواهید ذکر بخوانید؟
+             </p>
+           </div>
+           
+           <!-- User Actions -->
+           <div class="flex flex-col sm:flex-row items-center gap-4">
             <!-- Quick Stats Preview -->
             <div class="hidden sm:flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
               <div class="text-center">
