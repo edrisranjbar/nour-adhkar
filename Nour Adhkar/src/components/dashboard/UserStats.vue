@@ -1,6 +1,14 @@
 <template>
-  <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8">
-    <h2 class="text-xl lg:text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+  <div :class="[
+    'backdrop-blur-sm rounded-3xl shadow-xl border p-6 lg:p-8 transition-all duration-300',
+    isDarkMode 
+      ? 'bg-gray-800/80 border-gray-700/50 shadow-black/40' 
+      : 'bg-white/80 border-white/20'
+  ]">
+    <h2 :class="[
+      'text-xl lg:text-2xl font-bold mb-6 flex items-center gap-3 transition-colors duration-300',
+      isDarkMode ? 'text-gray-100' : 'text-gray-800'
+    ]">
       <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
         <FontAwesomeIcon icon="fa-solid fa-chart-line" class="text-white text-lg" />
       </div>
@@ -110,6 +118,7 @@
 <script>
 import { computed, ref, onMounted, watch, inject } from 'vue'
 import { useStore } from 'vuex'
+import { useSettingsStore } from '@/stores/settings'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { 
@@ -131,8 +140,10 @@ export default {
   },
   setup(props) {
     const store = useStore()
+    const settingsStore = useSettingsStore()
     const loading = ref(true)
     const user = computed(() => store.state.user)
+    const isDarkMode = computed(() => settingsStore.darkMode)
 
     const streak = computed(() => user.value?.streak || 0)
     const heartScore = computed(() => user.value?.heart_score || 0)
@@ -184,7 +195,8 @@ export default {
       league,
       leagueScore,
       nextLeague,
-      nextLeaguePoints
+      nextLeaguePoints,
+      isDarkMode
     }
   }
 }

@@ -47,8 +47,9 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
+import { useSettingsStore } from '@/stores/settings'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { toJalaali, toGregorian } from 'jalaali-js'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -67,8 +68,10 @@ export default {
   },
   setup() {
     const store = useStore()
+    const settingsStore = useSettingsStore()
     const loading = ref(true)
     const completedDays = ref([])
+    const isDarkMode = computed(() => settingsStore.darkMode)
 
     const lastWeekDates = ref([])
     const today = new Date()
