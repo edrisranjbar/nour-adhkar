@@ -1,79 +1,150 @@
 <template>
-  <div class="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen pb-12">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-xl relative z-10">
-      <div class="container mx-auto px-4 py-6">
-        <!-- Pattern Overlay -->
-        <div class="absolute inset-0 opacity-10 overflow-hidden">
-          <div class="absolute -right-24 -top-24 w-64 h-64 rounded-full bg-white/20"></div>
-          <div class="absolute -left-20 -bottom-16 w-48 h-48 rounded-full bg-white/20"></div>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <!-- Modern Header with Glass Effect -->
+    <div class="relative overflow-hidden">
+      <!-- Background Pattern -->
+      <div class="absolute inset-0 bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800">
+        <div class="absolute inset-0 opacity-10">
+          <div class="absolute top-0 left-0 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+          <div class="absolute top-0 right-0 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+          <div class="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
         </div>
-        
-        <!-- Unified Layout -->
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 relative">
-          <h1 class="text-2xl font-bold">داشبورد</h1>
+      </div>
+      
+      <!-- Header Content -->
+      <div class="relative z-10 container mx-auto px-4 py-10">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <!-- Welcome Section -->
+          <div class="flex-1">
+            <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">
+              سلام {{ user?.name || 'کاربر' }} 👋
+            </h1>
+            <p class="text-primary-100 text-lg">
+              امروز چطور می‌خواهید ذکر بخوانید؟
+            </p>
+          </div>
           
-          <div class="flex items-center gap-3">
-            <!-- User Avatar on small screens -->
-            <div class="flex sm:hidden h-12 w-12 bg-white/20 rounded-full items-center justify-center">
-              <font-awesome-icon icon="fa-solid fa-user" class="text-xl" />
+          <!-- User Actions -->
+          <div class="flex flex-col sm:flex-row items-center gap-4">
+            <!-- Quick Stats Preview -->
+            <div class="hidden sm:flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-white">{{ user?.streak || 0 }}</div>
+                <div class="text-xs text-primary-100">روز متوالی</div>
+              </div>
+              <div class="w-px h-8 bg-white/20"></div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-white">{{ user?.score || 0 }}</div>
+                <div class="text-xs text-primary-100">امتیاز کل</div>
+              </div>
             </div>
             
-            <div class="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
-              <div class="text-center sm:text-right">
-                <span class="text-xl font-medium">{{ user?.name || 'کاربر' }}</span>
-                <span class="hidden sm:block text-sm text-white/70">خوش آمدید</span>
+            <!-- Profile Button -->
+            <button 
+              @click="showProfileSettings = true" 
+              class="flex items-center gap-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl px-6 py-3 text-white transition-all duration-300 hover:scale-105 border border-white/20"
+            >
+              <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-user" class="text-lg" />
               </div>
-              
-              <!-- User Avatar on larger screens -->
-              <div class="hidden sm:flex h-12 w-12 bg-white/20 rounded-full items-center justify-center">
-                <font-awesome-icon icon="fa-solid fa-user" class="text-xl" />
+              <span class="font-medium">پروفایل</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 mt-9 relative z-20">
+      <!-- Stats Cards Grid -->
+      <div class="mb-8">
+        <UserStats />
+      </div>
+
+      <!-- Content Grid -->
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <!-- Main Content Area -->
+        <div class="xl:col-span-2 space-y-8">
+          <!-- Daily Activity -->
+          <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+                  <font-awesome-icon icon="fa-solid fa-calendar-day" class="text-white text-lg" />
+                </div>
+                فعالیت روزانه
+              </h2>
+              <div class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                هفته گذشته
               </div>
-              
+            </div>
+            <StreakCalendar />
+          </div>
+
+          <!-- Recent Achievements -->
+          <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
+                  <font-awesome-icon icon="fa-solid fa-award" class="text-white text-lg" />
+                </div>
+                دستاوردهای اخیر
+              </h2>
+              <div class="text-sm text-gray-500">
+                {{ earnedBadgesCount }} از {{ totalBadgesCount }} نشان
+              </div>
+            </div>
+            <BadgesList />
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-8">
+          <!-- Quick Actions -->
+          <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <font-awesome-icon icon="fa-solid fa-bolt" class="text-primary-600" />
+              اقدامات سریع
+            </h3>
+            <div class="space-y-3">
               <button 
-                @click="showProfileSettings = true" 
-                class="mt-2 sm:mt-0 px-4 py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-full sm:rounded-lg flex items-center gap-1.5 sm:gap-2 transition-colors"
+                @click="goToCounter" 
+                class="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl p-4 text-right font-medium transition-all duration-300 hover:scale-105 flex items-center justify-between"
               >
-                <font-awesome-icon icon="fa-solid fa-user-pen" class="text-xs sm:text-sm" />
-                <span>ویرایش پروفایل</span>
+                <font-awesome-icon icon="fa-solid fa-pray" class="text-lg" />
+                تسبیح
+              </button>
+              <button 
+                @click="goToHome" 
+                class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl p-4 text-right font-medium transition-all duration-300 hover:scale-105 flex items-center justify-between"
+              >
+                <font-awesome-icon icon="fa-solid fa-book-open" class="text-lg" />
+                اذکار
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Stats Section: full width -->
-    <div class="container mx-auto px-4 mt-8">
-      <div class="w-full">
-        <UserStats />
-      </div>
-    </div>
+          <!-- League Progress -->
+          <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <font-awesome-icon icon="fa-solid fa-trophy" class="text-yellow-600" />
+              پیشرفت لیگ
+            </h3>
+            <LeagueProgress />
+          </div>
 
-    <!-- Main Content: centered -->
-    <div class="container mx-auto px-2 sm:px-4 mt-8">
-      <div class="max-w-6xl mx-auto space-y-6 sm:space-y-8">
-        <!-- Activity & Progress -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div class="lg:col-span-3">
-            <!-- Daily activity timeline -->
-            <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100">
-              <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2">
-                <font-awesome-icon icon="fa-solid fa-calendar-day" class="text-primary-600" />
-                فعالیت روزانه
-              </h2>
-              <StreakCalendar />
+          <!-- Motivation Quote -->
+          <div class="bg-gradient-to-br from-primary-500 to-primary-600 rounded-3xl p-6 text-white">
+            <div class="text-center">
+              <font-awesome-icon icon="fa-solid fa-quote-right" class="text-3xl text-white/30 mb-4" />
+              <p class="text-lg font-medium mb-3">
+                "ذکر خداوند آرامش قلب است"
+              </p>
+              <p class="text-sm text-primary-100">
+                قرآن کریم - سوره رعد
+              </p>
             </div>
           </div>
-        </div>
-
-        <!-- Achievements & Badges -->
-        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-3 sm:p-6 border border-gray-100">
-          <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 flex items-center gap-2">
-            <font-awesome-icon icon="fa-solid fa-award" class="text-primary-600" />
-            دستاوردها
-          </h2>
-          <BadgesList />
         </div>
       </div>
     </div>
@@ -92,9 +163,11 @@
 import UserStats from '@/components/dashboard/UserStats.vue'
 import StreakCalendar from '@/components/dashboard/StreakCalendar.vue'
 import BadgesList from '@/components/dashboard/BadgesList.vue'
+import LeagueProgress from '@/components/dashboard/LeagueProgress.vue'
 import ProfileSettingsModal from '@/components/dashboard/ProfileSettingsModal.vue'
 import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { useToast } from 'vue-toastification'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -103,11 +176,28 @@ import {
   faUserPen, 
   faCalendarDay, 
   faAward,
-  faUser
+  faUser,
+  faBolt,
+  faPray,
+  faBookOpen,
+  faChartLine,
+  faTrophy,
+  faQuoteRight
 } from '@fortawesome/free-solid-svg-icons'
 
 // Add icons to the library
-library.add(faUserPen, faCalendarDay, faAward, faUser)
+library.add(
+  faUserPen, 
+  faCalendarDay, 
+  faAward, 
+  faUser, 
+  faBolt, 
+  faPray, 
+  faBookOpen, 
+  faChartLine, 
+  faTrophy, 
+  faQuoteRight
+)
 
 export default {
   name: 'DashboardView',
@@ -115,22 +205,27 @@ export default {
     UserStats,
     StreakCalendar,
     BadgesList,
+    LeagueProgress,
     ProfileSettingsModal,
     FontAwesomeIcon
   },
   setup() {
     const store = useStore()
+    const router = useRouter()
     const toast = useToast()
     const loading = ref(true)
     const user = computed(() => store.state.user)
     const showProfileSettings = ref(false)
+    const earnedBadgesCount = ref(0)
+    const totalBadgesCount = ref(0)
 
     const fetchUserData = async () => {
       try {
         loading.value = true
         const response = await store.dispatch('fetchUserStats')
-        console.log('User stats response:', response) // Debug log
+        console.log('User stats response:', response)
         await store.dispatch('fetchCompletedDays')
+        await fetchBadgeStats()
       } catch (error) {
         console.error('Error fetching user data:', error)
         toast.error('خطا در دریافت اطلاعات کاربر')
@@ -139,9 +234,23 @@ export default {
       }
     }
 
+    const fetchBadgeStats = async () => {
+      try {
+        const [badgesResponse, userBadgesResponse] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/badges`),
+          axios.get(`${import.meta.env.VITE_API_URL}/user/badges`)
+        ])
+        
+        totalBadgesCount.value = badgesResponse.data.data?.length || 0
+        earnedBadgesCount.value = userBadgesResponse.data.data?.length || 0
+      } catch (error) {
+        console.error('Error fetching badge stats:', error)
+      }
+    }
+
     // Watch for changes in the user state
     watch(() => store.state.user, (newUser) => {
-      console.log('User state changed:', newUser) // Debug log
+      console.log('User state changed:', newUser)
       if (newUser) {
         loading.value = false
       }
@@ -171,10 +280,7 @@ export default {
         })
 
         if (response.data.avatar_url) {
-          // Update user photo in store
           store.commit('updateUserPhoto', response.data.avatar_url)
-          
-          // Show success message
           toast.success(response.data.message || 'تصویر پروفایل با موفقیت به‌روزرسانی شد')
         }
       } catch (error) {
@@ -189,34 +295,99 @@ export default {
     }
 
     const handleNameUpdated = (newName) => {
-      // Update user name in store if needed
       if (user.value) {
         store.commit('updateUserName', newName)
       }
       toast.success('نام شما با موفقیت به‌روزرسانی شد')
     }
 
+    const goToCounter = () => {
+      router.push('/counter')
+    }
+
+    const goToHome = () => {
+      router.push('/')
+    }
+
     return {
       user,
       loading,
       showProfileSettings,
+      earnedBadgesCount,
+      totalBadgesCount,
       handlePhotoUpload,
       handlePhotoError,
-      handleNameUpdated
+      handleNameUpdated,
+      goToCounter,
+      goToHome
     }
   }
 }
 </script>
 
-<style>
-/* Global styles for user panel pages */
-:global(.user-panel) {
-  padding: 0 !important;
-  margin: 0 !important;
+<style scoped>
+/* Custom animations */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
 }
 
-:global(.user-panel .container) {
-  padding: 0 !important;
-  margin: 0 !important;
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Glass morphism effect */
+.backdrop-blur-sm {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 </style>
