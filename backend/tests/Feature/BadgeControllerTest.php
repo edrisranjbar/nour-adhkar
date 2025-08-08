@@ -72,8 +72,7 @@ class BadgeControllerTest extends TestCase
     {
         // Award a badge to the user
         $this->user->badges()->attach($this->badges[0]->id, [
-            'earned_at' => now(),
-            'user_id' => $this->user->id
+            'earned_at' => now()
         ]);
 
         $response = $this->actingAs($this->user)
@@ -154,10 +153,12 @@ class BadgeControllerTest extends TestCase
 
     public function test_cannot_award_duplicate_badge()
     {
+        $this->assertNotNull($this->user->id);
+        $this->assertDatabaseHas('users', ['id' => $this->user->id]);
+        
         // Award the badge first
         $this->user->badges()->attach($this->badges[0]->id, [
             'earned_at' => now(),
-            'user_id' => $this->user->id
         ]);
 
         // Try to award the same badge again
@@ -175,7 +176,6 @@ class BadgeControllerTest extends TestCase
         // Award the badge first
         $this->user->badges()->attach($this->badges[0]->id, [
             'earned_at' => now(),
-            'user_id' => $this->user->id
         ]);
 
         $response = $this->actingAs($this->user)

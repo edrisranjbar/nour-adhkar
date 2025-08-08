@@ -1,106 +1,216 @@
 <template>
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8 px-4" dir="rtl">
-    <div class="max-w-4xl mx-auto space-y-6">
-      <!-- Header Section -->
-      <div class="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4 space-x-reverse">
-            <div class="relative">
-              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                <img v-if="user.avatar" :src="user.avatar" alt="avatar" class="w-full h-full object-cover rounded-full" />
-                <span v-else>{{ getInitial }}</span>
-              </div>
-            </div>
-            <div>
-              <h2 class="text-2xl font-bold text-gray-800">{{ user.name }}</h2>
-              <div class="flex items-center space-x-2 space-x-reverse mt-1">
-                <div class="flex items-center space-x-1 space-x-reverse bg-red-50 px-3 py-1 rounded-full">
-                  <span class="text-sm font-semibold text-red-600">{{ user.heart_score }}</span>
-                  <font-awesome-icon icon="heart" class="w-4 h-4 text-red-600 fill-current" />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="text-left">
-            <div class="flex items-center space-x-1 space-x-reverse">
-              <span class="text-sm font-semibold text-red-600">{{ user.heart_score }}</span>
-              <font-awesome-icon icon="heart" class="w-4 h-4 text-red-600 fill-current" />
-            </div>
-            <div class="w-24 h-2 bg-gray-200 rounded-full mt-2">
-              <div class="h-full bg-gradient-to-l from-red-400 to-red-500 rounded-full transition-all duration-500" :style="{ width: user.heart_score + '%' }"></div>
-            </div>
-          </div>
+  <div :class="[
+    'min-h-screen transition-all duration-500',
+    isDarkMode 
+      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
+      : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+  ]">
+    <!-- Modern Header with Glass Effect -->
+    <div class="relative overflow-hidden">
+      <!-- Background Pattern -->
+      <div :class="[
+        'absolute inset-0 transition-all duration-500',
+        isDarkMode 
+          ? 'bg-gradient-to-r from-gray-800 via-gray-900 to-black' 
+          : 'bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800'
+      ]">
+        <div class="absolute inset-0 opacity-10">
+          <div class="absolute top-0 left-0 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+          <div class="absolute top-0 right-0 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+          <div class="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
         </div>
       </div>
-
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm font-medium text-gray-600">تداوم</div>
-              <div class="text-2xl font-bold text-gray-800">{{ user.streak }}</div>
-              <div class="text-xs text-orange-500 font-medium">روز متوالی</div>
+      
+             <!-- Header Content -->
+       <div class="relative z-10 container mx-auto px-4 py-10">
+         <div class="flex flex-col lg:flex-row justify-between items-center lg:items-center gap-6">
+           <!-- Welcome Section -->
+           <div class="flex-1 text-center lg:text-right">
+             <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">
+               سلام {{ user?.name || 'کاربر' }} 👋
+             </h1>
+             <p class="text-primary-100 text-lg">
+               امروز چطور می‌خواهید ذکر بخوانید؟
+             </p>
+           </div>
+           
+           <!-- User Actions -->
+           <div class="flex flex-col sm:flex-row items-center gap-4">
+            <!-- Quick Stats Preview -->
+            <div :class="[
+              'hidden sm:flex items-center gap-4 backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300',
+              isDarkMode 
+                ? 'bg-white/5 border-white/10' 
+                : 'bg-white/10 border-white/20'
+            ]">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-white">{{ user?.streak || 0 }}</div>
+                <div class="text-xs text-primary-100">روز متوالی</div>
+              </div>
+              <div class="w-px h-8 bg-white/20"></div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-white">{{ user?.score || 0 }}</div>
+                <div class="text-xs text-primary-100">امتیاز کل</div>
+              </div>
             </div>
-            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-              <font-awesome-icon icon="fire" class="w-6 h-6 text-orange-500" />
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm font-medium text-gray-600">هدف روزانه</div>
-              <div class="text-2xl font-bold text-gray-800">50</div>
-              <div class="text-xs text-blue-500 font-medium">امتیاز</div>
-            </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <font-awesome-icon icon="bullseye" class="w-6 h-6 text-blue-500" />
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm font-medium text-gray-600">لیگ</div>
-              <div class="text-2xl font-bold text-gray-800">{{ league ?? 'مبتدی' }}</div>
-            </div>
-            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-              <font-awesome-icon icon="trophy" class="w-6 h-6 text-yellow-500" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Weekly Activity -->
-      <div class="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-        <div class="flex items-center space-x-3 space-x-reverse mb-6">
-          <font-awesome-icon icon="calendar-check" class="w-6 h-6 text-blue-500" />
-          <h3 class="text-xl font-bold text-gray-800">فعالیت هفتگی</h3>
-          <div class="flex-1"></div>
-          <div class="text-sm text-gray-500 font-medium">{{ weekProgress }}% تکمیل</div>
-        </div>
-
-        <div class="grid grid-cols-7 gap-2 mb-6">
-          <div v-for="(day, index) in lastWeek" :key="index" class="flex flex-col">
-            <div class="text-xs text-gray-500 font-medium mb-2">{{ day.label }}</div>
-            <div
-              class="w-12 h-12 rounded-xl flex items-center justify-center font-bold transition-all duration-300 transform hover:scale-110"
-              :class="{
-                'bg-gradient-to-br from-green-400 to-green-500 text-white shadow-md': day.completed,
-                'bg-gradient-to-br from-blue-400 to-blue-500 text-white shadow-md animate-pulse': day.isToday,
-                'bg-gray-100 text-gray-400 border-2 border-dashed border-gray-300': !day.completed && !day.isToday
-              }"
+            
+            <!-- Profile Button -->
+            <button 
+              @click="showProfileSettings = true" 
+              :class="[
+                'flex items-center gap-3 backdrop-blur-sm rounded-xl px-6 py-3 text-white transition-all duration-300 hover:scale-105 border',
+                isDarkMode 
+                  ? 'bg-white/5 hover:bg-white/10 border-white/10' 
+                  : 'bg-white/20 hover:bg-white/30 border-white/20'
+              ]"
             >
-              <template v-if="day.completed">✓</template>
-              <template v-else-if="day.isToday">
-                <div class="w-3 h-3 bg-white rounded-full"></div>
-              </template>
-              <template v-else>
-                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
-              </template>
+              <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-user" class="text-lg" />
+              </div>
+              <span class="font-medium">پروفایل</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 mt-9 relative z-20">
+      <!-- Stats Cards Grid -->
+      <div class="mb-8">
+        <UserStats />
+      </div>
+
+      <!-- Content Grid -->
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <!-- Main Content Area -->
+        <div class="xl:col-span-2 space-y-8">
+          <!-- Daily Activity -->
+          <div :class="[
+            'backdrop-blur-sm rounded-3xl shadow-xl border p-6 lg:p-8 transition-all duration-300',
+            isDarkMode 
+              ? 'bg-gray-800/80 border-gray-700/50 shadow-black/40' 
+              : 'bg-white/80 border-white/20'
+          ]">
+            <div class="flex items-center justify-between mb-6">
+              <h2 :class="[
+                'text-xl lg:text-2xl font-bold flex items-center gap-3 transition-colors duration-300',
+                isDarkMode ? 'text-gray-100' : 'text-gray-800'
+              ]">
+                <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+                  <font-awesome-icon icon="fa-solid fa-calendar-day" class="text-white text-lg" />
+                </div>
+                فعالیت روزانه
+              </h2>
+              <div :class="[
+                'text-sm px-3 py-1 rounded-full transition-all duration-300',
+                isDarkMode 
+                  ? 'text-gray-300 bg-gray-700' 
+                  : 'text-gray-500 bg-gray-100'
+              ]">
+                هفته گذشته
+              </div>
+            </div>
+            <StreakCalendar />
+          </div>
+
+          <!-- Recent Achievements -->
+          <div :class="[
+            'backdrop-blur-sm rounded-3xl shadow-xl border p-6 lg:p-8 transition-all duration-300',
+            isDarkMode 
+              ? 'bg-gray-800/80 border-gray-700/50 shadow-black/40' 
+              : 'bg-white/80 border-white/20'
+          ]">
+            <div class="flex items-center justify-between mb-6">
+              <h2 :class="[
+                'text-xl lg:text-2xl font-bold flex items-center gap-3 transition-colors duration-300',
+                isDarkMode ? 'text-gray-100' : 'text-gray-800'
+              ]">
+                <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
+                  <font-awesome-icon icon="fa-solid fa-award" class="text-white text-lg" />
+                </div>
+                دستاوردهای اخیر
+              </h2>
+              <div :class="[
+                'text-sm transition-colors duration-300',
+                isDarkMode ? 'text-gray-300' : 'text-gray-500'
+              ]">
+                {{ earnedBadgesCount }} از {{ totalBadgesCount }} نشان
+              </div>
+            </div>
+            <BadgesList />
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-8">
+          <!-- Quick Actions -->
+          <div :class="[
+            'backdrop-blur-sm rounded-3xl shadow-xl border p-6 transition-all duration-300',
+            isDarkMode 
+              ? 'bg-gray-800/80 border-gray-700/50 shadow-black/40' 
+              : 'bg-white/80 border-white/20'
+          ]">
+            <h3 :class="[
+              'text-lg font-bold mb-4 flex items-center gap-2 transition-colors duration-300',
+              isDarkMode ? 'text-gray-100' : 'text-gray-800'
+            ]">
+              <font-awesome-icon icon="fa-solid fa-bolt" class="text-primary-600" />
+              اقدامات سریع
+            </h3>
+            <div class="space-y-3">
+              <button 
+                @click="goToCounter" 
+                class="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl p-4 text-right font-medium transition-all duration-300 hover:scale-105 flex items-center justify-between"
+              >
+                <font-awesome-icon icon="fa-solid fa-pray" class="text-lg" />
+                تسبیح
+              </button>
+              <button 
+                @click="goToHome" 
+                class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl p-4 text-right font-medium transition-all duration-300 hover:scale-105 flex items-center justify-between"
+              >
+                <font-awesome-icon icon="fa-solid fa-book-open" class="text-lg" />
+                اذکار
+              </button>
+            </div>
+          </div>
+
+          <!-- League Progress -->
+          <div :class="[
+            'backdrop-blur-sm rounded-3xl shadow-xl border p-6 transition-all duration-300',
+            isDarkMode 
+              ? 'bg-gray-800/80 border-gray-700/50 shadow-black/40' 
+              : 'bg-white/80 border-white/20'
+          ]">
+            <h3 :class="[
+              'text-lg font-bold mb-4 flex items-center gap-2 transition-colors duration-300',
+              isDarkMode ? 'text-gray-100' : 'text-gray-800'
+            ]">
+              <font-awesome-icon icon="fa-solid fa-trophy" class="text-yellow-600" />
+              پیشرفت لیگ
+            </h3>
+            <LeagueProgress />
+          </div>
+
+          <!-- Motivation Quote -->
+          <div :class="[
+            'rounded-3xl p-6 text-white transition-all duration-300',
+            isDarkMode 
+              ? 'bg-gradient-to-br from-gray-700 to-gray-800' 
+              : 'bg-gradient-to-br from-primary-500 to-primary-600'
+          ]">
+            <div class="text-center">
+              <font-awesome-icon icon="fa-solid fa-quote-right" class="text-3xl text-white/30 mb-4" />
+              <p class="text-lg font-medium mb-3">
+                "ذکر خداوند آرامش قلب است"
+              </p>
+              <p :class="[
+                'text-sm transition-colors duration-300',
+                isDarkMode ? 'text-gray-300' : 'text-primary-100'
+              ]">
+                قرآن کریم - سوره رعد
+              </p>
             </div>
           </div>
         </div>
@@ -110,81 +220,237 @@
 </template>
 
 <script>
-import { computed, inject, ref, onMounted } from 'vue'
+import UserStats from '@/components/dashboard/UserStats.vue'
+import StreakCalendar from '@/components/dashboard/StreakCalendar.vue'
+import BadgesList from '@/components/dashboard/BadgesList.vue'
+import LeagueProgress from '@/components/dashboard/LeagueProgress.vue'
+import ProfileSettingsModal from '@/components/dashboard/ProfileSettingsModal.vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import defaultAvatar from '@/assets/icons/back-button.svg' // Replace with a real default avatar
+import { useRouter } from 'vue-router'
+import { useSettingsStore } from '@/stores/settings'
 import axios from 'axios'
-import jalaali from 'jalaali-js'
+import { useToast } from 'vue-toastification'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { 
+  faUserPen, 
+  faCalendarDay, 
+  faAward,
+  faUser,
+  faBolt,
+  faPray,
+  faBookOpen,
+  faChartLine,
+  faTrophy,
+  faQuoteRight
+} from '@fortawesome/free-solid-svg-icons'
+
+// Add icons to the library
+library.add(
+  faUserPen, 
+  faCalendarDay, 
+  faAward, 
+  faUser, 
+  faBolt, 
+  faPray, 
+  faBookOpen, 
+  faChartLine, 
+  faTrophy, 
+  faQuoteRight
+)
 
 export default {
   name: 'DashboardView',
-  
+  components: {
+    UserStats,
+    StreakCalendar,
+    BadgesList,
+    LeagueProgress,
+    ProfileSettingsModal,
+    FontAwesomeIcon
+  },
   setup() {
     const store = useStore()
+    const router = useRouter()
+    const settingsStore = useSettingsStore()
+    const toast = useToast()
+    const loading = ref(true)
     const user = computed(() => store.state.user)
+    const showProfileSettings = ref(false)
+    const earnedBadgesCount = ref(0)
+    const totalBadgesCount = ref(0)
 
-    const getInitial = computed(() => {
-      if (!user.value?.name) return '؟' // fallback
-      return user.value.name.trim().charAt(0)
-    })
-
-
-    // League progress state
-    const BASE_API_URL = inject('BASE_API_URL')
-    const league = ref({ name: 'لیگ مبتدی', icon: 'fa-solid fa-star' })
-    const leagueScore = ref(0)
-    const nextLeague = ref(null)
-    const nextLeaguePoints = ref(0)
+    // Reactive dark mode state
+    const isDarkMode = computed(() => settingsStore.darkMode)
 
     const fetchLeagueProgress = async () => {
       try {
-        const response = await axios.get(`${BASE_API_URL}/user/league-progress`)
-        const data = response.data
-        league.value = { ...league.value, ...data.current_league }
-        leagueScore.value = data.current_score
-        nextLeague.value = data.next_league
-        nextLeaguePoints.value = data.next_league_points
+        loading.value = true
+        const response = await store.dispatch('fetchUserStats')
+        console.log('User stats response:', response)
+        await store.dispatch('fetchCompletedDays')
+        await fetchBadgeStats()
       } catch (error) {
         console.error('Error fetching league progress:', error)
       }
     }
-    
+
+    const fetchBadgeStats = async () => {
+      try {
+        const [badgesResponse, userBadgesResponse] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/badges`),
+          axios.get(`${import.meta.env.VITE_API_URL}/user/badges`)
+        ])
+        
+        totalBadgesCount.value = badgesResponse.data.data?.length || 0
+        earnedBadgesCount.value = userBadgesResponse.data.data?.length || 0
+      } catch (error) {
+        console.error('Error fetching badge stats:', error)
+      }
+    }
+
+    // Watch for changes in the user state
+    watch(() => store.state.user, (newUser) => {
+      console.log('User state changed:', newUser)
+      if (newUser) {
+        loading.value = false
+      }
+    }, { immediate: true })
+
     onMounted(() => {
       fetchLeagueProgress()
     })
 
-const lastWeek = computed(() => {
-  const days = []
-  const today = new Date()
+    const handlePhotoUpload = async (file) => {
+      if (!file) {
+        toast.error('لطفاً یک فایل انتخاب کنید')
+        return
+      }
 
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - i)
+      try {
+        const formData = new FormData()
+        formData.append('avatar', file)
 
-    const jd = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate())
-    const isoDate = date.toISOString().split('T')[0]
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/avatar`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${store.state.token}`
+          },
+          withCredentials: true
+        })
 
-    days.push({
-      label: date.toLocaleDateString('fa-IR', { weekday: 'long' }),
-      dayNumber: jd.jd,
-      isToday: i === 0,
-      completed: user.value?.completed_dates?.includes(isoDate),
-      isFuture: date > today,
-      persianDate: `${jd.jd}/${jd.jm}/${jd.jy}`
-    })
-  }
+        if (response.data.avatar_url) {
+          store.commit('updateUserPhoto', response.data.avatar_url)
+          toast.success(response.data.message || 'تصویر پروفایل با موفقیت به‌روزرسانی شد')
+        }
+      } catch (error) {
+        console.error('Upload error:', error.response?.data)
+        const message = error.response?.data?.message || 'خطا در بروزرسانی تصویر پروفایل'
+        toast.error(message)
+      }
+    }
 
-  return days
-})
+    const handlePhotoError = (message) => {
+      toast.error(message)
+    }
 
-    const weekProgress = computed(() => {
-      const completed = lastWeek.value.filter(d => d.completed).length
-      return Math.round((completed / 7) * 100)
-    })
-    return { user, lastWeek, weekProgress, defaultAvatar, getInitial }
+    const handleNameUpdated = (newName) => {
+      if (user.value) {
+        store.commit('updateUserName', newName)
+      }
+      toast.success('نام شما با موفقیت به‌روزرسانی شد')
+    }
+
+    const goToCounter = () => {
+      router.push('/counter')
+    }
+
+    const goToHome = () => {
+      router.push('/')
+    }
+
+    return {
+      user,
+      loading,
+      showProfileSettings,
+      earnedBadgesCount,
+      totalBadgesCount,
+      isDarkMode,
+      handlePhotoUpload,
+      handlePhotoError,
+      handleNameUpdated,
+      goToCounter,
+      goToHome
+    }
   }
 }
 </script>
 
-<style>
+<style scoped>
+/* Custom animations */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Glass morphism effect */
+.backdrop-blur-sm {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 </style>

@@ -10,26 +10,11 @@ class AdhkarSeeder extends Seeder
 {
     public function run(): void
     {
-        // Get all collections
         $collections = Collection::all()->keyBy('name');
-
-        // IMPORTANT: All of these methods need to be expanded to include ALL adhkar from 
-        // the corresponding JavaScript files (src/assets/js/collections/*.js)
-        // The current implementation only includes a few examples from each collection
-        
-        // Daily Adhkar
         $this->seedDailyAdhkar($collections['اذکار روزانه']->id);
-        
-        // Morning Adhkar - Must include ALL adhkar from morning.js (currently ~30 items)
         $this->seedMorningAdhkar($collections['اذکار صبحگاه']->id);
-        
-        // Night Adhkar - Must include ALL adhkar from night.js (currently ~30 items)
         $this->seedNightAdhkar($collections['اذکار شامگاه']->id);
-        
-        // Ramadan Adhkar - Must include ALL adhkar from ramadan.js
-        $this->seedRamadanAdhkar($collections['اذکار ماه رمضان']->id);
-        
-        // Istikhara Prayer - Must include ALL adhkar from istikhara.js
+        $this->seedRamadanAdhkar($collections['اذکار ماه رمضان']->id);   
         $this->seedIstikharaAdhkar($collections['دعاء استخاره']->id);
     }
     
