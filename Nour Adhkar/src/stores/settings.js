@@ -74,8 +74,10 @@ export const useSettingsStore = defineStore('settings', {
       // Apply dark mode
       if (this.darkMode) {
         document.body.classList.add('dark-mode')
+        document.body.classList.add('dark')
       } else {
         document.body.classList.remove('dark-mode')
+        document.body.classList.remove('dark')
       }
       
       // Apply font size

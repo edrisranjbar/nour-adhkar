@@ -216,14 +216,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Profile Settings Modal -->
-    <ProfileSettingsModal 
-      :show="showProfileSettings"
-      :user-name="user?.name"
-      @close="showProfileSettings = false"
-      @name-updated="handleNameUpdated"
-    />
   </div>
 </template>
 
@@ -292,7 +284,7 @@ export default {
     // Reactive dark mode state
     const isDarkMode = computed(() => settingsStore.darkMode)
 
-    const fetchUserData = async () => {
+    const fetchLeagueProgress = async () => {
       try {
         loading.value = true
         const response = await store.dispatch('fetchUserStats')
@@ -300,10 +292,7 @@ export default {
         await store.dispatch('fetchCompletedDays')
         await fetchBadgeStats()
       } catch (error) {
-        console.error('Error fetching user data:', error)
-        toast.error('خطا در دریافت اطلاعات کاربر')
-      } finally {
-        loading.value = false
+        console.error('Error fetching league progress:', error)
       }
     }
 
@@ -330,7 +319,7 @@ export default {
     }, { immediate: true })
 
     onMounted(() => {
-      fetchUserData()
+      fetchLeagueProgress()
     })
 
     const handlePhotoUpload = async (file) => {

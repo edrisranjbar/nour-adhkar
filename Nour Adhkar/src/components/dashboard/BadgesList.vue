@@ -147,6 +147,9 @@ export default {
         console.log('Combined Badges:', allBadges.value);
       } catch (err) {
         console.error('Error fetching badges:', err);
+        if (err.response && err.response.status === 401) {
+          window.location.href = '/login';
+        }
         error.value = 'خطا در دریافت نشان‌ها';
       } finally {
         loading.value = false;
