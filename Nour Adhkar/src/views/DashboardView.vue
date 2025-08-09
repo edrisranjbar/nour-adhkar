@@ -1,19 +1,9 @@
 <template>
-  <div :class="[
-    'min-h-screen transition-all duration-500',
-    isDarkMode 
-      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
-      : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
-  ]">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
     <!-- Modern Header with Glass Effect -->
     <div class="relative overflow-hidden">
       <!-- Background Pattern -->
-      <div :class="[
-        'absolute inset-0 transition-all duration-500',
-        isDarkMode 
-          ? 'bg-gradient-to-r from-gray-800 via-gray-900 to-black' 
-          : 'bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800'
-      ]">
+      <div class="absolute inset-0 bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800">
         <div class="absolute inset-0 opacity-10">
           <div class="absolute top-0 left-0 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
           <div class="absolute top-0 right-0 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
@@ -37,12 +27,7 @@
            <!-- User Actions -->
            <div class="flex flex-col sm:flex-row items-center gap-4">
             <!-- Quick Stats Preview -->
-            <div :class="[
-              'hidden sm:flex items-center gap-4 backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300',
-              isDarkMode 
-                ? 'bg-white/5 border-white/10' 
-                : 'bg-white/10 border-white/20'
-            ]">
+            <div class="hidden sm:flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
               <div class="text-center">
                 <div class="text-2xl font-bold text-white">{{ user?.streak || 0 }}</div>
                 <div class="text-xs text-primary-100">روز متوالی</div>
@@ -57,12 +42,7 @@
             <!-- Profile Button -->
             <button 
               @click="showProfileSettings = true" 
-              :class="[
-                'flex items-center gap-3 backdrop-blur-sm rounded-xl px-6 py-3 text-white transition-all duration-300 hover:scale-105 border',
-                isDarkMode 
-                  ? 'bg-white/5 hover:bg-white/10 border-white/10' 
-                  : 'bg-white/20 hover:bg-white/30 border-white/20'
-              ]"
+              class="flex items-center gap-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl px-6 py-3 text-white transition-all duration-300 hover:scale-105 border border-white/20"
             >
               <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                 <font-awesome-icon icon="fa-solid fa-user" class="text-lg" />
@@ -86,28 +66,15 @@
         <!-- Main Content Area -->
         <div class="xl:col-span-2 space-y-8">
           <!-- Daily Activity -->
-          <div :class="[
-            'backdrop-blur-sm rounded-3xl shadow-xl border p-6 lg:p-8 transition-all duration-300',
-            isDarkMode 
-              ? 'bg-gray-800/80 border-gray-700/50 shadow-black/40' 
-              : 'bg-white/80 border-white/20'
-          ]">
+          <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8">
             <div class="flex items-center justify-between mb-6">
-              <h2 :class="[
-                'text-xl lg:text-2xl font-bold flex items-center gap-3 transition-colors duration-300',
-                isDarkMode ? 'text-gray-100' : 'text-gray-800'
-              ]">
+              <h2 class="text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
                   <font-awesome-icon icon="fa-solid fa-calendar-day" class="text-white text-lg" />
                 </div>
                 فعالیت روزانه
               </h2>
-              <div :class="[
-                'text-sm px-3 py-1 rounded-full transition-all duration-300',
-                isDarkMode 
-                  ? 'text-gray-300 bg-gray-700' 
-                  : 'text-gray-500 bg-gray-100'
-              ]">
+              <div class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
                 هفته گذشته
               </div>
             </div>
@@ -115,26 +82,15 @@
           </div>
 
           <!-- Recent Achievements -->
-          <div :class="[
-            'backdrop-blur-sm rounded-3xl shadow-xl border p-6 lg:p-8 transition-all duration-300',
-            isDarkMode 
-              ? 'bg-gray-800/80 border-gray-700/50 shadow-black/40' 
-              : 'bg-white/80 border-white/20'
-          ]">
+          <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8">
             <div class="flex items-center justify-between mb-6">
-              <h2 :class="[
-                'text-xl lg:text-2xl font-bold flex items-center gap-3 transition-colors duration-300',
-                isDarkMode ? 'text-gray-100' : 'text-gray-800'
-              ]">
+              <h2 class="text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
                   <font-awesome-icon icon="fa-solid fa-award" class="text-white text-lg" />
                 </div>
                 دستاوردهای اخیر
               </h2>
-              <div :class="[
-                'text-sm transition-colors duration-300',
-                isDarkMode ? 'text-gray-300' : 'text-gray-500'
-              ]">
+              <div class="text-sm text-gray-500">
                 {{ earnedBadgesCount }} از {{ totalBadgesCount }} نشان
               </div>
             </div>
@@ -145,16 +101,8 @@
         <!-- Sidebar -->
         <div class="space-y-8">
           <!-- Quick Actions -->
-          <div :class="[
-            'backdrop-blur-sm rounded-3xl shadow-xl border p-6 transition-all duration-300',
-            isDarkMode 
-              ? 'bg-gray-800/80 border-gray-700/50 shadow-black/40' 
-              : 'bg-white/80 border-white/20'
-          ]">
-            <h3 :class="[
-              'text-lg font-bold mb-4 flex items-center gap-2 transition-colors duration-300',
-              isDarkMode ? 'text-gray-100' : 'text-gray-800'
-            ]">
+          <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
               <font-awesome-icon icon="fa-solid fa-bolt" class="text-primary-600" />
               اقدامات سریع
             </h3>
@@ -177,16 +125,8 @@
           </div>
 
           <!-- League Progress -->
-          <div :class="[
-            'backdrop-blur-sm rounded-3xl shadow-xl border p-6 transition-all duration-300',
-            isDarkMode 
-              ? 'bg-gray-800/80 border-gray-700/50 shadow-black/40' 
-              : 'bg-white/80 border-white/20'
-          ]">
-            <h3 :class="[
-              'text-lg font-bold mb-4 flex items-center gap-2 transition-colors duration-300',
-              isDarkMode ? 'text-gray-100' : 'text-gray-800'
-            ]">
+          <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
               <font-awesome-icon icon="fa-solid fa-trophy" class="text-yellow-600" />
               پیشرفت لیگ
             </h3>
@@ -194,21 +134,13 @@
           </div>
 
           <!-- Motivation Quote -->
-          <div :class="[
-            'rounded-3xl p-6 text-white transition-all duration-300',
-            isDarkMode 
-              ? 'bg-gradient-to-br from-gray-700 to-gray-800' 
-              : 'bg-gradient-to-br from-primary-500 to-primary-600'
-          ]">
+          <div class="bg-gradient-to-br from-primary-500 to-primary-600 rounded-3xl p-6 text-white">
             <div class="text-center">
               <font-awesome-icon icon="fa-solid fa-quote-right" class="text-3xl text-white/30 mb-4" />
               <p class="text-lg font-medium mb-3">
                 "ذکر خداوند آرامش قلب است"
               </p>
-              <p :class="[
-                'text-sm transition-colors duration-300',
-                isDarkMode ? 'text-gray-300' : 'text-primary-100'
-              ]">
+              <p class="text-sm text-primary-100">
                 قرآن کریم - سوره رعد
               </p>
             </div>
@@ -216,6 +148,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Profile Settings Modal -->
+    <ProfileSettingsModal 
+      :show="showProfileSettings"
+      :user-name="user?.name"
+      @close="showProfileSettings = false"
+      @name-updated="handleNameUpdated"
+    />
   </div>
 </template>
 
@@ -228,7 +168,6 @@ import ProfileSettingsModal from '@/components/dashboard/ProfileSettingsModal.vu
 import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { useSettingsStore } from '@/stores/settings'
 import axios from 'axios'
 import { useToast } from 'vue-toastification'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -273,7 +212,6 @@ export default {
   setup() {
     const store = useStore()
     const router = useRouter()
-    const settingsStore = useSettingsStore()
     const toast = useToast()
     const loading = ref(true)
     const user = computed(() => store.state.user)
@@ -281,10 +219,7 @@ export default {
     const earnedBadgesCount = ref(0)
     const totalBadgesCount = ref(0)
 
-    // Reactive dark mode state
-    const isDarkMode = computed(() => settingsStore.darkMode)
-
-    const fetchLeagueProgress = async () => {
+    const fetchUserData = async () => {
       try {
         loading.value = true
         const response = await store.dispatch('fetchUserStats')
@@ -292,7 +227,10 @@ export default {
         await store.dispatch('fetchCompletedDays')
         await fetchBadgeStats()
       } catch (error) {
-        console.error('Error fetching league progress:', error)
+        console.error('Error fetching user data:', error)
+        toast.error('خطا در دریافت اطلاعات کاربر')
+      } finally {
+        loading.value = false
       }
     }
 
@@ -319,7 +257,7 @@ export default {
     }, { immediate: true })
 
     onMounted(() => {
-      fetchLeagueProgress()
+      fetchUserData()
     })
 
     const handlePhotoUpload = async (file) => {
@@ -377,7 +315,6 @@ export default {
       showProfileSettings,
       earnedBadgesCount,
       totalBadgesCount,
-      isDarkMode,
       handlePhotoUpload,
       handlePhotoError,
       handleNameUpdated,
