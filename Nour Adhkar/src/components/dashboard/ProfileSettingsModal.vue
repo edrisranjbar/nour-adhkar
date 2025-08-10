@@ -8,7 +8,7 @@
 
       <!-- Modal panel -->
       <div
-        class="inline-block overflow-hidden text-right align-bottom transition-all duration-300 transform bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-white/20">
+        class="inline-block overflow-hidden text-right align-bottom transition-all duration-300 transform bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-3xl shadow-2xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-white/20 dark:border-white/10">
         <!-- Modal Header -->
         <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4 rounded-t-3xl">
           <div class="flex items-center justify-between">
@@ -28,26 +28,26 @@
         </div>
 
         <!-- Modal Content -->
-        <div class="px-6 py-6 bg-white/80 backdrop-blur-sm">
+        <div class="px-6 py-6 bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm">
           <div class="w-full">
 
             <!-- Name Change Form -->
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 mb-6">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-6 border border-blue-100 dark:border-slate-700 mb-6">
               <div class="flex items-center gap-3 mb-4">
                 <div
                   class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
                   <font-awesome-icon icon="fa-solid fa-user" class="text-white text-sm" />
                 </div>
-                <h4 class="text-lg font-bold text-gray-800">اطلاعات شخصی</h4>
+                <h4 class="text-lg font-bold text-gray-800 dark:text-gray-100">اطلاعات شخصی</h4>
               </div>
 
               <Form @submit="updateName" v-slot="{ errors }">
                 <div class="form-group">
-                  <label for="name" class="block text-sm font-medium text-gray-700 mb-2">نام و نام خانوادگی</label>
+                  <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">نام و نام خانوادگی</label>
                   <div class="flex gap-2">
                     <Field name="name" id="name" v-model="nameForm.name" :disabled="nameForm.isSubmitting"
                       placeholder="نام خود را وارد کنید" :rules="nameRules"
-                      class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 bg-white/80 backdrop-blur-sm" />
+                      class="flex-1 px-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 transition-all duration-300 bg-white/80 dark:bg-slate-900/40 backdrop-blur-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" />
                     <button type="submit"
                       :disabled="Object.keys(errors).length > 0 || !nameForm.name || nameForm.isSubmitting"
                       class="px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center">
@@ -58,7 +58,7 @@
                   </div>
                   <ErrorMessage name="name" class="text-red-500 text-sm mt-2 text-right" />
                   <div v-if="nameForm.message"
-                    :class="[nameForm.error ? 'text-red-500' : 'text-green-600', 'text-sm mt-2 text-right font-medium']">
+                    :class="[nameForm.error ? 'text-red-500' : 'text-green-600 dark:text-green-400', 'text-sm mt-2 text-right font-medium']">
                     {{ nameForm.message }}
                   </div>
                 </div>
@@ -66,28 +66,28 @@
             </div>
 
             <!-- Password Change Form -->
-            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-6 border border-green-100 dark:border-slate-700">
               <div class="flex items-center gap-3 mb-4">
                 <div
                   class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
                   <font-awesome-icon icon="fa-solid fa-lock" class="text-white text-sm" />
                 </div>
-                <h4 class="text-lg font-bold text-gray-800">تغییر رمز عبور</h4>
+                <h4 class="text-lg font-bold text-gray-800 dark:text-gray-100">تغییر رمز عبور</h4>
               </div>
 
               <Form @submit="updatePassword" v-slot="{ errors }">
                 <div class="space-y-4">
                   <div class="form-group">
-                    <label for="current_password" class="block text-sm font-medium text-gray-700 mb-2">رمز عبور
+                    <label for="current_password" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">رمز عبور
                       فعلی</label>
                     <div class="relative">
                       <Field name="current_password" :type="passwordVisibility.current ? 'text' : 'password'"
                         id="current_password" v-model="passwordForm.current_password"
                         :disabled="passwordForm.isSubmitting" placeholder="رمز عبور فعلی خود را وارد کنید"
                         :rules="currentPasswordRules"
-                        class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 bg-white/80 backdrop-blur-sm" />
+                        class="w-full px-4 py-3 pr-12 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-emerald-800 transition-all duration-300 bg-white/80 dark:bg-slate-900/40 backdrop-blur-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" />
                       <button type="button"
-                        class="absolute left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 hover:text-gray-600 transition-colors"
+                        class="absolute left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                         @click="togglePasswordVisibility('current')">
                         <font-awesome-icon
                           :icon="passwordVisibility.current ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" />
@@ -97,14 +97,14 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">رمز عبور جدید</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">رمز عبور جدید</label>
                     <div class="relative">
                       <Field name="password" :type="passwordVisibility.new ? 'text' : 'password'" id="password"
                         v-model="passwordForm.password" :disabled="passwordForm.isSubmitting"
                         placeholder="رمز عبور جدید را وارد کنید" :rules="passwordRules"
-                        class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 bg-white/80 backdrop-blur-sm" />
+                        class="w-full px-4 py-3 pr-12 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-emerald-800 transition-all duration-300 bg-white/80 dark:bg-slate-900/40 backdrop-blur-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" />
                       <button type="button"
-                        class="absolute left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 hover:text-gray-600 transition-colors"
+                        class="absolute left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                         @click="togglePasswordVisibility('new')">
                         <font-awesome-icon
                           :icon="passwordVisibility.new ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" />
@@ -114,16 +114,16 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">تکرار رمز
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">تکرار رمز
                       عبور جدید</label>
                     <div class="relative">
                       <Field name="password_confirmation" :type="passwordVisibility.confirm ? 'text' : 'password'"
                         id="password_confirmation" v-model="passwordForm.password_confirmation"
                         :disabled="passwordForm.isSubmitting" placeholder="رمز عبور جدید را تکرار کنید"
                         :rules="passwordConfirmationRules"
-                        class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 bg-white/80 backdrop-blur-sm" />
+                        class="w-full px-4 py-3 pr-12 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-emerald-800 transition-all duration-300 bg-white/80 dark:bg-slate-900/40 backdrop-blur-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500" />
                       <button type="button"
-                        class="absolute left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 hover:text-gray-600 transition-colors"
+                        class="absolute left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                         @click="togglePasswordVisibility('confirm')">
                         <font-awesome-icon
                           :icon="passwordVisibility.confirm ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" />
@@ -152,7 +152,7 @@
       </div>
 
       <!-- Modal footer -->
-      <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-slate-100 rounded-b-3xl border-t border-gray-200">
+      <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-b-3xl border-t border-gray-200 dark:border-slate-700">
         <div class="flex justify-end">
           <button type="button"
             class="px-6 py-3 bg-gradient-to-r from-gray-500 to-slate-600 hover:from-gray-600 hover:to-slate-700 text-white rounded-xl font-medium transition-all duration-300 hover:scale-105 flex items-center gap-2"

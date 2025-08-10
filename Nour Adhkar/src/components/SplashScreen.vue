@@ -15,7 +15,7 @@
         </div>
         <div>
             <p class="version-number">
-                نسخه آزمایشی ۰.۱
+                نسخه آزمایشی {version}
             </p>
         </div>
     </div>

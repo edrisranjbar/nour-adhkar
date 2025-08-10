@@ -12,14 +12,19 @@ a {
     right: 0;
     width: min(100%, 600px);
     max-width: calc(100vw - 32px);
-    background-color: rgba(255, 255, 255);
+    background-color: rgba(255, 255, 255, 0.95);
     border-radius: 16px;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     min-height: 50vh;
     max-height: 550px;
     padding: 66px 16px 16px 16px;
     text-align: center;
     z-index: 99;
+}
+
+body.dark-mode #congrats-card {
+    background-color: rgba(15, 23, 42, 0.95); /* slate-900/95 */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 .balloon {
@@ -39,11 +44,19 @@ a {
     margin-bottom: 16px;
 }
 
+body.dark-mode .card-title {
+    color: #FDE68A; /* yellow-300 */
+}
+
 .card-description {
     font-size: 20px;
     font-weight: 300;
     color: #1E1E1E;
     margin-bottom: 32px;
+}
+
+body.dark-mode .card-description {
+    color: #E5E7EB; /* gray-200 */
 }
 
 .button-primary-outline {
@@ -58,6 +71,12 @@ a {
     height: 85px;
     width: 100%;
     margin-bottom: 8px;
+    background: transparent;
+}
+
+body.dark-mode .button-primary-outline {
+    color: #F3F4F6; /* gray-100 */
+    border-color: #FDE68A; /* yellow-300 */
 }
 
 .button-primary {
@@ -71,6 +90,10 @@ a {
     border-radius: 8px;
     height: 85px;
     width: 100%;
+}
+
+body.dark-mode .button-primary {
+    background-color: #926D47; /* slightly darker for dark mode */
 }
 </style>
 

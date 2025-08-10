@@ -17,97 +17,97 @@
     
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
       <!-- Streak -->
-      <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-orange-100">
+      <div class="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900 dark:to-red-900 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-orange-100 dark:border-red-800">
         <div class="h-1 bg-gradient-to-r from-orange-500 to-red-500"></div>
         <div class="p-5">
           <div class="flex items-center justify-between">
             <div class="flex flex-col">
-              <span class="text-sm font-medium text-orange-700 mb-1">روزهای متوالی</span>
+              <span class="text-sm font-medium text-orange-700 dark:text-orange-200 mb-1">روزهای متوالی</span>
               <div class="flex items-end gap-1">
-                <span v-if="!loading" class="text-3xl font-bold text-orange-800">{{ streak }}</span>
+                <span v-if="!loading" class="text-3xl font-bold text-orange-800 dark:text-orange-100">{{ streak }}</span>
                 <div v-else class="h-8 w-16 bg-orange-200 rounded animate-pulse"></div>
-                <span class="text-xs text-orange-600 mb-1">روز</span>
+                 <span class="text-xs text-orange-600 dark:text-orange-300 mb-1">روز</span>
               </div>
             </div>
             <div class="p-3 bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-xl shadow-lg">
               <FontAwesomeIcon icon="fa-solid fa-fire" class="text-xl" />
             </div>
           </div>
-          <div class="mt-3 w-full bg-orange-200 rounded-full h-2">
-            <div class="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full transition-all duration-700" :style="{ width: `${Math.min(streak * 10, 100)}%` }"></div>
+           <div class="mt-3 w-full bg-orange-200 dark:bg-orange-800 rounded-full h-2">
+             <div class="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-400 dark:to-red-400 h-2 rounded-full transition-all duration-700" :style="{ width: `${Math.min(streak * 10, 100)}%` }"></div>
           </div>
         </div>
       </div>
 
              <!-- Heart Score -->
-       <div class="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-pink-100">
+       <div class="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-rose-900 dark:to-rose-950 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-pink-100 dark:border-rose-800">
          <div class="h-1 bg-gradient-to-r from-pink-500 to-rose-500"></div>
          <div class="p-5">
            <div class="flex items-center justify-between">
              <div class="flex flex-col">
-               <span class="text-sm font-medium text-pink-700 mb-1">امتیاز قلب</span>
+               <span class="text-sm font-medium text-pink-700 dark:text-pink-200 mb-1">امتیاز قلب</span>
                <div class="flex items-end gap-1">
-                 <span v-if="!loading" class="text-3xl font-bold text-pink-800">{{ heartScore }}</span>
+                 <span v-if="!loading" class="text-3xl font-bold text-pink-800 dark:text-pink-100">{{ heartScore }}</span>
                  <div v-else class="h-8 w-16 bg-pink-200 rounded animate-pulse"></div>
-                 <span class="text-xs text-pink-600 mb-1">امتیاز</span>
+                 <span class="text-xs text-pink-600 dark:text-pink-300 mb-1">امتیاز</span>
                </div>
              </div>
              <div class="p-3 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-xl shadow-lg">
                <FontAwesomeIcon icon="fa-solid fa-heart" class="text-xl" />
              </div>
            </div>
-           <div class="mt-3 w-full bg-pink-200 rounded-full h-2">
-             <div class="bg-gradient-to-r from-pink-500 to-rose-500 h-2 rounded-full transition-all duration-700" :style="{ width: `${Math.min(heartScore, 100)}%` }"></div>
+           <div class="mt-3 w-full bg-pink-200 dark:bg-pink-800 rounded-full h-2">
+             <div class="bg-gradient-to-r from-pink-500 to-rose-500 dark:from-pink-400 dark:to-rose-400 h-2 rounded-full transition-all duration-700" :style="{ width: `${Math.min(heartScore, 100)}%` }"></div>
            </div>
          </div>
        </div>
 
              <!-- Global Score -->
-       <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-blue-100">
+       <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-blue-100 dark:border-slate-700">
          <div class="h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
          <div class="p-5">
            <div class="flex items-center justify-between">
              <div class="flex flex-col">
-               <span class="text-sm font-medium text-blue-700 mb-1">امتیاز کل</span>
+                <span class="text-sm font-medium text-blue-700 dark:text-blue-200 mb-1">امتیاز کل</span>
                <div class="flex items-end gap-1">
-                 <span v-if="!loading" class="text-3xl font-bold text-blue-800">{{ score }}</span>
+                  <span v-if="!loading" class="text-3xl font-bold text-blue-800 dark:text-blue-100">{{ score }}</span>
                  <div v-else class="h-8 w-16 bg-blue-200 rounded animate-pulse"></div>
-                 <span class="text-xs text-blue-600 mb-1">امتیاز</span>
+                  <span class="text-xs text-blue-600 dark:text-blue-300 mb-1">امتیاز</span>
                </div>
              </div>
              <div class="p-3 bg-gradient-to-br from-blue-500 to-indigo-500 text-white rounded-xl shadow-lg">
                <FontAwesomeIcon icon="fa-solid fa-trophy" class="text-xl" />
              </div>
            </div>
-           <div class="mt-3 w-full bg-blue-200 rounded-full h-2">
-             <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-700" :style="{ width: `${Math.min(score / 10, 100)}%` }"></div>
+           <div class="mt-3 w-full bg-blue-200 dark:bg-slate-700 rounded-full h-2">
+             <div class="bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-400 h-2 rounded-full transition-all duration-700" :style="{ width: `${Math.min(score / 10, 100)}%` }"></div>
            </div>
          </div>
        </div>
 
              <!-- League Progress -->
-       <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-yellow-100">
+       <div class="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-amber-900 dark:to-amber-950 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-yellow-100 dark:border-amber-800">
          <div class="h-1 bg-gradient-to-r from-yellow-500 to-amber-500"></div>
          <div class="p-5">
            <div class="flex items-center justify-between">
              <div class="flex flex-col">
-               <span class="text-sm font-medium text-yellow-700 mb-1">{{ league.name }}</span>
+                <span class="text-sm font-medium text-yellow-700 dark:text-yellow-200 mb-1">{{ league.name }}</span>
                <div class="flex items-end gap-1">
-                 <span v-if="!loading" class="text-3xl font-bold text-yellow-800">{{ leagueScore }}</span>
+                  <span v-if="!loading" class="text-3xl font-bold text-yellow-800 dark:text-yellow-100">{{ leagueScore }}</span>
                  <div v-else class="h-8 w-16 bg-yellow-200 rounded animate-pulse"></div>
-                 <span class="text-xs text-yellow-600 mb-1">امتیاز</span>
+                  <span class="text-xs text-yellow-600 dark:text-yellow-300 mb-1">امتیاز</span>
                </div>
              </div>
              <div class="p-3 bg-gradient-to-br from-yellow-500 to-amber-500 text-white rounded-xl shadow-lg">
                <FontAwesomeIcon :icon="league.icon || 'fa-solid fa-trophy'" class="text-xl" />
              </div>
            </div>
-           <div v-if="nextLeague" class="mt-1 text-xs text-gray-500">
-             لیگ بعدی: <span class="font-semibold text-yellow-700">{{ nextLeague.name }}</span>
-             <span class="text-yellow-600">({{ nextLeaguePoints - leagueScore }} امتیاز تا ارتقا)</span>
+           <div v-if="nextLeague" class="mt-1 text-xs text-gray-500 dark:text-gray-300">
+             لیگ بعدی: <span class="font-semibold text-yellow-700 dark:text-yellow-300">{{ nextLeague.name }}</span>
+             <span class="text-yellow-600 dark:text-yellow-300">({{ nextLeaguePoints - leagueScore }} امتیاز تا ارتقا)</span>
            </div>
-           <div class="mt-3 w-full bg-yellow-200 rounded-full h-2">
-             <div class="bg-gradient-to-r from-yellow-500 to-amber-500 h-2 rounded-full transition-all duration-700 ease-out" :style="{ width: `${Math.min(100, nextLeague ? (leagueScore / nextLeaguePoints) * 100 : 100)}%` }"></div>
+           <div class="mt-3 w-full bg-yellow-200 dark:bg-amber-800 rounded-full h-2">
+             <div class="bg-gradient-to-r from-yellow-500 to-amber-500 dark:from-yellow-400 dark:to-amber-400 h-2 rounded-full transition-all duration-700 ease-out" :style="{ width: `${Math.min(100, nextLeague ? (leagueScore / nextLeaguePoints) * 100 : 100)}%` }"></div>
            </div>
          </div>
        </div>
