@@ -178,9 +178,17 @@ export default {
     },
     handleCounterClick() {
       // Only increment if we have a current dhikr selected
-      if (this.currentDhikr.id) {
-        this.incrementCount();
+      if (!this.currentDhikr.id) return;
+      // If already completed, tapping goes to next dhikr (if exists)
+      if (this.currentDhikr.count && this.currentCount >= this.currentDhikr.count) {
+        const currentIndex = this.adhkars.findIndex(d => d.id === this.currentDhikr.id);
+        const next = this.adhkars[currentIndex + 1];
+        if (next) {
+          this.selectDhikr(next);
+          return;
+        }
       }
+      this.incrementCount();
     },
     incrementCount() {
       if (!this.currentDhikr.id) {
@@ -204,6 +212,7 @@ export default {
     completeCounter() {
       this.hasCompleted = true;
       this.addToast('تبریک! شما ذکر را به پایان رساندید', 'success');
+      // Optional: Auto-advance immediately if user taps after completion is not required
     },
     addToast(message, type) {
       const toast = {

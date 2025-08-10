@@ -287,6 +287,10 @@ export default {
       
       const currentCount = this.counters[this.openedDhikr.arabic_text] || 0;
       if (currentCount >= this.openedDhikr.count) {
+        // If current dhikr is completed, tapping should go to next dhikr (if available)
+        if (this.isThereANextDhikr) {
+          this.gotoNextDhikr();
+        }
         return;
       }
       
