@@ -52,7 +52,6 @@
             <textarea
               id="description"
               v-model="formData.description"
-              required
               placeholder="توضیحات مجموعه را وارد کنید"
             ></textarea>
           </div>

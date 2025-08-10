@@ -1,6 +1,14 @@
 <template>
   <div class="admin-dashboard">
-    <h1 class="dashboard-title">پیشخوان مدیریت</h1>
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">پیشخوان مدیریت</h1>
+      <div class="header-actions">
+        <button class="refresh-btn" @click="refreshStats">
+          <font-awesome-icon icon="fa-solid fa-sync" />
+          بروزرسانی
+        </button>
+      </div>
+    </div>
     
     <div class="stats-container">
       <div class="stat-card">

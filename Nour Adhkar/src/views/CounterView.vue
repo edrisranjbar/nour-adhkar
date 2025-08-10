@@ -677,8 +677,8 @@ h2 {
 }
 
 .arabic-text {
-  font-size: 1.5rem;
-  line-height: 1.6;
+  font-size: calc(1.5rem * var(--font-size-factor));
+  line-height: calc(1.6 * var(--font-size-factor));
   text-align: center;
   margin: 10px 0;
   color: #2C2A2A;
