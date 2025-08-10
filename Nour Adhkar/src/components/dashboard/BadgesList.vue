@@ -7,21 +7,21 @@
       <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="text-lg mr-2" />
       {{ error }}
     </div>
-    <div v-else-if="!allBadges.length" class="text-center py-8 bg-gradient-to-br from-gray-50 to-slate-100 rounded-2xl border-2 border-dashed border-gray-300">
+    <div v-else-if="!allBadges.length" class="text-center py-8 bg-gradient-to-br from-gray-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border-2 border-dashed border-gray-300 dark:border-slate-700">
       <div class="w-16 h-16 bg-gradient-to-br from-gray-300 to-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
         <font-awesome-icon icon="fa-solid fa-medal" class="text-2xl text-white" />
       </div>
-      <p class="text-gray-600 font-medium mb-2">هنوز هیچ نشانی کسب نکرده‌اید</p>
-      <p class="text-gray-500 text-sm">با استفاده منظم از برنامه، نشان‌های مختلف را کسب کنید</p>
+      <p class="text-gray-600 dark:text-gray-200 font-medium mb-2">هنوز هیچ نشانی کسب نکرده‌اید</p>
+      <p class="text-gray-500 dark:text-gray-300 text-sm">با استفاده منظم از برنامه، نشان‌های مختلف را کسب کنید</p>
     </div>
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
       <div 
         v-for="badge in allBadges" 
         :key="badge.id" 
-        class="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden border-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+        class="bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl overflow-hidden border-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
         :class="{ 
-          'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200': badge.earned_at,
-          'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200': !badge.earned_at
+          'bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-amber-900 dark:to-amber-950 border-yellow-200 dark:border-amber-800': badge.earned_at,
+          'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-slate-800 dark:to-slate-900 border-gray-200 dark:border-slate-700': !badge.earned_at
         }"
       >
         <div 
@@ -46,8 +46,8 @@
               <h3 
                 class="font-bold text-base lg:text-lg"
                 :class="{ 
-                  'text-yellow-800': badge.earned_at,
-                  'text-gray-600': !badge.earned_at
+                  'text-yellow-800 dark:text-yellow-200': badge.earned_at,
+                  'text-gray-600 dark:text-gray-200': !badge.earned_at
                 }"
               >
                 {{ badge.title }}
@@ -55,17 +55,17 @@
               <p 
                 class="text-sm lg:text-base mt-2"
                 :class="{ 
-                  'text-yellow-700': badge.earned_at,
-                  'text-gray-500': !badge.earned_at
+                  'text-yellow-700 dark:text-yellow-300': badge.earned_at,
+                  'text-gray-500 dark:text-gray-300': !badge.earned_at
                 }"
               >
                 {{ badge.description }}
               </p>
-              <div v-if="badge.earned_at" class="mt-3 text-xs lg:text-sm font-medium text-yellow-600 flex items-center">
+              <div v-if="badge.earned_at" class="mt-3 text-xs lg:text-sm font-medium text-yellow-600 dark:text-yellow-300 flex items-center">
                 <font-awesome-icon icon="fa-solid fa-calendar-check" class="ml-2" />
                 کسب شده: {{ formatDate(badge.earned_at) }}
               </div>
-              <div v-else class="mt-3 text-xs lg:text-sm font-medium text-gray-400 flex items-center">
+              <div v-else class="mt-3 text-xs lg:text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
                 <font-awesome-icon icon="fa-solid fa-lock" class="ml-2" />
                 قفل شده
               </div>

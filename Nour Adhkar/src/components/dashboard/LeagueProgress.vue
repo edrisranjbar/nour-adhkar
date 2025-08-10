@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl overflow-hidden hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+  <div class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-slate-800 dark:to-slate-900 rounded-xl overflow-hidden hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 border border-transparent dark:border-slate-700">
     <div class="h-1 bg-primary-500"></div>
     <div class="p-5 flex flex-col gap-2">
       <div class="flex items-center gap-3">
@@ -7,21 +7,21 @@
           <i :class="['fas', currentLeague.icon, 'text-xl']"></i>
         </div>
         <div class="flex flex-col">
-          <span class="text-sm font-medium text-primary-700 mb-1">{{ currentLeague.name }}</span>
-          <span class="text-xs text-primary-600">امتیاز فعلی: <span class="font-bold text-primary-800">{{ currentScore }}</span></span>
+          <span class="text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">{{ currentLeague.name }}</span>
+          <span class="text-xs text-primary-600 dark:text-primary-300">امتیاز فعلی: <span class="font-bold text-primary-800 dark:text-primary-200">{{ currentScore }}</span></span>
         </div>
       </div>
-      <div class="mt-2 w-full bg-primary-200 rounded-full h-1.5">
+      <div class="mt-2 w-full bg-primary-200 dark:bg-slate-700 rounded-full h-1.5">
         <div
-          class="bg-primary-500 h-1.5 rounded-full transition-all duration-700 ease-out"
+          class="bg-primary-500 dark:bg-primary-400 h-1.5 rounded-full transition-all duration-700 ease-out"
           :style="{
             width: `${Math.max(5, nextLeague ? (currentScore / nextLeaguePoints) * 100 : 100)}%`
           }"
         ></div>
       </div>
       <div v-if="nextLeague" class="flex items-center justify-between mt-2">
-        <span class="text-xs text-gray-500">لیگ بعدی: <span class="font-semibold text-primary-700">{{ nextLeague.name }}</span></span>
-        <span class="text-xs text-primary-600">{{ nextLeaguePoints - currentScore }} امتیاز تا ارتقا</span>
+        <span class="text-xs text-gray-500 dark:text-gray-300">لیگ بعدی: <span class="font-semibold text-primary-700 dark:text-primary-300">{{ nextLeague.name }}</span></span>
+        <span class="text-xs text-primary-600 dark:text-primary-300">{{ nextLeaguePoints - currentScore }} امتیاز تا ارتقا</span>
       </div>
     </div>
   </div>

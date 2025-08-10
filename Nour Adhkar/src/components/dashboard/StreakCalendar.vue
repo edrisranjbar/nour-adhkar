@@ -4,9 +4,9 @@
          class="flex flex-col items-center gap-2">
       <div class="p-2 sm:p-4 w-full aspect-square rounded-2xl flex flex-col items-center justify-center transition-all duration-300 hover:scale-105"
            :class="{
-             'bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 shadow-lg hover:shadow-xl hover:bg-green-100': isCompletedDay(date),
-             'bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-200 shadow-lg hover:shadow-xl hover:bg-red-100': isMissedDay(date),
-             'bg-gradient-to-br from-gray-50 to-slate-50 border-2 border-gray-200 shadow-md hover:shadow-lg hover:bg-gray-100': !isCompletedDay(date) && !isMissedDay(date)
+             'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-emerald-900 dark:to-emerald-950 border-2 border-green-200 dark:border-emerald-800 shadow-lg hover:shadow-xl hover:bg-green-100 dark:hover:bg-emerald-900': isCompletedDay(date),
+             'bg-gradient-to-br from-red-50 to-rose-50 dark:from-rose-900 dark:to-rose-950 border-2 border-red-200 dark:border-rose-800 shadow-lg hover:shadow-xl hover:bg-red-100 dark:hover:bg-rose-900': isMissedDay(date),
+             'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-slate-800 dark:to-slate-900 border-2 border-gray-200 dark:border-slate-700 shadow-md hover:shadow-lg hover:bg-gray-100 dark:hover:bg-slate-800': !isCompletedDay(date) && !isMissedDay(date)
            }">
         <div class="relative flex items-center justify-center">
           <div v-if="isCompletedDay(date)" class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
@@ -21,23 +21,23 @@
               class="text-white text-sm sm:text-lg"
             />
           </div>
-          <div v-else class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-gray-300 to-slate-400 rounded-full flex items-center justify-center">
+          <div v-else class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-gray-300 to-slate-400 dark:from-slate-500 dark:to-slate-600 rounded-full flex items-center justify-center">
             <span class="text-white text-sm sm:text-lg font-bold">-</span>
           </div>
         </div>
         <div class="mt-2 sm:mt-3 text-xs sm:text-sm font-bold"
              :class="{
-               'text-green-800': isCompletedDay(date),
-               'text-red-800': isMissedDay(date),
-               'text-gray-600': !isCompletedDay(date) && !isMissedDay(date)
+               'text-green-800 dark:text-green-300': isCompletedDay(date),
+               'text-red-800 dark:text-red-300': isMissedDay(date),
+               'text-gray-600 dark:text-gray-300': !isCompletedDay(date) && !isMissedDay(date)
              }">
           {{ getJalaliDay(date) }}
         </div>
         <div class="text-xs sm:text-sm font-medium"
              :class="{
-               'text-green-600': isCompletedDay(date),
-               'text-red-600': isMissedDay(date),
-               'text-gray-500': !isCompletedDay(date) && !isMissedDay(date)
+               'text-green-600 dark:text-green-400': isCompletedDay(date),
+               'text-red-600 dark:text-red-400': isMissedDay(date),
+               'text-gray-500 dark:text-gray-400': !isCompletedDay(date) && !isMissedDay(date)
              }">
           {{ getDayShortName(date) }}
         </div>
