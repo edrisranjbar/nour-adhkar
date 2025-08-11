@@ -433,6 +433,11 @@ header h1 {
   box-shadow: 0 2px 8px var(--ui-shadow-light);
 }
 
+/* Ensure counter number remains readable in light mode */
+.bottom-nav-bar .counter-button .counter-value {
+  color: var(--brand-primary);
+}
+
 /* Content Top Bar */
 .content-top-bar {
   width: 100%;
