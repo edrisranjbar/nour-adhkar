@@ -12,7 +12,8 @@ class BadgeController extends Controller
 {
     public function index()
     {
-        $badges = Badge::all();
+        // Return badges sorted by points_required ascending
+        $badges = Badge::orderBy('points_required')->get();
         return BadgeResource::collection($badges);
     }
 
@@ -23,25 +24,37 @@ class BadgeController extends Controller
         return BadgeResource::collection($badges);
     }
 
-    public function checkAndAwardBadges(User $user)
+    public function checkAndAwardBadges(Request $request)
     {
-        $totalPoints = $user->heart_score;
+        $user = Auth::user();
+        // Ensure we have the latest values (e.g., updated heart_score)
+        $user->refresh();
+        $totalPoints = $user->heart_score ?? 0;
+        // Award badges for both 0-point and threshold-based requirements
         $badges = Badge::where('points_required', '<=', $totalPoints)->get();
 
+        // Attach all eligible badges without removing existing ones
+        $now = now();
+        $attachData = [];
         foreach ($badges as $badge) {
+            // Only attach if not already present
             if (!$user->badges()->where('badge_id', $badge->id)->exists()) {
-                $user->badges()->attach($badge->id, ['earned_at' => now()]);
+                $attachData[$badge->id] = ['earned_at' => $now];
             }
+        }
+        if (!empty($attachData)) {
+            $user->badges()->syncWithoutDetaching($attachData);
         }
 
         return response()->json([
             'message' => 'نشان‌ها بررسی و اعطا شدند',
-            'badges' => BadgeResource::collection($user->badges)
+            'badges' => BadgeResource::collection($user->badges()->withPivot('earned_at')->get())
         ]);
     }
 
-    public function awardBadge(User $user, Badge $badge)
+    public function awardBadge(Request $request, Badge $badge)
     {
+        $user = Auth::user();
         if ($user->badges()->where('badge_id', $badge->id)->exists()) {
             return response()->json([
                 'message' => 'کاربر قبلاً این نشان را دریافت کرده است'

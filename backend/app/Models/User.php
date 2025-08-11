@@ -25,12 +25,11 @@ class User extends Authenticatable implements JWTSubject
         'score',
         'streak',
         'badges',
+        'heart_score',
         'last_login_at',
         'last_dhikr_completed_at',
-        'last_activity_date',
         'favorites',
-        'total_dhikrs',
-        'league_id'
+        'total_dhikrs'
     ];
 
     protected $hidden = [
@@ -50,7 +49,6 @@ class User extends Authenticatable implements JWTSubject
         'heart_score' => 'integer',
         'last_login_at' => 'datetime',
         'last_dhikr_completed_at' => 'datetime',
-        'last_activity_date' => 'datetime',
         'total_dhikrs' => 'integer'
     ];
 

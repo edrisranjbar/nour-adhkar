@@ -156,6 +156,7 @@ class UserTest extends TestCase
             'score',
             'streak',
             'badges',
+            'heart_score',
             'last_login_at',
             'last_dhikr_completed_at',
             'favorites',

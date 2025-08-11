@@ -15,7 +15,9 @@ class AuthController extends Controller
 {
     public function get()
     {
-        return new UserResource(auth()->user());
+        return response()->json([
+            'data' => new UserResource(auth()->user())
+        ]);
     }
 
     public function register(Request $request)
