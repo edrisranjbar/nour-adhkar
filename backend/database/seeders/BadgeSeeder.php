@@ -18,11 +18,18 @@ class BadgeSeeder extends Seeder
                 'points_required' => 0,
             ],
             [
-                'name' => 'مداوم',
-                'description' => '۷ روز پشت سر هم ذکر خواندن',
+                'name' => 'مستقر',
+                'description' => 'کاربری که مدتی در پلتفرم فعال بوده است',
+                'icon' => 'fa-solid fa-house',
+                'color' => '#2196F3',
+                'points_required' => 100,
+            ],
+            [
+                'name' => 'مستمر',
+                'description' => 'کاربری که به صورت مداوم و منظم فعالیت می‌کند',
                 'icon' => 'fa-solid fa-calendar-check',
                 'color' => '#9C27B0',
-                'points_required' => 0,
+                'points_required' => 500,
             ],
         ];
 

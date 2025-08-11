@@ -12,87 +12,115 @@ class BadgeService
 {
     protected $badges = [
         'beginner' => [
-            'title' => 'تازه‌کار',
+            'title' => 'beginner',
             'condition' => 1, // total_dhikrs
         ],
         'hardworker' => [
-            'title' => 'پرتلاش',
+            'title' => 'hardworker',
             'condition' => 100, // total_dhikrs
         ],
         'consistent' => [
-            'title' => 'مداوم',
+            'title' => 'consistent',
             'condition' => 7, // streak
         ],
         'golden_heart' => [
-            'title' => 'قلب طلایی',
+            'title' => 'golden_heart',
             'condition' => 100, // heart_score
         ],
     ];
 
     public function initializeBadges(User $user)
     {
-        // Award beginner badge immediately upon user creation
-        $beginnerBadge = Badge::where('name', 'تازه‌کار')->first();
-        if ($beginnerBadge) {
-            $user->badges()->attach($beginnerBadge->id, ['earned_at' => now()]);
-        }
+        $badges = [
+            'beginner' => false,
+            'beginner_date' => null,
+            'hardworker' => false,
+            'hardworker_date' => null,
+            'consistent' => false,
+            'consistent_date' => null,
+            'golden_heart' => false,
+            'golden_heart_date' => null,
+        ];
+        $user->badges = $badges;
+        $user->save();
     }
 
     public function checkAndAwardBadges(User $user)
     {
-        // Check for consistent badge (7-day streak)
-        $consistentBadge = Badge::where('name', 'مداوم')->first();
-        if ($consistentBadge && !$user->badges()->where('badge_id', $consistentBadge->id)->exists()) {
-            if ($user->streak >= 7) {
-                $user->badges()->attach($consistentBadge->id, ['earned_at' => now()]);
-                return true;
+        $awarded = false;
+        $badges = $user->badges ?? [];
+
+        // Ensure badge structure keys exist so tests can assert false values
+        foreach (['beginner', 'hardworker', 'consistent', 'golden_heart'] as $key) {
+            if (!array_key_exists($key, $badges)) {
+                $badges[$key] = false;
+            }
+            $dateKey = $key . '_date';
+            if (!array_key_exists($dateKey, $badges)) {
+                $badges[$dateKey] = null;
             }
         }
-        return false;
+
+        // Beginner: first dhikr
+        if (($user->total_dhikrs ?? 0) >= 1 && empty($badges['beginner'])) {
+            $badges['beginner'] = true;
+            $badges['beginner_date'] = now()->toDateString();
+            $awarded = true;
+        }
+
+        // Hardworker: 100 dhikrs
+        if (($user->total_dhikrs ?? 0) >= 100 && empty($badges['hardworker'])) {
+            $badges['hardworker'] = true;
+            $badges['hardworker_date'] = now()->toDateString();
+            $awarded = true;
+        }
+
+        // Consistent: 7-day streak
+        if (($user->streak ?? 0) >= 7 && empty($badges['consistent'])) {
+            $badges['consistent'] = true;
+            $badges['consistent_date'] = now()->toDateString();
+            $awarded = true;
+        }
+
+        // Golden heart: heart_score 100
+        if (($user->heart_score ?? 0) >= 100 && empty($badges['golden_heart'])) {
+            $badges['golden_heart'] = true;
+            $badges['golden_heart_date'] = now()->toDateString();
+            $awarded = true;
+        }
+
+        // Persist even if nothing awarded so keys are present
+        $user->badges = $badges;
+        $user->save();
+
+        return $awarded;
     }
 
     public function updateStreak(User $user)
     {
-        $lastActivity = $user->last_activity_date;
-        $today = Carbon::today();
+        $today = Carbon::today()->toDateString();
+        $dates = $user->completed_dates ?? [];
 
-        if (!$lastActivity) {
+        if (empty($dates)) {
+            $dates = [$today];
             $user->streak = 1;
-            $user->last_activity_date = $today;
-            
-            // Also update last_dhikr_completed_at for backward compatibility
-            if (Schema::hasColumn('users', 'last_dhikr_completed_at')) {
-                $user->last_dhikr_completed_at = $today;
-            }
-            
-            $user->save();
-            return;
-        }
-
-        $lastActivityDate = Carbon::parse($lastActivity)->startOfDay();
-        $daysDifference = $today->diffInDays($lastActivityDate);
-
-        if ($daysDifference === 0) {
-            // Already recorded today
-            return;
-        } elseif ($daysDifference === 1) {
-            // Consecutive day
-            $user->streak += 1;
         } else {
-            // Streak broken
-            $user->streak = 1;
+            $last = end($dates);
+            if ($last === $today) {
+                // already counted today
+            } elseif ($last === Carbon::yesterday()->toDateString()) {
+                $dates[] = $today;
+                $user->streak = ($user->streak ?? 0) + 1;
+            } else {
+                $dates[] = $today;
+                $user->streak = 1;
+            }
         }
 
-        $user->last_activity_date = $today;
-        
-        // Also update last_dhikr_completed_at for backward compatibility
-        if (Schema::hasColumn('users', 'last_dhikr_completed_at')) {
-            $user->last_dhikr_completed_at = $today;
-        }
-        
+        $user->completed_dates = $dates;
+        $user->last_dhikr_completed_at = Carbon::today();
         $user->save();
 
-        // Check for badges after updating streak
         $this->checkAndAwardBadges($user);
     }
 

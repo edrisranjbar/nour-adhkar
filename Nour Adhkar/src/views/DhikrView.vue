@@ -55,6 +55,22 @@ section#morning {
   animation: fadeInOut 3s ease-in-out forwards;
 }
 
+/* Dynamic font sizes driven by settings' --font-size-factor */
+#dhikr-prefix {
+  font-size: calc(1rem * var(--font-size-factor));
+  line-height: calc(1.8rem * var(--font-size-factor));
+}
+
+#dhikr-text {
+  font-size: calc(1.6rem * var(--font-size-factor));
+  line-height: calc(2.2rem * var(--font-size-factor));
+}
+
+#dhikr-translation {
+  font-size: calc(1rem * var(--font-size-factor));
+  line-height: calc(1.9rem * var(--font-size-factor));
+}
+
 .content-top-bar {
   display: flex;
   justify-content: space-between;
@@ -151,7 +167,7 @@ section#morning {
           <font-awesome-icon icon="fa-copy" class="share-button" @click="share" />
         </div>
       </div>
-      <p id="dhikr-prefix">{{ openedDhikr.prefix }}</p>
+      <p id="dhikr-prefix" :style="prefixStyles">{{ openedDhikr.prefix }}</p>
       <p id="dhikr-text">{{ openedDhikr.arabic_text }}</p>
       <hr>
       <p id="dhikr-translation">{{ openedDhikr.translation }}</p>
@@ -236,6 +252,15 @@ export default {
       ) + 1;
       return Math.max((currentDhikrIndex / total) * 100, 5);
     },
+    prefixStyles() {
+      // Bind to settings store for reactivity when user changes font size
+      const settings = useSettingsStore();
+      const numeric = (settings.fontSize || 3) / 3;
+      return {
+        fontSize: `calc(1rem * ${numeric})`,
+        lineHeight: `calc(1.8rem * ${numeric})`
+      };
+    },
     showCongratsModal() {
       const result = !this.isThereANextDhikr && this.counter == this.openedDhikr.count;
       if (result && !this.hasUpdatedScore) {
@@ -287,6 +312,10 @@ export default {
       
       const currentCount = this.counters[this.openedDhikr.arabic_text] || 0;
       if (currentCount >= this.openedDhikr.count) {
+        // If current dhikr is completed, tapping should go to next dhikr (if available)
+        if (this.isThereANextDhikr) {
+          this.gotoNextDhikr();
+        }
         return;
       }
       
