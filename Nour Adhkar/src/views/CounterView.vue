@@ -187,6 +187,7 @@ export default {
   max-width: 1000px;
   margin: auto;
   background: #D1BB9E;
+  padding-top: 20px;
 }
 
 .section-header {
@@ -232,6 +233,11 @@ header {
   background-repeat: repeat;
   background-size: cover;
   color: #ffffff;
+  margin: 0;
+}
+
+body.dark-mode header {
+  background: #1E1E1E;
 }
 
 .counter-container {
@@ -561,6 +567,7 @@ h2 {
 }
 
 @media (max-width: 480px) {
+  .counter-view { padding-top: 0; }
   .carousel-container {
     padding: 0;
   }

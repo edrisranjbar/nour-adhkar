@@ -56,20 +56,29 @@ section#morning {
   animation: fadeInOut 3s ease-in-out forwards;
 }
 
+.loading-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Dynamic font sizes driven by settings' --font-size-factor */
 #dhikr-prefix {
-  font-size: calc(1rem * var(--font-size-factor));
-  line-height: calc(1.8rem * var(--font-size-factor));
+  font-size: calc(1.6rem * var(--font-size-factor)) !important;
+  line-height: calc(2.3rem * var(--font-size-factor)) !important;
+  margin-bottom: calc(0.9rem * var(--font-size-factor)) !important;
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-light);
 }
 
 #dhikr-text {
   font-size: calc(1.6rem * var(--font-size-factor));
-  line-height: calc(2.2rem * var(--font-size-factor));
+  line-height: calc(2.3rem * var(--font-size-factor));
 }
 
 #dhikr-translation {
-  font-size: calc(1rem * var(--font-size-factor));
-  line-height: calc(1.9rem * var(--font-size-factor));
+  font-size: calc(1.3rem * var(--font-size-factor));
+  line-height: calc(2.3rem * var(--font-size-factor));
 }
 
 .content-top-bar {

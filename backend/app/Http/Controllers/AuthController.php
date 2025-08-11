@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -227,6 +230,56 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'وضعیت کاربر با موفقیت به روزرسانی شد'
         ]);
+    }
+
+    // Password reset: request reset link
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        // Always respond with success to avoid user enumeration
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return response()->json([
+            'success' => in_array($status, [Password::RESET_LINK_SENT, Password::INVALID_USER]) ? true : true,
+            'message' => __($status)
+        ]);
+    }
+
+    // Password reset: perform reset with token
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status == Password::PASSWORD_RESET) {
+            return response()->json([
+                'success' => true,
+                'message' => __($status)
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => __($status)
+        ], 422);
     }
 
 }

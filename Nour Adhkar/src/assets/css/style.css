@@ -2,6 +2,12 @@
 @import './fonts.css';
 @import './dark-mode.css';
 
+/* Reset default browser spacing to avoid white gaps */
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
 :root {
     /* Theme Colors - Light Mode */
     --bg-primary: #D1BB9E;

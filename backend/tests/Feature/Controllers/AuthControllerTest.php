@@ -6,6 +6,9 @@ use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthControllerTest extends TestCase
@@ -91,6 +94,56 @@ class AuthControllerTest extends TestCase
                 'token',
                 'expires_in'
             ]);
+    }
+
+    public function test_can_request_password_reset_link()
+    {
+        Notification::fake();
+        $user = User::factory()->create(['email' => 'reset@example.com']);
+
+        $response = $this->postJson('/api/auth/forgot-password', [
+            'email' => 'reset@example.com'
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson(['success' => true]);
+
+        Notification::assertSentTo($user, ResetPassword::class);
+    }
+
+    public function test_can_reset_password_with_token()
+    {
+        Notification::fake();
+        $user = User::factory()->create(['email' => 'reset2@example.com']);
+
+        // Request reset link to generate a token
+        $this->postJson('/api/auth/forgot-password', [
+            'email' => 'reset2@example.com'
+        ]);
+
+        // Retrieve token from the notification
+        $token = '';
+        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use (&$token) {
+            $token = $notification->token;
+            return true;
+        });
+
+        $newPassword = 'new-password-123';
+        $response = $this->postJson('/api/auth/reset-password', [
+            'email' => 'reset2@example.com',
+            'token' => $token,
+            'password' => $newPassword,
+            'password_confirmation' => $newPassword,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson(['success' => true]);
+
+        // Verify password actually changed
+        $this->postJson('/api/auth/login', [
+            'email' => 'reset2@example.com',
+            'password' => $newPassword,
+        ])->assertStatus(200);
     }
 
     public function test_can_get_authenticated_user()

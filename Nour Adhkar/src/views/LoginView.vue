@@ -53,7 +53,7 @@
             class="w-full flex justify-center items-center py-3 px-4 rounded-lg text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 font-medium text-base disabled:bg-gray-300 disabled:cursor-not-allowed"
             :disabled="Object.keys(errors).length > 0 || isProcessing || isSubmitting"
           >
-            <span v-if="isProcessing" class="inline-block mr-2">
+            <span v-if="isProcessing" class="inline-block" style="margin-inline-end: 0.5rem;">
               <font-awesome-icon icon="fa-solid fa-spinner" spin class="text-base" />
             </span>
             ورود
@@ -73,6 +73,11 @@
             حساب کاربری ندارید؟ 
             <RouterLink to="/register" class="text-primary-600 hover:text-primary-700 font-medium">
               اینجا ثبت نام کنید
+            </RouterLink>
+          </p>
+          <p class="text-sm text-gray-600 mt-2">
+            <RouterLink to="/forgot-password" class="text-primary-600 hover:text-primary-700 font-medium">
+              فراموشی رمز عبور
             </RouterLink>
           </p>
         </div>

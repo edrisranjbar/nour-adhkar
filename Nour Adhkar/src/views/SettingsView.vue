@@ -133,6 +133,7 @@ export default {
   max-width: 1000px;
   margin: auto;
   background: #D1BB9E;
+  padding-top: 20px;
 }
 
 body.dark-mode .settings-view {
@@ -150,6 +151,7 @@ header {
   background-repeat: repeat;
   background-size: cover;
   color: #ffffff;
+  margin: 0;
 }
 
 body.dark-mode header {
@@ -344,6 +346,7 @@ body.dark-mode .font-size-selector button:disabled {
 
 /* Responsive */
 @media (max-width: 480px) {
+  .settings-view { padding-top: 0; }
   .settings-container {
     padding: 15px;
   }
