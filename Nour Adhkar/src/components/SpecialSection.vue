@@ -8,7 +8,7 @@
             <font-awesome-icon icon="fa-solid fa-sun" />
           </div>
           <h3>اذکار صبحگاه</h3>
-          <p>هر روز صبح با این اذکار روز خود را آغاز کنید</p>
+          <p>روز خود را با یاد خدا آغاز کنید</p>
           <div class="badge">{{ morningCollection?.adhkar?.length || 0 }} ذکر</div>
         </div>
       </RouterLink>
@@ -111,6 +111,11 @@ body.dark-mode .section-title {
 .night-card {
   background: linear-gradient(135deg, #141E30 0%, #243B55 100%);
   color: white;
+}
+
+/* Dark mode: ensure day adhkar (first card) title is white */
+body.dark-mode .morning-card h3 {
+  color: #fff;
 }
 
 .special-card-content {

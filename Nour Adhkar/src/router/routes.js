@@ -12,6 +12,8 @@ import AboutView from '../views/AboutView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import { authGuard, adminGuard } from './guards';
 import DashboardView from '../views/DashboardView.vue'
+import ForgotPasswordView from '../views/ForgotPasswordView.vue'
+import ResetPasswordView from '../views/ResetPasswordView.vue'
 
 // Lazy loading for blog components
 const BlogView = () => import('../views/BlogView.vue');
@@ -37,6 +39,24 @@ export const publicRoutes = [
     component: Login,
     meta: { 
       noindex: true // exclude from sitemap 
+    }
+  },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPasswordView,
+    meta: {
+      title: 'بازیابی رمز عبور | اذکار نور',
+      noindex: true
+    }
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: ResetPasswordView,
+    meta: {
+      title: 'تنظیم رمز عبور جدید | اذکار نور',
+      noindex: true
     }
   },
   { 

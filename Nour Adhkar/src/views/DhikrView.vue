@@ -24,6 +24,7 @@ section#morning {
   height: calc(100dvh - 80px - 70px); /* viewport height minus header and footer heights */
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 @media (max-width: 767px) {
@@ -55,20 +56,29 @@ section#morning {
   animation: fadeInOut 3s ease-in-out forwards;
 }
 
+.loading-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Dynamic font sizes driven by settings' --font-size-factor */
 #dhikr-prefix {
-  font-size: calc(1rem * var(--font-size-factor));
-  line-height: calc(1.8rem * var(--font-size-factor));
+  font-size: calc(1.6rem * var(--font-size-factor)) !important;
+  line-height: calc(2.3rem * var(--font-size-factor)) !important;
+  margin-bottom: calc(0.9rem * var(--font-size-factor)) !important;
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-light);
 }
 
 #dhikr-text {
   font-size: calc(1.6rem * var(--font-size-factor));
-  line-height: calc(2.2rem * var(--font-size-factor));
+  line-height: calc(2.3rem * var(--font-size-factor));
 }
 
 #dhikr-translation {
-  font-size: calc(1rem * var(--font-size-factor));
-  line-height: calc(1.9rem * var(--font-size-factor));
+  font-size: calc(1.3rem * var(--font-size-factor));
+  line-height: calc(2.3rem * var(--font-size-factor));
 }
 
 .content-top-bar {
@@ -122,6 +132,97 @@ section#morning {
   90% { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, -20px); }
 }
+
+/* Slide transitions for dhikr changes */
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(24px);
+}
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+.slide-right-enter-from {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+.slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+/* Counter bump animation */
+.bottom-nav-bar .counter-button.bump {
+  animation: counter-bump 160ms ease;
+}
+@keyframes counter-bump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* Number swap micro-transition */
+.counter-bump-enter-active,
+.counter-bump-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.counter-bump-enter-from { opacity: 0; transform: translateY(6px) scale(0.96); }
+.counter-bump-enter-to { opacity: 1; transform: translateY(0) scale(1); }
+.counter-bump-leave-from { opacity: 1; transform: translateY(0) scale(1); }
+.counter-bump-leave-to { opacity: 0; transform: translateY(-6px) scale(1.04); }
+
+.counter-value {
+  display: inline-block;
+}
+
+/* Tap ripple visual feedback */
+.tap-ripple {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+  background: rgba(156, 132, 102, 0.25); /* brand-primary with alpha */
+  box-shadow: 0 0 0 2px rgba(156, 132, 102, 0.15);
+  animation: tap-ripple-expand 550ms ease-out forwards;
+}
+
+@keyframes tap-ripple-expand {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0.5;
+  }
+  70% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(6);
+    opacity: 0;
+  }
+}
+
+.counter-button { position: relative; overflow: hidden; }
+.counter-ripple {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+  background: rgba(167, 146, 119, 0.25); /* brand-secondary with alpha */
+  animation: counter-ripple-expand 450ms ease-out forwards;
+}
+@keyframes counter-ripple-expand {
+  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(4.5); opacity: 0; }
+}
 </style>
 <template>
 
@@ -153,7 +254,7 @@ section#morning {
       <button @click="loadCollection" class="retry-button">تلاش مجدد</button>
     </div>
 
-    <main v-else class="modal-container" @click="handleDhikrBodyClick">
+    <main v-else class="modal-container" ref="dhikrMain" @click="handleDhikrBodyClick">
       <div class="content-top-bar">
         <h2 id="dhikr-title"></h2>
         <div class="action-buttons">
@@ -167,15 +268,26 @@ section#morning {
           <font-awesome-icon icon="fa-copy" class="share-button" @click="share" />
         </div>
       </div>
-      <p id="dhikr-prefix" :style="prefixStyles">{{ openedDhikr.prefix }}</p>
-      <p id="dhikr-text">{{ openedDhikr.arabic_text }}</p>
-      <hr>
-      <p id="dhikr-translation">{{ openedDhikr.translation }}</p>
+      <transition :name="transitionName" mode="out-in">
+        <div class="dhikr-content" :key="openedDhikr.id || openedDhikr.arabic_text">
+          <p id="dhikr-prefix" :style="prefixStyles">{{ openedDhikr.prefix }}</p>
+          <p id="dhikr-text">{{ openedDhikr.arabic_text }}</p>
+          <hr>
+          <p id="dhikr-translation">{{ openedDhikr.translation }}</p>
+        </div>
+      </transition>
+      <!-- Tap ripples container -->
+      <span v-for="r in ripples" :key="r.id" class="tap-ripple" :style="{ left: r.x + 'px', top: r.y + 'px' }" />
     </main>
 
     <footer class="bottom-nav-bar">
       <span id="dhikr-count">{{ openedDhikr.count }} مرتبه</span>
-      <span class="counter-button" @click="count()">{{ counter }}</span>
+      <span class="counter-button" ref="counterButton" @click="count($event)" :class="{ bump: bumping }">
+        <transition name="counter-bump" mode="out-in">
+          <span class="counter-value" :key="counter">{{ counter }}</span>
+        </transition>
+        <span v-for="r in buttonRipples" :key="r.id" class="counter-ripple" :style="{ left: r.x + 'px', top: r.y + 'px' }" />
+      </span>
       <span id="dhikr-progress-details">{{ counter }} از {{ openedDhikr.count }} مرتبه</span>
     </footer>
 
@@ -216,7 +328,11 @@ export default {
       loading: true,
       error: null,
       hasUpdatedScore: false,
-      favorites: new Set() // Store favorite dhikr IDs
+      favorites: new Set(), // Store favorite dhikr IDs
+      transitionName: 'slide-left',
+      bumping: false,
+      ripples: [],
+      buttonRipples: []
     }
   },
   watch: {
@@ -306,7 +422,7 @@ export default {
       this.counters = newCounters;
     },
     count(event) {
-      if (event && event.target.id === 'share-button') {
+      if (event && event.target && event.target.id === 'share-button') {
         return;
       }
       
@@ -321,6 +437,18 @@ export default {
       
       // Update the counter for the current dhikr
       this.counters[this.openedDhikr.arabic_text] = currentCount + 1;
+      this.triggerCounterBump();
+      // Create ripple at button click point if event is from button
+      if (event && this.$refs.counterButton) {
+        const rect = this.$refs.counterButton.getBoundingClientRect();
+        const x = (event.clientX || (event.touches && event.touches[0]?.clientX)) - rect.left;
+        const y = (event.clientY || (event.touches && event.touches[0]?.clientY)) - rect.top;
+        const id = Date.now() + Math.random();
+        this.buttonRipples.push({ id, x, y });
+        setTimeout(() => {
+          this.buttonRipples = this.buttonRipples.filter(r => r.id !== id);
+        }, 500);
+      }
       
       if (currentCount + 1 >= this.openedDhikr.count && this.isThereANextDhikr) {
         this.gotoNextDhikr();
@@ -329,6 +457,7 @@ export default {
     },
     gotoPrevDhikr() {
       if (this.dhikrIndex > 0) {
+        this.transitionName = 'slide-right';
         this.dhikrIndex--;
         this.openedDhikr = this.openedCollection.adhkar[this.dhikrIndex];
       }
@@ -340,8 +469,16 @@ export default {
         } catch {
           console.error('Cannot vibrate!');
         }
+        this.transitionName = 'slide-left';
         this.openedDhikr = this.openedCollection.adhkar[++this.dhikrIndex];
       }
+    },
+    triggerCounterBump() {
+      this.bumping = false;
+      this.$nextTick(() => {
+        this.bumping = true;
+        setTimeout(() => { this.bumping = false; }, 180);
+      });
     },
     async updateHeartScore() {
       if (!this.isAuthenticated) {
@@ -431,9 +568,19 @@ export default {
       }
     },
     handleDhikrBodyClick(event) {
-      if (event.target.id !== 'share-button') {
-        this.count();
+      if (event.target.id === 'share-button') return;
+      // Ripple on body
+      if (this.$refs.dhikrMain) {
+        const rect = this.$refs.dhikrMain.getBoundingClientRect();
+        const x = (event.clientX || (event.touches && event.touches[0]?.clientX)) - rect.left;
+        const y = (event.clientY || (event.touches && event.touches[0]?.clientY)) - rect.top;
+        const id = Date.now() + Math.random();
+        this.ripples.push({ id, x, y });
+        setTimeout(() => {
+          this.ripples = this.ripples.filter(r => r.id !== id);
+        }, 600);
       }
+      this.count();
     },
     handleTouchStart(event) {
       this.touchstartX = event.changedTouches[0].screenX;

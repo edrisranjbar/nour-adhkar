@@ -2,6 +2,12 @@
 @import './fonts.css';
 @import './dark-mode.css';
 
+/* Reset default browser spacing to avoid white gaps */
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
 :root {
     /* Theme Colors - Light Mode */
     --bg-primary: #D1BB9E;
@@ -431,6 +437,11 @@ header h1 {
 .bottom-nav-bar .counter-button:active {
   transform: scale(0.95);
   box-shadow: 0 2px 8px var(--ui-shadow-light);
+}
+
+/* Ensure counter number remains readable in light mode */
+.bottom-nav-bar .counter-button .counter-value {
+  color: var(--brand-primary);
 }
 
 /* Content Top Bar */
