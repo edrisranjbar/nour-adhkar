@@ -1,31 +1,14 @@
 <template>
-  <aside class="sidebar">
+  <aside class="sidebar" role="navigation" aria-label="پنل مدیریت">
+    <div class="sidebar-header">
+      <button class="collapse-btn" @click="toggleCollapsed" :aria-pressed="isCollapsed.toString()" aria-label="تغییر وضعیت نوار کناری">
+        <font-awesome-icon :icon="isCollapsed ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left'" />
+      </button>
+    </div>
     <nav class="nav">
       <ul class="menu">
-        <li v-for="item in items" :key="item.id || item.path" class="menu-item" :class="{ 'has-submenu': item.items }">
-          <template v-if="item.items">
-            <div class="menu-link submenu-header" @click="toggleSubmenu(item.id)">
-              <div class="menu-icon">
-                <font-awesome-icon :icon="item.icon" />
-              </div>
-              <span class="menu-text">{{ item.title }}</span>
-              <font-awesome-icon 
-                :icon="expandedMenus.includes(item.id) ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'" 
-                class="submenu-arrow"
-              />
-            </div>
-            <ul v-show="expandedMenus.includes(item.id)" class="submenu">
-              <li v-for="subItem in item.items" :key="subItem.path" class="submenu-item">
-                <RouterLink :to="subItem.path" class="menu-link" active-class="active">
-                  <div class="menu-icon">
-                    <font-awesome-icon :icon="subItem.icon" />
-                  </div>
-                  <span class="menu-text">{{ subItem.title }}</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </template>
-          <RouterLink v-else :to="item.path" class="menu-link" active-class="active" :exact="item.exact">
+        <li v-for="item in items" :key="item.path" class="menu-item">
+          <RouterLink :to="item.path" class="menu-link" :class="{ active: isActive(item.path) }" :title="isCollapsed ? item.title : null">
             <div class="menu-icon">
               <font-awesome-icon :icon="item.icon" />
             </div>
@@ -46,33 +29,77 @@ export default {
       required: true
     }
   },
+  emits: ['sidebar-toggle'],
   data() {
     return {
-      expandedMenus: []
+      isCollapsed: false
+    }
+  },
+  created() {
+    // Restore persisted UI state
+    try {
+      const stored = localStorage.getItem('admin-sidebar-expanded');
+      if (stored) this.expandedMenus = JSON.parse(stored);
+      const collapsed = localStorage.getItem('admin-sidebar-collapsed');
+      this.isCollapsed = collapsed === 'true';
+      if (this.isCollapsed) document.body.classList.add('admin-collapsed');
+    } catch (_) {}
+
+    // Auto-expand the section that contains the active route
+    this.autoExpandForRoute(this.$route.path);
+  },
+  watch: {
+    isCollapsed(val) {
+      try { localStorage.setItem('admin-sidebar-collapsed', String(val)); } catch (_) {}
+    },
+    '$route.path'(newPath) {
+      // no-op for flat menu
     }
   },
   methods: {
-    toggleSubmenu(menuId) {
-      const index = this.expandedMenus.indexOf(menuId);
-      if (index === -1) {
-        this.expandedMenus.push(menuId);
-      } else {
-        this.expandedMenus.splice(index, 1);
-      }
-    }
+    toggleCollapsed() {
+      this.isCollapsed = !this.isCollapsed;
+      document.body.classList.toggle('admin-collapsed', this.isCollapsed);
+      this.$emit('sidebar-toggle', this.isCollapsed);
+    },
+    isActive(path) {
+      if (!path) return false;
+      // Exact for root, startsWith for sections
+      return this.$route.path === path || this.$route.path.startsWith(path + '/');
+    },
+    autoExpandForRoute() {}
   }
 }
 </script>
 
 <style scoped>
 .sidebar {
-  width: 250px;
-  background-color: #333;
-  color: white;
-  border-right: 1px solid #444;
+  width: 260px;
+  background: #0f172a; /* --admin-header */
+  color: #e5e7eb;      /* --admin-text */
+  border-right: 1px solid rgba(255,255,255,0.08); /* --admin-border */
   overflow-y: auto;
   position: relative;
+  backdrop-filter: blur(4px);
 }
+
+.sidebar-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem 0.75rem 0 0.75rem;
+}
+
+.collapse-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #e5e7eb;
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.collapse-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
 
 .nav {
   padding: 1rem 0;
@@ -93,25 +120,31 @@ export default {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  color: #ddd;
+  color: #cbd5e1;
   text-decoration: none;
   transition: all 0.2s;
   border-left: 3px solid transparent;
   cursor: pointer;
   text-align: right;
   direction: rtl;
+  width: 100%;
 }
 
 .menu-link:hover {
-  background-color: #444;
-  color: white;
-  border-left-color: #A79277;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border-left-color: #3b82f6; /* --admin-accent */
 }
 
 .menu-link.active {
-  background-color: #444;
-  color: white;
-  border-left-color: #A79277;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-left-color: #3b82f6; /* --admin-accent */
+}
+
+.menu-link:focus-visible {
+  outline: 2px solid #A79277;
+  outline-offset: 2px;
 }
 
 .menu-icon {
@@ -139,7 +172,7 @@ export default {
   list-style: none;
   padding: 0;
   margin: 0;
-  background-color: #2a2a2a;
+  background: rgba(255,255,255,0.04);
 }
 
 .submenu-item .menu-link {
@@ -148,10 +181,17 @@ export default {
 }
 
 .submenu-item .menu-link:hover {
-  background-color: #3a3a3a;
+  background: rgba(255,255,255,0.06);
 }
 
 .submenu-item .menu-link.active {
-  background-color: #3a3a3a;
+  background: rgba(255,255,255,0.08);
 }
+
+/* Collapsed mode */
+body.admin-collapsed .sidebar { width: 72px; }
+body.admin-collapsed .sidebar .menu-text { display: none; }
+body.admin-collapsed .sidebar .submenu { display: none !important; }
+body.admin-collapsed .sidebar .submenu-header .submenu-arrow { display: none; }
+body.admin-collapsed .sidebar .menu-link { justify-content: center; padding: 0.75rem; }
 </style> 

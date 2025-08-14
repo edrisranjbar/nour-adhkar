@@ -2,12 +2,6 @@
   <div class="admin-dashboard">
     <div class="dashboard-header">
       <h1 class="dashboard-title">پیشخوان مدیریت</h1>
-      <div class="header-actions">
-        <button class="refresh-btn" @click="refreshStats">
-          <font-awesome-icon icon="fa-solid fa-sync" />
-          بروزرسانی
-        </button>
-      </div>
     </div>
     
     <div class="stats-container">
@@ -37,7 +31,7 @@
         </div>
         <div class="stat-content">
           <span class="stat-value">{{ formatNumber(stats.totalViews || 0) }}</span>
-          <span class="stat-label">بازدیدها</span>
+          <span class="stat-label">بازدید مقالات</span>
         </div>
       </div>
       
@@ -48,6 +42,16 @@
         <div class="stat-content">
           <span class="stat-value">{{ formatNumber(stats.commentsCount || 0) }}</span>
           <span class="stat-label">نظرات</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon analytics-icon">
+          <font-awesome-icon icon="fa-solid fa-chart-line" />
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ formatNumber(stats.analyticsTotal || 0) }}</span>
+          <span class="stat-label">بازدید صفحات (۱۴ روز)</span>
         </div>
       </div>
     </div>
@@ -123,6 +127,24 @@
           </table>
         </div>
       </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">آمار بازدید صفحات (۱۴ روز گذشته)</h2>
+        </div>
+        <div class="section-content">
+          <canvas ref="visitsChart" height="120"></canvas>
+          <div class="top-pages">
+            <h3 class="section-subtitle">پر بازدیدترین صفحات</h3>
+            <ul class="top-pages-list">
+              <li v-for="(p, i) in analytics.topPages" :key="i">
+                <span class="page-path">{{ p.path }}</span>
+                <span class="page-count">{{ formatNumber(p.visits) }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
       
       <div class="quick-actions section">
         <h2 class="section-title">عملیات سریع</h2>
@@ -150,12 +172,7 @@
           </div>
           
           <!-- Future quick actions can be added here -->
-          <div class="action-card" @click="refreshStats">
-            <div class="action-icon">
-              <font-awesome-icon icon="fa-solid fa-sync" />
-            </div>
-            <span class="action-label">بروزرسانی آمار</span>
-          </div>
+          
         </div>
       </div>
     </div>
@@ -173,10 +190,23 @@ import {
   faComments, 
   faPlus, 
   faList, 
-  faSync, 
+  
   faPen,
-  faArrowLeft
+  faArrowLeft,
+  faChartLine
 } from '@fortawesome/free-solid-svg-icons';
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale
+} from 'chart.js';
+
+ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
 
 // Add icons to the library
 library.add(
@@ -186,9 +216,9 @@ library.add(
   faComments, 
   faPlus, 
   faList, 
-  faSync, 
   faPen,
-  faArrowLeft
+  faArrowLeft,
+  faChartLine
 );
 
 export default {
@@ -201,7 +231,12 @@ export default {
         blogPostsCount: 0,
         usersCount: 0,
         totalViews: 0,
-        commentsCount: 0
+        commentsCount: 0,
+        analyticsTotal: 0
+      },
+      analytics: {
+        daily: [],
+        topPages: []
       }
     };
   },
@@ -219,7 +254,8 @@ export default {
       try {
         await Promise.all([
           this.fetchStats(),
-          this.fetchRecentPosts()
+          this.fetchRecentPosts(),
+          this.fetchAnalytics()
         ]);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -241,12 +277,69 @@ export default {
           blogPostsCount: postsResponse.data.posts.total || 0,
           totalViews: viewsResponse.data.total_views || 0,
           commentsCount: commentsResponse.data.count || 0,
-          usersCount: usersCount
+          usersCount: usersCount,
+          analyticsTotal: this.analytics.daily.reduce((sum, d) => sum + (d.visits || 0), 0)
         };
       } catch (error) {
         console.error('Error fetching stats:', error);
         this.$toast.error('خطا در دریافت آمار');
       }
+    },
+
+    async fetchAnalytics() {
+      try {
+        const response = await axios.get('admin/analytics/overview', { params: { days: 14 } });
+        if (response.data.success) {
+          const { daily, topPages } = response.data.data;
+          this.analytics.daily = daily;
+          this.analytics.topPages = topPages;
+          this.stats.analyticsTotal = this.analytics.daily.reduce((sum, d) => sum + (d.visits || 0), 0);
+          this.renderVisitsChart();
+        }
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+      }
+    },
+
+    renderVisitsChart() {
+      const ctx = this.$refs.visitsChart?.getContext('2d');
+      if (!ctx) return;
+      const labels = this.analytics.daily.map(d => new Date(d.date).toLocaleDateString('fa-IR'));
+      const data = this.analytics.daily.map(d => d.visits);
+
+      if (this._visitsChart) {
+        this._visitsChart.data.labels = labels;
+        this._visitsChart.data.datasets[0].data = data;
+        this._visitsChart.update();
+        return;
+      }
+
+      this._visitsChart = new ChartJS(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'بازدید صفحات',
+            data,
+            borderColor: '#4a6fa5',
+            backgroundColor: 'rgba(74, 111, 165, 0.15)',
+            tension: 0.3,
+            fill: true,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: false }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
     },
     
     async getBlogPostsCount() {
@@ -330,9 +423,7 @@ export default {
       this.$router.push(path);
     },
     
-    refreshStats() {
-      this.fetchDashboardData();
-    }
+    
   }
 };
 </script>
@@ -347,7 +438,7 @@ export default {
 .dashboard-title {
   margin-bottom: 2rem;
   font-size: 1.8rem;
-  color: #333;
+  color: var(--admin-text);
 }
 
 .stats-container {
@@ -370,7 +461,7 @@ export default {
 }
 
 .stat-card {
-  background-color: white;
+  background-color: var(--admin-surface);
   border-radius: 8px;
   padding: 1.25rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -414,12 +505,12 @@ export default {
 .stat-value {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #333;
+  color: var(--admin-text);
 }
 
 .stat-label {
   font-size: 0.95rem;
-  color: #777;
+  color: var(--admin-muted);
 }
 
 .dashboard-sections {
@@ -435,7 +526,7 @@ export default {
 }
 
 .section {
-  background-color: white;
+  background-color: var(--admin-surface);
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -450,7 +541,7 @@ export default {
 
 .section-title {
   font-size: 1.25rem;
-  color: #333;
+  color: var(--admin-text);
   margin: 0;
 }
 
@@ -458,7 +549,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #A79277;
+  color: var(--admin-accent);
   text-decoration: none;
   font-size: 0.95rem;
 }
@@ -472,7 +563,7 @@ export default {
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  color: #777;
+  color: var(--admin-muted);
 }
 
 .spinner {
@@ -497,7 +588,7 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 3rem 0;
-  color: #777;
+  color: var(--admin-muted);
 }
 
 .empty-icon {
@@ -521,7 +612,7 @@ export default {
 
 .data-table th {
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text);
 }
 
 .post-title {
@@ -575,7 +666,7 @@ export default {
   cursor: pointer;
   font-size: 0.9rem;
   transition: color 0.2s;
-  color: #666;
+  color: var(--admin-muted);
 }
 
 .view-button:hover {
@@ -626,7 +717,7 @@ export default {
 .action-label {
   font-size: 0.85rem;
   text-align: center;
-  color: #555;
+  color: var(--admin-muted);
 }
 
 /* Dark mode styles */
@@ -634,11 +725,7 @@ body.dark-mode .dashboard-title {
   color: #eee;
 }
 
-body.dark-mode .stat-card,
-body.dark-mode .section {
-  background-color: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
+/* Dark mode overrides handled globally via :deep in AdminLayout */
 
 body.dark-mode .stat-value {
   color: #eee;

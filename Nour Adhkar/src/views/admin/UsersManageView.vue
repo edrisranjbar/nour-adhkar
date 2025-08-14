@@ -22,6 +22,7 @@
       :has-filters="hasActiveFilters"
       @edit-user="editUser"
       @toggle-status="toggleUserStatus"
+      @delete-user="confirmAndDeleteUser"
     />
     
     <PaginationControls 
@@ -345,6 +346,36 @@ export default {
         console.error('Error toggling user status:', error);
         this.showToast(error.response?.data?.message || 'خطا در تغییر وضعیت کاربر', 'error');
       }
+    },
+
+    async confirmAndDeleteUser(user) {
+      const confirmed = window.confirm(`آیا از حذف کاربر «${user.name}» مطمئن هستید؟ این عملیات غیرقابل بازگشت است.`);
+      if (!confirmed) return;
+
+      try {
+        const response = await axios.delete(
+          `${BASE_API_URL}/admin/users/${user.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.token}`
+            }
+          }
+        );
+
+        if (response.data && response.data.success) {
+          this.showToast('کاربر با موفقیت حذف شد', 'success');
+          // Refresh list (keep current page; adjust if last item on page)
+          if (this.users.length === 1 && this.pagination.current_page > 1) {
+            this.pagination.current_page -= 1;
+          }
+          await this.fetchUsers();
+        } else {
+          this.showToast(response.data?.message || 'خطا در حذف کاربر', 'error');
+        }
+      } catch (error) {
+        const message = error.response?.data?.message || 'خطا در حذف کاربر';
+        this.showToast(message, 'error');
+      }
     }
   }
 };
@@ -367,7 +398,7 @@ export default {
 .page-title {
   margin-bottom: 0;
   font-size: 1.8rem;
-  color: #333;
+  color: var(--admin-text);
 }
 
 .new-user-button {

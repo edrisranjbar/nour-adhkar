@@ -15,6 +15,7 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\Api\LeagueController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\AnalyticsController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -39,6 +40,9 @@ Route::get('/posts/views/total', [PostController::class, 'getTotalViews']);
 Route::get('posts/{post}/related', [PostController::class, 'related']);
 Route::get('posts/{postId}/comments', [CommentController::class, 'getPostComments']);
 Route::post('comments', [CommentController::class, 'store']);
+
+// Public analytics route (track page visit)
+Route::post('analytics/visit', [AnalyticsController::class, 'track'])->middleware('throttle:60,1');
 
 // Public donation routes
 Route::prefix('donations')->group(function () {
@@ -106,6 +110,7 @@ Route::middleware(['auth:api', AdminMiddleware::class])
             Route::post('/', [AuthController::class, 'adminStore']);
             Route::put('{id}', [AuthController::class, 'adminUpdate']);
             Route::patch('{id}/toggle-status', [AuthController::class, 'toggleStatus']);
+            Route::delete('{id}', [AuthController::class, 'deleteUser']);
         });
 
         // Collections management
@@ -159,5 +164,10 @@ Route::middleware(['auth:api', AdminMiddleware::class])
             Route::put('{comment}', [CommentController::class, 'update']);
             Route::delete('{comment}', [CommentController::class, 'destroy']);
             Route::get('pending/count', [CommentController::class, 'getPendingCount']);
+        });
+
+        // Analytics overview
+        Route::prefix('analytics')->group(function () {
+            Route::get('overview', [AnalyticsController::class, 'overview']);
         });
     });

@@ -1,31 +1,5 @@
 <template>
   <div class="admin-layout">
-    <header class="admin-header">
-      <div class="admin-header-container">
-        <div class="admin-brand">
-          <RouterLink to="/admin" class="admin-logo">
-            <img src="@/assets/icons/logo.png" alt="Logo" class="logo-image" />
-            <span class="logo-text">اذکار نور</span>
-            <span class="admin-badge">مدیریت</span>
-          </RouterLink>
-        </div>
-        <div class="admin-user-info">
-          <div class="user-avatar">
-            <div v-if="!user?.avatar" class="avatar-placeholder">
-              {{ userInitials }}
-            </div>
-            <img v-else :src="user.avatar" :alt="user.name" />
-          </div>
-          <div class="admin-user-name">
-            <span class="user-name">{{ user?.name || 'Admin' }}</span>
-            <button class="logout-button" @click="logout">
-              <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
-              <span>خروج</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
     <div class="admin-content">
       <AdminSidebar />
       <main class="admin-main">
@@ -57,6 +31,9 @@ export default {
   },
   methods: {
     ...mapActions(['logoutUser']),
+    toggleSidebar() {
+      document.body.classList.toggle('admin-collapsed');
+    },
     async logout() {
       await this.logoutUser();
       this.$router.push('/');
@@ -82,15 +59,23 @@ export default {
   margin: 0;
   display: flex;
   flex-direction: column;
+  /* Standard dark admin palette */
+  --admin-bg: #0b1220;           /* page background */
+  --admin-surface: #111827;      /* cards/surfaces */
+  --admin-header: #0f172a;       /* header/nav */
+  --admin-border: rgba(255,255,255,0.08);
+  --admin-text: #e5e7eb;         /* primary text */
+  --admin-muted: #9ca3af;        /* secondary text */
+  --admin-accent: #3b82f6;       /* blue accent */
 }
 
 .admin-header {
   margin-top: 0;
   border-radius: 0;
-  background-color: #262626;
-  color: white;
-  border-bottom: 1px solid #444;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: var(--admin-header);
+  color: var(--admin-text);
+  border-bottom: 1px solid var(--admin-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   z-index: 100;
 }
 
@@ -115,7 +100,7 @@ export default {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: white;
+  color: var(--admin-text);
   margin-left: 1rem;
   gap: 0.75rem;
 }
@@ -128,7 +113,7 @@ export default {
 }
 
 .admin-logo:hover .logo-image {
-  transform: rotate(5deg);
+  transform: rotate(5deg) scale(1.05);
 }
 
 .logo-text {
@@ -138,13 +123,33 @@ export default {
 }
 
 .admin-badge {
-  color: white;
-  background-color: #A79277;
+  color: #fff;
+  background-color: var(--admin-accent);
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.8rem;
   font-weight: 500;
 }
+
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: auto;
+  margin-left: 1rem;
+}
+
+.icon-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
 
 .admin-user-info {
   display: flex;
@@ -186,13 +191,13 @@ export default {
 
 .user-name {
   font-weight: 500;
-  color: #fff;
+  color: var(--admin-text);
 }
 
 .logout-button {
   background: none;
   border: none;
-  color: #aaa;
+  color: var(--admin-muted);
   cursor: pointer;
   padding: 0;
   font-family: inherit;
@@ -204,18 +209,107 @@ export default {
 }
 
 .logout-button:hover {
-  color: white;
+  color: var(--admin-text);
 }
 
 .admin-main {
   flex: 1;
-  padding: 1.5rem;
-  background-color: #f5f5f5;
+  padding: 1.25rem;
+  background: var(--admin-bg);
   overflow-y: auto;
 }
 
 body.dark-mode .admin-main {
-  background-color: #222;
+  background: var(--admin-bg);
+}
+
+/* Standardize admin card surfaces using deep selector to override child scoped styles */
+:deep(.section),
+:deep(.stat-card),
+:deep(.chart-card),
+:deep(.top-pages) {
+  background: var(--admin-surface) !important;
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
+}
+
+:deep(.data-table th),
+:deep(.data-table td) {
+  border-bottom: 1px solid var(--admin-border) !important;
+  color: var(--admin-text);
+}
+
+/* Tables */
+:deep(.users-table),
+:deep(.data-table) {
+  color: var(--admin-text);
+}
+
+:deep(.users-table th),
+:deep(.data-table th) {
+  background-color: rgba(255,255,255,0.06) !important;
+  color: var(--admin-text) !important;
+}
+
+:deep(.users-table td),
+:deep(.data-table td) {
+  border-bottom: 1px solid var(--admin-border) !important;
+}
+
+/* Generic table theming across admin */
+:deep(table) {
+  color: var(--admin-text);
+}
+
+:deep(table thead th) {
+  background-color: rgba(255,255,255,0.06) !important;
+  color: var(--admin-text) !important;
+  border-bottom: 1px solid var(--admin-border) !important;
+}
+
+:deep(table tbody tr) {
+  border-bottom: 1px solid var(--admin-border) !important;
+}
+
+:deep(table tbody tr:hover) {
+  background: rgba(255,255,255,0.04) !important;
+}
+
+/* Forms */
+:deep(input[type="text"]),
+:deep(input[type="email"]),
+:deep(input[type="number"]),
+:deep(input[type="password"]),
+:deep(select),
+:deep(textarea) {
+  background: #0b1220 !important;
+  color: var(--admin-text) !important;
+  border: 1px solid var(--admin-border) !important;
+}
+
+:deep(input::placeholder),
+:deep(textarea::placeholder) {
+  color: var(--admin-muted) !important;
+}
+
+/* Modals */
+:deep(.modal),
+:deep(.modal-content),
+:deep(.v-modal) {
+  background: var(--admin-surface) !important;
+  color: var(--admin-text) !important;
+  border-color: var(--admin-border) !important;
+}
+
+/* Generic cards */
+:deep(.card) {
+  background: var(--admin-surface) !important;
+  color: var(--admin-text) !important;
+  border: 1px solid var(--admin-border) !important;
+}
+
+:deep(.status-badge) {
+  border: 1px solid var(--admin-border);
 }
 
 /* Responsive adjustments */
