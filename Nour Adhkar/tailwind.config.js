@@ -23,6 +23,8 @@ export default {
       },
       fontFamily: {
         sans: ['Vazirmatn', 'sans-serif'],
+        arabic: ['Othman Taha', 'serif'],
+        othman: ['Othman Taha', 'serif'],
       },
     },
   },

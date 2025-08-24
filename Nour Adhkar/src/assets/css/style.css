@@ -123,6 +123,15 @@ input,textarea,select,button,radio,checkbox{
     text-align: right;
 }
 
+/* Arabic Text Styling */
+.arabic-text {
+    font-family: var(--font-arabic) !important;
+}
+
+.othman-taha {
+    font-family: var(--font-arabic) !important;
+}
+
 /* Common Utility Classes */
 .d-flex {
     display: flex;
