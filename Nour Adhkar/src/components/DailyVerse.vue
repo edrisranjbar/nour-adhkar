@@ -116,6 +116,7 @@ export default {
   margin-bottom: 1rem;
   text-align: center;
   direction: rtl;
+  font-family: var(--font-arabic);
 }
 
 .verse-translation {

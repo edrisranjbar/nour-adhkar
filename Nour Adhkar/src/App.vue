@@ -10,7 +10,9 @@ export default {
   data() {
     return {
       showSplash: false,
-      settingsStore: null
+      settingsStore: null,
+      deferredPrompt: null,
+      canInstall: false
     }
   },
   computed: {
@@ -22,6 +24,14 @@ export default {
   },
   methods: {
     ...mapActions(['refreshUserData']),
+    triggerInstall() {
+      if (!this.deferredPrompt) return;
+      this.deferredPrompt.prompt();
+      this.deferredPrompt.userChoice.finally(() => {
+        this.deferredPrompt = null;
+        this.canInstall = false;
+      });
+    },
     checkSplashScreen() {
       // Get from local storage to check if the splash is currently showing
       const hasSplashBeenShown = localStorage.getItem('splashShown')
@@ -69,6 +79,17 @@ export default {
     
     // Listen for splash screen events
     window.addEventListener('splashScreenHidden', this.handleSplashScreenHidden);
+
+    // Handle PWA install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+      this.canInstall = true;
+    });
+    window.addEventListener('appinstalled', () => {
+      this.deferredPrompt = null;
+      this.canInstall = false;
+    });
   },
   beforeUnmount() {
     window.removeEventListener('splashScreenHidden', this.handleSplashScreenHidden);
@@ -105,6 +126,12 @@ export default {
         </RouterLink>
       </div>
     </div>
+
+    <!-- Install PWA floating button -->
+    <button v-if="canInstall && !isAdminRoute" class="pwa-install-btn" @click="triggerInstall" aria-label="نصب برنامه">
+      <font-awesome-icon icon="fa-solid fa-download" />
+      <span>نصب برنامه</span>
+    </button>
   </div>
 </template>
 
@@ -139,6 +166,29 @@ body.admin-page {
 .app-container {
   position: relative;
   min-height: 100vh;
+}
+/* PWA install button */
+.pwa-install-btn {
+  position: fixed;
+  right: 16px;
+  bottom: 96px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 24px rgba(14,165,233,0.4);
+  cursor: pointer;
+  z-index: 1100;
+}
+
+.pwa-install-btn:hover { filter: brightness(1.05); }
+
+@media (max-width: 767px) {
+  .pwa-install-btn { bottom: 86px; }
 }
 
 /* Bottom Navigation */

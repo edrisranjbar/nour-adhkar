@@ -72,6 +72,14 @@
             >
               <font-awesome-icon icon="fa-solid fa-check" />
             </button>
+
+            <button 
+              class="action-button delete-button" 
+              title="حذف کاربر"
+              @click="$emit('delete-user', user)"
+            >
+              <font-awesome-icon icon="fa-solid fa-trash" />
+            </button>
           </td>
         </tr>
       </tbody>
@@ -85,7 +93,8 @@ import {
   faUsers, 
   faPenToSquare, 
   faBan, 
-  faCheck 
+  faCheck,
+  faTrash
 } from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to the library
@@ -93,7 +102,8 @@ library.add(
   faUsers, 
   faPenToSquare, 
   faBan, 
-  faCheck
+  faCheck,
+  faTrash
 );
 
 export default {

@@ -10,6 +10,15 @@
   body.dark-mode {
     @apply bg-gray-900 text-gray-100;
   }
+
+  /* Arabic text utility classes */
+  .arabic-text {
+    font-family: "Othman Taha", serif !important;
+  }
+
+  .othman-taha {
+    font-family: "Othman Taha", serif !important;
+  }
 }
 
 @layer components {

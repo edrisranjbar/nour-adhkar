@@ -31,6 +31,7 @@ const SettingsManageView = () => import('../views/admin/SettingsManageView.vue')
 const LogsManageView = () => import('../views/admin/LogsManageView.vue');
 import AdminAdhkarView from '@/views/admin/AdminAdhkarView.vue';
 import AdminCollectionsView from '@/views/admin/AdminCollectionsView.vue';
+const AdminAnalyticsView = () => import('../views/admin/AdminAnalyticsView.vue');
 
 // Public routes that everyone can access
 export const publicRoutes = [
@@ -215,6 +216,12 @@ export const adminRoutes = [
           title: 'پیشخوان مدیریت | اذکار نور',
           noindex: true
         }
+      },
+      {
+        path: 'analytics',
+        name: 'admin-analytics',
+        component: AdminAnalyticsView,
+        meta: { title: 'آمار و تحلیل | اذکار نور', noindex: true }
       },
       {
         path: 'adhkar',

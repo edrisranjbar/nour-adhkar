@@ -19,6 +19,7 @@ import {
     faBookOpen,
     faChevronRight,
     faChevronLeft,
+    faChevronUp,
     faSignInAlt,
     faGear,
     faMinus,
@@ -76,6 +77,7 @@ import {
     faUpload,
     // Add new icons for sidebar categories
     faFileAlt,
+    faFileLines,
     faUserShield,
     faCogs,
     faImages,
@@ -104,6 +106,12 @@ import {
     faCircleNotch,
     // Badge icons
     faSeedling, // Beginner badge
+    // New icons for admin UI enhancements
+    faBars,
+    faAnglesLeft,
+    faAnglesRight,
+    faChartLine,
+    faDownload,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import brand icons
@@ -225,6 +233,12 @@ library.add(
     faCircleNotch,
     // Badge icons
     faSeedling, // Beginner badge
+    // New icons for admin UI enhancements
+    faBars,
+    faAnglesLeft,
+    faAnglesRight,
+    faChartLine,
+    faDownload,
 );
 
 export default FontAwesomeIcon; 

@@ -20,61 +20,18 @@ export default {
           exact: true
         },
         {
-          id: 'adhkar',
-          title: 'مدیریت اذکار',
-          icon: 'fa-solid fa-book-quran',
-          items: [
-            {
-              path: '/admin/adhkar',
-              title: 'اذکار',
-              icon: 'fa-solid fa-book-quran'
-            },
-            {
-              path: '/admin/collections',
-              title: 'مجموعه‌ها',
-              icon: 'fa-solid fa-layer-group'
-            }
-          ]
+          path: '/admin/analytics',
+          title: 'آمار',
+          icon: 'fa-solid fa-chart-line',
+          exact: true
         },
-        {
-          id: 'content',
-          title: 'مدیریت محتوا',
-          icon: 'fa-solid fa-newspaper',
-          items: [
-            {
-              title: 'مقالات',
-              path: '/admin/blog',
-              icon: 'fa-solid fa-file-lines'
-            },
-            {
-              title: 'دسته‌بندی‌ها',
-              path: '/admin/categories',
-              icon: 'fa-solid fa-folder'
-            },
-            {
-              title: 'نظرات',
-              path: '/admin/comments',
-              icon: 'fa-solid fa-comments'
-            },
-            {
-              title: 'رسانه‌ها',
-              path: '/admin/media',
-              icon: 'fa-solid fa-images'
-            }
-          ]
-        },
-        {
-          id: 'users',
-          title: 'مدیریت کاربران',
-          icon: 'fa-solid fa-user-shield',
-          items: [
-            {
-              path: '/admin/users',
-              title: 'کاربران',
-              icon: 'fa-solid fa-users'
-            }
-          ]
-        },
+        { path: '/admin/adhkar', title: 'اذکار', icon: 'fa-solid fa-book-quran', exact: true },
+        { path: '/admin/collections', title: 'مجموعه‌ها', icon: 'fa-solid fa-layer-group', exact: true },
+        { path: '/admin/blog', title: 'مقالات', icon: 'fa-solid fa-file-lines', exact: true },
+        { path: '/admin/categories', title: 'دسته‌بندی‌ها', icon: 'fa-solid fa-folder', exact: true },
+        { path: '/admin/comments', title: 'نظرات', icon: 'fa-solid fa-comments', exact: true },
+        { path: '/admin/media', title: 'رسانه‌ها', icon: 'fa-solid fa-images', exact: true },
+        { path: '/admin/users', title: 'کاربران', icon: 'fa-solid fa-users', exact: true },
         {
           path: '/admin/settings',
           title: 'تنظیمات سیستم',

@@ -10,6 +10,7 @@ import FontAwesomeIcon from './plugins/fontawesome'
 import metaPlugin from './plugins/meta'
 import validationPlugin from './plugins/validation'
 import axios from 'axios';
+import { registerSW } from 'virtual:pwa-register'
 
 // Set axios base URL
 axios.defaults.baseURL = BASE_API_URL;
@@ -98,3 +99,16 @@ axios.interceptors.response.use(
 
 
 app.mount('#app')
+
+// Register PWA Service Worker (shows Persian messages)
+const updateSW = registerSW({
+    immediate: true,
+    onNeedRefresh() {
+        if (confirm('نسخه جدیدی از برنامه آماده است. آیا می‌خواهید به‌روزرسانی شود؟')) {
+            updateSW()
+        }
+    },
+    onOfflineReady() {
+        console.log('برنامه برای استفاده آفلاین آماده است.')
+    }
+})

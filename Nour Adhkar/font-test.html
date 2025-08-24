@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست فونت عثمان طه</title>
+    <link rel="stylesheet" href="src/assets/css/fonts.css">
+    <style>
+        body {
+            font-family: 'Vazirmatn FD', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .font-test {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .font-label {
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .arabic-text {
+            font-family: var(--font-arabic);
+            font-size: 24px;
+            line-height: 1.8;
+            text-align: center;
+            color: #2C2A2A;
+        }
+        
+        .vazir-text {
+            font-family: var(--font-primary);
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: right;
+            color: #2C2A2A;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #9C8466;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>تست فونت عثمان طه</h1>
+        
+        <div class="font-test">
+            <div class="font-label">متن عربی با فونت عثمان طه:</div>
+            <div class="arabic-text">
+                بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+            </div>
+        </div>
+        
+        <div class="font-test">
+            <div class="font-label">متن عربی با فونت عثمان طه (آیه قرآن):</div>
+            <div class="arabic-text">
+                الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ
+            </div>
+        </div>
+        
+        <div class="font-test">
+            <div class="font-label">متن فارسی با فونت وزیر:</div>
+            <div class="vazir-text">
+                این متن فارسی است که با فونت وزیر نمایش داده می‌شود.
+            </div>
+        </div>
+        
+        <div class="font-test">
+            <div class="font-label">متن عربی و فارسی ترکیبی:</div>
+            <div class="arabic-text">
+                اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ
+            </div>
+            <div class="vazir-text" style="margin-top: 15px;">
+                خدایا بر محمد و آل محمد درود بفرست
+            </div>
+        </div>
+    </div>
+</body>
+</html>

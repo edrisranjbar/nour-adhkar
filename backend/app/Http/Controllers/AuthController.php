@@ -146,6 +146,14 @@ class AuthController extends Controller
         try {
             $user = User::findOrFail($id);
 
+            // Prevent admin from deleting their own account
+            if (auth()->id() === $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'نمی‌توانید حساب کاربری خود را حذف کنید'
+                ], 422);
+            }
+
             // Delete user avatar if exists
             if ($user->avatar && $user->avatar != 'avatars/default.png') {
                 Storage::disk('public')->delete($user->avatar);
@@ -154,10 +162,11 @@ class AuthController extends Controller
             $user->delete();
 
             return response()->json([
+                'success' => true,
                 'message' => 'کاربر با موفقیت حذف شد'
             ]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'خطا در حذف کاربر', 'error' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'خطا در حذف کاربر', 'error' => $e->getMessage()], 500);
         }
     }
 

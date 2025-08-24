@@ -69,11 +69,13 @@ section#morning {
   margin-bottom: calc(0.9rem * var(--font-size-factor)) !important;
   color: var(--text-secondary);
   font-weight: var(--font-weight-light);
+  font-family: var(--font-arabic);
 }
 
 #dhikr-text {
   font-size: calc(1.6rem * var(--font-size-factor));
   line-height: calc(2.3rem * var(--font-size-factor));
+  font-family: var(--font-arabic);
 }
 
 #dhikr-translation {
