@@ -19,8 +19,8 @@ use App\Http\Controllers\AnalyticsController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register'])->middleware('throttle:5,1');
-    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
     Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:3,1');
