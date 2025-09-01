@@ -11,6 +11,7 @@ import metaPlugin from './plugins/meta'
 import validationPlugin from './plugins/validation'
 import axios from 'axios';
 import { registerSW } from 'virtual:pwa-register'
+import { useSettingsStore } from './stores/settings'
 
 // Set axios base URL
 axios.defaults.baseURL = BASE_API_URL;
@@ -47,6 +48,10 @@ app.provide('BASE_API_URL', BASE_API_URL)
 
 // Register Font Awesome component globally
 app.component('font-awesome-icon', FontAwesomeIcon);
+
+// Initialize settings store
+const settingsStore = useSettingsStore()
+settingsStore.init()
 
 // Add this to your main.js or a separate axios config file
 axios.interceptors.request.use(

@@ -196,6 +196,16 @@ section#morning {
   animation: tap-ripple-expand 550ms ease-out forwards;
 }
 
+/* HR styling for better contrast and thickness */
+hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--brand-primary, #9C8466), transparent);
+  margin: 1.5rem 0;
+  border-radius: 1px;
+  opacity: 0.8;
+}
+
 @keyframes tap-ripple-expand {
   0% {
     transform: translate(-50%, -50%) scale(0.2);
