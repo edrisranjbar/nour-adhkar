@@ -20,6 +20,10 @@ export default {
     isAdminRoute() {
       // Check if the current route path starts with /admin
       return this.$route.path.startsWith('/admin')
+    },
+    isHomePage() {
+      // Check if the current route is the homepage
+      return this.$route.path === '/'
     }
   },
   methods: {
@@ -127,8 +131,8 @@ export default {
       </div>
     </div>
 
-    <!-- Install PWA floating button -->
-    <button v-if="canInstall && !isAdminRoute" class="pwa-install-btn" @click="triggerInstall" aria-label="نصب برنامه">
+    <!-- Install PWA floating button - only on homepage -->
+    <button v-if="canInstall && !isAdminRoute && isHomePage" class="pwa-install-btn" @click="triggerInstall" aria-label="نصب برنامه">
       <font-awesome-icon icon="fa-solid fa-download" />
       <span>نصب برنامه</span>
     </button>
@@ -175,17 +179,33 @@ body.admin-page {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #0ea5e9;
+  background: #A79277;
   color: #fff;
   border: none;
   border-radius: 9999px;
   padding: 10px 14px;
-  box-shadow: 0 8px 24px rgba(14,165,233,0.4);
+  box-shadow: 0 8px 24px rgba(167,146,119,0.4);
   cursor: pointer;
   z-index: 1100;
+  transition: all 0.3s ease;
 }
 
-.pwa-install-btn:hover { filter: brightness(1.05); }
+.pwa-install-btn:hover { 
+  background: #9C8466;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(167,146,119,0.5);
+}
+
+/* Dark mode PWA install button */
+body.dark-mode .pwa-install-btn {
+  background: #1E1E1E;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .pwa-install-btn:hover {
+  background: #2A2A2A;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+}
 
 @media (max-width: 767px) {
   .pwa-install-btn { bottom: 86px; }
