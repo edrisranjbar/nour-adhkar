@@ -414,6 +414,8 @@ export default {
 <style scoped>
 .admin-collections {
   padding: 1.5rem;
+  background: var(--admin-bg);
+  color: var(--admin-text);
 }
 
 .header {
@@ -428,17 +430,17 @@ export default {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: #A79277;
-  color: white;
+  background-color: var(--admin-accent);
+  color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease;
   font-family: inherit;
 }
 
 .add-button:hover {
-  background-color: #8a7660;
+  background-color: rgba(59, 130, 246, 0.85);
 }
 
 .filters {
@@ -457,16 +459,22 @@ export default {
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #666;
+  color: var(--admin-muted);
 }
 
 .search-input {
   width: 100%;
   padding: 0.75rem 2.5rem 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
   font-size: 1rem;
   font-family: inherit;
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--admin-text);
+}
+
+.search-input::placeholder {
+  color: var(--admin-muted);
 }
 
 .filter-actions {
@@ -476,18 +484,21 @@ export default {
 
 .filter-select {
   padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
   font-size: 1rem;
   min-width: 150px;
   font-family: inherit;
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--admin-text);
 }
 
 /* Table Styles */
 .collections-table-container {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--admin-surface);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.35);
+  border: 1px solid var(--admin-border);
   overflow: hidden;
 }
 
@@ -500,16 +511,20 @@ export default {
 .collections-table td {
   padding: 1rem;
   text-align: right;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
 }
 
 .collections-table th {
-  background-color: #f8f9fa;
+  background: rgba(255, 255, 255, 0.04);
   font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
 }
 
 .collections-table tr:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(59, 130, 246, 0.08);
 }
 
 .description-cell {
@@ -517,6 +532,7 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--admin-muted);
 }
 
 .actions {
@@ -532,7 +548,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(8, 11, 19, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -540,13 +556,15 @@ export default {
 }
 
 .form-container {
-  background: white;
-  border-radius: 8px;
+  background: var(--admin-surface);
+  border-radius: 12px;
   padding: 2rem;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
+  border: 1px solid var(--admin-border);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.45);
 }
 
 .form-group {
@@ -556,7 +574,7 @@ export default {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--admin-text);
   font-weight: 500;
 }
 
@@ -564,28 +582,45 @@ export default {
 .form-group textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
   font-size: 1rem;
   font-family: inherit;
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--admin-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--admin-muted);
 }
 
 .form-group textarea {
-  min-height: 100px;
+  min-height: 120px;
   resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 .adhkar-selection {
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
   padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .dhikr-item {
   padding: 0.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
 }
 
 .dhikr-item:last-child {
@@ -601,6 +636,7 @@ export default {
 
 .dhikr-title {
   font-size: 0.9rem;
+  color: var(--admin-text);
 }
 
 .form-actions {
@@ -613,29 +649,31 @@ export default {
 .save-button {
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 1rem;
-  transition: background-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   font-family: inherit;
 }
 
 .cancel-button {
-  background-color: #f8f9fa;
-  color: #666;
+  background-color: rgba(148, 163, 184, 0.15);
+  color: var(--admin-muted);
 }
 
 .save-button {
-  background-color: #A79277;
-  color: white;
+  background-color: var(--admin-accent);
+  color: #fff;
 }
 
 .cancel-button:hover {
-  background-color: #e9ecef;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(148, 163, 184, 0.2);
 }
 
 .save-button:hover {
-  background-color: #8a7660;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
 }
 
 /* Other States */
@@ -645,26 +683,28 @@ export default {
   align-items: center;
   gap: 1rem;
   padding: 3rem;
-  color: #666;
+  color: var(--admin-muted);
 }
 
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  background: white;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
   border-radius: 8px;
   margin: 2rem 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  color: var(--admin-text);
 }
 
 .empty-icon {
   font-size: 3rem;
-  color: #A79277;
+  color: var(--admin-accent);
   margin-bottom: 1rem;
 }
 
 .subtitle {
-  color: #666;
+  color: var(--admin-muted);
   margin-top: 0.5rem;
 }
 
@@ -675,69 +715,28 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(8, 11, 19, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
-.modal-container {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
+.modal-content {
+  background: var(--admin-surface);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
   width: 90%;
-  max-width: 400px;
-  text-align: center;
+  border: 1px solid var(--admin-border);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.45);
+  color: var(--admin-text);
 }
 
-.modal-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.delete-icon {
-  font-size: 2rem;
-  color: #dc3545;
-  margin-bottom: 0.5rem;
-}
-
-.modal-actions {
+.pagination-container {
+  margin-top: 2rem;
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-danger:hover {
-  background-color: #c82333;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
 }
 
 @media (max-width: 768px) {
@@ -745,22 +744,13 @@ export default {
     flex-direction: column;
   }
   
-  .collections-table th:nth-child(1),
-  .collections-table td:nth-child(1) {
-    display: none;
+  .filter-actions {
+    width: 100%;
+    justify-content: space-between;
   }
   
-  .description-cell {
-    max-width: 100px;
-  }
-  
-  .form-container {
-    padding: 1.5rem;
-    width: 95%;
-  }
-  
-  .modal-container {
-    width: 95%;
+  .filter-select {
+    width: 100%;
   }
 }
 </style> 

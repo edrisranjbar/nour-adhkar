@@ -76,15 +76,31 @@ import {
   Title,
   Tooltip,
   Legend,
+  LineController,
   LineElement,
   PointElement,
+  BarController,
   BarElement,
+  DoughnutController,
   ArcElement,
   CategoryScale,
   LinearScale
 } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, BarElement, ArcElement, CategoryScale, LinearScale);
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  LineController,
+  LineElement,
+  PointElement,
+  BarController,
+  BarElement,
+  DoughnutController,
+  ArcElement,
+  CategoryScale,
+  LinearScale
+);
 
 export default {
   name: 'AdminAnalyticsView',

@@ -73,5 +73,8 @@ export default {
 <style scoped>
 .logs-manage {
   padding: 1.5rem;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  min-height: 100vh;
 }
-</style> 
+</style>
