@@ -383,41 +383,50 @@ export default {
 
 <style scoped>
 .users-manage {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  padding: 1.5rem 1rem 2.5rem;
 }
 
 .admin-controls {
+  max-width: 1200px;
+  margin: 0 auto 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  gap: 1rem;
 }
 
 .page-title {
-  margin-bottom: 0;
+  margin: 0;
   font-size: 1.8rem;
   color: var(--admin-text);
 }
 
 .new-user-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: #A79277;
-  color: white;
+  padding: 0.65rem 1.25rem;
+  background-color: var(--admin-accent);
+  color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .new-user-button:hover {
-  background-color: #967f69;
+  background-color: rgba(59, 130, 246, 0.85);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+}
+
+.new-user-button span {
+  font-weight: 600;
 }
 
 /* Toast Notification Styles */
@@ -426,21 +435,22 @@ export default {
   bottom: 20px;
   right: 20px;
   padding: 12px 20px;
-  border-radius: 4px;
-  color: white;
+  border-radius: 8px;
+  color: #fff;
   font-weight: 500;
   z-index: 1000;
   animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
-  max-width: 350px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 360px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.4);
 }
 
 .toast-success {
-  background-color: #4caf50;
+  background-color: #4ade80;
+  color: #0f172a;
 }
 
 .toast-error {
-  background-color: #f44336;
+  background-color: #f87171;
 }
 
 @keyframes fadeIn {

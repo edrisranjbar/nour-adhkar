@@ -303,95 +303,97 @@ export default {
 </script>
 
 <style scoped>
-input,select,textarea {
-  font-family: inherit;
-}
-
 .logs-container {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  width: 100%;
+  color: var(--admin-text);
 }
 
 .logs-controls {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 1rem;
-  background-color: white;
+  background: var(--admin-surface);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid var(--admin-border);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.45);
+}
+
+.logs-controls label {
+  color: var(--admin-muted);
+  font-size: 0.9rem;
+}
+
+.logs-controls input,
+.logs-controls select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--admin-border);
   border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 0.6rem 0.8rem;
+  color: var(--admin-text);
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.logs-controls input:focus,
+.logs-controls select:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.logs-controls select {
+  min-width: 140px;
+  direction: rtl;
 }
 
 .search-filter {
   position: relative;
-  flex: 1;
-  min-width: 250px;
-}
-
-.search-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .search-input {
-  width: 100%;
-  padding: 0.6rem 2.5rem 0.6rem 1rem;
-  font-size: 0.9rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  direction: rtl;
-  height: 40px;
+  flex: 1;
 }
 
 .clear-search {
   position: absolute;
-  top: 33px;
-  left: 0.75rem;
-  transform: translateY(-50%);
+  left: 0.65rem;
   background: none;
   border: none;
-  color: #999;
+  color: var(--admin-muted);
   cursor: pointer;
+  font-size: 1rem;
   padding: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.clear-search:hover {
+  color: var(--admin-accent);
 }
 
 .filter-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  align-items: flex-end;
 }
 
 .filter-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-}
-
-.filter-item label {
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.filter-item select {
-  padding: 0.6rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  min-width: 120px;
-  direction: rtl;
-  height: 40px;
+  gap: 0.35rem;
 }
 
 .logs-table-container {
-  background-color: white;
-  border-radius: 8px;
+  background-color: var(--admin-surface);
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--admin-border);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.45);
 }
 
 .logs-table {
@@ -401,15 +403,19 @@ input,select,textarea {
 
 .logs-table th,
 .logs-table td {
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   text-align: right;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
 }
 
 .logs-table th {
-  background-color: #f5f5f5;
+  background: rgba(255, 255, 255, 0.05);
   font-weight: 600;
-  color: #555;
+  color: var(--admin-muted);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
 }
 
 .logs-table tr:last-child td {
@@ -417,42 +423,43 @@ input,select,textarea {
 }
 
 .logs-table tr:hover {
-  background-color: #f9f9f9;
+  background-color: rgba(59, 130, 246, 0.08);
 }
 
 .log-message {
-  max-width: 300px;
+  max-width: 320px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .log-type-badge {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .log-type-info {
-  background-color: #e6f4ff;
-  color: #0066cc;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
 }
 
 .log-type-warning {
-  background-color: #fff8e6;
-  color: #cc7700;
+  background: rgba(250, 204, 21, 0.15);
+  color: #facc15;
 }
 
 .log-type-error {
-  background-color: #ffebeb;
-  color: #cc0000;
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
 }
 
 .log-type-debug {
-  background-color: #e6ffee;
-  color: #00994d;
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
 }
 
 .actions {
@@ -466,25 +473,22 @@ input,select,textarea {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.view-btn {
-  color: #0066cc;
-}
-
-.delete-btn {
-  color: #cc0000;
+  padding: 0.35rem;
+  border-radius: 6px;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  color: var(--admin-muted);
 }
 
 .view-btn:hover {
-  background-color: #e6f4ff;
+  color: var(--admin-accent);
+  background-color: rgba(59, 130, 246, 0.12);
+  transform: translateY(-1px);
 }
 
 .delete-btn:hover {
-  background-color: #ffebeb;
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.12);
+  transform: translateY(-1px);
 }
 
 .logs-loading,
@@ -494,76 +498,19 @@ input,select,textarea {
   align-items: center;
   justify-content: center;
   padding: 3rem;
-  color: #666;
+  color: var(--admin-muted);
   gap: 1rem;
 }
 
 .logs-pagination {
   display: flex;
   justify-content: center;
-  margin-top: 1rem;
-}
-
-/* Dark mode styles */
-body.dark-mode .logs-controls,
-body.dark-mode .logs-table-container {
-  background-color: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-body.dark-mode .search-label {
-  color: #aaa;
-}
-
-body.dark-mode .search-input,
-body.dark-mode .filter-item select {
-  background-color: #444;
-  border-color: #555;
-  color: #eee;
-}
-
-body.dark-mode .logs-table th {
-  background-color: #444;
-  color: #eee;
-}
-
-body.dark-mode .logs-table td {
-  border-bottom-color: #444;
-}
-
-body.dark-mode .logs-table tr:hover {
-  background-color: #3a3a3a;
-}
-
-body.dark-mode .logs-loading,
-body.dark-mode .logs-empty {
-  color: #aaa;
-}
-
-/* Responsive adjustments */
-@media (max-width: 992px) {
-  .search-filter {
-    width: 100%;
-  }
-  
-  .logs-table th,
-  .logs-table td {
-    padding: 0.5rem;
-  }
-  
-  .log-message {
-    max-width: 200px;
-  }
 }
 
 @media (max-width: 768px) {
-  .logs-table {
-    display: block;
-    overflow-x: auto;
-  }
-  
-  .log-message {
-    max-width: 150px;
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style> 

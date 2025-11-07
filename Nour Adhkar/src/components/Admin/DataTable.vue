@@ -66,65 +66,52 @@
   </script>
   
   <style scoped>
-  .data-table-container {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
-  
+.data-table-container {
+  background: var(--admin-surface);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.35);
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 1rem;
+  text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
+}
+
+.data-table th {
+  background-color: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--admin-muted);
+}
+
+.data-table tr:hover {
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
   .data-table {
-    width: 100%;
-    border-collapse: collapse;
+    display: block;
+    overflow-x: auto;
   }
-  
-  .data-table th,
-  .data-table td {
-    padding: 1rem;
-    text-align: right;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .data-table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-  }
-  
-  .data-table tr:hover {
-    background-color: #f5f5f5;
-  }
-  
-  .actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-  }
-  
-  /* Dark mode styles */
-  body.dark-mode {
-    .data-table-container {
-      background-color: #333;
-    }
-  
-    .data-table th {
-      background-color: #444;
-      color: #ddd;
-    }
-  
-    .data-table td {
-      border-bottom-color: #444;
-    }
-  
-    .data-table tr:hover {
-      background-color: #3a3a3a;
-    }
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .data-table {
-      display: block;
-      overflow-x: auto;
-    }
-  }
-  </style>
+}
+</style>

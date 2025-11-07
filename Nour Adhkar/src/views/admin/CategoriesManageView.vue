@@ -267,7 +267,18 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+.categories-manage {
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+}
 
 .admin-controls {
   display: flex;
@@ -278,30 +289,27 @@ export default {
 
 .admin-controls h2 {
   font-size: 1.5rem;
-  color: #333;
+  color: var(--admin-text);
+  margin: 0;
 }
 
 .new-category-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: #A79277;
-  color: white;
+  background-color: var(--admin-accent);
+  color: #fff;
   padding: 8px 16px;
   border-radius: 6px;
   text-decoration: none;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .new-category-button:hover {
-  background-color: #8a7660;
-}
-
-.categories-manage {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  background-color: rgba(59, 130, 246, 0.85);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
 }
 
 /* Override Tailwind form styles for RTL */

@@ -79,6 +79,9 @@ export default {
   flex-direction: column;
   gap: 1rem;
   margin-bottom: 1.5rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .search-box {
@@ -91,16 +94,29 @@ export default {
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #777;
+  color: var(--admin-muted);
 }
 
 .search-input {
   width: 100%;
   padding: 0.75rem 2.5rem 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
   font-family: inherit;
   font-size: 0.95rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: var(--admin-muted);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 .filter-actions {
@@ -111,12 +127,20 @@ export default {
 
 .filter-select {
   padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
   font-family: inherit;
   font-size: 0.95rem;
-  background-color: white;
-  min-width: 150px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
+  min-width: 160px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 /* Dark mode styles */

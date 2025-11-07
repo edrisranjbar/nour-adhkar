@@ -148,23 +148,36 @@ export default {
 </script>
 
 <style scoped>
+.users-list-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .users-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.45);
 }
 
 .users-table th,
 .users-table td {
-  padding: 0.75rem;
+  padding: 0.9rem 1rem;
   text-align: right;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
 }
 
 .users-table th {
   font-weight: 600;
-  color: #555;
-  background-color: #f8f9fa;
+  color: var(--admin-muted);
+  background-color: rgba(255, 255, 255, 0.05);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
 }
 
 .user-info-cell {
@@ -179,6 +192,7 @@ export default {
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .user-avatar img {
@@ -193,10 +207,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #A79277;
-  color: white;
+  background-color: var(--admin-accent);
+  color: #0f172a;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .user-name {
@@ -209,31 +223,31 @@ export default {
 .role-badge,
 .status-badge {
   display: inline-block;
-  padding: 0.25rem 0.6rem;
-  border-radius: 12px;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
 }
 
 .admin-badge {
-  background-color: #A79277;
-  color: white;
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
 }
 
 .user-badge {
-  background-color: #f2f2f2;
-  color: #777;
+  background-color: rgba(148, 163, 184, 0.12);
+  color: var(--admin-muted);
 }
 
 .active-badge {
-  background-color: #e6f7ed;
-  color: #28a745;
+  background-color: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
 }
 
 .inactive-badge {
-  background-color: #fef2f2;
-  color: #ef4444;
+  background-color: rgba(248, 113, 113, 0.15);
+  color: #f87171;
 }
 
 .actions-cell {
@@ -245,25 +259,28 @@ export default {
   border: none;
   padding: 0.4rem 0.5rem;
   cursor: pointer;
-  font-size: 0.9rem;
-  color: #666;
-  transition: color 0.2s;
+  font-size: 0.95rem;
+  color: var(--admin-muted);
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  border-radius: 6px;
 }
 
-.edit-button:hover {
-  color: #A79277;
+.action-button:hover {
+  color: var(--admin-accent);
+  background-color: rgba(59, 130, 246, 0.12);
+  transform: translateY(-1px);
 }
 
 .deactivate-button:hover {
-  color: #ef4444;
+  color: #f87171;
 }
 
 .activate-button:hover {
-  color: #28a745;
+  color: #4ade80;
 }
 
 .admin-user {
-  background-color: #fdfbf8;
+  background-color: rgba(167, 146, 119, 0.08);
 }
 
 .loading-state,
@@ -273,7 +290,7 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 3rem 0;
-  color: #777;
+  color: var(--admin-muted);
   text-align: center;
 }
 
@@ -281,54 +298,20 @@ export default {
   display: inline-block;
   width: 2rem;
   height: 2rem;
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #A79277;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-top: 2px solid var(--admin-accent);
   border-radius: 50%;
   margin-bottom: 1rem;
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
 .empty-icon {
   font-size: 3rem;
-  color: #ddd;
+  color: var(--admin-border);
   margin-bottom: 1rem;
-}
-
-/* Dark mode styles */
-body.dark-mode .users-table th {
-  background-color: #333;
-  color: #bbb;
-}
-
-body.dark-mode .users-table td {
-  border-bottom-color: #444;
-}
-
-body.dark-mode .user-badge {
-  background-color: #444;
-  color: #aaa;
-}
-
-body.dark-mode .active-badge {
-  background-color: #1a3b29;
-  color: #4ade80;
-}
-
-body.dark-mode .inactive-badge {
-  background-color: #3b1a1a;
-  color: #f87171;
-}
-
-body.dark-mode .action-button {
-  color: #aaa;
-}
-
-body.dark-mode .admin-user {
-  background-color: #2a2620;
 }
 </style> 
