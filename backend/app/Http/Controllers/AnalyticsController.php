@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Carbon;
 
 class AnalyticsController extends Controller
 {
@@ -64,57 +65,98 @@ class AnalyticsController extends Controller
         $days = (int) ($request->input('days', 14));
         $days = $days > 60 ? 60 : ($days < 1 ? 14 : $days);
 
-        $startDate = now()->subDays($days - 1)->startOfDay();
+        $defaultPayload = [
+            'total' => 0,
+            'uniqueVisitors' => 0,
+            'daily' => collect(),
+            'topPages' => collect(),
+            'browsers' => collect(),
+            'countries' => collect(),
+        ];
 
-        // Daily visits
-        $daily = DB::table('page_visits')
-            ->selectRaw('DATE(visited_at) as date, COUNT(*) as visits')
-            ->where('visited_at', '>=', $startDate)
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        try {
+            $startDate = now()->subDays($days - 1)->startOfDay();
 
-        // Top pages
-        $topPages = DB::table('page_visits')
-            ->selectRaw('path, COUNT(*) as visits')
-            ->where('visited_at', '>=', $startDate)
-            ->groupBy('path')
-            ->orderByDesc('visits')
-            ->limit(10)
-            ->get();
+            // Daily visits
+            $daily = DB::table('page_visits')
+                ->selectRaw('DATE(visited_at) as date, COUNT(*) as visits')
+                ->where('visited_at', '>=', $startDate)
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
 
-        // Totals
-        $total = DB::table('page_visits')->where('visited_at', '>=', $startDate)->count();
-        $uniqueVisitors = DB::table('page_visits')->where('visited_at', '>=', $startDate)->distinct('ip')->count('ip');
+            // Top pages
+            $topPages = DB::table('page_visits')
+                ->selectRaw('path, COUNT(*) as visits')
+                ->where('visited_at', '>=', $startDate)
+                ->groupBy('path')
+                ->orderByDesc('visits')
+                ->limit(10)
+                ->get();
 
-        // Browsers
-        $browsers = DB::table('page_visits')
-            ->selectRaw('COALESCE(browser, "Unknown") as browser, COUNT(*) as visits')
-            ->where('visited_at', '>=', $startDate)
-            ->groupBy('browser')
-            ->orderByDesc('visits')
-            ->get();
+            // Totals
+            $total = DB::table('page_visits')->where('visited_at', '>=', $startDate)->count();
+            $uniqueVisitors = DB::table('page_visits')->where('visited_at', '>=', $startDate)->distinct('ip')->count('ip');
 
-        // Countries (based on code header)
-        $countries = DB::table('page_visits')
-            ->selectRaw('COALESCE(country_code, "--") as code, COUNT(*) as visits')
-            ->where('visited_at', '>=', $startDate)
-            ->groupBy('code')
-            ->orderByDesc('visits')
-            ->limit(20)
-            ->get();
+            // Browsers
+            $browsers = DB::table('page_visits')
+                ->selectRaw('COALESCE(browser, "Unknown") as browser, COUNT(*) as visits')
+                ->where('visited_at', '>=', $startDate)
+                ->groupBy('browser')
+                ->orderByDesc('visits')
+                ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'total' => $total,
-                'uniqueVisitors' => $uniqueVisitors,
-                'daily' => $daily,
-                'topPages' => $topPages,
-                'browsers' => $browsers,
-                'countries' => $countries,
-            ],
-        ]);
+            // Countries (based on code header)
+            $countries = DB::table('page_visits')
+                ->selectRaw('COALESCE(country_code, "--") as code, COUNT(*) as visits')
+                ->where('visited_at', '>=', $startDate)
+                ->groupBy('code')
+                ->orderByDesc('visits')
+                ->limit(20)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total' => $total,
+                    'uniqueVisitors' => $uniqueVisitors,
+                    'daily' => $daily,
+                    'topPages' => $topPages,
+                    'browsers' => $browsers,
+                    'countries' => $countries,
+                ],
+            ]);
+        } catch (QueryException $exception) {
+            $message = $exception->getMessage();
+            $isMissingAnalyticsTable = str_contains(strtolower($message), 'page_visits')
+                && (str_contains(strtolower($message), 'no such table')
+                    || str_contains(strtolower($message), 'doesn\'t exist')
+                    || str_contains(strtolower($message), 'base table or view not found'));
+
+            if ($isMissingAnalyticsTable) {
+                Log::warning('Analytics overview requested but analytics tables are not available.', [
+                    'sql_state' => $exception->getSqlState(),
+                    'code' => $exception->getCode(),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $defaultPayload,
+                    'meta' => ['fallback' => true],
+                ]);
+            }
+
+            Log::error('Failed to fetch analytics overview.', [
+                'error' => $message,
+                'sql_state' => $exception->getSqlState(),
+                'code' => $exception->getCode(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to load analytics overview.',
+            ], 500);
+        }
     }
 }
 
