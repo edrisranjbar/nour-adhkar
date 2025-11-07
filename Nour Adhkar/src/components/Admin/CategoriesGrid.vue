@@ -99,10 +99,11 @@ export default {
 
 <style scoped>
 .posts-table-container {
-  background-color: white;
-  border-radius: 8px;
+  background-color: var(--admin-surface);
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.35);
+  border: 1px solid var(--admin-border);
 }
 
 .loading-container {
@@ -111,14 +112,15 @@ export default {
   align-items: center;
   justify-content: center;
   min-height: 300px;
+  color: var(--admin-muted);
 }
 
 .spinner {
   width: 50px;
   height: 50px;
-  border: 5px solid rgba(167, 146, 119, 0.3);
+  border: 5px solid rgba(59, 130, 246, 0.2);
   border-radius: 50%;
-  border-top-color: #A79277;
+  border-top-color: var(--admin-accent);
   animation: spin 1s infinite ease;
   margin-bottom: 20px;
 }
@@ -130,7 +132,7 @@ export default {
 .no-posts {
   text-align: center;
   padding: 40px;
-  color: #777;
+  color: var(--admin-muted);
 }
 
 .posts-table {
@@ -142,19 +144,20 @@ export default {
 .posts-table td {
   padding: 12px 16px;
   text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
 }
 
 .posts-table th {
-  background-color: #f8f8f8;
+  background-color: rgba(255, 255, 255, 0.05);
   font-weight: 600;
-  color: #555;
+  color: var(--admin-muted);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
 }
 
-.posts-table tr {
-  border-bottom: 1px solid #eee;
-}
-
-.posts-table tr:last-child {
+.posts-table tr:last-child td {
   border-bottom: none;
 }
 
@@ -169,37 +172,15 @@ export default {
   padding: 0.4rem 0.5rem;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: color 0.2s;
-  color: #666;
+  transition: color 0.2s ease;
+  color: var(--admin-muted);
 }
 
-.edit-button:hover {
-  color: #A79277;
+.action-button:hover {
+  color: var(--admin-accent);
 }
 
-.delete-button:hover {
-  color: #dc3545;
-}
-
-/* Dark mode */
-:deep(body.dark-mode) .posts-table-container {
-  background-color: #262626;
-}
-
-:deep(body.dark-mode) .posts-table th {
-  background-color: #333;
-  color: #ddd;
-}
-
-:deep(body.dark-mode) .posts-table tr {
-  border-bottom-color: #444;
-}
-
-:deep(body.dark-mode) td {
-  color: #eee;
-}
-
-:deep(body.dark-mode) .no-posts {
-  color: #ddd;
+.action-button.delete-button:hover {
+  color: #f87171;
 }
 </style> 

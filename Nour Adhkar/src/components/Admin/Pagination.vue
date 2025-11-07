@@ -62,31 +62,28 @@ export default {
 }
 
 .pagination-button {
-  background-color: #A79277;
-  color: white;
-  border: none;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
   font-family: inherit;
 }
 
 .pagination-button:disabled {
-  background-color: #d1d1d1;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .pagination-button:not(:disabled):hover {
-  background-color: #8a7660;
+  background-color: var(--admin-accent);
+  border-color: transparent;
+  color: #fff;
 }
 
 .page-info {
-  color: #666;
-}
-
-/* Dark mode */
-:deep(body.dark-mode) .page-info {
-  color: #ddd;
+  color: var(--admin-muted);
 }
 </style> 

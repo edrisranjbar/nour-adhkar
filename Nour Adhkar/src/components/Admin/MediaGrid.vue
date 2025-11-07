@@ -168,23 +168,24 @@ export default {
 
 .media-item {
   position: relative;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
   overflow: hidden;
-  background-color: white;
-  transition: all 0.3s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  background-color: var(--admin-surface);
+  transition: all 0.3s ease;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.35);
   cursor: pointer;
+  color: var(--admin-text);
 }
 
 .media-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.45);
 }
 
 .media-item.selected {
-  border-color: #A79277;
-  box-shadow: 0 0 0 2px rgba(167, 146, 119, 0.3);
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
 }
 
 .selection-indicator {
@@ -192,12 +193,12 @@ export default {
   top: 10px;
   right: 10px;
   z-index: 5;
-  color: #A79277;
-  font-size: 1.2rem;
-  background: rgba(255, 255, 255, 0.8);
+  color: var(--admin-accent);
+  font-size: 1.1rem;
+  background: rgba(8, 11, 19, 0.7);
   border-radius: 50%;
-  width: 25px;
-  height: 25px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,8 +209,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--admin-border);
   position: relative;
 }
 
@@ -221,21 +222,23 @@ export default {
   transition: opacity 0.3s ease;
 }
 
-.audio-preview, .file-preview {
+.audio-preview,
+.file-preview {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
 }
 
-.audio-preview i, .file-preview i {
+.audio-preview i,
+.file-preview i {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
-  color: #6c757d;
+  color: var(--admin-muted);
 }
 
 .media-info {
-  padding: 0.75rem;
+  padding: 0.85rem;
 }
 
 .media-name {
@@ -244,72 +247,66 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #343a40;
+  color: var(--admin-text);
 }
 
 .media-size {
-  color: #6c757d;
-  font-size: 0.875rem;
+  color: var(--admin-muted);
+  font-size: 0.85rem;
 }
 
 .media-actions {
   display: flex;
   justify-content: flex-end;
-  padding: 0.5rem;
-  border-top: 1px solid #dee2e6;
-  background-color: #f8f9fa;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-top: 1px solid var(--admin-border);
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .media-actions button {
   background: none;
   border: none;
   cursor: pointer;
-  margin-left: 0.5rem;
-  color: #6c757d;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: all 0.2s;
+  color: var(--admin-muted);
+  padding: 0.35rem;
+  border-radius: 6px;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
   font-family: inherit;
 }
 
 .media-actions button:hover {
-  color: #A79277;
-  background-color: rgba(167, 146, 119, 0.1);
+  color: var(--admin-accent);
+  background-color: rgba(59, 130, 246, 0.12);
+  transform: translateY(-1px);
 }
 
-.no-media {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 3rem 0;
-  color: #6c757d;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px dashed #ced4da;
-  margin-top: 1rem;
-}
-
-.no-media i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  color: #ced4da;
-}
-
+.no-media,
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 3rem 0;
+  color: var(--admin-muted);
+  background-color: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px dashed var(--admin-border);
+  margin-top: 1rem;
+}
+
+.no-media i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--admin-border);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(167, 146, 119, 0.3);
+  border: 4px solid rgba(59, 130, 246, 0.2);
   border-radius: 50%;
-  border-top-color: #A79277;
+  border-top-color: var(--admin-accent);
   animation: spin 1s infinite linear;
   margin-bottom: 1rem;
 }
@@ -323,7 +320,7 @@ export default {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 1rem;
   }
-  
+
   .media-preview {
     height: 120px;
   }

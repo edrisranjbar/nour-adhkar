@@ -102,26 +102,28 @@ export default {
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  border-radius: 8px;
-  background-color: white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  background-color: var(--admin-surface);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.45);
+  border: 1px solid var(--admin-border);
   animation: fadeInUp 0.3s ease-out forwards;
+  color: var(--admin-text);
 }
 
 .notification-toast.success {
-  border-left: 4px solid #28a745;
+  border-left: 4px solid #4ade80;
 }
 
 .notification-toast.error {
-  border-left: 4px solid #dc3545;
+  border-left: 4px solid #f87171;
 }
 
 .notification-toast.warning {
-  border-left: 4px solid #ffc107;
+  border-left: 4px solid #facc15;
 }
 
 .notification-toast.info {
-  border-left: 4px solid #17a2b8;
+  border-left: 4px solid var(--admin-accent);
 }
 
 .notification-icon {
@@ -130,19 +132,19 @@ export default {
 }
 
 .notification-toast.success .notification-icon {
-  color: #28a745;
+  color: #4ade80;
 }
 
 .notification-toast.error .notification-icon {
-  color: #dc3545;
+  color: #f87171;
 }
 
 .notification-toast.warning .notification-icon {
-  color: #ffc107;
+  color: #facc15;
 }
 
 .notification-toast.info .notification-icon {
-  color: #17a2b8;
+  color: var(--admin-accent);
 }
 
 .notification-content {
@@ -150,14 +152,14 @@ export default {
 }
 
 .notification-message {
-  color: #343a40;
+  color: var(--admin-text);
   font-size: 0.9rem;
 }
 
 .notification-close {
   background: none;
   border: none;
-  color: #6c757d;
+  color: var(--admin-muted);
   cursor: pointer;
   padding: 4px;
   margin-left: 8px;
@@ -167,8 +169,8 @@ export default {
 }
 
 .notification-close:hover {
-  background-color: #f8f9fa;
-  color: #343a40;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--admin-text);
 }
 
 @keyframes fadeInUp {

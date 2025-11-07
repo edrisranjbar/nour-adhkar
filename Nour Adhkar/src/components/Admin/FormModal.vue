@@ -47,7 +47,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(8, 11, 19, 0.75);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -55,17 +55,25 @@
   }
   
   .modal-container {
-    background: white;
-    border-radius: 8px;
+    background: var(--admin-surface);
+    border-radius: 12px;
     padding: 2rem;
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
+    border: 1px solid var(--admin-border);
+    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.45);
+    color: var(--admin-text);
   }
   
   .modal-header {
     margin-bottom: 1.5rem;
+  }
+  
+  .modal-header h2 {
+    margin: 0;
+    color: var(--admin-text);
   }
   
   .modal-actions {
@@ -78,48 +86,31 @@
   .save-button {
     padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
-    transition: background-color 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     font-family: inherit;
   }
   
   .cancel-button {
-    background-color: #f8f9fa;
-    color: #666;
+    background-color: rgba(148, 163, 184, 0.2);
+    color: var(--admin-muted);
   }
   
   .save-button {
-    background-color: #A79277;
-    color: white;
+    background-color: var(--admin-accent);
+    color: #fff;
   }
   
   .cancel-button:hover {
-    background-color: #e9ecef;
+    background-color: rgba(148, 163, 184, 0.3);
+    transform: translateY(-1px);
   }
   
   .save-button:hover {
-    background-color: #8a7660;
-  }
-  
-  /* Dark mode styles */
-  body.dark-mode {
-    .modal-container {
-      background-color: #333;
-    }
-  
-    .modal-header h2 {
-      color: #fff;
-    }
-  
-    .cancel-button {
-      background-color: #444;
-      color: #fff;
-    }
-  
-    .cancel-button:hover {
-      background-color: #555;
-    }
+    background-color: rgba(59, 130, 246, 0.85);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
   }
   </style>

@@ -285,25 +285,26 @@ export default {
 <style scoped>
 .media-uploader {
   width: 100%;
+  color: var(--admin-text);
 }
 
 .upload-area {
-  border: 2px dashed #ced4da;
-  border-radius: 8px;
+  border: 2px dashed var(--admin-border);
+  border-radius: 12px;
   padding: 2rem;
   text-align: center;
-  transition: all 0.3s;
-  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.04);
   position: relative;
 }
 
 .upload-area.dragging {
-  background-color: #e9ecef;
-  border-color: #A79277;
+  background-color: rgba(59, 130, 246, 0.08);
+  border-color: var(--admin-accent);
 }
 
 .upload-area.has-files {
-  padding: 1rem;
+  padding: 1.25rem;
 }
 
 .upload-prompt {
@@ -312,34 +313,34 @@ export default {
   align-items: center;
   justify-content: center;
   min-height: 200px;
+  gap: 1rem;
 }
 
 .upload-prompt i {
   font-size: 3.5rem;
-  color: #6c757d;
-  margin-bottom: 1rem;
+  color: var(--admin-accent);
 }
 
 .upload-prompt p {
-  margin-bottom: 1rem;
-  color: #495057;
+  margin: 0;
+  color: var(--admin-text);
+  font-weight: 600;
 }
 
 .upload-info {
   font-size: 0.85rem;
-  color: #6c757d;
-  margin-top: 0.5rem;
+  color: var(--admin-muted);
 }
 
 .upload-btn {
-  background-color: #A79277;
-  color: white;
+  background-color: var(--admin-accent);
+  color: #fff;
   border: none;
-  padding: 0.5rem 1.25rem;
-  border-radius: 4px;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -347,7 +348,9 @@ export default {
 }
 
 .upload-btn:hover {
-  background-color: #8a7660;
+  background-color: rgba(59, 130, 246, 0.85);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
 }
 
 .selected-files {
@@ -359,49 +362,51 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--admin-border);
 }
 
 .selected-files-header h3 {
-  font-size: 1.25rem;
-  color: #343a40;
+  font-size: 1.2rem;
+  color: var(--admin-text);
   margin: 0;
 }
 
 .clear-btn {
   background: none;
   border: none;
-  color: #dc3545;
+  color: #f87171;
   cursor: pointer;
-  font-size: 0.875rem;
-  display: flex;
+  font-size: 0.85rem;
+  display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s;
+  gap: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
   font-family: inherit;
 }
 
 .clear-btn:hover {
-  background-color: rgba(220, 53, 69, 0.1);
+  background-color: rgba(248, 113, 113, 0.12);
+  transform: translateY(-1px);
 }
 
 .file-list {
   max-height: 250px;
   overflow-y: auto;
   margin-bottom: 1rem;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  background-color: white;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background-color: var(--admin-surface);
 }
 
 .selected-file {
   display: flex;
   align-items: center;
-  padding: 0.75rem;
-  border-bottom: 1px solid #dee2e6;
+  padding: 0.8rem;
+  border-bottom: 1px solid var(--admin-border);
+  gap: 0.75rem;
 }
 
 .selected-file:last-child {
@@ -409,14 +414,13 @@ export default {
 }
 
 .file-preview {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  margin-right: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -428,19 +432,19 @@ export default {
 
 .file-icon {
   font-size: 1.5rem;
-  color: #6c757d;
+  color: var(--admin-muted);
 }
 
 .file-info {
   flex: 1;
-  text-align: left;
   overflow: hidden;
+  text-align: right;
 }
 
 .file-name {
   display: block;
-  font-weight: 500;
-  color: #343a40;
+  font-weight: 600;
+  color: var(--admin-text);
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -448,23 +452,22 @@ export default {
 
 .file-size {
   font-size: 0.75rem;
-  color: #6c757d;
+  color: var(--admin-muted);
 }
 
 .remove-btn {
   background: none;
   border: none;
-  color: #dc3545;
+  color: #f87171;
   cursor: pointer;
   padding: 0.25rem;
-  border-radius: 4px;
-  transition: all 0.2s;
-  font-size: 0.875rem;
-  font-family: inherit;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .remove-btn:hover {
-  background-color: rgba(220, 53, 69, 0.1);
+  background-color: rgba(248, 113, 113, 0.12);
+  transform: translateY(-1px);
 }
 
 .upload-actions {
@@ -473,47 +476,37 @@ export default {
   gap: 0.75rem;
 }
 
-.cancel-btn {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  border: 1px solid #ced4da;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-  display: flex;
+.upload-actions button {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-family: inherit;
-}
-
-.cancel-btn:hover {
-  background-color: #e9ecef;
-}
-
-.start-upload-btn {
-  background-color: #A79277;
-  color: white;
+  gap: 0.4rem;
+  border-radius: 8px;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.55rem 1.2rem;
   cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   font-family: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-.start-upload-btn:hover {
-  background-color: #8a7660;
+.upload-actions .cancel {
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--admin-muted);
 }
 
-.start-upload-btn:disabled {
-  background-color: #b5b5b5;
-  cursor: not-allowed;
+.upload-actions .cancel:hover {
+  background: rgba(148, 163, 184, 0.3);
+  transform: translateY(-1px);
+}
+
+.upload-actions .confirm {
+  background: var(--admin-accent);
+  color: #fff;
+}
+
+.upload-actions .confirm:hover {
+  background: rgba(59, 130, 246, 0.85);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
 }
 
 .upload-progress {
@@ -522,11 +515,9 @@ export default {
 }
 
 .progress-bar {
-  height: 8px;
-  background-color: #e9ecef;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
+  height: 100%;
+  background: var(--admin-accent);
+  transition: width 0.3s ease;
 }
 
 .progress-fill {
@@ -539,5 +530,11 @@ export default {
   text-align: right;
   font-size: 0.75rem;
   color: #6c757d;
+}
+
+.error-message {
+  color: #f87171;
+  margin-top: 1rem;
+  font-size: 0.9rem;
 }
 </style> 

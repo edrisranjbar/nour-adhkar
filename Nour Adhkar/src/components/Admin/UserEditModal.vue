@@ -160,71 +160,87 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(8, 11, 19, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 1rem;
 }
 
 .edit-modal {
-  background-color: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
+  background-color: var(--admin-surface);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem;
-  border-bottom: 1px solid #eee;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--admin-border);
 }
 
 .modal-header h2 {
   margin: 0;
-  font-size: 1.5rem;
-  color: #333;
+  font-size: 1.4rem;
+  color: var(--admin-text);
 }
 
 .close-button {
   background: none;
   border: none;
   font-size: 1.2rem;
-  color: #777;
+  color: var(--admin-muted);
   cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.close-button:hover {
+  color: var(--admin-text);
 }
 
 .modal-body {
   padding: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #555;
+  font-weight: 600;
+  color: var(--admin-muted);
 }
 
 .form-input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
   font-family: inherit;
   font-size: 0.95rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 .form-input:disabled {
-  background-color: #f5f5f5;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -235,17 +251,16 @@ export default {
 .password-toggle {
   position: absolute;
   top: 50%;
-  left: 10px;
+  left: 12px;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #777;
+  color: var(--admin-muted);
   cursor: pointer;
 }
 
-.password-toggle:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.password-toggle:hover {
+  color: var(--admin-accent);
 }
 
 .toggle-switch {
@@ -263,10 +278,10 @@ export default {
   display: inline-block;
   width: 46px;
   height: 24px;
-  background-color: #eee;
+  background-color: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 .switch-label:after {
@@ -277,148 +292,86 @@ export default {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background-color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35);
+  transition: transform 0.3s ease;
 }
 
 input:checked + .switch-label {
-  background-color: #A79277;
+  background-color: rgba(74, 222, 128, 0.35);
 }
 
 input:checked + .switch-label:after {
   transform: translateX(-22px);
 }
 
-input:disabled + .switch-label {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .status-text {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--admin-muted);
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding: 1.25rem;
-  border-top: 1px solid #eee;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--admin-border);
 }
 
 .cancel-button,
 .save-button {
   padding: 0.75rem 1.5rem;
-  border-radius: 6px;
+  border-radius: 10px;
   font-family: inherit;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .cancel-button {
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  color: #666;
+  background-color: rgba(148, 163, 184, 0.2);
+  border: none;
+  color: var(--admin-muted);
 }
 
-.cancel-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.cancel-button:hover:not(:disabled) {
+  background-color: rgba(148, 163, 184, 0.3);
+  transform: translateY(-1px);
 }
 
 .save-button {
-  background-color: #A79277;
+  background-color: var(--admin-accent);
   border: none;
-  color: white;
-  min-width: 80px;
+  color: #fff;
+  min-width: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.save-button:disabled {
-  opacity: 0.7;
+.save-button:hover:not(:disabled) {
+  background-color: rgba(59, 130, 246, 0.85);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+}
+
+.save-button:disabled,
+.cancel-button:disabled,
+.password-toggle:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.cancel-button:hover:not(:disabled) {
-  background-color: #ebebeb;
-}
-
-.save-button:hover:not(:disabled) {
-  background-color: #967f69;
-}
-
 .spinner {
-  display: inline-block;
   width: 1rem;
   height: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top: 2px solid #fff;
   border-radius: 50%;
-  margin: 0;
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Dark mode styles */
-body.dark-mode .edit-modal {
-  background-color: #333;
-}
-
-body.dark-mode .modal-header,
-body.dark-mode .modal-footer {
-  border-color: #444;
-}
-
-body.dark-mode .modal-header h2 {
-  color: #eee;
-}
-
-body.dark-mode .close-button {
-  color: #aaa;
-}
-
-body.dark-mode .form-group label {
-  color: #bbb;
-}
-
-body.dark-mode .form-input {
-  background-color: #333;
-  border-color: #444;
-  color: #eee;
-}
-
-body.dark-mode .form-input:disabled {
-  background-color: #2a2a2a;
-}
-
-body.dark-mode .switch-label {
-  background-color: #444;
-}
-
-body.dark-mode .switch-label:after {
-  background-color: #666;
-}
-
-body.dark-mode .status-text {
-  color: #aaa;
-}
-
-body.dark-mode .cancel-button {
-  background-color: #444;
-  border-color: #555;
-  color: #ddd;
-}
-
-body.dark-mode .cancel-button:hover:not(:disabled) {
-  background-color: #555;
+  to { transform: rotate(360deg); }
 }
 </style> 

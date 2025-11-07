@@ -117,185 +117,136 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(8, 11, 19, 0.75);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 1rem;
 }
 
 .modal-content {
-  background-color: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
+  background-color: var(--admin-surface);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--admin-border);
 }
 
 .modal-header h3 {
   margin: 0;
-  font-size: 1.2rem;
-  color: #333;
+  font-size: 1.4rem;
+  color: var(--admin-text);
 }
 
 .close-button {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   cursor: pointer;
-  color: #666;
-  padding: 0;
-  line-height: 1;
+  color: var(--admin-muted);
+  transition: color 0.2s ease;
 }
 
 .close-button:hover {
-  color: #333;
+  color: var(--admin-text);
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 1.25rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #333;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--admin-muted);
 }
 
 .form-control {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #495057;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-control:focus {
-  border-color: #A79277;
-  outline: 0;
-  box-shadow: 0 0 0 2px rgba(167, 146, 119, 0.25);
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 .checkbox-label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  gap: 0.5rem;
   cursor: pointer;
-}
-
-.checkbox-label input {
-  margin-left: 8px;
+  color: var(--admin-text);
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 24px;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
 }
 
 .save-button,
 .cancel-button {
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .save-button {
-  background-color: #A79277;
-  color: white;
-  border: none;
+  background-color: var(--admin-accent);
+  color: #fff;
 }
 
-.save-button:hover {
-  background-color: #8a7660;
+.save-button:hover:not(:disabled) {
+  background-color: rgba(59, 130, 246, 0.85);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
 }
 
 .cancel-button {
-  background-color: #f8f9fa;
-  color: #495057;
-  border: 1px solid #ced4da;
+  background-color: rgba(148, 163, 184, 0.2);
+  color: var(--admin-muted);
 }
 
-.cancel-button:hover {
-  background-color: #e9ecef;
+.cancel-button:hover:not(:disabled) {
+  background-color: rgba(148, 163, 184, 0.3);
+  transform: translateY(-1px);
 }
 
 .save-button:disabled,
 .cancel-button:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Dark mode styles */
-body.dark-mode .modal-content {
-  background-color: #333;
-}
-
-body.dark-mode .modal-header {
-  border-bottom-color: #444;
-}
-
-body.dark-mode .modal-header h3 {
-  color: #eee;
-}
-
-body.dark-mode .close-button {
-  color: #aaa;
-}
-
-body.dark-mode .close-button:hover {
-  color: #eee;
-}
-
-body.dark-mode .form-group label {
-  color: #eee;
-}
-
-body.dark-mode .form-control {
-  background-color: #444;
-  border-color: #555;
-  color: #eee;
-}
-
-body.dark-mode .form-control:focus {
-  border-color: #C5B192;
-  box-shadow: 0 0 0 2px rgba(197, 177, 146, 0.25);
-}
-
-body.dark-mode .save-button {
-  background-color: #C5B192;
-  color: #333;
-}
-
-body.dark-mode .save-button:hover {
-  background-color: #A79277;
-}
-
-body.dark-mode .cancel-button {
-  background-color: #444;
-  color: #eee;
-  border-color: #555;
-}
-
-body.dark-mode .cancel-button:hover {
-  background-color: #555;
 }
 </style> 

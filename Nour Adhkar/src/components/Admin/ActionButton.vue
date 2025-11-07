@@ -51,22 +51,11 @@ export default {
   cursor: pointer;
   margin: 0 4px;
   transition: all 0.2s ease;
-  color: #666;
+  color: var(--admin-muted);
 }
 
 .action-button:hover {
-  color: #333;
+  color: var(--admin-accent);
   transform: translateY(-1px);
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .action-button {
-    color: #aaa;
-  }
-  
-  .action-button:hover {
-    color: #fff;
-  }
 }
 </style> 

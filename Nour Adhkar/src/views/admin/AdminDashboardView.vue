@@ -5,7 +5,11 @@
     </div>
     
     <div class="stats-container">
-      <div class="stat-card">
+      <div class="stat-card clickable"
+           role="button"
+           tabindex="0"
+           @click="navigateTo('/admin/blog')"
+           @keyup.enter.prevent="navigateTo('/admin/blog')">
         <div class="stat-icon blog-icon">
           <font-awesome-icon icon="fa-solid fa-newspaper" />
         </div>
@@ -15,7 +19,11 @@
         </div>
       </div>
       
-      <div class="stat-card">
+      <div class="stat-card clickable"
+           role="button"
+           tabindex="0"
+           @click="navigateTo('/admin/users')"
+           @keyup.enter.prevent="navigateTo('/admin/users')">
         <div class="stat-icon user-icon">
           <font-awesome-icon icon="fa-solid fa-users" />
         </div>
@@ -25,7 +33,11 @@
         </div>
       </div>
       
-      <div class="stat-card">
+      <div class="stat-card clickable"
+           role="button"
+           tabindex="0"
+           @click="navigateTo('/admin/analytics')"
+           @keyup.enter.prevent="navigateTo('/admin/analytics')">
         <div class="stat-icon view-icon">
           <font-awesome-icon icon="fa-solid fa-eye" />
         </div>
@@ -35,7 +47,11 @@
         </div>
       </div>
       
-      <div class="stat-card">
+      <div class="stat-card clickable"
+           role="button"
+           tabindex="0"
+           @click="navigateTo('/admin/comments')"
+           @keyup.enter.prevent="navigateTo('/admin/comments')">
         <div class="stat-icon comment-icon">
           <font-awesome-icon icon="fa-solid fa-comments" />
         </div>
@@ -382,6 +398,10 @@ export default {
       if (post.featured) return 'ویژه';
       return 'منتشر شده';
     },
+
+    navigateTo(path) {
+      this.$router.push(path);
+    },
     
     
   }
@@ -428,6 +448,23 @@ export default {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.stat-card.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.stat-card.clickable:hover,
+.stat-card.clickable:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.35);
+  border-color: var(--admin-accent);
+}
+
+.stat-card.clickable:focus-visible {
+  outline: none;
 }
 
 .stat-icon {
