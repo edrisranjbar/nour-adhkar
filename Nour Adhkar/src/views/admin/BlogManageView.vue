@@ -249,6 +249,8 @@ export default {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--admin-bg);
+  color: var(--admin-text);
 }
 
 .container {
@@ -267,24 +269,26 @@ export default {
 
 .admin-controls h2 {
   font-size: 1.5rem;
-  color: #333;
+  color: var(--admin-text);
+  margin: 0;
 }
 
 .new-post-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: #A79277;
-  color: white;
+  background-color: var(--admin-accent);
+  color: #fff;
   padding: 8px 16px;
   border-radius: 6px;
   text-decoration: none;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .new-post-button:hover {
-  background-color: #8a7660;
+  background-color: rgba(59, 130, 246, 0.85);
+  transform: translateY(-1px);
 }
 
 .loading-container {
@@ -293,14 +297,15 @@ export default {
   align-items: center;
   justify-content: center;
   min-height: 300px;
+  color: var(--admin-muted);
 }
 
 .spinner {
   width: 50px;
   height: 50px;
-  border: 5px solid rgba(167, 146, 119, 0.3);
+  border: 5px solid rgba(59, 130, 246, 0.2);
   border-radius: 50%;
-  border-top-color: #A79277;
+  border-top-color: var(--admin-accent);
   animation: spin 1s infinite ease;
   margin-bottom: 20px;
 }
@@ -311,28 +316,35 @@ export default {
 
 .error-message {
   text-align: center;
-  color: #e74c3c;
+  color: #fca5a5;
   padding: 30px;
-  background-color: #fef2f2;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: 8px;
   margin: 20px 0;
 }
 
 .retry-button {
-  background-color: #A79277;
-  color: white;
+  background-color: var(--admin-accent);
+  color: #fff;
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
   margin-top: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.retry-button:hover {
+  background-color: rgba(59, 130, 246, 0.85);
 }
 
 .posts-table-container {
-  background-color: white;
-  border-radius: 8px;
+  background-color: var(--admin-surface);
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.35);
+  border: 1px solid var(--admin-border);
 }
 
 .posts-table {
@@ -344,38 +356,39 @@ export default {
 .posts-table td {
   padding: 12px 16px;
   text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
 }
 
 .posts-table th {
-  background-color: #f8f8f8;
+  background-color: rgba(255, 255, 255, 0.05);
   font-weight: 600;
-  color: #555;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--admin-muted);
 }
 
-.posts-table tr {
-  border-bottom: 1px solid #eee;
-}
-
-.posts-table tr:last-child {
+.posts-table tr:last-child td {
   border-bottom: none;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 4px 8px;
-  border-radius: 20px;
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 500;
 }
 
 .status-badge.published {
-  background-color: #d4edda;
-  color: #28a745;
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
 }
 
 .status-badge.draft {
-  background-color: #f8f9fa;
-  color: #6c757d;
+  background-color: rgba(148, 163, 184, 0.15);
+  color: var(--admin-muted);
 }
 
 .actions {
@@ -389,32 +402,32 @@ export default {
   padding: 0.4rem 0.5rem;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: color 0.2s;
-  color: #666;
+  transition: color 0.2s ease;
+  color: var(--admin-muted);
 }
 
 .view-button:hover {
-  color: #4a6fa5;
+  color: #60a5fa;
 }
 
 .edit-button:hover {
-  color: #A79277;
+  color: var(--admin-accent);
 }
 
 .delete-button:hover {
-  color: #dc3545;
+  color: #f87171;
 }
 
 .no-posts {
   text-align: center;
   padding: 40px;
-  color: #777;
+  color: var(--admin-muted);
 }
 
 .create-post-link {
   display: inline-block;
   margin-top: 10px;
-  color: #A79277;
+  color: var(--admin-accent);
   font-weight: 500;
   text-decoration: none;
 }
@@ -428,15 +441,17 @@ export default {
   justify-content: center;
   align-items: center;
   margin-top: 20px;
+  gap: 0.75rem;
 }
 
 .pagination-button {
   padding: 8px 16px;
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
   cursor: pointer;
-  margin: 0 5px;
+  color: var(--admin-text);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .pagination-button:disabled {
@@ -446,7 +461,7 @@ export default {
 
 .page-numbers {
   display: flex;
-  margin: 0 10px;
+  gap: 0.5rem;
 }
 
 .page-number {
@@ -455,27 +470,30 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ddd;
-  background-color: white;
-  margin: 0 5px;
+  border: 1px solid var(--admin-border);
+  background-color: rgba(255, 255, 255, 0.03);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
+  color: var(--admin-text);
 }
 
 .page-number.active {
-  background-color: #A79277;
-  color: white;
-  border-color: #A79277;
+  background-color: var(--admin-accent);
+  color: #fff;
+  border-color: transparent;
 }
 
-/* Modal */
+.page-number:hover {
+  border-color: var(--admin-accent);
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(8, 11, 19, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -483,21 +501,23 @@ export default {
 }
 
 .modal-content {
-  background-color: white;
-  border-radius: 8px;
+  background-color: var(--admin-surface);
+  border-radius: 12px;
   padding: 24px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.45);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
 }
 
 .modal-content h3 {
   margin-top: 0;
-  color: #333;
+  color: var(--admin-text);
 }
 
 .modal-content p {
-  color: #666;
+  color: var(--admin-muted);
   margin-bottom: 20px;
 }
 
@@ -508,21 +528,31 @@ export default {
 }
 
 .delete-confirm-button {
-  background-color: #dc3545;
-  color: white;
+  background-color: #f87171;
+  color: #fff;
   border: none;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.delete-confirm-button:hover {
+  background-color: #ef4444;
 }
 
 .cancel-button {
-  background-color: #6c757d;
-  color: white;
+  background-color: rgba(148, 163, 184, 0.2);
+  color: var(--admin-muted);
   border: none;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cancel-button:hover {
+  background-color: rgba(148, 163, 184, 0.3);
 }
 
 .toast-notification {
@@ -530,12 +560,12 @@ export default {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #333;
-  color: white;
+  background-color: rgba(17, 24, 39, 0.95);
+  color: #fff;
   padding: 12px 20px;
   border-radius: 8px;
   z-index: 1100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.45);
   animation: fadeInOut 3s ease-in-out forwards;
 }
 
@@ -546,33 +576,16 @@ export default {
   100% { opacity: 0; transform: translate(-50%, 20px); }
 }
 
-/* Dark mode */
-body.dark-mode .posts-table-container {
-  background-color: #262626;
-}
+@media (max-width: 768px) {
+  .admin-controls {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
 
-body.dark-mode .posts-table th {
-  background-color: #333;
-  color: #ddd;
-}
-
-body.dark-mode .posts-table tr {
-  border-bottom-color: #444;
-}
-
-body.dark-mode .admin-controls h2 {
-  color: #eee;
-}
-
-body.dark-mode .modal-content {
-  background-color: #262626;
-}
-
-body.dark-mode .modal-content h3 {
-  color: #eee;
-}
-
-body.dark-mode .modal-content p {
-  color: #ccc;
+  .pagination {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 </style> 

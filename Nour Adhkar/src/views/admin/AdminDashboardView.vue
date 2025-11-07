@@ -30,8 +30,8 @@
           <font-awesome-icon icon="fa-solid fa-eye" />
         </div>
         <div class="stat-content">
-          <span class="stat-value">{{ formatNumber(stats.totalViews || 0) }}</span>
-          <span class="stat-label">بازدید مقالات</span>
+          <span class="stat-value">{{ formatNumber(totalViews) }}</span>
+          <span class="stat-label">مجموع بازدیدها</span>
         </div>
       </div>
       
@@ -45,15 +45,6 @@
         </div>
       </div>
       
-      <div class="stat-card">
-        <div class="stat-icon analytics-icon">
-          <font-awesome-icon icon="fa-solid fa-chart-line" />
-        </div>
-        <div class="stat-content">
-          <span class="stat-value">{{ formatNumber(stats.analyticsTotal || 0) }}</span>
-          <span class="stat-label">بازدید صفحات (۱۴ روز)</span>
-        </div>
-      </div>
     </div>
     
     <div class="dashboard-sections">
@@ -146,35 +137,6 @@
         </div>
       </div>
       
-      <div class="quick-actions section">
-        <h2 class="section-title">عملیات سریع</h2>
-        
-        <div class="actions-grid">
-          <div class="action-card" @click="goTo('/admin/blog/new')">
-            <div class="action-icon">
-              <font-awesome-icon icon="fa-solid fa-plus" />
-            </div>
-            <span class="action-label">ایجاد مقاله جدید</span>
-          </div>
-          
-          <div class="action-card" @click="goTo('/admin/blog')">
-            <div class="action-icon">
-              <font-awesome-icon icon="fa-solid fa-list" />
-            </div>
-            <span class="action-label">مدیریت مقالات</span>
-          </div>
-          
-          <div class="action-card" @click="goTo('/admin/users')">
-            <div class="action-icon">
-              <font-awesome-icon icon="fa-solid fa-users" />
-            </div>
-            <span class="action-label">مدیریت کاربران</span>
-          </div>
-          
-          <!-- Future quick actions can be added here -->
-          
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -230,9 +192,9 @@ export default {
       stats: {
         blogPostsCount: 0,
         usersCount: 0,
-        totalViews: 0,
+        articleViews: 0,
         commentsCount: 0,
-        analyticsTotal: 0
+        analyticsViews: 0
       },
       analytics: {
         daily: [],
@@ -243,6 +205,11 @@ export default {
   computed: {
     token() {
       return this.$store.state.token;
+    },
+    totalViews() {
+      const articleViews = this.stats.articleViews || 0;
+      const analyticsViews = this.stats.analyticsViews || 0;
+      return articleViews + analyticsViews;
     }
   },
   mounted() {
@@ -273,13 +240,10 @@ export default {
           this.getUsersCount()
         ]);
 
-        this.stats = {
-          blogPostsCount: postsResponse.data.posts.total || 0,
-          totalViews: viewsResponse.data.total_views || 0,
-          commentsCount: commentsResponse.data.count || 0,
-          usersCount: usersCount,
-          analyticsTotal: this.analytics.daily.reduce((sum, d) => sum + (d.visits || 0), 0)
-        };
+        this.stats.blogPostsCount = postsResponse.data.posts.total || 0;
+        this.stats.articleViews = viewsResponse.data.total_views || 0;
+        this.stats.commentsCount = commentsResponse.data.count || 0;
+        this.stats.usersCount = usersCount;
       } catch (error) {
         console.error('Error fetching stats:', error);
         this.$toast.error('خطا در دریافت آمار');
@@ -293,7 +257,7 @@ export default {
           const { daily, topPages } = response.data.data;
           this.analytics.daily = daily;
           this.analytics.topPages = topPages;
-          this.stats.analyticsTotal = this.analytics.daily.reduce((sum, d) => sum + (d.visits || 0), 0);
+          this.stats.analyticsViews = this.analytics.daily.reduce((sum, d) => sum + (d.visits || 0), 0);
           this.renderVisitsChart();
         }
       } catch (error) {
@@ -417,10 +381,6 @@ export default {
       if (post.status === 'draft') return 'پیش‌نویس';
       if (post.featured) return 'ویژه';
       return 'منتشر شده';
-    },
-    
-    goTo(path) {
-      this.$router.push(path);
     },
     
     
@@ -675,49 +635,6 @@ export default {
 
 .edit-button:hover {
   color: #A79277;
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.action-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #f8f8f8;
-  border-radius: 8px;
-  padding: 1.25rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.action-card:hover {
-  background-color: #f0f0f0;
-  transform: translateY(-2px);
-}
-
-.action-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #A79277;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  margin-bottom: 0.75rem;
-}
-
-.action-label {
-  font-size: 0.85rem;
-  text-align: center;
-  color: var(--admin-muted);
 }
 
 /* Dark mode styles */

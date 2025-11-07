@@ -343,6 +343,8 @@ export default {
 <style scoped>
 .admin-adhkar {
   padding: 1.5rem;
+  background: var(--admin-bg);
+  color: var(--admin-text);
 }
 
 .loading-state {
@@ -351,26 +353,28 @@ export default {
   align-items: center;
   gap: 1rem;
   padding: 3rem;
-  color: #666;
+  color: var(--admin-muted);
 }
 
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  background: white;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
   border-radius: 8px;
   margin: 2rem 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  color: var(--admin-text);
 }
 
 .empty-icon {
   font-size: 3rem;
-  color: #A79277;
+  color: var(--admin-accent);
   margin-bottom: 1rem;
 }
 
 .subtitle {
-  color: #666;
+  color: var(--admin-muted);
   margin-top: 0.5rem;
 }
 
@@ -381,7 +385,7 @@ export default {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--admin-text);
   font-weight: 500;
 }
 
@@ -390,34 +394,31 @@ export default {
 .form-group select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
   font-size: 1rem;
   font-family: inherit;
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--admin-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--admin-muted);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 .form-group textarea {
   min-height: 100px;
   resize: vertical;
-}
-
-/* Dark mode styles */
-body.dark-mode {
-  .empty-state {
-    background-color: #333;
-  }
-
-  .form-group label {
-    color: #fff;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    background-color: #444;
-    border-color: #555;
-    color: #fff;
-  }
 }
 
 .actions {
