@@ -44,6 +44,11 @@ export default {
           icon: 'fa-solid fa-clipboard-list',
           exact: true
         },
+        {
+          action: 'logout',
+          title: 'خروج',
+          icon: 'fa-solid fa-arrow-right-from-bracket'
+        }
       ]
     }
   },

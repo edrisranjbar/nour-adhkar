@@ -7,7 +7,7 @@
     </div>
     <nav class="nav">
       <ul class="menu">
-        <li v-for="item in items" :key="item.path" class="menu-item">
+        <li v-for="item in navigationItems" :key="item.path" class="menu-item">
           <RouterLink :to="item.path" class="menu-link" :class="{ active: isActive(item.path) }" :title="isCollapsed ? item.title : null">
             <div class="menu-icon">
               <font-awesome-icon :icon="item.icon" />
@@ -17,6 +17,14 @@
         </li>
       </ul>
     </nav>
+    <div class="sidebar-footer" v-if="logoutItem">
+      <button type="button" class="menu-link button-link logout-button" @click="handleLogout" :title="isCollapsed ? logoutItem.title : null">
+        <div class="menu-icon">
+          <font-awesome-icon :icon="logoutItem.icon" />
+        </div>
+        <span class="menu-text">{{ logoutItem.title }}</span>
+      </button>
+    </div>
   </aside>
 </template>
 
@@ -29,10 +37,19 @@ export default {
       required: true
     }
   },
-  emits: ['sidebar-toggle'],
+  emits: ['sidebar-toggle', 'logout'],
   data() {
     return {
-      isCollapsed: false
+      isCollapsed: false,
+      expandedMenus: {}
+    }
+  },
+  computed: {
+    logoutItem() {
+      return this.items.find(item => item.action === 'logout');
+    },
+    navigationItems() {
+      return this.items.filter(item => item.action !== 'logout');
     }
   },
   created() {
@@ -67,7 +84,10 @@ export default {
       // Exact for root, startsWith for sections
       return this.$route.path === path || this.$route.path.startsWith(path + '/');
     },
-    autoExpandForRoute() {}
+    autoExpandForRoute() {},
+    handleLogout() {
+      this.$emit('logout');
+    }
   }
 }
 </script>
@@ -81,6 +101,9 @@ export default {
   overflow-y: auto;
   position: relative;
   backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .sidebar-header {
@@ -103,6 +126,7 @@ export default {
 
 .nav {
   padding: 1rem 0;
+  flex: 1;
 }
 
 .menu {
@@ -127,6 +151,13 @@ export default {
   cursor: pointer;
   text-align: right;
   direction: rtl;
+  width: 100%;
+  background: none;
+}
+
+.button-link {
+  border: none;
+  background: none;
   width: 100%;
 }
 
@@ -194,4 +225,24 @@ body.admin-collapsed .sidebar .menu-text { display: none; }
 body.admin-collapsed .sidebar .submenu { display: none !important; }
 body.admin-collapsed .sidebar .submenu-header .submenu-arrow { display: none; }
 body.admin-collapsed .sidebar .menu-link { justify-content: center; padding: 0.75rem; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1rem;
+}
+
+.logout-button {
+  border: none;
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover,
+.logout-button:focus-visible {
+  background: rgba(248, 113, 113, 0.2);
+  border-left-color: #f87171;
+  color: #fca5a5;
+}
 </style> 

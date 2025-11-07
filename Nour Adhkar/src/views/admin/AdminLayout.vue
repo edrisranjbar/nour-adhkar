@@ -1,7 +1,7 @@
 <template>
   <div class="admin-layout">
     <div class="admin-content">
-      <AdminSidebar />
+      <AdminSidebar @logout="logout" />
       <main class="admin-main">
         <RouterView />
       </main>
