@@ -79,9 +79,7 @@ export default {
   flex-direction: column;
   gap: 1rem;
   margin-bottom: 1.5rem;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
 }
 
 .search-box {
@@ -123,6 +121,7 @@ export default {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .filter-select {

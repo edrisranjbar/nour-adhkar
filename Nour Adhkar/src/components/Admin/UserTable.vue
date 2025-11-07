@@ -149,8 +149,7 @@ export default {
 
 <style scoped>
 .users-list-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .users-table {

@@ -275,9 +275,8 @@ export default {
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem 2rem;
+  width: 100%;
+  padding: 0 2rem 2.5rem;
 }
 
 .admin-controls {

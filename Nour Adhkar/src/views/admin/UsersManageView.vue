@@ -386,16 +386,15 @@ export default {
   min-height: 100vh;
   background: var(--admin-bg);
   color: var(--admin-text);
-  padding: 1.5rem 1rem 2.5rem;
+  padding: 1.5rem 2rem 2.5rem;
 }
 
 .admin-controls {
-  max-width: 1200px;
-  margin: 0 auto 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .page-title {
