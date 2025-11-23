@@ -276,18 +276,40 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Always respond with success to avoid user enumeration
+        // Check if user exists
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'کاربری با این ایمیل در سیستم ثبت نشده است.'
+            ], 404);
+        }
+
+        // Send reset link
         $status = Password::sendResetLink(
             $request->only('email')
         );
 
-        // Get Persian message from lang/fa/passwords.php
-        $message = __('passwords.sent', [], 'fa');
-        
+        if ($status == Password::RESET_LINK_SENT) {
+            return response()->json([
+                'success' => true,
+                'message' => 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد.'
+            ]);
+        }
+
+        // Handle other statuses
+        $errorMessages = [
+            Password::INVALID_USER => 'کاربری با این ایمیل یافت نشد.',
+            Password::THROTTLED => 'لطفاً قبل از تلاش مجدد کمی صبر کنید.',
+        ];
+
+        $message = $errorMessages[$status] ?? 'خطا در ارسال لینک بازیابی رمز عبور.';
+
         return response()->json([
-            'success' => true,
+            'success' => false,
             'message' => $message
-        ]);
+        ], 422);
     }
 
     // Password reset: perform reset with token
