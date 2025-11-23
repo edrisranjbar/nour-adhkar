@@ -13,9 +13,15 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\App;
 
 class AuthController extends Controller
 {
+    public function __construct()
+    {
+        // Set locale to Persian for all responses
+        App::setLocale('fa');
+    }
     public function get()
     {
         return response()->json([
@@ -32,7 +38,13 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            $errors = $validator->errors();
+            $firstError = $errors->first();
+            return response()->json([
+                'success' => false,
+                'message' => $firstError,
+                'errors' => $errors
+            ], 422);
         }
 
         try {
@@ -62,7 +74,13 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            $errors = $validator->errors();
+            $firstError = $errors->first();
+            return response()->json([
+                'success' => false,
+                'message' => $firstError,
+                'errors' => $errors
+            ], 422);
         }
 
         if (!$token = auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
@@ -244,27 +262,52 @@ class AuthController extends Controller
     // Password reset: request reset link
     public function forgotPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            $firstError = $errors->first();
+            return response()->json([
+                'success' => false,
+                'message' => $firstError,
+                'errors' => $errors
+            ], 422);
+        }
 
         // Always respond with success to avoid user enumeration
         $status = Password::sendResetLink(
             $request->only('email')
         );
 
+        // Get Persian message from lang/fa/passwords.php
+        $message = __('passwords.sent', [], 'fa');
+        
         return response()->json([
-            'success' => in_array($status, [Password::RESET_LINK_SENT, Password::INVALID_USER]) ? true : true,
-            'message' => __($status)
+            'success' => true,
+            'message' => $message
         ]);
     }
 
     // Password reset: perform reset with token
     public function resetPassword(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|string|min:6|confirmed',
         ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            $firstError = $errors->first();
+            return response()->json([
+                'success' => false,
+                'message' => $firstError,
+                'errors' => $errors
+            ], 422);
+        }
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
@@ -281,13 +324,22 @@ class AuthController extends Controller
         if ($status == Password::PASSWORD_RESET) {
             return response()->json([
                 'success' => true,
-                'message' => __($status)
+                'message' => __('passwords.reset', [], 'fa')
             ]);
         }
 
+        // Get Persian error message
+        $errorMessages = [
+            Password::INVALID_TOKEN => __('passwords.token', [], 'fa'),
+            Password::INVALID_USER => __('passwords.user', [], 'fa'),
+            Password::THROTTLED => __('passwords.throttled', [], 'fa'),
+        ];
+
+        $message = $errorMessages[$status] ?? 'خطا در بازنشانی رمز عبور';
+
         return response()->json([
             'success' => false,
-            'message' => __($status)
+            'message' => $message
         ], 422);
     }
 
