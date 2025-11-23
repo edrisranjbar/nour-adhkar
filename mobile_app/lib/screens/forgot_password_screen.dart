@@ -47,7 +47,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         setState(() {
           _isLoading = false;
           if (result['success'] == true) {
-            _successMessage = result['message'] ?? 'اگر ایمیل صحیح باشد، لینک بازیابی ارسال شد';
+            _successMessage = result['message'] ?? 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد';
             _errorMessage = null;
           } else {
             _errorMessage = result['message'] ?? 'خطا در ارسال لینک بازیابی';
@@ -59,6 +59,44 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (mounted) {
         setState(() {
           _errorMessage = 'خطا در ارسال لینک بازیابی';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleResend() async {
+    if (_isLoading) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _successMessage = null;
+    });
+
+    try {
+      final result = await AuthService.resendPasswordReset(
+        _emailController.text.trim(),
+      );
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          if (result['success'] == true) {
+            _successMessage = result['message'] ?? 'لینک بازیابی رمز عبور مجدداً به ایمیل شما ارسال شد';
+            _errorMessage = null;
+          } else {
+            _errorMessage = result['message'] ?? 'خطا در ارسال مجدد لینک بازیابی';
+            _successMessage = null;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'خطا در ارسال مجدد لینک بازیابی';
           _isLoading = false;
         });
       }
@@ -387,6 +425,42 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     ),
                             ),
                           ),
+
+                          // Resend Button (shown after successful send)
+                          if (_successMessage != null) ...[
+                            const SizedBox(height: 16),
+                            TextButton(
+                              onPressed: _isLoading ? null : _handleResend,
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    FontAwesomeIcons.arrowRotateRight,
+                                    size: 16,
+                                    color: isDark 
+                                        ? Colors.white.withOpacity(0.8)
+                                        : Colors.black54,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'ارسال مجدد',
+                                    textDirection: TextDirection.rtl,
+                                    style: TextStyle(
+                                      color: isDark 
+                                          ? Colors.white.withOpacity(0.8)
+                                          : Colors.black54,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: AppTheme.fontPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),

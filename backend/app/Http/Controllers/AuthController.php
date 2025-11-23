@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\WelcomeEmail;
+use App\Notifications\ResetPasswordFa;
 
 class AuthController extends Controller
 {
@@ -55,6 +59,14 @@ class AuthController extends Controller
             ]);
 
             $token = auth()->login($user);
+
+            // Send welcome email
+            try {
+                $user->notify(new WelcomeEmail());
+            } catch (Exception $e) {
+                // Log error but don't fail registration
+                \Log::error('Failed to send welcome email: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'user' => new UserResource($user),
@@ -286,30 +298,40 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // Send reset link
-        $status = Password::sendResetLink(
-            $request->only('email')
+        // Generate password reset token
+        // Laravel's Password broker creates and stores the token, then we get it
+        $token = Password::broker()->createToken($user);
+        
+        // Get the plain token from database (we need to store it temporarily)
+        // Actually, Laravel's createToken stores hashed token, we need plain one for URL
+        // So we'll generate our own token and store it properly
+        $plainToken = Str::random(64);
+        
+        // Store hashed token in password_resets table (Laravel's way)
+        DB::table('password_resets')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => Hash::make($plainToken),
+                'created_at' => now()
+            ]
         );
 
-        if ($status == Password::RESET_LINK_SENT) {
+        // Send reset password email with plain token
+        try {
+            $user->notify(new ResetPasswordFa($plainToken));
+            
             return response()->json([
                 'success' => true,
                 'message' => 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد.'
             ]);
+        } catch (Exception $e) {
+            \Log::error('Failed to send password reset email: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در ارسال ایمیل. لطفاً دوباره تلاش کنید.'
+            ], 500);
         }
-
-        // Handle other statuses
-        $errorMessages = [
-            Password::INVALID_USER => 'کاربری با این ایمیل یافت نشد.',
-            Password::THROTTLED => 'لطفاً قبل از تلاش مجدد کمی صبر کنید.',
-        ];
-
-        $message = $errorMessages[$status] ?? 'خطا در ارسال لینک بازیابی رمز عبور.';
-
-        return response()->json([
-            'success' => false,
-            'message' => $message
-        ], 422);
     }
 
     // Password reset: perform reset with token
@@ -331,38 +353,137 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+        // Check if user exists
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => __('passwords.user', [], 'fa')
+            ], 404);
+        }
 
-                event(new PasswordReset($user));
-            }
-        );
+        // Check if token exists and is valid
+        $passwordReset = DB::table('password_resets')
+            ->where('email', $request->email)
+            ->first();
 
-        if ($status == Password::PASSWORD_RESET) {
+        if (!$passwordReset) {
+            return response()->json([
+                'success' => false,
+                'message' => __('passwords.token', [], 'fa')
+            ], 422);
+        }
+
+        // Check if token is expired (60 minutes)
+        if (now()->diffInMinutes($passwordReset->created_at) > 60) {
+            return response()->json([
+                'success' => false,
+                'message' => 'توکن بازیابی رمز عبور منقضی شده است. لطفاً درخواست جدید ارسال کنید.'
+            ], 422);
+        }
+
+        // Verify token
+        if (!Hash::check($request->token, $passwordReset->token)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('passwords.token', [], 'fa')
+            ], 422);
+        }
+
+        // Reset password
+        try {
+            $user->forceFill([
+                'password' => Hash::make($request->password),
+                'remember_token' => Str::random(60),
+            ])->save();
+
+            // Delete used token
+            DB::table('password_resets')->where('email', $request->email)->delete();
+
+            event(new PasswordReset($user));
+
             return response()->json([
                 'success' => true,
                 'message' => __('passwords.reset', [], 'fa')
             ]);
+        } catch (Exception $e) {
+            \Log::error('Failed to reset password: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در بازنشانی رمز عبور'
+            ], 500);
+        }
+    }
+
+    // Resend password reset email
+    public function resendPasswordReset(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            $firstError = $errors->first();
+            return response()->json([
+                'success' => false,
+                'message' => $firstError,
+                'errors' => $errors
+            ], 422);
         }
 
-        // Get Persian error message
-        $errorMessages = [
-            Password::INVALID_TOKEN => __('passwords.token', [], 'fa'),
-            Password::INVALID_USER => __('passwords.user', [], 'fa'),
-            Password::THROTTLED => __('passwords.throttled', [], 'fa'),
-        ];
+        // Check if user exists
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'کاربری با این ایمیل در سیستم ثبت نشده است.'
+            ], 404);
+        }
 
-        $message = $errorMessages[$status] ?? 'خطا در بازنشانی رمز عبور';
+        // Check rate limiting (prevent spam)
+        $lastReset = DB::table('password_resets')
+            ->where('email', $request->email)
+            ->first();
 
-        return response()->json([
-            'success' => false,
-            'message' => $message
-        ], 422);
+        if ($lastReset && now()->diffInMinutes($lastReset->created_at) < 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لطفاً قبل از درخواست مجدد ۲ دقیقه صبر کنید.'
+            ], 429);
+        }
+
+        // Generate new password reset token
+        $plainToken = Str::random(64);
+        
+        // Store hashed token in password_resets table
+        DB::table('password_resets')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => Hash::make($plainToken),
+                'created_at' => now()
+            ]
+        );
+
+        // Send reset password email with plain token
+        try {
+            $user->notify(new ResetPasswordFa($plainToken));
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'لینک بازیابی رمز عبور مجدداً به ایمیل شما ارسال شد.'
+            ]);
+        } catch (Exception $e) {
+            \Log::error('Failed to resend password reset email: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در ارسال ایمیل. لطفاً دوباره تلاش کنید.'
+            ], 500);
+        }
     }
 
 }

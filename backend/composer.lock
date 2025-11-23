@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a3dbf824030304e27da29af4658c07db",
+    "content-hash": "b802abbc96deca76b7285c55aaafbcb3",
     "packages": [
         {
             "name": "brick/math",
@@ -3486,6 +3486,132 @@
                 }
             ],
             "time": "2024-04-27T21:32:50+00:00"
+        },
+        {
+            "name": "resend/resend-laravel",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/resend/resend-laravel.git",
+                "reference": "b1341bf386746766c8b3c3e5a36fa5ccd4a39ced"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/resend/resend-laravel/zipball/b1341bf386746766c8b3c3e5a36fa5ccd4a39ced",
+                "reference": "b1341bf386746766c8b3c3e5a36fa5ccd4a39ced",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/http": "^10.0|^11.0|^12.0",
+                "illuminate/support": "^10.0|^11.0|^12.0",
+                "php": "^8.1",
+                "resend/resend-php": "^1.0.0",
+                "symfony/mailer": "^6.2|^7.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.14",
+                "mockery/mockery": "^1.5",
+                "orchestra/testbench": "^8.17|^9.0|^10.0",
+                "pestphp/pest": "^2.0|^3.7"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Resend\\Laravel\\ResendServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Resend\\Laravel\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Resend and contributors",
+                    "homepage": "https://github.com/resend/resend-laravel/contributors"
+                }
+            ],
+            "description": "Resend for Laravel",
+            "homepage": "https://resend.com/",
+            "keywords": [
+                "api",
+                "client",
+                "laravel",
+                "php",
+                "resend",
+                "sdk"
+            ],
+            "support": {
+                "issues": "https://github.com/resend/resend-laravel/issues",
+                "source": "https://github.com/resend/resend-laravel/tree/v1.0.0"
+            },
+            "time": "2025-11-11T03:07:39+00:00"
+        },
+        {
+            "name": "resend/resend-php",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/resend/resend-php.git",
+                "reference": "9088f169bfc8373ef52a061200c81912451750f0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/resend/resend-php/zipball/9088f169bfc8373ef52a061200c81912451750f0",
+                "reference": "9088f169bfc8373ef52a061200c81912451750f0",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.5",
+                "php": "^8.1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.13",
+                "mockery/mockery": "^1.6",
+                "pestphp/pest": "^2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Resend.php"
+                ],
+                "psr-4": {
+                    "Resend\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Resend and contributors",
+                    "homepage": "https://github.com/resend/resend-php/contributors"
+                }
+            ],
+            "description": "Resend PHP library.",
+            "homepage": "https://resend.com/",
+            "keywords": [
+                "api",
+                "client",
+                "php",
+                "resend",
+                "sdk"
+            ],
+            "support": {
+                "issues": "https://github.com/resend/resend-php/issues",
+                "source": "https://github.com/resend/resend-php/tree/v1.0.1"
+            },
+            "time": "2025-11-18T18:01:57+00:00"
         },
         {
             "name": "stella-maris/clock",
