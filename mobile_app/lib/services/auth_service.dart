@@ -219,14 +219,21 @@ class AuthService {
         }),
       );
 
+      final data = json.decode(response.body);
+      
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
         return {
           'success': data['success'] ?? true,
-          'message': data['message'] ?? 'اگر ایمیل صحیح باشد، لینک بازیابی ارسال شد',
+          'message': data['message'] ?? 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد',
+        };
+      } else if (response.statusCode == 404) {
+        // Account doesn't exist
+        return {
+          'success': false,
+          'message': data['message'] ?? 'کاربری با این ایمیل در سیستم ثبت نشده است',
         };
       } else {
-        final data = json.decode(response.body);
+        // Other errors (422, 500, etc.)
         return {
           'success': false,
           'message': data['message'] ?? 'خطا در ارسال لینک بازیابی',
