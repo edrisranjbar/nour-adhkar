@@ -117,13 +117,11 @@ class _SplashWrapperState extends State<SplashWrapper> {
 
   Future<void> _checkSplashAndAuth() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final hasSplashBeenShown = prefs.getBool('splashShown') ?? false;
       final isAuth = await AuthService.isAuthenticated();
       
       if (mounted) {
         setState(() {
-          _showSplash = !hasSplashBeenShown;
+          _showSplash = true; // Always show splash screen
           _isAuthenticated = isAuth;
           _isChecking = false;
         });
@@ -141,13 +139,6 @@ class _SplashWrapperState extends State<SplashWrapper> {
   }
 
   Future<void> _onSplashComplete() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('splashShown', true);
-    } catch (e) {
-      // Ignore error
-    }
-    
     if (mounted) {
       setState(() {
         _showSplash = false;

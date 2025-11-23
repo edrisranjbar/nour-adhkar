@@ -8,7 +8,6 @@ import '../widgets/collections_grid.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import 'dhikr_view_screen.dart';
-import 'dashboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -95,13 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         setState(() {
                           _isAuthenticated = false;
                         });
-                      },
-                      onDashboardTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const DashboardScreen(),
-                          ),
-                        );
                       },
                       onMenuTap: () {
                         // Open drawer - will use Scaffold.of(context) from MainScreen
