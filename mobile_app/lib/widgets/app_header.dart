@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
+import '../utils/number_formatter.dart';
 
 class AppHeader extends StatelessWidget {
   final String title;
@@ -75,7 +76,7 @@ class AppHeader extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        // Logo placeholder - you can add actual logo image here
+                        // Logo
                         Container(
                           width: 50,
                           height: 50,
@@ -90,32 +91,25 @@ class AppHeader extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.mosque,
-                            color: AppTheme.brandSecondary,
-                            size: 28,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              'assets/icons/logo.png',
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Fallback to icon if image fails to load
+                                return const Icon(
+                                  Icons.mosque,
+                                  color: AppTheme.brandSecondary,
+                                  size: 28,
+                                );
+                              },
+                            ),
                           ),
                         ),
                         const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                title,
-                                textAlign: TextAlign.right,
-                                maxLines: 2,
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                  fontFamily: AppTheme.fontPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -201,7 +195,7 @@ class _StatItem extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            value.toString(),
+            NumberFormatter.formatNumber(value),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,

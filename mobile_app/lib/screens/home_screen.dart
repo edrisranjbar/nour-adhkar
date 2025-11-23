@@ -7,6 +7,8 @@ import '../widgets/special_section.dart';
 import '../widgets/collections_grid.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import 'dhikr_view_screen.dart';
+import 'dashboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,7 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
       final user = await AuthService.getUser();
       setState(() {
         _isAuthenticated = true;
-        // TODO: Load heart score and streak from API
         _heartScore = user?['heart_score'] ?? 0;
         _streak = user?['streak'] ?? 0;
       });
@@ -96,7 +97,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         });
                       },
                       onDashboardTap: () {
-                        // Navigate to dashboard
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const DashboardScreen(),
+                          ),
+                        );
                       },
                       onMenuTap: () {
                         // Open drawer - will use Scaffold.of(context) from MainScreen
@@ -109,8 +114,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     AppSearchBar(
                       collections: _collections,
                       onSearch: (path) {
-                        // Navigate to collection
-                        print('Navigate to: $path');
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => DhikrViewScreen(
+                              collectionSlug: path,
+                            ),
+                          ),
+                        );
                       },
                     ),
 
@@ -122,12 +132,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       morningCount: _getCollectionCount('morning'),
                       nightCount: _getCollectionCount('night'),
                       onMorningTap: () {
-                        // Navigate to morning collection
-                        print('Navigate to morning');
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const DhikrViewScreen(
+                              collectionSlug: 'morning',
+                              collectionName: 'اذکار صبحگاه',
+                            ),
+                          ),
+                        );
                       },
                       onNightTap: () {
-                        // Navigate to night collection
-                        print('Navigate to night');
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const DhikrViewScreen(
+                              collectionSlug: 'night',
+                              collectionName: 'اذکار شامگاه',
+                            ),
+                          ),
+                        );
                       },
                     ),
 
@@ -164,8 +186,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     CollectionsGrid(
                       collections: _collections,
                       onCollectionTap: (slug) {
-                        // Navigate to collection
-                        print('Navigate to collection: $slug');
+                        final collection = _collections.firstWhere(
+                          (c) => (c['path'] ?? '').toString() == slug,
+                          orElse: () => <String, dynamic>{},
+                        );
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => DhikrViewScreen(
+                              collectionSlug: slug,
+                              collectionName: collection['name'],
+                            ),
+                          ),
+                        );
                       },
                       onCounterTap: () {
                         // Navigate to counter

@@ -46,9 +46,15 @@ class _AppSearchBarState extends State<AppSearchBar> {
       final path = collection['path']?.toString() ?? '';
 
       if (name.contains(queryLower) && !addedCategories.contains(path)) {
+        // Check if collection name already contains "اذکار"
+        final collectionName = collection['name']?.toString() ?? '';
+        final title = collectionName.contains('اذکار') || collectionName.contains('دعا')
+            ? collectionName
+            : 'اذکار $collectionName';
+        
         results.add({
           'id': path,
-          'title': 'اذکار ${collection['name']}',
+          'title': title,
           'path': path,
           'type': 'category',
         });

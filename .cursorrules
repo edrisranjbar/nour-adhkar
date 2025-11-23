@@ -1,0 +1,26 @@
+# Cursor AI Rules for Nour Adhkar Project
+
+## Flutter Commands
+- **NEVER** run `flutter run` automatically after making changes
+- **NEVER** run `flutter clean` automatically
+- **NEVER** run `flutter pub get` automatically unless explicitly requested
+- Only suggest these commands to the user, let them decide when to run them
+
+## When Making Changes
+- Make file edits and fixes
+- Check for linter errors with `read_lints` tool
+- Inform the user about the changes made
+- Suggest running `flutter run` if needed, but DON'T execute it
+- Let the user control when to restart the app
+
+## Exceptions
+- The user explicitly asks to run Flutter commands
+- The user says "run the app" or similar direct instruction
+- Package dependencies are added (then only suggest `flutter pub get`)
+
+## General Guidelines
+- Focus on code quality and correctness
+- Use the linter to validate changes
+- Provide clear explanations of what was changed
+- Be efficient with tool usage
+

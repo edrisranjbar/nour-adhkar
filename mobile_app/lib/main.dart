@@ -6,12 +6,14 @@ import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/counter_screen.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/favorites_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/login_screen.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/splash_screen.dart';
 import 'widgets/app_drawer.dart';
 import 'services/auth_service.dart';
+import 'services/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,8 +29,43 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final themeMode = await SettingsService.getThemeMode();
+    setState(() {
+      switch (themeMode) {
+        case 'light':
+          _themeMode = ThemeMode.light;
+          break;
+        case 'dark':
+          _themeMode = ThemeMode.dark;
+          break;
+        default:
+          _themeMode = ThemeMode.system;
+      }
+    });
+  }
+
+  void updateThemeMode(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,14 +87,18 @@ class MyApp extends StatelessWidget {
       ],
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const SplashWrapper(),
+      themeMode: _themeMode,
+      home: SplashWrapper(
+        onThemeModeChanged: updateThemeMode,
+      ),
     );
   }
 }
 
 class SplashWrapper extends StatefulWidget {
-  const SplashWrapper({super.key});
+  final Function(ThemeMode)? onThemeModeChanged;
+  
+  const SplashWrapper({super.key, this.onThemeModeChanged});
 
   @override
   State<SplashWrapper> createState() => _SplashWrapperState();
@@ -142,12 +183,16 @@ class _SplashWrapperState extends State<SplashWrapper> {
       return LoginScreen(onLoginSuccess: _onLoginSuccess);
     }
 
-    return const MainScreen();
+    return MainScreen(
+      onThemeModeChanged: widget.onThemeModeChanged,
+    );
   }
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final Function(ThemeMode)? onThemeModeChanged;
+  
+  const MainScreen({super.key, this.onThemeModeChanged});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -162,12 +207,27 @@ class _MainScreenState extends State<MainScreen> {
   String? _userName;
   String? _profilePhotoUrl;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const CounterScreen(),
-    const DashboardScreen(),
-    const SettingsScreen(),
-  ];
+  List<Widget> get _screens {
+    if (_isAuthenticated) {
+      return [
+        const HomeScreen(),
+        const CounterScreen(),
+        const DashboardScreen(),
+        const FavoritesScreen(),
+        SettingsScreen(
+          onThemeModeChanged: widget.onThemeModeChanged,
+        ),
+      ];
+    } else {
+      return [
+        const HomeScreen(),
+        const CounterScreen(),
+        SettingsScreen(
+          onThemeModeChanged: widget.onThemeModeChanged,
+        ),
+      ];
+    }
+  }
 
   @override
   void initState() {
@@ -198,18 +258,6 @@ class _MainScreenState extends State<MainScreen> {
     _scaffoldKey.currentState?.closeDrawer();
   }
 
-  Future<void> _handleLogout() async {
-    await AuthService.logout();
-    if (mounted) {
-      // Navigate back to login by rebuilding the app
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -230,24 +278,17 @@ class _MainScreenState extends State<MainScreen> {
             ),
           );
         },
-        onLogoutTap: _handleLogout,
       ),
-      body: Stack(
+      body: Column(
         children: [
-          // Main content with bottom padding for navigation
-          Padding(
-            padding: const EdgeInsets.only(bottom: 102), // Space for bottom nav
+          // Main content
+          Expanded(
             child: _screens[_currentIndex],
           ),
-          // Bottom Navigation positioned at the bottom
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: BottomNavigation(
-              currentIndex: _currentIndex,
-              onTap: _onTabTapped,
-            ),
+          // Bottom Navigation
+          BottomNavigation(
+            currentIndex: _currentIndex,
+            onTap: _onTabTapped,
           ),
         ],
       ),

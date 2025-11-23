@@ -38,6 +38,7 @@ dependencies:
   shared_preferences: ^2.2.2
   provider: ^6.1.1
   http: ^1.1.0
+  shamsi_date: ^1.0.1
 
 dev_dependencies:
   flutter_test:
@@ -65,23 +66,23 @@ flutter:
   fonts:
     - family: Vazir
       fonts:
-        - asset: assets/fonts/vazir/Vazirmatn-FD-Thin.woff2
+        - asset: assets/fonts/vazir/Vazirmatn-Thin.ttf
           weight: 100
-        - asset: assets/fonts/vazir/Vazirmatn-FD-ExtraLight.woff2
+        - asset: assets/fonts/vazir/Vazirmatn-ExtraLight.ttf
           weight: 200
-        - asset: assets/fonts/vazir/Vazirmatn-FD-Light.woff2
+        - asset: assets/fonts/vazir/Vazirmatn-Light.ttf
           weight: 300
-        - asset: assets/fonts/vazir/Vazirmatn-FD-Regular.woff2
+        - asset: assets/fonts/vazir/Vazirmatn-Regular.ttf
           weight: 400
-        - asset: assets/fonts/vazir/Vazirmatn-FD-Medium.woff2
+        - asset: assets/fonts/vazir/Vazirmatn-Medium.ttf
           weight: 500
-        - asset: assets/fonts/vazir/Vazirmatn-FD-SemiBold.woff2
+        - asset: assets/fonts/vazir/Vazirmatn-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/vazir/Vazirmatn-FD-Bold.woff2
+        - asset: assets/fonts/vazir/Vazirmatn-Bold.ttf
           weight: 700
-        - asset: assets/fonts/vazir/Vazirmatn-FD-ExtraBold.woff2
+        - asset: assets/fonts/vazir/Vazirmatn-ExtraBold.ttf
           weight: 800
-        - asset: assets/fonts/vazir/Vazirmatn-FD-Black.woff2
+        - asset: assets/fonts/vazir/Vazirmatn-Black.ttf
           weight: 900
     - family: Othman Taha
       fonts:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
+import '../utils/number_formatter.dart';
 
 class AppDrawer extends StatelessWidget {
   final bool isAuthenticated;
@@ -11,7 +12,6 @@ class AppDrawer extends StatelessWidget {
   final int currentIndex;
   final Function(int) onItemTap;
   final VoidCallback? onLoginTap;
-  final VoidCallback? onLogoutTap;
 
   const AppDrawer({
     super.key,
@@ -23,7 +23,6 @@ class AppDrawer extends StatelessWidget {
     required this.currentIndex,
     required this.onItemTap,
     this.onLoginTap,
-    this.onLogoutTap,
   });
 
   @override
@@ -92,7 +91,7 @@ class AppDrawer extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            heartScore.toString(),
+                            NumberFormatter.formatNumber(heartScore ?? 0),
                             textDirection: TextDirection.rtl,
                             style: TextStyle(
                               fontSize: 14,
@@ -110,7 +109,7 @@ class AppDrawer extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            streak.toString(),
+                            NumberFormatter.formatNumber(streak ?? 0),
                             textDirection: TextDirection.rtl,
                             style: TextStyle(
                               fontSize: 14,
@@ -153,7 +152,7 @@ class AppDrawer extends StatelessWidget {
                   ),
                   _DrawerItem(
                     icon: FontAwesomeIcons.handsPraying,
-                    title: 'تسبیح',
+                    title: 'ذکرشمار',
                     index: 1,
                     currentIndex: currentIndex,
                     onTap: () {
@@ -174,14 +173,26 @@ class AppDrawer extends StatelessWidget {
                       },
                       isDark: isDark,
                     ),
+                  if (isAuthenticated)
+                    _DrawerItem(
+                      icon: FontAwesomeIcons.heart,
+                      title: 'علاقه‌مندی‌ها',
+                      index: 3,
+                      currentIndex: currentIndex,
+                      onTap: () {
+                        Navigator.pop(context);
+                        onItemTap(3);
+                      },
+                      isDark: isDark,
+                    ),
                   _DrawerItem(
                     icon: FontAwesomeIcons.gear,
                     title: 'تنظیمات',
-                    index: isAuthenticated ? 3 : 2,
+                    index: isAuthenticated ? 4 : 2,
                     currentIndex: currentIndex,
                     onTap: () {
                       Navigator.pop(context);
-                      onItemTap(isAuthenticated ? 3 : 2);
+                      onItemTap(isAuthenticated ? 4 : 2);
                     },
                     isDark: isDark,
                   ),
@@ -196,21 +207,8 @@ class AppDrawer extends StatelessWidget {
               color: isDark ? Colors.grey[800] : Colors.grey[200],
             ),
 
-            // Login/Logout Button
-            if (isAuthenticated && onLogoutTap != null)
-              _DrawerItem(
-                icon: FontAwesomeIcons.signOutAlt,
-                title: 'خروج',
-                index: -1,
-                currentIndex: -1,
-                onTap: () {
-                  Navigator.pop(context);
-                  onLogoutTap!();
-                },
-                isDark: isDark,
-                isLogout: true,
-              )
-            else if (!isAuthenticated && onLoginTap != null)
+            // Login Button (only shown when not authenticated)
+            if (!isAuthenticated && onLoginTap != null)
               _DrawerItem(
                 icon: FontAwesomeIcons.signInAlt,
                 title: 'ورود',
@@ -236,7 +234,6 @@ class _DrawerItem extends StatelessWidget {
   final int currentIndex;
   final VoidCallback onTap;
   final bool isDark;
-  final bool isLogout;
 
   const _DrawerItem({
     required this.icon,
@@ -245,17 +242,14 @@ class _DrawerItem extends StatelessWidget {
     required this.currentIndex,
     required this.onTap,
     required this.isDark,
-    this.isLogout = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final isActive = index == currentIndex && index != -1;
-    final color = isLogout
-        ? AppTheme.danger
-        : (isActive
-            ? AppTheme.brandPrimary
-            : (isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary));
+    final color = isActive
+        ? AppTheme.brandPrimary
+        : (isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary);
 
     return InkWell(
       onTap: onTap,

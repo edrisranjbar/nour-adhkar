@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
+import '../utils/number_formatter.dart';
 
 class SpecialSection extends StatelessWidget {
   final String title;
@@ -34,7 +35,6 @@ class SpecialSection extends StatelessWidget {
               Expanded(
                 child: _SpecialCard(
                   title: 'اذکار صبحگاه',
-                  description: 'روز خود را با یاد خدا آغاز کنید',
                   icon: FontAwesomeIcons.sun,
                   count: morningCount,
                   gradient: const LinearGradient(
@@ -50,7 +50,6 @@ class SpecialSection extends StatelessWidget {
               Expanded(
                 child: _SpecialCard(
                   title: 'اذکار شامگاه',
-                  description: 'پایان هر روز را با این اذکار به خوبی به پایان برسانید',
                   icon: FontAwesomeIcons.moon,
                   count: nightCount,
                   gradient: const LinearGradient(
@@ -106,7 +105,6 @@ class _SectionTitle extends StatelessWidget {
 
 class _SpecialCard extends StatelessWidget {
   final String title;
-  final String description;
   final IconData icon;
   final int count;
   final Gradient gradient;
@@ -115,7 +113,6 @@ class _SpecialCard extends StatelessWidget {
 
   const _SpecialCard({
     required this.title,
-    required this.description,
     required this.icon,
     required this.count,
     required this.gradient,
@@ -153,7 +150,7 @@ class _SpecialCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '$count ذکر',
+                  '${NumberFormatter.formatNumber(count)} ذکر',
                   style: TextStyle(
                     color: textColor,
                     fontSize: 12,
@@ -184,17 +181,6 @@ class _SpecialCard extends StatelessWidget {
                       color: textColor,
                       fontFamily: AppTheme.fontPrimary,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: textColor.withOpacity(0.9),
-                      fontFamily: AppTheme.fontPrimary,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

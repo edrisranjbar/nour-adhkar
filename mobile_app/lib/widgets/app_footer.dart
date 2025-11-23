@@ -43,7 +43,7 @@ class AppFooter extends StatelessWidget {
             links: [
               {'title': 'اذکار صبحگاه', 'onTap': () {}},
               {'title': 'اذکار شامگاه', 'onTap': () {}},
-              {'title': 'تسبیح شمار', 'onTap': () {}},
+              {'title': 'ذکرشمار', 'onTap': () {}},
               {'title': 'مقالات', 'onTap': () {}},
             ],
           ),

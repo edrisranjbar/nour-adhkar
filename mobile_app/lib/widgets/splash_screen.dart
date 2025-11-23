@@ -29,10 +29,10 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _startProgress() {
-    _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (mounted) {
         setState(() {
-          _progress += 3.0;
+          _progress += 2.5;
           if (_progress >= 100) {
             _progress = 100;
             timer.cancel();
@@ -121,7 +121,7 @@ class _SplashScreenState extends State<SplashScreen>
                       children: const [
                         TextSpan(text: 'اذکار '),
                         TextSpan(
-                          text: 'حرفه‌ای',
+                          text: 'نور',
                           style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ],
@@ -199,15 +199,15 @@ class _SplashScreenState extends State<SplashScreen>
 
             // Version Number at Bottom
             Positioned(
-              bottom: 16,
+              bottom: 24,
               left: 0,
               right: 0,
               child: Text(
-                'نسخه آزمایشی ${AppConfig.appVersion}',
+                'نسخه ${AppConfig.appVersion}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w100,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w300,
                   color: AppTheme.brandPrimary,
                   fontFamily: AppTheme.fontPrimary,
                 ),
