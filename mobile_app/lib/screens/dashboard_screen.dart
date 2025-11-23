@@ -43,6 +43,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final dashboard = await ApiService.getDashboard();
       final badges = await ApiService.getUserBadges();
       
+      // Normalize badges to ensure proper types
+      final normalizedBadges = badges.map((badge) {
+        final unlocked = badge['unlocked'];
+        bool unlockedBool = false;
+        if (unlocked is bool) {
+          unlockedBool = unlocked;
+        } else if (unlocked is int) {
+          unlockedBool = unlocked != 0;
+        } else if (unlocked is String) {
+          unlockedBool = unlocked == '1' || unlocked.toLowerCase() == 'true';
+        }
+        
+        final progress = badge['progress'];
+        double progressDouble = 0.0;
+        if (progress is double) {
+          progressDouble = progress;
+        } else if (progress is int) {
+          progressDouble = progress.toDouble();
+        } else if (progress is String) {
+          progressDouble = double.tryParse(progress) ?? 0.0;
+        }
+        
+        return {
+          ...badge,
+          'unlocked': unlockedBool,
+          'progress': progressDouble,
+        };
+      }).toList();
+      
       if (mounted) {
         setState(() {
           _user = user;
@@ -51,7 +80,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _heartScore = stats?['heart_score'] ?? user?['heart_score'] ?? 0;
           _streak = stats?['streak'] ?? user?['streak'] ?? 0;
           _recentActivities = dashboard?['recent_activities'] ?? [];
-          _badges = badges;
+          _badges = normalizedBadges;
           _isLoading = false;
         });
       }
@@ -416,46 +445,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   List<Map<String, dynamic>> _getDefaultBadges() {
+    // Helper function to safely get int from stats
+    int _getIntFromStats(String key) {
+      final value = _userStats?[key];
+      if (value == null) return 0;
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value) ?? 0;
+      if (value is double) return value.toInt();
+      return 0;
+    }
+
+    final totalDhikrs = _getIntFromStats('total_dhikrs');
+    final favoriteCount = _getIntFromStats('favorite_count');
+    final currentStreak = _streak ?? 0;
+
     return [
       {
         'name': 'آغازگر',
         'description': 'اولین ذکر خود را تمام کنید',
         'icon': 'star',
         'rarity': 'bronze',
-        'unlocked': _userStats?['total_dhikrs'] ?? 0 > 0,
-        'progress': _userStats?['total_dhikrs'] ?? 0 >= 1 ? 1.0 : 0.0,
+        'unlocked': totalDhikrs > 0,
+        'progress': totalDhikrs >= 1 ? 1.0 : 0.0,
       },
       {
         'name': 'پیگیر',
         'description': '۳ روز پشت سر هم ذکر بخوانید',
         'icon': 'fire',
         'rarity': 'bronze',
-        'unlocked': (_streak ?? 0) >= 3,
-        'progress': (_streak ?? 0) / 3,
+        'unlocked': currentStreak >= 3,
+        'progress': (currentStreak / 3).clamp(0.0, 1.0),
       },
       {
         'name': 'مداوم',
         'description': '۷ روز پشت سر هم ذکر بخوانید',
         'icon': 'fire',
         'rarity': 'silver',
-        'unlocked': (_streak ?? 0) >= 7,
-        'progress': (_streak ?? 0) / 7,
+        'unlocked': currentStreak >= 7,
+        'progress': (currentStreak / 7).clamp(0.0, 1.0),
       },
       {
         'name': 'استاد',
         'description': '۱۰۰ ذکر کامل کنید',
         'icon': 'crown',
         'rarity': 'gold',
-        'unlocked': (_userStats?['total_dhikrs'] ?? 0) >= 100,
-        'progress': ((_userStats?['total_dhikrs'] ?? 0) / 100).clamp(0.0, 1.0),
+        'unlocked': totalDhikrs >= 100,
+        'progress': (totalDhikrs / 100).clamp(0.0, 1.0),
       },
       {
         'name': 'محبوب',
         'description': '۱۰ ذکر را به علاقه‌مندی اضافه کنید',
         'icon': 'heart',
         'rarity': 'silver',
-        'unlocked': (_userStats?['favorite_count'] ?? 0) >= 10,
-        'progress': ((_userStats?['favorite_count'] ?? 0) / 10).clamp(0.0, 1.0),
+        'unlocked': favoriteCount >= 10,
+        'progress': (favoriteCount / 10).clamp(0.0, 1.0),
       },
       {
         'name': 'صبحگاه',
@@ -775,8 +818,23 @@ class _AchievementBadge extends StatelessWidget {
     final description = badge['description'] ?? '';
     final icon = _getIconFromString(badge['icon']);
     final rarity = badge['rarity'] ?? 'bronze';
-    final unlocked = badge['unlocked'] == true;
-    final progress = (badge['progress'] ?? 0.0) as double;
+    // Safely convert unlocked to bool (handles int 0/1, bool, or string)
+    final unlockedValue = badge['unlocked'];
+    final unlocked = unlockedValue == true || 
+                     unlockedValue == 1 || 
+                     (unlockedValue is String && unlockedValue == '1') ||
+                     (unlockedValue is int && unlockedValue != 0);
+    
+    // Safely convert progress to double
+    final progressValue = badge['progress'];
+    double progress = 0.0;
+    if (progressValue is double) {
+      progress = progressValue;
+    } else if (progressValue is int) {
+      progress = progressValue.toDouble();
+    } else if (progressValue is String) {
+      progress = double.tryParse(progressValue) ?? 0.0;
+    }
 
     return Container(
       width: 110,
