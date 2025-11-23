@@ -119,6 +119,139 @@ class AuthService {
     }
   }
 
+  // Register
+  static Future<Map<String, dynamic>> register(String name, String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConfig.baseApiUrl}/auth/register'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({
+          'name': name,
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        if (data['token'] != null) {
+          final prefs = await SharedPreferences.getInstance();
+          
+          // Store token
+          await prefs.setString(_tokenKey, data['token']);
+          
+          // Store user data
+          if (data['user'] != null) {
+            await prefs.setString(_userKey, json.encode(data['user']));
+          }
+          
+          // Set authenticated flag
+          await prefs.setBool(_isAuthenticatedKey, true);
+          
+          return {
+            'success': true,
+            'token': data['token'],
+            'user': data['user'],
+          };
+        } else {
+          return {
+            'success': false,
+            'message': data['message'] ?? 'خطای نامشخص در ثبت نام',
+          };
+        }
+      } else {
+        final data = json.decode(response.body);
+        String errorMessage = 'خطا در ثبت نام';
+        
+        if (data['errors'] != null) {
+          final errors = data['errors'] as Map<String, dynamic>;
+          if (errors['email'] != null) {
+            errorMessage = 'این ایمیل قبلاً استفاده شده است';
+          } else if (errors['password'] != null) {
+            errorMessage = errors['password'][0] ?? errorMessage;
+          } else if (errors['name'] != null) {
+            errorMessage = errors['name'][0] ?? errorMessage;
+          }
+        } else if (data['message'] != null) {
+          errorMessage = data['message'];
+        }
+        
+        return {
+          'success': false,
+          'message': errorMessage,
+        };
+      }
+    } catch (e) {
+      if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+        return {
+          'success': false,
+          'message': 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.',
+        };
+      } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
+        return {
+          'success': false,
+          'message': 'اتصال اینترنت خود را بررسی کنید',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'خطا در ثبت نام',
+        };
+      }
+    }
+  }
+
+  // Forgot Password
+  static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConfig.baseApiUrl}/auth/forgot-password'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({
+          'email': email,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return {
+          'success': data['success'] ?? true,
+          'message': data['message'] ?? 'اگر ایمیل صحیح باشد، لینک بازیابی ارسال شد',
+        };
+      } else {
+        final data = json.decode(response.body);
+        return {
+          'success': false,
+          'message': data['message'] ?? 'خطا در ارسال لینک بازیابی',
+        };
+      }
+    } catch (e) {
+      if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+        return {
+          'success': false,
+          'message': 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.',
+        };
+      } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
+        return {
+          'success': false,
+          'message': 'اتصال اینترنت خود را بررسی کنید',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'خطا در ارسال لینک بازیابی',
+        };
+      }
+    }
+  }
+
   // Logout
   static Future<void> logout() async {
     try {

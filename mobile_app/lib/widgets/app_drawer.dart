@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../utils/number_formatter.dart';
+import '../config.dart';
 
 class AppDrawer extends StatelessWidget {
   final bool isAuthenticated;
@@ -220,6 +221,23 @@ class AppDrawer extends StatelessWidget {
                 },
                 isDark: isDark,
               ),
+
+            // Version Number (bottom center)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                'نسخه ${AppConfig.appVersion}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark 
+                      ? AppTheme.darkTextSecondary 
+                      : AppTheme.textSecondary,
+                  fontFamily: AppTheme.fontPrimary,
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -351,10 +351,11 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity != null) {
+          // In RTL: swipe right (positive) = next, swipe left (negative) = previous
           if (details.primaryVelocity! > 0) {
-            _goToPreviousDhikr();
-          } else if (details.primaryVelocity! < 0) {
             _goToNextDhikr();
+          } else if (details.primaryVelocity! < 0) {
+            _goToPreviousDhikr();
           }
         }
       },
@@ -419,6 +420,10 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
                   ),
                 ),
               ),
+            
+            // Congratulations Modal
+            if (_showCongratulations)
+              _buildCongratulationsModal(isDark),
           ],
         ),
         ),
@@ -548,6 +553,9 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     final prefix = dhikr['prefix'] ?? '';
     final arabicText = dhikr['arabic_text'] ?? '';
     final translation = dhikr['translation'] ?? '';
+    final targetCount = dhikr['count'] ?? 33;
+    final currentCount = _currentCounter;
+    final isCompleted = currentCount >= targetCount;
 
     return GestureDetector(
       onTap: _incrementCounter,
@@ -566,128 +574,260 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Title and Action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    if (title.isNotEmpty)
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? AppTheme.darkBrandPrimary
-                                : AppTheme.brandPrimary,
-                            fontFamily: AppTheme.fontPrimary,
-                          ),
-                        ),
-                      )
-                    else
-                      const Spacer(),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            _isFavorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                            color: _isFavorite ? Colors.red : (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary),
-                            size: 20,
-                          ),
-                          onPressed: _toggleFavorite,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                        const SizedBox(width: 16),
-                        IconButton(
-                          icon: Icon(
-                            FontAwesomeIcons.copy,
-                            color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                            size: 20,
-                          ),
-                          onPressed: _copyDhikr,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                // Navigation Dots (if multiple dhikrs)
+                if (_adhkar.length > 1) ...[
+                  _buildNavigationDots(isDark),
+                  const SizedBox(height: 20),
+                ],
                 
-                const SizedBox(height: 16),
-                
-                // Prefix
-                if (prefix.isNotEmpty)
-                  Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Text(
-                      prefix,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: isDark
-                            ? AppTheme.darkTextSecondary
-                            : AppTheme.textSecondary,
-                        fontFamily: AppTheme.fontArabic,
-                        height: 2.3,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                
-                if (prefix.isNotEmpty) const SizedBox(height: 12),
-                
-                // Arabic Text
-                if (arabicText.isNotEmpty)
-                  Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Text(
-                      arabicText,
-                      style: TextStyle(
-                        fontSize: 24,
-                        height: 2.3,
-                        color: isDark
-                            ? AppTheme.darkTextPrimary
-                            : AppTheme.textPrimary,
-                        fontFamily: AppTheme.fontArabic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                
-                const SizedBox(height: 24),
-                
-                // Separator
+                // Enhanced Dhikr Card
                 Container(
-                  height: 2,
-                  margin: const EdgeInsets.symmetric(horizontal: 40),
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent,
-                        isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                        Colors.transparent,
-                      ],
+                    color: isDark ? AppTheme.darkBgSecondary : AppTheme.bgSecondary,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                        spreadRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                            .withOpacity(0.1),
+                        blurRadius: 30,
+                        offset: const Offset(0, 4),
+                        spreadRadius: -5,
+                      ),
+                    ],
+                    border: Border.all(
+                      color: isCompleted
+                          ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                              .withOpacity(0.3)
+                          : Colors.transparent,
+                      width: 2,
                     ),
-                    borderRadius: BorderRadius.circular(1),
+                  ),
+                  child: Column(
+                    children: [
+                      // Title and Action Buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (title.isNotEmpty)
+                            Expanded(
+                              child: Text(
+                                title,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark
+                                      ? AppTheme.darkBrandPrimary
+                                      : AppTheme.brandPrimary,
+                                  fontFamily: AppTheme.fontPrimary,
+                                ),
+                              ),
+                            )
+                          else
+                            const Spacer(),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: (_isFavorite ? Colors.red : (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary))
+                                      .withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: IconButton(
+                                  icon: Icon(
+                                    _isFavorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                                    color: _isFavorite ? Colors.red : (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary),
+                                    size: 20,
+                                  ),
+                                  onPressed: _toggleFavorite,
+                                  padding: const EdgeInsets.all(10),
+                                  constraints: const BoxConstraints(),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary)
+                                      .withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: IconButton(
+                                  icon: Icon(
+                                    FontAwesomeIcons.copy,
+                                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                                    size: 18,
+                                  ),
+                                  onPressed: _copyDhikr,
+                                  padding: const EdgeInsets.all(10),
+                                  constraints: const BoxConstraints(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Prefix
+                      if (prefix.isNotEmpty)
+                        Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary)
+                                  .withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              prefix,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: isDark
+                                    ? AppTheme.darkTextSecondary
+                                    : AppTheme.textSecondary,
+                                fontFamily: AppTheme.fontArabic,
+                                height: 2.0,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      
+                      if (prefix.isNotEmpty) const SizedBox(height: 20),
+                      
+                      // Arabic Text - Enhanced
+                      if (arabicText.isNotEmpty)
+                        Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                      .withOpacity(0.05),
+                                  Colors.transparent,
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              arabicText,
+                              style: TextStyle(
+                                fontSize: 28,
+                                height: 2.5,
+                                color: isDark
+                                    ? AppTheme.darkTextPrimary
+                                    : AppTheme.textPrimary,
+                                fontFamily: AppTheme.fontArabic,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Enhanced Separator
+                      Container(
+                        height: 1,
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.transparent,
+                              (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                  .withOpacity(0.3),
+                              (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                  .withOpacity(0.6),
+                              (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                  .withOpacity(0.3),
+                              Colors.transparent,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Translation - Enhanced
+                      if (translation.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary)
+                                .withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            translation,
+                            style: TextStyle(
+                              fontSize: 18,
+                              height: 2.0,
+                              color: isDark
+                                  ? AppTheme.darkTextPrimary
+                                  : AppTheme.textPrimary,
+                              fontFamily: AppTheme.fontPrimary,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      
+                      // Completion Badge
+                      if (isCompleted) ...[
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                .withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.checkCircle,
+                                color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'تکمیل شد',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                                  fontFamily: AppTheme.fontPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                
-                const SizedBox(height: 24),
-                
-                // Translation
-                if (translation.isNotEmpty)
-                  Text(
-                    translation,
-                    style: TextStyle(
-                      fontSize: 18,
-                      height: 2.3,
-                      color: isDark
-                          ? AppTheme.darkTextPrimary
-                          : AppTheme.textPrimary,
-                      fontFamily: AppTheme.fontPrimary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
               ],
             ),
           ),
@@ -701,81 +841,344 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     
     final targetCount = _currentDhikr!['count'] ?? 33;
     final currentCount = _currentCounter;
+    final progress = targetCount > 0 ? (currentCount / targetCount).clamp(0.0, 1.0) : 0.0;
+    final isCompleted = currentCount >= targetCount;
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF262626) : AppTheme.brandSecondary,
+          gradient: LinearGradient(
+            colors: isDark
+                ? [
+                    const Color(0xFF1a1a1a),
+                    const Color(0xFF262626),
+                  ]
+                : [
+                    AppTheme.brandSecondary,
+                    AppTheme.brandSecondary.withOpacity(0.9),
+                  ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           border: Border(
             top: BorderSide(
               color: Colors.white.withOpacity(0.1),
               width: 1,
             ),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Target count (right side in RTL)
-            Text(
-              '${NumberFormatter.formatNumber(targetCount)} مرتبه',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-                fontFamily: AppTheme.fontPrimary,
-              ),
+            // Dhikr position (right side in RTL)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'ذکر ${NumberFormatter.formatNumber(_currentIndex + 1)} از ${NumberFormatter.formatNumber(_adhkar.length)}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    fontFamily: AppTheme.fontPrimary,
+                  ),
+                ),
+              ],
             ),
             
-            // Counter Button (center)
+            // Counter Button with Circular Progress (center)
             GestureDetector(
               onTap: _incrementCounter,
               child: AnimatedBuilder(
                 animation: _bumpController!,
                 builder: (context, child) {
-                  final scale = _bumping ? 1.08 : 1.0;
+                  final scale = _bumping ? 1.12 : 1.0;
                   return Transform.scale(
                     scale: scale,
                     child: child,
                   );
                 },
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isDark ? AppTheme.darkBrandSecondary : AppTheme.brandSecondary,
-                      width: 2,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      NumberFormatter.formatNumber(currentCount),
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                        fontFamily: AppTheme.fontPrimary,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Circular Progress Ring
+                    SizedBox(
+                      width: 80,
+                      height: 80,
+                      child: CircularProgressIndicator(
+                        value: progress,
+                        strokeWidth: 4,
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                        ),
+                        strokeCap: StrokeCap.round,
                       ),
                     ),
-                  ),
+                    // Counter Button
+                    Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isCompleted
+                              ? [
+                                  (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                      .withOpacity(0.3),
+                                  (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                      .withOpacity(0.2),
+                                ]
+                              : [
+                                  Colors.white,
+                                  Colors.white.withOpacity(0.95),
+                                ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isCompleted
+                              ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                  .withOpacity(0.5)
+                              : Colors.white.withOpacity(0.3),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                .withOpacity(0.3),
+                            blurRadius: 15,
+                            offset: const Offset(0, 4),
+                            spreadRadius: -2,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          NumberFormatter.formatNumber(currentCount),
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                            color: isCompleted
+                                ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                                : (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary),
+                            fontFamily: AppTheme.fontPrimary,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
             
             // Progress details (left side in RTL)
-            Text(
-              '${NumberFormatter.formatNumber(currentCount)} از ${NumberFormatter.formatNumber(targetCount)} مرتبه',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-                fontFamily: AppTheme.fontPrimary,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'پیشرفت',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white.withOpacity(0.7),
+                    fontFamily: AppTheme.fontPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${NumberFormatter.formatNumber(currentCount)}/${NumberFormatter.formatNumber(targetCount)}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontFamily: AppTheme.fontPrimary,
+                  ),
+                ),
+              ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationDots(bool isDark) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(_adhkar.length, (index) {
+        final isActive = index == _currentIndex;
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _currentIndex = index;
+            });
+            _slideController?.forward(from: 0.0);
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: isActive ? 24 : 8,
+            height: 8,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              color: isActive
+                  ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                  : (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary)
+                      .withOpacity(0.5),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildCongratulationsModal(bool isDark) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _showCongratulations = false;
+        });
+      },
+      child: Container(
+        color: Colors.black.withOpacity(0.7),
+        child: Center(
+          child: GestureDetector(
+            onTap: () {}, // Prevent tap from closing
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isDark
+                      ? [
+                          AppTheme.darkBgSecondary,
+                          AppTheme.darkBgTertiary,
+                        ]
+                      : [
+                          Colors.white,
+                          AppTheme.bgSecondary,
+                        ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Celebration Icon
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.brandPrimary,
+                          AppTheme.brandSecondary,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.brandPrimary.withOpacity(0.4),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      FontAwesomeIcons.trophy,
+                      color: Colors.white,
+                      size: 50,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Title
+                  Text(
+                    'تبریک!',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                      fontFamily: AppTheme.fontPrimary,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Message
+                  Text(
+                    'شما تمام اذکار این مجموعه را با موفقیت به پایان رساندید',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      height: 1.8,
+                      color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                      fontFamily: AppTheme.fontPrimary,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Go Back Button
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _showCongratulations = false;
+                      });
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 8,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.arrow_back, size: 20),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'بازگشت',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: AppTheme.fontPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

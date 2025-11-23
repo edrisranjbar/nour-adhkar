@@ -279,18 +279,10 @@ class _MainScreenState extends State<MainScreen> {
           );
         },
       ),
-      body: Column(
-        children: [
-          // Main content
-          Expanded(
-            child: _screens[_currentIndex],
-          ),
-          // Bottom Navigation
-          BottomNavigation(
-            currentIndex: _currentIndex,
-            onTap: _onTabTapped,
-          ),
-        ],
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigation(
+        currentIndex: _currentIndex.clamp(0, 2),
+        onTap: _onTabTapped,
       ),
     );
   }

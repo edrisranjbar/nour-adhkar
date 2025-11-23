@@ -2,33 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
-import 'register_screen.dart';
-import 'forgot_password_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  final VoidCallback? onLoginSuccess;
+class RegisterScreen extends StatefulWidget {
+  final VoidCallback? onRegisterSuccess;
 
-  const LoginScreen({
+  const RegisterScreen({
     super.key,
-    this.onLoginSuccess,
+    this.onRegisterSuccess,
   });
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordConfirmController = TextEditingController();
   bool _passwordVisible = false;
+  bool _passwordConfirmVisible = false;
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordConfirmController.dispose();
     super.dispose();
   }
 
@@ -38,7 +41,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> _handleLogin() async {
+  void _togglePasswordConfirmVisibility() {
+    setState(() {
+      _passwordConfirmVisible = !_passwordConfirmVisible;
+    });
+  }
+
+  Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -53,20 +62,23 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final result = await AuthService.login(
+      final result = await AuthService.register(
+        _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
       );
 
       if (mounted) {
         if (result['success'] == true) {
-          // Login successful
-          if (widget.onLoginSuccess != null) {
-            widget.onLoginSuccess!();
+          // Registration successful
+          if (widget.onRegisterSuccess != null) {
+            widget.onRegisterSuccess!();
+          } else {
+            Navigator.of(context).pop();
           }
         } else {
           setState(() {
-            _errorMessage = result['message'] ?? 'خطا در ورود به سیستم';
+            _errorMessage = result['message'] ?? 'خطا در ثبت نام';
             _isLoading = false;
           });
         }
@@ -74,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'خطا در ورود به سیستم';
+          _errorMessage = 'خطا در ثبت نام';
           _isLoading = false;
         });
       }
@@ -99,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // Enhanced Title
                   Text(
-                    'وارد شوید',
+                    'ثبت نام',
                     textAlign: TextAlign.center,
                     textDirection: TextDirection.rtl,
                     style: TextStyle(
@@ -112,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'به اذکار نور خوش آمدید',
+                    'حساب کاربری جدید ایجاد کنید',
                     textAlign: TextAlign.center,
                     textDirection: TextDirection.rtl,
                     style: TextStyle(
@@ -162,6 +174,94 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          // Name Field
+                          Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.user,
+                                size: 16,
+                                color: isDark 
+                                    ? Colors.white.withOpacity(0.7)
+                                    : Colors.black54,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'نام',
+                                textDirection: TextDirection.rtl,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontFamily: AppTheme.fontPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: _nameController,
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontFamily: AppTheme.fontPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'نام کامل خود را وارد کنید',
+                              hintStyle: TextStyle(
+                                color: isDark 
+                                    ? Colors.white.withOpacity(0.4)
+                                    : Colors.black38,
+                                fontFamily: AppTheme.fontPrimary,
+                              ),
+                              filled: true,
+                              fillColor: isDark 
+                                  ? Colors.white.withOpacity(0.05)
+                                  : Colors.black.withOpacity(0.03),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: isDark 
+                                      ? Colors.white.withOpacity(0.2)
+                                      : Colors.black.withOpacity(0.15),
+                                  width: 1.5,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: isDark 
+                                      ? Colors.white.withOpacity(0.2)
+                                      : Colors.black.withOpacity(0.15),
+                                  width: 1.5,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: AppTheme.brandPrimary,
+                                  width: 2.5,
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 18,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'لطفاً نام خود را وارد کنید';
+                              }
+                              if (value.length < 3) {
+                                return 'نام باید حداقل ۳ کاراکتر باشد';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
+
                           // Enhanced Email Field
                           Row(
                             children: [
@@ -349,7 +449,108 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
                               return null;
                             },
-                            onFieldSubmitted: (_) => _handleLogin(),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Password Confirmation Field
+                          Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.lock,
+                                size: 16,
+                                color: isDark 
+                                    ? Colors.white.withOpacity(0.7)
+                                    : Colors.black54,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'تکرار رمز عبور',
+                                textDirection: TextDirection.rtl,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontFamily: AppTheme.fontPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: _passwordConfirmController,
+                            obscureText: !_passwordConfirmVisible,
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontFamily: AppTheme.fontPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'رمز عبور را دوباره وارد کنید',
+                              hintStyle: TextStyle(
+                                color: isDark 
+                                    ? Colors.white.withOpacity(0.4)
+                                    : Colors.black38,
+                                fontFamily: AppTheme.fontPrimary,
+                              ),
+                              filled: true,
+                              fillColor: isDark 
+                                  ? Colors.white.withOpacity(0.05)
+                                  : Colors.black.withOpacity(0.03),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: isDark 
+                                      ? Colors.white.withOpacity(0.2)
+                                      : Colors.black.withOpacity(0.15),
+                                  width: 1.5,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: isDark 
+                                      ? Colors.white.withOpacity(0.2)
+                                      : Colors.black.withOpacity(0.15),
+                                  width: 1.5,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: AppTheme.brandPrimary,
+                                  width: 2.5,
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 18,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _passwordConfirmVisible
+                                      ? FontAwesomeIcons.eyeSlash
+                                      : FontAwesomeIcons.eye,
+                                  color: isDark 
+                                      ? Colors.white.withOpacity(0.6)
+                                      : Colors.black54,
+                                  size: 20,
+                                ),
+                                onPressed: _togglePasswordConfirmVisibility,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'لطفاً رمز عبور را تکرار کنید';
+                              }
+                              if (value != _passwordController.text) {
+                                return 'رمز عبور با تکرار آن مطابقت ندارد';
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _handleRegister(),
                           ),
                           const SizedBox(height: 28),
 
@@ -412,7 +613,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : _handleLogin,
+                              onPressed: _isLoading ? null : _handleRegister,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
@@ -438,12 +639,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         const FaIcon(
-                                          FontAwesomeIcons.signInAlt,
+                                          FontAwesomeIcons.userPlus,
                                           size: 20,
                                         ),
                                         const SizedBox(width: 10),
                                         Text(
-                                          'ورود',
+                                          'ثبت نام',
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w700,
@@ -467,19 +668,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => RegisterScreen(
-                                onRegisterSuccess: widget.onLoginSuccess,
-                              ),
-                            ),
-                          );
+                          Navigator.of(context).pop();
                         },
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
                         child: Text(
-                          'حساب کاربری ندارید؟ اینجا ثبت نام کنید',
+                          'قبلاً ثبت نام کرده‌اید؟ وارد شوید',
                           textDirection: TextDirection.rtl,
                           style: TextStyle(
                             color: isDark 
@@ -490,31 +685,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontFamily: AppTheme.fontPrimary,
                             decoration: TextDecoration.underline,
                             decorationThickness: 1.5,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ForgotPasswordScreen(),
-                            ),
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        child: Text(
-                          'فراموشی رمز عبور',
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            color: isDark 
-                                ? Colors.white.withOpacity(0.8)
-                                : Colors.black54,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: AppTheme.fontPrimary,
                           ),
                         ),
                       ),

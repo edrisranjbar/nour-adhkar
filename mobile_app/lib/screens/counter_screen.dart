@@ -730,7 +730,7 @@ class _CounterScreenState extends State<CounterScreen>
                                       if (_currentDhikr?['arabic_text'] != null)
                                         Directionality(
                                           textDirection: TextDirection.rtl,
-                                          child: Text(
+        child: Text(
                                             _currentDhikr!['arabic_text'],
                                             style: TextStyle(
                                               fontSize: 28,

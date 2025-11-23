@@ -65,7 +65,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    
     return Container(
       color: isDark ? AppTheme.darkBgPrimary : AppTheme.bgPrimary,
       child: SafeArea(

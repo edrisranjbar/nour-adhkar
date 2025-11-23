@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
 import '../services/settings_service.dart';
@@ -164,7 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'اذکار نور یک برنامه جامع برای خواندن و شمارش اذکار و ادعیه اسلامی است. این برنامه با هدف تسهیل در یادآوری و خواندن اذکار روزانه، صبحگاهی، شامگاهی و سایر اذکار مهم طراحی شده است.',
+                    'اذکار نور یک برنامه جامع برای خواندن و شمارش اذکار و ادعیه اسلامی است. این برنامه با هدف تسهیل در یادآوری و خواندن اذکار روزانه، صبحگاهی، شامگاهی و سایر اذکار مهم طراحی شده است.\n برنامه نویس: ادریس رنجبر',
                     style: TextStyle(
                       color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
                       fontFamily: AppTheme.fontPrimary,
@@ -172,23 +173,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       height: 1.8,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'ویژگی‌های برنامه:',
-                    style: TextStyle(
-                      color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
-                      fontFamily: AppTheme.fontPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildFeatureItem('• اذکار صبح و شام', isDark),
-                  _buildFeatureItem('• اذکار روزانه و ماه رمضان', isDark),
-                  _buildFeatureItem('• شمارشگر ذکر با قابلیت تنظیم هدف', isDark),
-                  _buildFeatureItem('• داشبورد شخصی و آمار پیشرفت', isDark),
-                  _buildFeatureItem('• لیست علاقه‌مندی‌ها', isDark),
-                  _buildFeatureItem('• حالت تاریک و روشن', isDark),
                   const SizedBox(height: 16),
                   Text(
                     '© ${DateTime.now().year} اذکار نور',
@@ -218,6 +202,251 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+  }
+
+  void _showSupportOptions(bool isDark) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'پشتیبانی',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.titleLarge?.color,
+            fontFamily: AppTheme.fontPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'برای تماس با پشتیبانی، یکی از روش‌های زیر را انتخاب کنید:',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                fontFamily: AppTheme.fontPrimary,
+                height: 1.8,
+              ),
+            ),
+            const SizedBox(height: 24),
+            // WhatsApp Option
+            InkWell(
+              onTap: () => _openWhatsApp(),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF25D366), // WhatsApp green
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        FontAwesomeIcons.whatsapp,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'واتساپ',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                              fontFamily: AppTheme.fontPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: Text(
+                              '+989962933405',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                                fontFamily: AppTheme.fontPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Email Option
+            InkWell(
+              onTap: () => _openEmail(),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        FontAwesomeIcons.envelope,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'ایمیل',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                              fontFamily: AppTheme.fontPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: Text(
+                              'edrisranjbar.dev@gmail.com',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                                fontFamily: AppTheme.fontPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'بستن',
+              style: TextStyle(
+                color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                fontFamily: AppTheme.fontPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openWhatsApp() async {
+    final phoneNumber = '+989962933405';
+    final url = Uri.parse('https://wa.me/$phoneNumber');
+    
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+        Navigator.of(context).pop(); // Close dialog
+      } else {
+        if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('واتساپ نصب نشده است'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('خطا در باز کردن واتساپ'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _openEmail() async {
+    final email = 'edrisranjbar.dev@gmail.com';
+    final subject = Uri.encodeComponent('پشتیبانی اذکار نور');
+    final body = Uri.encodeComponent('سلام،\n\n');
+    final url = Uri.parse('mailto:$email?subject=$subject&body=$body');
+    
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+        Navigator.of(context).pop(); // Close dialog
+      } else {
+        if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('نرم‌افزار ایمیل یافت نشد'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('خطا در باز کردن ایمیل'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildFeatureItem(String text, bool isDark) {
@@ -270,7 +499,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    
     return Container(
       color: isDark ? AppTheme.darkBgPrimary : AppTheme.bgPrimary,
       child: SafeArea(
@@ -343,7 +572,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             isDark,
                             title: 'خروج از حساب کاربری',
                             description: 'خروج از حساب کاربری فعلی',
-                            icon: FontAwesomeIcons.rightFromBracket,
+                            icon: Icons.logout,
+                            rightIcon: null,
                             onTap: _handleLogout,
                             isDestructive: true,
                           ),
@@ -360,6 +590,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           title: 'نسخه برنامه',
                           value: AppConfig.appVersion,
                           icon: FontAwesomeIcons.info,
+                        ),
+                        const Divider(height: 24),
+                        _buildActionSetting(
+                          isDark,
+                          title: 'پشتیبانی',
+                          description: 'تماس با پشتیبانی',
+                          icon: FontAwesomeIcons.headset,
+                          onTap: () => _showSupportOptions(isDark),
                         ),
                         const Divider(height: 24),
                         _buildActionSetting(
@@ -500,7 +738,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Container(
                 width: 60,
                 alignment: Alignment.center,
-                child: Text(
+        child: Text(
                   NumberFormatter.formatNumber(_fontSize),
                   style: TextStyle(
                     fontSize: 20,
@@ -524,17 +762,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     : Colors.grey,
               ),
               const Spacer(),
-              Text(
-                'کوچک',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? AppTheme.darkTextSecondary
-                      : AppTheme.textSecondary,
-                  fontFamily: AppTheme.fontPrimary,
-                ),
-              ),
-              const SizedBox(width: 8),
               Expanded(
                 child: Slider(
                   value: _fontSize.toDouble(),
@@ -547,17 +774,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   activeColor: isDark
                       ? AppTheme.darkBrandPrimary
                       : AppTheme.brandPrimary,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'بزرگ',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? AppTheme.darkTextSecondary
-                      : AppTheme.textSecondary,
-                  fontFamily: AppTheme.fontPrimary,
                 ),
               ),
             ],
@@ -632,7 +848,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isDark, {
     required String title,
     required String description,
-    required IconData icon,
+    IconData? icon,
+    IconData? rightIcon,
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
@@ -642,16 +859,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isDestructive
-                  ? Colors.red
-                  : (isDark
-                      ? AppTheme.darkBrandPrimary
-                      : AppTheme.brandPrimary),
-            ),
-            const SizedBox(width: 12),
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 20,
+                color: isDestructive
+                    ? Colors.red
+                    : (isDark
+                        ? AppTheme.darkBrandPrimary
+                        : AppTheme.brandPrimary),
+              ),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -684,10 +903,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             Icon(
-              Icons.chevron_left,
-              color: isDark
-                  ? AppTheme.darkTextSecondary
-                  : AppTheme.textSecondary,
+              rightIcon ?? Icons.chevron_left,
+              size: rightIcon != null ? 20 : null,
+              color: isDestructive && rightIcon != null
+                  ? Colors.red
+                  : (isDark
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textSecondary),
             ),
           ],
         ),

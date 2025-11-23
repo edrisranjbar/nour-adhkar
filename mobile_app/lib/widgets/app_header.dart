@@ -101,9 +101,9 @@ class AppHeader extends StatelessWidget {
                               errorBuilder: (context, error, stackTrace) {
                                 // Fallback to icon if image fails to load
                                 return const Icon(
-                                  Icons.mosque,
-                                  color: AppTheme.brandSecondary,
-                                  size: 28,
+                            Icons.mosque,
+                            color: AppTheme.brandSecondary,
+                            size: 28,
                                 );
                               },
                             ),

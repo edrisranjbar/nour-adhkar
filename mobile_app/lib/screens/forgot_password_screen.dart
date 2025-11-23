@@ -2,43 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
-import 'register_screen.dart';
-import 'forgot_password_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  final VoidCallback? onLoginSuccess;
-
-  const LoginScreen({
-    super.key,
-    this.onLoginSuccess,
-  });
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _passwordVisible = false;
   bool _isLoading = false;
   String? _errorMessage;
+  String? _successMessage;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
-  void _togglePasswordVisibility() {
-    setState(() {
-      _passwordVisible = !_passwordVisible;
-    });
-  }
-
-  Future<void> _handleLogin() async {
+  Future<void> _handleForgotPassword() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -50,31 +35,30 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _successMessage = null;
     });
 
     try {
-      final result = await AuthService.login(
+      final result = await AuthService.forgotPassword(
         _emailController.text.trim(),
-        _passwordController.text,
       );
 
       if (mounted) {
-        if (result['success'] == true) {
-          // Login successful
-          if (widget.onLoginSuccess != null) {
-            widget.onLoginSuccess!();
+        setState(() {
+          _isLoading = false;
+          if (result['success'] == true) {
+            _successMessage = result['message'] ?? 'اگر ایمیل صحیح باشد، لینک بازیابی ارسال شد';
+            _errorMessage = null;
+          } else {
+            _errorMessage = result['message'] ?? 'خطا در ارسال لینک بازیابی';
+            _successMessage = null;
           }
-        } else {
-          setState(() {
-            _errorMessage = result['message'] ?? 'خطا در ورود به سیستم';
-            _isLoading = false;
-          });
-        }
+        });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'خطا در ورود به سیستم';
+          _errorMessage = 'خطا در ارسال لینک بازیابی';
           _isLoading = false;
         });
       }
@@ -87,6 +71,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.darkBgPrimary : AppTheme.bgPrimary,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -99,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // Enhanced Title
                   Text(
-                    'وارد شوید',
+                    'فراموشی رمز عبور',
                     textAlign: TextAlign.center,
                     textDirection: TextDirection.rtl,
                     style: TextStyle(
@@ -112,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'به اذکار نور خوش آمدید',
+                    'ایمیل خود را وارد کنید تا لینک بازیابی رمز عبور برای شما ارسال شود',
                     textAlign: TextAlign.center,
                     textDirection: TextDirection.rtl,
                     style: TextStyle(
@@ -122,11 +117,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? Colors.white.withOpacity(0.7)
                           : Colors.black54,
                       fontFamily: AppTheme.fontPrimary,
+                      height: 1.6,
                     ),
                   ),
                   const SizedBox(height: 40),
 
-                  // Enhanced Login Form Card
+                  // Enhanced Form Card
                   Container(
                     decoration: BoxDecoration(
                       color: isDark 
@@ -162,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Enhanced Email Field
+                          // Email Field
                           Row(
                             children: [
                               Icon(
@@ -248,112 +244,48 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
                               return null;
                             },
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Enhanced Password Field
-                          Row(
-                            children: [
-                              Icon(
-                                FontAwesomeIcons.lock,
-                                size: 16,
-                                color: isDark 
-                                    ? Colors.white.withOpacity(0.7)
-                                    : Colors.black54,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'رمز عبور',
-                                textDirection: TextDirection.rtl,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontFamily: AppTheme.fontPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: !_passwordVisible,
-                            textDirection: TextDirection.ltr,
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black87,
-                              fontFamily: AppTheme.fontPrimary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'رمز عبور خود را وارد کنید',
-                              hintStyle: TextStyle(
-                                color: isDark 
-                                    ? Colors.white.withOpacity(0.4)
-                                    : Colors.black38,
-                                fontFamily: AppTheme.fontPrimary,
-                              ),
-                              filled: true,
-                              fillColor: isDark 
-                                  ? Colors.white.withOpacity(0.05)
-                                  : Colors.black.withOpacity(0.03),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(
-                                  color: isDark 
-                                      ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
-                                  width: 1.5,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(
-                                  color: isDark 
-                                      ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
-                                  width: 1.5,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(
-                                  color: AppTheme.brandPrimary,
-                                  width: 2.5,
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 18,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _passwordVisible
-                                      ? FontAwesomeIcons.eyeSlash
-                                      : FontAwesomeIcons.eye,
-                                  color: isDark 
-                                      ? Colors.white.withOpacity(0.6)
-                                      : Colors.black54,
-                                  size: 20,
-                                ),
-                                onPressed: _togglePasswordVisibility,
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'لطفاً رمز عبور خود را وارد کنید';
-                              }
-                              if (value.length < 6) {
-                                return 'رمز عبور باید حداقل ۶ کاراکتر باشد';
-                              }
-                              return null;
-                            },
-                            onFieldSubmitted: (_) => _handleLogin(),
+                            onFieldSubmitted: (_) => _handleForgotPassword(),
                           ),
                           const SizedBox(height: 28),
 
-                          // Enhanced Error Message
+                          // Success Message
+                          if (_successMessage != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              margin: const EdgeInsets.only(bottom: 20),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.green.withOpacity(0.4),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    FontAwesomeIcons.circleCheck,
+                                    color: Colors.green.shade700,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      _successMessage!,
+                                      textDirection: TextDirection.rtl,
+                                      style: TextStyle(
+                                        color: Colors.green.shade700,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: AppTheme.fontPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          // Error Message
                           if (_errorMessage != null)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -390,7 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
 
-                          // Enhanced Login Button
+                          // Submit Button
                           Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -412,7 +344,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : _handleLogin,
+                              onPressed: _isLoading ? null : _handleForgotPassword,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
@@ -438,12 +370,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         const FaIcon(
-                                          FontAwesomeIcons.signInAlt,
+                                          FontAwesomeIcons.paperPlane,
                                           size: 20,
                                         ),
                                         const SizedBox(width: 10),
                                         Text(
-                                          'ورود',
+                                          'ارسال لینک بازیابی',
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w700,
@@ -462,63 +394,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 32),
 
-                  // Enhanced Additional Links
-                  Column(
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => RegisterScreen(
-                                onRegisterSuccess: widget.onLoginSuccess,
-                              ),
-                            ),
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        child: Text(
-                          'حساب کاربری ندارید؟ اینجا ثبت نام کنید',
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            color: isDark 
-                                ? Colors.white.withOpacity(0.9)
-                                : Colors.black87,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: AppTheme.fontPrimary,
-                            decoration: TextDecoration.underline,
-                            decorationThickness: 1.5,
-                          ),
-                        ),
+                  // Back to Login Link
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    child: Text(
+                      'بازگشت به ورود',
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                        color: isDark 
+                            ? Colors.white.withOpacity(0.9)
+                            : Colors.black87,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: AppTheme.fontPrimary,
+                        decoration: TextDecoration.underline,
+                        decorationThickness: 1.5,
                       ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ForgotPasswordScreen(),
-                            ),
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        child: Text(
-                          'فراموشی رمز عبور',
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            color: isDark 
-                                ? Colors.white.withOpacity(0.8)
-                                : Colors.black54,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: AppTheme.fontPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -530,5 +427,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
 
