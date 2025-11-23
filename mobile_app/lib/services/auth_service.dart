@@ -259,6 +259,63 @@ class AuthService {
     }
   }
 
+  // Resend Password Reset
+  static Future<Map<String, dynamic>> resendPasswordReset(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConfig.baseApiUrl}/auth/resend-password-reset'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({
+          'email': email,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      
+      if (response.statusCode == 200) {
+        return {
+          'success': data['success'] ?? true,
+          'message': data['message'] ?? 'لینک بازیابی رمز عبور مجدداً به ایمیل شما ارسال شد',
+        };
+      } else if (response.statusCode == 404) {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'کاربری با این ایمیل در سیستم ثبت نشده است',
+        };
+      } else if (response.statusCode == 429) {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'لطفاً قبل از درخواست مجدد ۲ دقیقه صبر کنید',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'خطا در ارسال لینک بازیابی',
+        };
+      }
+    } catch (e) {
+      if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+        return {
+          'success': false,
+          'message': 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.',
+        };
+      } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
+        return {
+          'success': false,
+          'message': 'اتصال اینترنت خود را بررسی کنید',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'خطا در ارسال لینک بازیابی',
+        };
+      }
+    }
+  }
+
   // Logout
   static Future<void> logout() async {
     try {
