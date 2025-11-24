@@ -5,6 +5,7 @@ import '../../utils/number_formatter.dart';
 class DayCircle extends StatelessWidget {
   final int day;
   final String monthName;
+  final String? dayName;
   final bool isCompleted;
   final bool isToday;
   final bool isDark;
@@ -13,6 +14,7 @@ class DayCircle extends StatelessWidget {
     super.key,
     required this.day,
     required this.monthName,
+    this.dayName,
     required this.isCompleted,
     required this.isToday,
     required this.isDark,
@@ -22,6 +24,20 @@ class DayCircle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Day name label
+        if (dayName != null)
+          Text(
+            dayName!,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
+              fontFamily: AppTheme.fontPrimary,
+            ),
+          ),
+        if (dayName != null) const SizedBox(height: 6),
         Container(
           width: 44,
           height: 44,

@@ -165,23 +165,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'اذکار نور یک برنامه جامع برای خواندن و شمارش اذکار و ادعیه اسلامی است. این برنامه با هدف تسهیل در یادآوری و خواندن اذکار روزانه، صبحگاهی، شامگاهی و سایر اذکار مهم طراحی شده است.\n برنامه نویس: ادریس رنجبر',
+                    'اذکار نور یک برنامه جامع برای خواندن و شمارش اذکار و ادعیه اسلامی است. این برنامه با هدف تسهیل در یادآوری و خواندن اذکار روزانه، صبحگاهی، شامگاهی و سایر اذکار مهم طراحی شده است.',
                     style: TextStyle(
                       color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
                       fontFamily: AppTheme.fontPrimary,
                       fontSize: 14,
                       height: 1.8,
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '© ${DateTime.now().year} اذکار نور',
-                    style: TextStyle(
-                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
-                      fontFamily: AppTheme.fontPrimary,
-                      fontSize: 12,
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                 ],
               ),

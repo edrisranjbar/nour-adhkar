@@ -70,10 +70,15 @@ class StreakCalendar extends StatelessWidget {
               final isToday = jalaliDate.day == today.day &&
                   jalaliDate.month == today.month &&
                   jalaliDate.year == today.year;
+              
+              // Get weekday (0 = Saturday, 6 = Friday)
+              final weekday = jalaliDate.weekDay;
+              final dayName = DashboardService.getPersianDayName(weekday);
 
               return DayCircle(
                 day: jalaliDate.day,
                 monthName: DashboardService.getJalaliMonthName(jalaliDate.month),
+                dayName: dayName,
                 isCompleted: isCompleted,
                 isToday: isToday,
                 isDark: isDark,

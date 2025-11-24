@@ -110,5 +110,19 @@ class DashboardService {
     ];
     return months[month - 1];
   }
+
+  /// Gets Persian day name
+  static String getPersianDayName(int weekday) {
+    const days = [
+      'شنبه',
+      'یکشنبه',
+      'دوشنبه',
+      'سه‌شنبه',
+      'چهارشنبه',
+      'پنج‌شنبه',
+      'جمعه',
+    ];
+    return days[weekday];
+  }
 }
 
