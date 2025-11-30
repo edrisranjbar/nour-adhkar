@@ -7,6 +7,7 @@ import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/settings_service.dart';
 import '../utils/number_formatter.dart';
+import '../widgets/modern_toast.dart';
 
 class DhikrViewScreen extends StatefulWidget {
   final String collectionSlug;
@@ -36,8 +37,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
   AnimationController? _bumpController;
   AnimationController? _slideController;
   bool _vibrationEnabled = true;
-  String _toastMessage = '';
-  bool _showToast = false;
   Timer? _toastTimer;
   bool _showCongratulations = false;
 
@@ -261,8 +260,16 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
   }
 
   Future<void> _toggleFavorite() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     if (!_isAuthenticated) {
-      _showToastMessage('لطفا ابتدا وارد شوید');
+      ModernToast.show(
+        context,
+        message: 'لطفا ابتدا وارد شوید',
+        icon: FontAwesomeIcons.circleExclamation,
+        backgroundColor: Colors.orange,
+        iconColor: Colors.white,
+      );
       return;
     }
     
@@ -283,10 +290,14 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     try {
       final success = await ApiService.toggleFavorite(dhikrId);
       if (success) {
-        _showToastMessage(
-          wasFavorite 
+        ModernToast.show(
+          context,
+          message: wasFavorite 
             ? 'ذکر از علاقه‌مندی‌ها حذف شد' 
-            : 'ذکر به علاقه‌مندی‌ها اضافه شد'
+            : 'ذکر به علاقه‌مندی‌ها اضافه شد',
+          icon: FontAwesomeIcons.heart,
+          backgroundColor: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+          iconColor: Colors.white,
         );
       } else {
         // Revert on failure
@@ -297,7 +308,13 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
             _favorites.remove(dhikrId);
           }
         });
-        _showToastMessage('خطا در ثبت تغییرات');
+        ModernToast.show(
+          context,
+          message: 'خطا در ثبت تغییرات',
+          icon: FontAwesomeIcons.circleExclamation,
+          backgroundColor: Colors.red,
+          iconColor: Colors.white,
+        );
       }
     } catch (e) {
       // Revert on error
@@ -308,7 +325,13 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
           _favorites.remove(dhikrId);
         }
       });
-      _showToastMessage('خطا در ثبت تغییرات');
+      ModernToast.show(
+        context,
+        message: 'خطا در ثبت تغییرات',
+        icon: FontAwesomeIcons.circleExclamation,
+        backgroundColor: Colors.red,
+        iconColor: Colors.white,
+      );
     }
   }
 
@@ -323,26 +346,27 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     
     try {
       await Clipboard.setData(ClipboardData(text: text));
-      _showToastMessage('متن ذکر کپی شد');
+      ModernToast.show(
+        context,
+        message: 'متن ذکر کپی شد',
+        icon: FontAwesomeIcons.check,
+        backgroundColor: Colors.green,
+        iconColor: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
+      HapticFeedback.lightImpact();
     } catch (e) {
-      _showToastMessage('خطا در کپی کردن متن');
+      ModernToast.show(
+        context,
+        message: 'خطا در کپی کردن متن',
+        icon: FontAwesomeIcons.circleExclamation,
+        backgroundColor: Colors.red,
+        iconColor: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
     }
   }
 
-  void _showToastMessage(String message) {
-    setState(() {
-      _toastMessage = message;
-      _showToast = true;
-    });
-    _toastTimer?.cancel();
-    _toastTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() {
-          _showToast = false;
-        });
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -388,38 +412,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
                   _buildCounterFooter(isDark),
               ],
             ),
-            
-            // Toast Notification
-            if (_showToast)
-              Positioned(
-                top: 20,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppTheme.darkBrandSecondary : AppTheme.brandSecondary,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      _toastMessage,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontFamily: AppTheme.fontPrimary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             
             // Congratulations Modal
             if (_showCongratulations)

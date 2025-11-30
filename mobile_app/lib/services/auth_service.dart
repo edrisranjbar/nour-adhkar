@@ -60,31 +60,38 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        
-        if (data['token'] != null) {
-          final prefs = await SharedPreferences.getInstance();
+        try {
+          final data = json.decode(response.body);
           
-          // Store token
-          await prefs.setString(_tokenKey, data['token']);
-          
-          // Store user data
-          if (data['user'] != null) {
-            await prefs.setString(_userKey, json.encode(data['user']));
+          if (data['token'] != null) {
+            final prefs = await SharedPreferences.getInstance();
+            
+            // Store token
+            await prefs.setString(_tokenKey, data['token']);
+            
+            // Store user data
+            if (data['user'] != null) {
+              await prefs.setString(_userKey, json.encode(data['user']));
+            }
+            
+            // Set authenticated flag
+            await prefs.setBool(_isAuthenticatedKey, true);
+            
+            return {
+              'success': true,
+              'token': data['token'],
+              'user': data['user'],
+            };
+          } else {
+            return {
+              'success': false,
+              'message': data['message'] ?? 'خطای نامشخص در ورود',
+            };
           }
-          
-          // Set authenticated flag
-          await prefs.setBool(_isAuthenticatedKey, true);
-          
-          return {
-            'success': true,
-            'token': data['token'],
-            'user': data['user'],
-          };
-        } else {
+        } catch (e) {
           return {
             'success': false,
-            'message': data['message'] ?? 'خطای نامشخص در ورود',
+            'message': 'خطا در پردازش پاسخ سرور. لطفاً دوباره تلاش کنید.',
           };
         }
       } else if (response.statusCode == 401) {
@@ -93,11 +100,18 @@ class AuthService {
           'message': 'ایمیل یا رمز عبور اشتباه است',
         };
       } else {
-        final data = json.decode(response.body);
-        return {
-          'success': false,
-          'message': data['message'] ?? 'خطا در ورود به سیستم',
-        };
+        try {
+          final data = json.decode(response.body);
+          return {
+            'success': false,
+            'message': data['message'] ?? 'خطا در ورود به سیستم',
+          };
+        } catch (e) {
+          return {
+            'success': false,
+            'message': 'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.',
+          };
+        }
       }
     } catch (e) {
       if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {

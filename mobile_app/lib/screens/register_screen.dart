@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'dart:ui';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 
@@ -99,44 +100,117 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.darkBgPrimary : AppTheme.bgPrimary,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Enhanced Title
-                  Text(
-                    'ثبت نام',
-                    textAlign: TextAlign.center,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w800,
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontFamily: AppTheme.fontPrimary,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'حساب کاربری جدید ایجاد کنید',
-                    textAlign: TextAlign.center,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: isDark 
-                          ? Colors.white.withOpacity(0.7)
-                          : Colors.black54,
-                      fontFamily: AppTheme.fontPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
+      body: Stack(
+        children: [
+          // Geometric Pattern Background
+          CustomPaint(
+            painter: GeometricPatternPainter(
+              color: (isDark ? AppTheme.darkBrandDark : AppTheme.brandDark)
+                  .withOpacity(0.08),
+            ),
+            size: Size.infinite,
+          ),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 20),
+                      // Header Text
+                      Text(
+                        'شروع کنید با',
+                        textAlign: TextAlign.center,
+                        textDirection: TextDirection.rtl,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: isDark 
+                              ? Colors.white.withOpacity(0.7)
+                              : Colors.black54,
+                          fontFamily: AppTheme.fontPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Logo Text
+                      ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: [
+                            AppTheme.brandDark,
+                            AppTheme.brandPrimary,
+                          ],
+                        ).createShader(bounds),
+                        child: Text(
+                          'اذکار نور',
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            fontSize: 56,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.white,
+                            fontFamily: AppTheme.fontArabic,
+                            letterSpacing: 4,
+                            height: 1.2,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 12,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      // Title
+                      Text(
+                        'ایجاد حساب کاربری جدید',
+                        textAlign: TextAlign.center,
+                        textDirection: TextDirection.rtl,
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontFamily: AppTheme.fontPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Sub-prompt
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              color: isDark 
+                                  ? Colors.white.withOpacity(0.7)
+                                  : Colors.black54,
+                              fontFamily: AppTheme.fontPrimary,
+                            ),
+                            children: [
+                              const TextSpan(text: 'قبلاً حساب دارید؟ '),
+                              TextSpan(
+                                text: 'ورود',
+                                style: TextStyle(
+                                  color: AppTheme.brandPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
 
                   // Enhanced Login Form Card
                   Container(
@@ -175,27 +249,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // Name Field
-                          Row(
-                            children: [
-                              Icon(
-                                FontAwesomeIcons.user,
-                                size: 16,
-                                color: isDark 
-                                    ? Colors.white.withOpacity(0.7)
-                                    : Colors.black54,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'نام',
-                                textDirection: TextDirection.rtl,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontFamily: AppTheme.fontPrimary,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'نام کامل',
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontFamily: AppTheme.fontPrimary,
+                            ),
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
@@ -209,7 +271,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'نام کامل خود را وارد کنید',
+                              hintText: 'لطفاً نام کامل خود را وارد کنید',
                               hintStyle: TextStyle(
                                 color: isDark 
                                     ? Colors.white.withOpacity(0.4)
@@ -219,35 +281,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: isDark 
                                   ? Colors.white.withOpacity(0.05)
-                                  : Colors.black.withOpacity(0.03),
+                                  : Colors.white.withOpacity(0.7),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: isDark 
                                       ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
+                                      : Colors.black.withOpacity(0.1),
                                   width: 1.5,
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: isDark 
                                       ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
+                                      : Colors.black.withOpacity(0.1),
                                   width: 1.5,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: AppTheme.brandPrimary,
-                                  width: 2.5,
+                                  width: 2,
                                 ),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 18,
+                                horizontal: 16,
+                                vertical: 16,
                               ),
                             ),
                             validator: (value) {
@@ -262,28 +324,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 24),
 
-                          // Enhanced Email Field
-                          Row(
-                            children: [
-                              Icon(
-                                FontAwesomeIcons.envelope,
-                                size: 16,
-                                color: isDark 
-                                    ? Colors.white.withOpacity(0.7)
-                                    : Colors.black54,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'ایمیل',
-                                textDirection: TextDirection.rtl,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontFamily: AppTheme.fontPrimary,
-                                ),
-                              ),
-                            ],
+                          // Email Field
+                          Text(
+                            'ایمیل',
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontFamily: AppTheme.fontPrimary,
+                            ),
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
@@ -298,7 +348,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'example@email.com',
+                              hintText: 'لطفاً ایمیل خود را وارد کنید',
                               hintStyle: TextStyle(
                                 color: isDark 
                                     ? Colors.white.withOpacity(0.4)
@@ -308,35 +358,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: isDark 
                                   ? Colors.white.withOpacity(0.05)
-                                  : Colors.black.withOpacity(0.03),
+                                  : Colors.white.withOpacity(0.7),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: isDark 
                                       ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
+                                      : Colors.black.withOpacity(0.1),
                                   width: 1.5,
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: isDark 
                                       ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
+                                      : Colors.black.withOpacity(0.1),
                                   width: 1.5,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: AppTheme.brandPrimary,
-                                  width: 2.5,
+                                  width: 2,
                                 ),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 18,
+                                horizontal: 16,
+                                vertical: 16,
                               ),
                             ),
                             validator: (value) {
@@ -351,28 +401,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 24),
 
-                          // Enhanced Password Field
-                          Row(
-                            children: [
-                              Icon(
-                                FontAwesomeIcons.lock,
-                                size: 16,
-                                color: isDark 
-                                    ? Colors.white.withOpacity(0.7)
-                                    : Colors.black54,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'رمز عبور',
-                                textDirection: TextDirection.rtl,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontFamily: AppTheme.fontPrimary,
-                                ),
-                              ),
-                            ],
+                          // Password Field
+                          Text(
+                            'رمز عبور',
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontFamily: AppTheme.fontPrimary,
+                            ),
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
@@ -387,7 +425,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'رمز عبور خود را وارد کنید',
+                              hintText: 'لطفاً رمز عبور خود را وارد کنید',
                               hintStyle: TextStyle(
                                 color: isDark 
                                     ? Colors.white.withOpacity(0.4)
@@ -397,35 +435,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               filled: true,
                               fillColor: isDark 
                                   ? Colors.white.withOpacity(0.05)
-                                  : Colors.black.withOpacity(0.03),
+                                  : Colors.white.withOpacity(0.7),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: isDark 
                                       ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
+                                      : Colors.black.withOpacity(0.1),
                                   width: 1.5,
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: isDark 
                                       ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
+                                      : Colors.black.withOpacity(0.1),
                                   width: 1.5,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: AppTheme.brandPrimary,
-                                  width: 2.5,
+                                  width: 2,
                                 ),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 18,
+                                horizontal: 16,
+                                vertical: 16,
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -449,108 +487,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               }
                               return null;
                             },
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Password Confirmation Field
-                          Row(
-                            children: [
-                              Icon(
-                                FontAwesomeIcons.lock,
-                                size: 16,
-                                color: isDark 
-                                    ? Colors.white.withOpacity(0.7)
-                                    : Colors.black54,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'تکرار رمز عبور',
-                                textDirection: TextDirection.rtl,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontFamily: AppTheme.fontPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            controller: _passwordConfirmController,
-                            obscureText: !_passwordConfirmVisible,
-                            textDirection: TextDirection.ltr,
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black87,
-                              fontFamily: AppTheme.fontPrimary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'رمز عبور را دوباره وارد کنید',
-                              hintStyle: TextStyle(
-                                color: isDark 
-                                    ? Colors.white.withOpacity(0.4)
-                                    : Colors.black38,
-                                fontFamily: AppTheme.fontPrimary,
-                              ),
-                              filled: true,
-                              fillColor: isDark 
-                                  ? Colors.white.withOpacity(0.05)
-                                  : Colors.black.withOpacity(0.03),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(
-                                  color: isDark 
-                                      ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
-                                  width: 1.5,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(
-                                  color: isDark 
-                                      ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.15),
-                                  width: 1.5,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(
-                                  color: AppTheme.brandPrimary,
-                                  width: 2.5,
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 18,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _passwordConfirmVisible
-                                      ? FontAwesomeIcons.eyeSlash
-                                      : FontAwesomeIcons.eye,
-                                  color: isDark 
-                                      ? Colors.white.withOpacity(0.6)
-                                      : Colors.black54,
-                                  size: 20,
-                                ),
-                                onPressed: _togglePasswordConfirmVisibility,
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'لطفاً رمز عبور را تکرار کنید';
-                              }
-                              if (value != _passwordController.text) {
-                                return 'رمز عبور با تکرار آن مطابقت ندارد';
-                              }
-                              return null;
-                            },
-                            onFieldSubmitted: (_) => _handleRegister(),
                           ),
                           const SizedBox(height: 28),
 
@@ -591,24 +527,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
 
-                          // Enhanced Login Button
+                          // Register Button
                           Container(
+                            width: double.infinity,
+                            height: 56,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppTheme.brandPrimary,
-                                  AppTheme.brandSecondary,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(14),
+                              color: AppTheme.brandPrimary,
+                              borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppTheme.brandPrimary.withOpacity(0.4),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 6),
-                                  spreadRadius: -2,
+                                  color: AppTheme.brandPrimary.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -618,9 +548,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 18),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 elevation: 0,
                               ),
@@ -635,24 +564,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         ),
                                       ),
                                     )
-                                  : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const FaIcon(
-                                          FontAwesomeIcons.userPlus,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          'ثبت نام',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
-                                            fontFamily: AppTheme.fontPrimary,
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                      ],
+                                  : Text(
+                                      'ثبت نام',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: AppTheme.fontPrimary,
+                                      ),
                                     ),
                             ),
                           ),
@@ -661,44 +579,65 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 32),
-
-                  // Enhanced Additional Links
-                  Column(
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        child: Text(
-                          'قبلاً ثبت نام کرده‌اید؟ وارد شوید',
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            color: isDark 
-                                ? Colors.white.withOpacity(0.9)
-                                : Colors.black87,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: AppTheme.fontPrimary,
-                            decoration: TextDecoration.underline,
-                            decorationThickness: 1.5,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
+}
+
+// Custom Painter for Geometric Pattern
+class GeometricPatternPainter extends CustomPainter {
+  final Color color;
+
+  GeometricPatternPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    // Create interconnected squares and diamonds pattern
+    final tileSize = 60.0;
+    final rows = (size.height / tileSize).ceil() + 1;
+    final cols = (size.width / tileSize).ceil() + 1;
+
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < cols; col++) {
+        final x = col * tileSize;
+        final y = row * tileSize;
+
+        // Draw diamond shape
+        final diamondPath = Path();
+        diamondPath.moveTo(x + tileSize / 2, y);
+        diamondPath.lineTo(x + tileSize, y + tileSize / 2);
+        diamondPath.lineTo(x + tileSize / 2, y + tileSize);
+        diamondPath.lineTo(x, y + tileSize / 2);
+        diamondPath.close();
+
+        canvas.drawPath(diamondPath, paint);
+
+        // Draw connecting lines to form circular motif
+        if (row > 0 && col > 0) {
+          canvas.drawLine(
+            Offset(x + tileSize / 2, y + tileSize / 2),
+            Offset(x - tileSize / 2, y - tileSize / 2),
+            paint,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 

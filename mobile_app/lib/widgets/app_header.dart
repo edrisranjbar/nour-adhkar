@@ -11,7 +11,6 @@ class AppHeader extends StatelessWidget {
   final int? streak;
   final VoidCallback? onLoginTap;
   final VoidCallback? onLogoutTap;
-  final VoidCallback? onDashboardTap;
   final VoidCallback? onMenuTap;
 
   const AppHeader({
@@ -23,7 +22,6 @@ class AppHeader extends StatelessWidget {
     this.streak,
     this.onLoginTap,
     this.onLogoutTap,
-    this.onDashboardTap,
     this.onMenuTap,
   });
 
@@ -130,15 +128,6 @@ class AppHeader extends StatelessWidget {
                         value: streak ?? 0,
                         isDark: isDark,
                       ),
-                      const SizedBox(width: 12),
-                      // Dashboard Button
-                      if (onDashboardTap != null)
-                        _HeaderButton(
-                          icon: FontAwesomeIcons.user,
-                          label: 'داشبورد',
-                          onTap: onDashboardTap!,
-                          isDark: isDark,
-                        ),
                     ],
                   ),
                 ] else if (onLoginTap != null) ...[

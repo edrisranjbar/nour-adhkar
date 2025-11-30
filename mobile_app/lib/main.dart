@@ -9,6 +9,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/favorites_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/welcome_screen.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/splash_screen.dart';
 import 'widgets/app_drawer.dart';
@@ -117,13 +118,11 @@ class _SplashWrapperState extends State<SplashWrapper> {
 
   Future<void> _checkSplashAndAuth() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final hasSplashBeenShown = prefs.getBool('splashShown') ?? false;
       final isAuth = await AuthService.isAuthenticated();
       
       if (mounted) {
         setState(() {
-          _showSplash = !hasSplashBeenShown;
+          _showSplash = true; // Always show splash screen
           _isAuthenticated = isAuth;
           _isChecking = false;
         });
@@ -141,13 +140,6 @@ class _SplashWrapperState extends State<SplashWrapper> {
   }
 
   Future<void> _onSplashComplete() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('splashShown', true);
-    } catch (e) {
-      // Ignore error
-    }
-    
     if (mounted) {
       setState(() {
         _showSplash = false;
@@ -178,9 +170,9 @@ class _SplashWrapperState extends State<SplashWrapper> {
       return SplashScreen(onComplete: _onSplashComplete);
     }
 
-    // Check authentication - show login if not authenticated
+    // Check authentication - show welcome screen if not authenticated
     if (!_isAuthenticated) {
-      return LoginScreen(onLoginSuccess: _onLoginSuccess);
+      return WelcomeScreen(onLoginSuccess: _onLoginSuccess);
     }
 
     return MainScreen(

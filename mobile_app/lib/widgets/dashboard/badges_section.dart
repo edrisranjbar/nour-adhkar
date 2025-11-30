@@ -1,0 +1,105 @@
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../../theme/app_theme.dart';
+import '../../services/dashboard_service.dart';
+import 'achievement_badge.dart';
+
+class BadgesSection extends StatelessWidget {
+  final List<Map<String, dynamic>> badges;
+  final Map<String, dynamic>? userStats;
+  final int? streak;
+  final bool isDark;
+
+  const BadgesSection({
+    super.key,
+    required this.badges,
+    required this.userStats,
+    required this.streak,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // If no badges from API, show default achievement badges
+    final displayBadges = badges.isNotEmpty
+        ? badges
+        : DashboardService.getDefaultBadges(
+            userStats: userStats,
+            streak: streak,
+          );
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.darkBgTertiary : AppTheme.bgSecondary,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    FontAwesomeIcons.trophy,
+                    size: 20,
+                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'دستاوردها',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                      fontFamily: AppTheme.fontPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '${displayBadges.where((b) => b['unlocked'] == true).length}/${displayBadges.length}',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                  fontFamily: AppTheme.fontPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: displayBadges.length,
+            itemBuilder: (context, index) {
+              final badge = displayBadges[index];
+              return AchievementBadge(
+                badge: badge,
+                isDark: isDark,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
