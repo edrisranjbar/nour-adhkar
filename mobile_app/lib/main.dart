@@ -9,6 +9,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/favorites_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/welcome_screen.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/splash_screen.dart';
 import 'widgets/app_drawer.dart';
@@ -169,9 +170,9 @@ class _SplashWrapperState extends State<SplashWrapper> {
       return SplashScreen(onComplete: _onSplashComplete);
     }
 
-    // Check authentication - show login if not authenticated
+    // Check authentication - show welcome screen if not authenticated
     if (!_isAuthenticated) {
-      return LoginScreen(onLoginSuccess: _onLoginSuccess);
+      return WelcomeScreen(onLoginSuccess: _onLoginSuccess);
     }
 
     return MainScreen(

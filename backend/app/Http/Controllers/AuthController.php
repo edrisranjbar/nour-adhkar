@@ -74,7 +74,11 @@ class AuthController extends Controller
                 'message' => 'ثبت نام با موفقیت انجام شد'
             ], 201);
         } catch (Exception $e) {
-            return response()->json(['message' => 'ثبت نام با خطا مواجه شد', 'error' => $e->getMessage()], 500);
+            \Log::error('Registration error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در ثبت نام. لطفاً دوباره تلاش کنید.'
+            ], 500);
         }
     }
 
@@ -95,17 +99,52 @@ class AuthController extends Controller
             ], 422);
         }
 
-        if (!$token = auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
-            return response()->json(['message' => 'نام کاربری یا رمز عبور اشتباه است'], 401);
+        try {
+            // Check if user exists
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'کاربری با این ایمیل در سیستم ثبت نشده است'
+                ], 401);
+            }
+
+            // Check if account is active
+            if (!$user->active) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حساب کاربری شما غیرفعال شده است. لطفاً با پشتیبانی تماس بگیرید.'
+                ], 403);
+            }
+
+            // Verify password
+            if (!Hash::check($request->password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'رمز عبور اشتباه است'
+                ], 401);
+            }
+
+            // Generate token
+            $token = auth()->login($user);
+
+            // Update last login time
+            $user->update(['last_login_at' => now()]);
+
+            return response()->json([
+                'success' => true,
+                'user' => new UserResource($user),
+                'token' => $token,
+                'message' => 'ورود موفقیت‌آمیز'
+            ]);
+        } catch (Exception $e) {
+            \Log::error('Login error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در ورود به سیستم. لطفاً دوباره تلاش کنید.'
+            ], 500);
         }
-
-        $user = auth()->user();
-
-        return response()->json([
-            'user' => new UserResource($user),
-            'token' => $token,
-            'message' => 'ورود موفقیت‌آمیز'
-        ]);
     }
 
     public function logout(Request $request)
