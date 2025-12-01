@@ -143,7 +143,7 @@ if [ ! -f "bundlesigner.jar" ]; then
 fi
 
 # Check if keystore exists
-KEYSTORE_PATH="android/nour-adhkar-release-key.jks"
+KEYSTORE_PATH="android/upload-keystore.jks"
 if [ ! -f "$KEYSTORE_PATH" ]; then
     echo "❌ Keystore not found at: $KEYSTORE_PATH"
     echo "   Please create a keystore file or update KEYSTORE_PATH in this script"

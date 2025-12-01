@@ -112,6 +112,8 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
             }
           });
           _initializeCounters();
+          // Initialize slide animation to show first dhikr immediately
+          _slideController?.value = 1.0;
         }
       } else {
         if (mounted) {
