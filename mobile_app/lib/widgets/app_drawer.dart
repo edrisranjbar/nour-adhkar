@@ -174,26 +174,14 @@ class AppDrawer extends StatelessWidget {
                       },
                       isDark: isDark,
                     ),
-                  if (isAuthenticated)
-                    _DrawerItem(
-                      icon: FontAwesomeIcons.heart,
-                      title: 'علاقه‌مندی‌ها',
-                      index: 3,
-                      currentIndex: currentIndex,
-                      onTap: () {
-                        Navigator.pop(context);
-                        onItemTap(3);
-                      },
-                      isDark: isDark,
-                    ),
                   _DrawerItem(
                     icon: FontAwesomeIcons.gear,
                     title: 'تنظیمات',
-                    index: isAuthenticated ? 4 : 2,
+                    index: isAuthenticated ? 3 : 2,
                     currentIndex: currentIndex,
                     onTap: () {
                       Navigator.pop(context);
-                      onItemTap(isAuthenticated ? 4 : 2);
+                      onItemTap(isAuthenticated ? 3 : 2);
                     },
                     isDark: isDark,
                   ),

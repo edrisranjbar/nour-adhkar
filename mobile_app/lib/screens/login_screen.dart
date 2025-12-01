@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'dart:ui';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'register_screen.dart';
@@ -39,13 +38,20 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
+    debugPrint('[LoginScreen] Login button pressed');
+    
     if (!_formKey.currentState!.validate()) {
+      debugPrint('[LoginScreen] Form validation failed');
       return;
     }
 
     if (_isLoading) {
+      debugPrint('[LoginScreen] Login already in progress, ignoring request');
       return;
     }
+
+    final email = _emailController.text.trim();
+    debugPrint('[LoginScreen] Starting login process for email: $email');
 
     setState(() {
       _isLoading = true;
@@ -53,35 +59,56 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      debugPrint('[LoginScreen] Calling AuthService.login()');
       final result = await AuthService.login(
-        _emailController.text.trim(),
+        email,
         _passwordController.text,
       );
 
+      debugPrint('[LoginScreen] AuthService.login() completed');
+      debugPrint('[LoginScreen] Result: $result');
+      debugPrint('[LoginScreen] Success: ${result['success']}');
+
       if (mounted) {
         if (result['success'] == true) {
+          debugPrint('[LoginScreen] Login successful, calling onLoginSuccess callback');
           // Login successful
           if (widget.onLoginSuccess != null) {
             widget.onLoginSuccess!();
+          } else {
+            debugPrint('[LoginScreen] Warning: onLoginSuccess callback is null');
           }
         } else {
+          final errorMsg = result['message'] ?? 'خطا در ورود به سیستم. لطفاً دوباره تلاش کنید.';
+          debugPrint('[LoginScreen] Login failed: $errorMsg');
           setState(() {
-            _errorMessage = result['message'] ?? 'خطا در ورود به سیستم. لطفاً دوباره تلاش کنید.';
+            _errorMessage = errorMsg;
             _isLoading = false;
           });
         }
+      } else {
+        debugPrint('[LoginScreen] Widget not mounted, skipping state update');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('[LoginScreen] Exception caught in _handleLogin');
+      debugPrint('[LoginScreen] Exception: $e');
+      debugPrint('[LoginScreen] Stack trace: $stackTrace');
+      
       if (mounted) {
         setState(() {
           // Show more specific error messages
           String errorMsg = 'خطا در ورود به سیستم';
           if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
             errorMsg = 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.';
+            debugPrint('[LoginScreen] Timeout error detected');
           } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
             errorMsg = 'اتصال اینترنت خود را بررسی کنید';
+            debugPrint('[LoginScreen] Network error detected');
           } else if (e.toString().contains('FormatException') || e.toString().contains('JSON')) {
             errorMsg = 'خطا در پردازش پاسخ سرور. لطفاً دوباره تلاش کنید.';
+            debugPrint('[LoginScreen] JSON parsing error detected');
+          } else {
+            debugPrint('[LoginScreen] Unknown error type');
           }
           _errorMessage = errorMsg;
           _isLoading = false;

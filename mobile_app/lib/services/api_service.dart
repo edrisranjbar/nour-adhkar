@@ -98,6 +98,32 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>?> getUserProfile() async {
+    try {
+      final token = await AuthService.getToken();
+      if (token == null) return null;
+
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseApiUrl}/user/profile'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && data['profile'] != null) {
+          return data['profile'] as Map<String, dynamic>;
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching user profile: $e');
+      return null;
+    }
+  }
+
   static Future<Map<String, dynamic>?> getUserStats() async {
     try {
       final token = await AuthService.getToken();

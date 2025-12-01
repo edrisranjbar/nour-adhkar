@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/counter_screen.dart';
@@ -243,8 +242,19 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onTabTapped(int index) {
+    // Map bottom nav index to screen index
+    int screenIndex;
+    if (_isAuthenticated) {
+      // Bottom nav: Home(0), Counter(1), Dashboard(2), Settings(3)
+      // Screens: Home(0), Counter(1), Dashboard(2), Favorites(3), Settings(4)
+      screenIndex = index == 3 ? 4 : index;
+    } else {
+      // Bottom nav: Home(0), Counter(1), Settings(2)
+      // Screens: Home(0), Counter(1), Settings(2)
+      screenIndex = index;
+    }
     setState(() {
-      _currentIndex = index;
+      _currentIndex = screenIndex;
     });
     // Close drawer if open
     _scaffoldKey.currentState?.closeDrawer();
@@ -273,8 +283,11 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigation(
-        currentIndex: _currentIndex.clamp(0, 2),
+        currentIndex: _isAuthenticated
+            ? (_currentIndex == 4 ? 3 : _currentIndex.clamp(0, 2))
+            : _currentIndex.clamp(0, 2),
         onTap: _onTabTapped,
+        isAuthenticated: _isAuthenticated,
       ),
     );
   }

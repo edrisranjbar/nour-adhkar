@@ -55,6 +55,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _refreshData() async {
+    await Future.wait([
+      _loadCollections(),
+      _loadAuthState(),
+    ]);
+  }
+
   int _getCollectionCount(String slug) {
     try {
       final collection = _collections.firstWhere(
@@ -77,9 +84,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ? const Center(
                 child: CircularProgressIndicator(),
               )
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
+            : RefreshIndicator(
+                onRefresh: _refreshData,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
                     // Header
                     AppHeader(
                       title: 'اذکار نور',
@@ -166,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               fontWeight: FontWeight.w500,
                               color: isDark
                                   ? AppTheme.darkBrandPrimary
-                                  : AppTheme.brandPrimary,
+                                  : AppTheme.textPrimary,
                               fontFamily: AppTheme.fontPrimary,
                             ),
                           ),
@@ -199,6 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+            ),
       ),
     );
   }
