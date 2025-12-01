@@ -22,7 +22,8 @@ class StatsSection extends StatelessWidget {
     final totalDhikrs = userStats?['total_dhikrs'] ?? 0;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
