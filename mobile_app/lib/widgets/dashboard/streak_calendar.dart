@@ -72,7 +72,8 @@ class StreakCalendar extends StatelessWidget {
                   jalaliDate.year == today.year;
               
               // Get weekday (0 = Saturday, 6 = Friday)
-              final weekday = jalaliDate.weekDay;
+              // shamsi_date returns 1-7, we need to convert to 0-6
+              final weekday = (jalaliDate.weekDay - 1) % 7;
               final dayName = DashboardService.getPersianDayName(weekday);
 
               return DayCircle(

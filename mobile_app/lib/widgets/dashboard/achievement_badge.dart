@@ -70,6 +70,7 @@ class AchievementBadge extends StatelessWidget {
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         // Badge Circle
         Stack(
@@ -78,8 +79,8 @@ class AchievementBadge extends StatelessWidget {
             // Progress ring
             if (!unlocked && progress > 0)
               SizedBox(
-                width: 80,
-                height: 80,
+                width: 70,
+                height: 70,
                 child: CircularProgressIndicator(
                   value: progress.clamp(0.0, 1.0),
                   strokeWidth: 3,
@@ -93,8 +94,8 @@ class AchievementBadge extends StatelessWidget {
               ),
             // Badge container
             Container(
-              width: 70,
-              height: 70,
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
                 gradient: unlocked
                     ? LinearGradient(
@@ -123,17 +124,17 @@ class AchievementBadge extends StatelessWidget {
               child: Icon(
                 icon,
                 color: unlocked ? Colors.white : Colors.grey[600],
-                size: 32,
+                size: 28,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         // Badge name
         Text(
           name,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: unlocked ? FontWeight.w600 : FontWeight.w400,
             color: unlocked
                 ? (isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary)
@@ -144,18 +145,20 @@ class AchievementBadge extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         // Description
-        Text(
-          description,
-          style: TextStyle(
-            fontSize: 10,
-            color: isDark ? Colors.grey[600] : Colors.grey[500],
-            fontFamily: AppTheme.fontPrimary,
+        Flexible(
+          child: Text(
+            description,
+            style: TextStyle(
+              fontSize: 9,
+              color: isDark ? Colors.grey[600] : Colors.grey[500],
+              fontFamily: AppTheme.fontPrimary,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.visible,
           ),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
