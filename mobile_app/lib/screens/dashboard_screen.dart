@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
@@ -72,7 +73,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      color: Colors.white,
+      color: isDark ? AppTheme.darkBgPrimary : Colors.white,
       child: SafeArea(
         child: _isLoading
             ? const Center(
@@ -103,7 +104,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
 
                       // Divider
-                      Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: isDark ? AppTheme.darkBgTertiary : Colors.grey[200],
+                      ),
 
                       // Stats Section
                       StatsSection(
@@ -114,7 +119,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
 
                       // Divider
-                      Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: isDark ? AppTheme.darkBgTertiary : Colors.grey[200],
+                      ),
 
                       // Streak Calendar
                       StreakCalendar(
@@ -123,7 +132,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
 
                       // Divider
-                      Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: isDark ? AppTheme.darkBgTertiary : Colors.grey[200],
+                      ),
 
                       // Badges Section
                       BadgesSection(
@@ -136,7 +149,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       // Recent Activities
                       if (_recentActivities.isNotEmpty) ...[
                         // Divider
-                        Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: isDark ? AppTheme.darkBgTertiary : Colors.grey[200],
+                        ),
                         RecentActivitiesSection(
                           activities: _recentActivities,
                           isDark: isDark,

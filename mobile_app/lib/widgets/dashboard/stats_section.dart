@@ -19,11 +19,11 @@ class StatsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalDhikrs = userStats?['total_dhikrs'] ?? 0;
+    final totalDhikrs = userStats?['total_adhkar_completed'] ?? 0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      color: Colors.white,
+      color: isDark ? AppTheme.darkBgPrimary : Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

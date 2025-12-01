@@ -17,7 +17,7 @@ class RecentActivitiesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      color: Colors.white,
+      color: isDark ? AppTheme.darkBgPrimary : Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -38,10 +38,10 @@ class RecentActivitiesSection extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: isDark ? AppTheme.darkBgTertiary : Colors.grey[50],
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.grey[200]!,
+                  color: isDark ? AppTheme.darkBgSecondary : Colors.grey[200]!,
                   width: 1,
                 ),
               ),

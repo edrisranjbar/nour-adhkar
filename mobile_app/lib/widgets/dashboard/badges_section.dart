@@ -40,7 +40,7 @@ class _BadgesSectionState extends State<BadgesSection> {
 
     return Container(
       padding: const EdgeInsets.all(20),
-      color: Colors.white,
+      color: widget.isDark ? AppTheme.darkBgPrimary : Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -65,15 +65,6 @@ class _BadgesSectionState extends State<BadgesSection> {
                     ),
                   ),
                 ],
-              ),
-              Text(
-                '${displayBadges.where((b) => b['unlocked'] == true).length}/${displayBadges.length}',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: widget.isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                  fontFamily: AppTheme.fontPrimary,
-                ),
               ),
             ],
           ),

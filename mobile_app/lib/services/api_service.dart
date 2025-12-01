@@ -142,7 +142,7 @@ class ApiService {
         return {
           'streak': data['streak'] ?? 0,
           'heart_score': data['heart_score'] ?? 0,
-          'total_dhikrs': data['total_dhikrs'] ?? 0,
+          'total_adhkar_completed': data['total_adhkar_completed'] ?? 0,
           'today_count': data['today_count'] ?? 0,
           'favorite_count': data['favorite_count'] ?? 0,
           'completed_dates': data['completed_dates'] ?? [],

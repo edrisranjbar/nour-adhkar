@@ -21,7 +21,7 @@ class ProfileSection extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(20),
-      color: Colors.white,
+      color: isDark ? AppTheme.darkBgPrimary : Colors.white,
       child: Row(
         children: [
           // Profile Photo
