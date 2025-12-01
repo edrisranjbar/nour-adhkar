@@ -24,6 +24,7 @@ class UserResource extends JsonResource
             'has_new_badge' => $this->has_new_badge,
             'role' => $this->role,
             'active' => $this->active,
+            'total_adhkar_completed' => $this->total_dhikrs,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
