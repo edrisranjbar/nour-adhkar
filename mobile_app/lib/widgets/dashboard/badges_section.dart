@@ -4,7 +4,7 @@ import '../../theme/app_theme.dart';
 import '../../services/dashboard_service.dart';
 import 'achievement_badge.dart';
 
-class BadgesSection extends StatelessWidget {
+class BadgesSection extends StatefulWidget {
   final List<Map<String, dynamic>> badges;
   final Map<String, dynamic>? userStats;
   final int? streak;
@@ -19,13 +19,23 @@ class BadgesSection extends StatelessWidget {
   });
 
   @override
+  State<BadgesSection> createState() => _BadgesSectionState();
+}
+
+class _BadgesSectionState extends State<BadgesSection> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // If no badges from API, show default achievement badges
-    final displayBadges = badges.isNotEmpty
-        ? badges
+    final displayBadges = widget.badges.isNotEmpty
+        ? widget.badges
         : DashboardService.getDefaultBadges(
-            userStats: userStats,
-            streak: streak,
+            userStats: widget.userStats,
+            streak: widget.streak,
           );
 
     return Container(
@@ -42,7 +52,7 @@ class BadgesSection extends StatelessWidget {
                   Icon(
                     FontAwesomeIcons.trophy,
                     size: 20,
-                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                    color: widget.isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -50,7 +60,7 @@ class BadgesSection extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                      color: widget.isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
                       fontFamily: AppTheme.fontPrimary,
                     ),
                   ),
@@ -61,7 +71,7 @@ class BadgesSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                  color: widget.isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
                   fontFamily: AppTheme.fontPrimary,
                 ),
               ),
@@ -80,9 +90,10 @@ class BadgesSection extends StatelessWidget {
             itemCount: displayBadges.length,
             itemBuilder: (context, index) {
               final badge = displayBadges[index];
-              return AchievementBadge(
+              return AnimatedBadge(
                 badge: badge,
-                isDark: isDark,
+                isDark: widget.isDark,
+                delay: Duration(milliseconds: index * 100),
               );
             },
           ),

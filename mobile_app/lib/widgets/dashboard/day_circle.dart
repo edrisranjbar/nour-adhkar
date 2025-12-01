@@ -75,17 +75,6 @@ class DayCircle extends StatelessWidget {
                   ),
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          monthName,
-          style: TextStyle(
-            fontSize: 10,
-            color: isDark
-                ? AppTheme.darkTextSecondary
-                : AppTheme.textSecondary,
-            fontFamily: AppTheme.fontPrimary,
-          ),
-        ),
       ],
     );
   }
