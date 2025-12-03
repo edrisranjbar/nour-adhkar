@@ -7,10 +7,7 @@ import 'register_screen.dart';
 class WelcomeScreen extends StatelessWidget {
   final VoidCallback? onLoginSuccess;
 
-  const WelcomeScreen({
-    super.key,
-    this.onLoginSuccess,
-  });
+  const WelcomeScreen({super.key, this.onLoginSuccess});
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +40,7 @@ class WelcomeScreen extends StatelessWidget {
                     // Large Stylized Logo Text
                     ShaderMask(
                       shaderCallback: (bounds) => LinearGradient(
-                        colors: [
-                          AppTheme.brandDark,
-                          AppTheme.brandPrimary,
-                        ],
+                        colors: [AppTheme.brandDark, AppTheme.brandPrimary],
                       ).createShader(bounds),
                       child: Text(
                         'اذکار نور',
@@ -55,7 +49,6 @@ class WelcomeScreen extends StatelessWidget {
                           fontWeight: FontWeight.w300,
                           color: Colors.white,
                           fontFamily: AppTheme.fontArabic,
-                          letterSpacing: 6,
                           height: 1.2,
                           shadows: [
                             Shadow(
@@ -112,9 +105,8 @@ class WelcomeScreen extends StatelessWidget {
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => LoginScreen(
-                                onLoginSuccess: onLoginSuccess,
-                              ),
+                              builder: (context) =>
+                                  LoginScreen(onLoginSuccess: onLoginSuccess),
                             ),
                           );
                         },
@@ -242,4 +234,3 @@ class GeometricPatternPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

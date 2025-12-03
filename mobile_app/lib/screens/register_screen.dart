@@ -5,6 +5,7 @@ import 'dart:ui';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'privacy_policy_screen.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   final VoidCallback? onRegisterSuccess;
@@ -68,21 +69,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
+      debugPrint('[RegisterScreen] Starting registration...');
       final result = await AuthService.register(
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
       );
+      debugPrint('[RegisterScreen] Registration result: $result');
 
       if (mounted) {
         if (result['success'] == true) {
+          debugPrint('[RegisterScreen] Registration successful');
           // Registration successful
+          setState(() {
+            _isLoading = false;
+          });
           if (widget.onRegisterSuccess != null) {
             widget.onRegisterSuccess!();
           } else {
             Navigator.of(context).pop();
           }
         } else {
+          debugPrint(
+            '[RegisterScreen] Registration failed: ${result['message']}',
+          );
           setState(() {
             _errorMessage = result['message'] ?? 'خطا در ثبت نام';
             _isLoading = false;
@@ -90,9 +100,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       }
     } catch (e) {
+      debugPrint('[RegisterScreen] Registration error: $e');
       if (mounted) {
         setState(() {
-          _errorMessage = 'خطا در ثبت نام';
+          _errorMessage = 'خطا در ثبت نام: ${e.toString()}';
           _isLoading = false;
         });
       }
@@ -172,7 +183,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // Sub-prompt
                       GestureDetector(
                         onTap: () {
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => LoginScreen(
+                                onLoginSuccess: widget.onRegisterSuccess,
+                              ),
+                            ),
+                          );
                         },
                         child: RichText(
                           textAlign: TextAlign.center,
@@ -201,37 +218,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 40),
 
-                      // Enhanced Login Form Card
-                      Container(
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1E1E1E)
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withOpacity(0.1)
-                                : Colors.black.withOpacity(0.08),
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isDark
-                                  ? Colors.black.withOpacity(0.5)
-                                  : Colors.black.withOpacity(0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                              spreadRadius: 0,
-                            ),
-                            BoxShadow(
-                              color: AppTheme.brandPrimary.withOpacity(0.1),
-                              blurRadius: 30,
-                              offset: const Offset(0, 4),
-                              spreadRadius: -5,
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(28),
+                      // Registration Form
+                      Padding(
+                        padding: const EdgeInsets.all(8),
                         child: Form(
                           key: _formKey,
                           child: Column(
