@@ -34,7 +34,7 @@ class ApiService {
                 adhkarCount = int.tryParse(count) ?? adhkarCount;
               }
             }
-            
+
             return {
               'name': collection['name'] ?? '',
               'path': collection['slug'] ?? '',
@@ -69,11 +69,13 @@ class ApiService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getAdhkarByCollection(String slug) async {
+  static Future<List<Map<String, dynamic>>> getAdhkarByCollection(
+    String slug,
+  ) async {
     try {
       // The collection endpoint already includes adhkar, so we fetch the collection
       final collection = await getCollectionBySlug(slug);
-      
+
       if (collection != null && collection['adhkar'] != null) {
         final adhkar = List<Map<String, dynamic>>.from(collection['adhkar']);
         return adhkar.map((item) {
@@ -208,10 +210,19 @@ class ApiService {
     }
   }
 
-  static Future<bool> completeDhikr() async {
+  static Future<Map<String, dynamic>> completeDhikrWithDetails([
+    int? dhikrCount,
+  ]) async {
     try {
       final token = await AuthService.getToken();
-      if (token == null) return false;
+      if (token == null)
+        return {'success': false, 'error': 'No authentication token'};
+
+      print('[ApiService] Completing dhikr...');
+
+      final requestBody = dhikrCount != null
+          ? json.encode({'count': dhikrCount})
+          : null;
 
       final response = await http.post(
         Uri.parse('${AppConfig.baseApiUrl}/dhikr'),
@@ -220,17 +231,50 @@ class ApiService {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
+        body: requestBody,
+      );
+
+      print(
+        '[ApiService] Dhikr completion response: ${response.statusCode} - ${response.body}',
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
-        return data['success'] == true;
+        if (data['success'] == true) {
+          print('[ApiService] Dhikr completed successfully on backend');
+
+          // Heart score is now calculated on backend, just refresh local data
+          await AuthService.refreshUserData();
+
+          // Check if collection was completed (extra 10 heart score points)
+          final collectionCompleted = data['collection_completed'] == true;
+          final heartScoreIncrease = data['heart_score_increase'] ?? 0;
+
+          if (collectionCompleted) {
+            print(
+              '[ApiService] Collection completed! Awarded 10 heart score points',
+            );
+          }
+
+          return {
+            'success': true,
+            'collection_completed': collectionCompleted,
+            'heart_score_increase': heartScoreIncrease,
+            'today_count': data['today_count'] ?? 0,
+          };
+        }
       }
-      return false;
+      return {'success': false};
     } catch (e) {
       print('Error completing dhikr: $e');
-      return false;
+      return {'success': false, 'error': e.toString()};
     }
+  }
+
+  // Backward compatibility method
+  static Future<bool> completeDhikr() async {
+    final result = await completeDhikrWithDetails();
+    return result['success'] == true;
   }
 
   static Future<List<Map<String, dynamic>>> getFavorites() async {
@@ -280,4 +324,3 @@ class ApiService {
     }
   }
 }
-

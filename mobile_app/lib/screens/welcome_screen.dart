@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:ui';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  final VoidCallback? onLoginSuccess;
-
-  const WelcomeScreen({super.key, this.onLoginSuccess});
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -103,12 +102,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  LoginScreen(onLoginSuccess: onLoginSuccess),
-                            ),
-                          );
+                          Get.to(() => const LoginScreen());
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
@@ -148,13 +142,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => RegisterScreen(
-                                onRegisterSuccess: onLoginSuccess,
-                              ),
-                            ),
-                          );
+                          Get.to(() => const RegisterScreen());
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,

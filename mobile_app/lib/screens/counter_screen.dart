@@ -35,6 +35,7 @@ class _CounterScreenState extends State<CounterScreen>
   String _customDhikr = '';
   bool _isCustomMode = false;
   final TextEditingController _customDhikrController = TextEditingController();
+  Map<String, dynamic>? _userData;
 
   @override
   void initState() {
@@ -111,6 +112,22 @@ class _CounterScreenState extends State<CounterScreen>
         _isAuthenticated = isAuth;
       });
     }
+    if (isAuth) {
+      await _loadUserData();
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final userData = await AuthService.getUser();
+      if (mounted && userData != null) {
+        setState(() {
+          _userData = userData;
+        });
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+    }
   }
 
   Future<void> _loadData() async {
@@ -139,7 +156,9 @@ class _CounterScreenState extends State<CounterScreen>
             .where((dhikr) {
               // Filter out empty dhikrs
               final arabicText = (dhikr['arabic_text'] ?? '').toString().trim();
-              final translation = (dhikr['translation'] ?? '').toString().trim();
+              final translation = (dhikr['translation'] ?? '')
+                  .toString()
+                  .trim();
               return arabicText.isNotEmpty || translation.isNotEmpty;
             })
             .toList();
@@ -175,6 +194,8 @@ class _CounterScreenState extends State<CounterScreen>
       // Refresh user data if authenticated
       if (_isAuthenticated) {
         await AuthService.refreshUserData();
+        // Reload local user data for UI update
+        await _loadUserData();
         // Re-check auth state to update UI if needed
         await _checkAuth();
       }
@@ -325,7 +346,6 @@ class _CounterScreenState extends State<CounterScreen>
     }
   }
 
-
   void _handleCompletion() {
     setState(() {
       _hasCompleted = true;
@@ -342,6 +362,18 @@ class _CounterScreenState extends State<CounterScreen>
     // Save completion to backend if authenticated
     if (_isAuthenticated) {
       _saveCompletion();
+      // Show additional heart score message after a delay
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('❤️ امتیاز قلب شما افزایش یافت!'),
+              backgroundColor: Colors.pink.shade500,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      });
     }
 
     // Show completion message
@@ -356,9 +388,60 @@ class _CounterScreenState extends State<CounterScreen>
 
   Future<void> _saveCompletion() async {
     try {
-      await ApiService.completeDhikr();
+      print('[CounterScreen] Saving dhikr completion...');
+      // Get the dhikr count for heart score calculation
+      final dhikrCount = _currentDhikr?['count'] ?? 33;
+      print('[CounterScreen] Dhikr count: $dhikrCount');
+
+      final result = await ApiService.completeDhikrWithDetails(dhikrCount);
+      print('[CounterScreen] Dhikr completion result: $result');
+
+      if (result['success'] == true) {
+        // Refresh user data to update UI with new stats
+        await AuthService.refreshUserData();
+        // Reload local user data for UI update
+        await _loadUserData();
+
+        // Show appropriate feedback messages
+        final collectionCompleted = result['collection_completed'] == true;
+        final heartScoreIncrease = result['heart_score_increase'] ?? 0;
+
+        if (heartScoreIncrease > 0) {
+          // Show heart score increase message
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '❤️ امتیاز قلب شما $heartScoreIncrease امتیاز افزایش یافت!',
+                  ),
+                  backgroundColor: Colors.pink.shade500,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          });
+        }
+
+        if (collectionCompleted) {
+          // Show collection completion message after a delay
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text(
+                    '🎉 مجموعه روزانه تکمیل شد! ۱۰ امتیاز قلب دریافت کردید',
+                  ),
+                  backgroundColor: Colors.orange.shade600,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          });
+        }
+      }
     } catch (e) {
-      print('Error saving completion: $e');
+      print('[CounterScreen] Error saving completion: $e');
     }
   }
 
@@ -378,7 +461,6 @@ class _CounterScreenState extends State<CounterScreen>
       }
     }
   }
-
 
   // Widget Builders
   Widget _buildEmptyState(bool isDark) {
@@ -518,7 +600,9 @@ class _CounterScreenState extends State<CounterScreen>
   Widget _buildTimerDisplay(bool isDark) {
     if (!_timerStarted || !_showTimer) return const SizedBox.shrink();
 
-    final brandColor = isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary;
+    final brandColor = isDark
+        ? AppTheme.darkBrandPrimary
+        : AppTheme.brandPrimary;
 
     return Positioned(
       top: 24,
@@ -529,10 +613,7 @@ class _CounterScreenState extends State<CounterScreen>
           color: (isDark ? AppTheme.darkBgSecondary : AppTheme.bgSecondary)
               .withOpacity(0.95),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: brandColor.withOpacity(0.3),
-            width: 1,
-          ),
+          border: Border.all(color: brandColor.withOpacity(0.3), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.15),
@@ -544,11 +625,7 @@ class _CounterScreenState extends State<CounterScreen>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              FontAwesomeIcons.stopwatch,
-              color: brandColor,
-              size: 14,
-            ),
+            Icon(FontAwesomeIcons.stopwatch, color: brandColor, size: 14),
             const SizedBox(width: 8),
             Text(
               _formatTime(_elapsedSeconds),
@@ -618,8 +695,9 @@ class _CounterScreenState extends State<CounterScreen>
             const SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(
-                color: (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                    .withOpacity(0.1),
+                color:
+                    (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
+                        .withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextButton.icon(
@@ -627,7 +705,9 @@ class _CounterScreenState extends State<CounterScreen>
                 icon: Icon(
                   Icons.edit,
                   size: 18,
-                  color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                  color: isDark
+                      ? AppTheme.darkBrandPrimary
+                      : AppTheme.brandPrimary,
                 ),
                 label: Text(
                   'ویرایش',
@@ -712,7 +792,9 @@ class _CounterScreenState extends State<CounterScreen>
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            backgroundColor: isDark ? AppTheme.darkBgSecondary : AppTheme.bgSecondary,
+            backgroundColor: isDark
+                ? AppTheme.darkBgSecondary
+                : AppTheme.bgSecondary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -733,7 +815,9 @@ class _CounterScreenState extends State<CounterScreen>
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                    color: isDark
+                        ? AppTheme.darkTextPrimary
+                        : AppTheme.textPrimary,
                     fontFamily: AppTheme.fontPrimary,
                   ),
                 ),
@@ -756,7 +840,9 @@ class _CounterScreenState extends State<CounterScreen>
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                        color: isDark
+                            ? AppTheme.darkTextPrimary
+                            : AppTheme.textPrimary,
                         fontFamily: AppTheme.fontPrimary,
                       ),
                     ),
@@ -770,7 +856,9 @@ class _CounterScreenState extends State<CounterScreen>
                           }
                         });
                       },
-                      activeColor: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                      activeColor: isDark
+                          ? AppTheme.darkBrandPrimary
+                          : AppTheme.brandPrimary,
                     ),
                   ],
                 ),
@@ -782,7 +870,9 @@ class _CounterScreenState extends State<CounterScreen>
                 child: Text(
                   'بستن',
                   style: TextStyle(
-                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                    color: isDark
+                        ? AppTheme.darkBrandPrimary
+                        : AppTheme.brandPrimary,
                     fontFamily: AppTheme.fontPrimary,
                     fontWeight: FontWeight.w600,
                   ),
@@ -797,8 +887,10 @@ class _CounterScreenState extends State<CounterScreen>
 
   Widget _buildModalGoalChip(bool isDark, int? value, String label) {
     final isSelected = _goalCount == value;
-    final brandColor = isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary;
-    
+    final brandColor = isDark
+        ? AppTheme.darkBrandPrimary
+        : AppTheme.brandPrimary;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -853,11 +945,11 @@ class _CounterScreenState extends State<CounterScreen>
     final buttonColor = _hasCompleted
         ? AppTheme.success
         : (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary);
-    
+
     // Calculate progress
     final targetCount = _goalCount ?? (_currentDhikr?['count'] ?? 33);
-    final progress = targetCount > 0 
-        ? (_currentCount / targetCount).clamp(0.0, 1.0) 
+    final progress = targetCount > 0
+        ? (_currentCount / targetCount).clamp(0.0, 1.0)
         : 0.0;
 
     return AnimatedBuilder(
@@ -877,10 +969,7 @@ class _CounterScreenState extends State<CounterScreen>
               end: Alignment.bottomRight,
               colors: _hasCompleted
                   ? [AppTheme.success, AppTheme.success.withOpacity(0.8)]
-                  : [
-                      buttonColor,
-                      buttonColor.withOpacity(0.85),
-                    ],
+                  : [buttonColor, buttonColor.withOpacity(0.85)],
             ),
             shape: BoxShape.circle,
             boxShadow: [
@@ -923,7 +1012,9 @@ class _CounterScreenState extends State<CounterScreen>
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: Icon(
-                      _hasCompleted ? Icons.check_circle : FontAwesomeIcons.hand,
+                      _hasCompleted
+                          ? Icons.check_circle
+                          : FontAwesomeIcons.hand,
                       key: ValueKey(_hasCompleted),
                       color: Colors.white,
                       size: 40,
@@ -955,7 +1046,10 @@ class _CounterScreenState extends State<CounterScreen>
                   if (_hasCompleted) ...[
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(20),
@@ -1016,8 +1110,11 @@ class _CounterScreenState extends State<CounterScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
                 side: BorderSide(
-                  color: (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                      .withOpacity(0.2),
+                  color:
+                      (isDark
+                              ? AppTheme.darkBrandPrimary
+                              : AppTheme.brandPrimary)
+                          .withOpacity(0.2),
                   width: 1,
                 ),
               ),
@@ -1044,7 +1141,10 @@ class _CounterScreenState extends State<CounterScreen>
                 children: [
                   AppHeader(
                     title: 'ذکرشمار',
-                    description: 'شمارش اذکار روزانه',
+                    description: _isAuthenticated && _userData != null
+                        ? '❤️ امتیاز قلب: ${_userData!['heart_score'] ?? 0}'
+                        : 'شمارش اذکار روزانه',
+                    heartScore: _isAuthenticated && _userData != null ? _userData!['heart_score'] : null,
                     isAuthenticated: _isAuthenticated,
                     onMenuTap: () => Scaffold.of(context).openDrawer(),
                   ),
@@ -1070,15 +1170,21 @@ class _CounterScreenState extends State<CounterScreen>
                             ),
                           ),
                         ),
-                        if (_timerStarted && _showTimer) _buildTimerDisplay(isDark),
+                        if (_timerStarted && _showTimer)
+                          _buildTimerDisplay(isDark),
                         // Floating Action Button for Settings
                         Positioned(
                           bottom: 24,
                           left: 24,
                           child: FloatingActionButton(
                             onPressed: _showSettingsModal,
-                            backgroundColor: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                            child: const Icon(Icons.settings, color: Colors.white),
+                            backgroundColor: isDark
+                                ? AppTheme.darkBrandPrimary
+                                : AppTheme.brandPrimary,
+                            child: const Icon(
+                              Icons.settings,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
@@ -1090,4 +1196,3 @@ class _CounterScreenState extends State<CounterScreen>
     );
   }
 }
-

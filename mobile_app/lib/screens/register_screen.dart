@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'dart:ui';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
@@ -8,9 +9,7 @@ import 'privacy_policy_screen.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  final VoidCallback? onRegisterSuccess;
-
-  const RegisterScreen({super.key, this.onRegisterSuccess});
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -79,16 +78,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (mounted) {
         if (result['success'] == true) {
-          debugPrint('[RegisterScreen] Registration successful');
-          // Registration successful
+          debugPrint(
+            '[RegisterScreen] Registration successful, automatically logging in user',
+          );
+          // Registration successful - automatically log in the user
           setState(() {
             _isLoading = false;
           });
-          if (widget.onRegisterSuccess != null) {
-            widget.onRegisterSuccess!();
-          } else {
-            Navigator.of(context).pop();
-          }
+          debugPrint('[RegisterScreen] Registration successful, navigating to dashboard');
+          // Navigate to main dashboard using GetX
+          Get.offAllNamed('/main');
         } else {
           debugPrint(
             '[RegisterScreen] Registration failed: ${result['message']}',
@@ -183,20 +182,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // Sub-prompt
                       GestureDetector(
                         onTap: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => LoginScreen(
-                                onLoginSuccess: widget.onRegisterSuccess,
-                              ),
-                            ),
-                          );
+                          Get.to(() => const LoginScreen());
                         },
                         child: RichText(
-                          textAlign: TextAlign.center,
+                          textAlign: TextAlign.right,
                           textDirection: TextDirection.rtl,
                           text: TextSpan(
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: FontWeight.w400,
                               color: isDark
                                   ? Colors.white.withOpacity(0.7)
