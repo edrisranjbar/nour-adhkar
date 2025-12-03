@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config.dart';
 import 'auth_service.dart';
 
@@ -243,8 +244,12 @@ class ApiService {
         if (data['success'] == true) {
           print('[ApiService] Dhikr completed successfully on backend');
 
-          // Heart score is now calculated on backend, just refresh local data
-          await AuthService.refreshUserData();
+          // Use the updated user data directly from the response instead of fetching again
+          if (data['user'] != null) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('user', json.encode(data['user']));
+            print('[ApiService] Updated user data stored locally');
+          }
 
           // Check if collection was completed (extra 10 heart score points)
           final collectionCompleted = data['collection_completed'] == true;

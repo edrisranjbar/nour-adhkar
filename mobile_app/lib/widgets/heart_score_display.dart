@@ -12,15 +12,6 @@ class HeartScoreDisplay extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'امتیاز قلب: ',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Vazir',
-          ),
-        ),
         Container(
           width: 24,
           height: 24,

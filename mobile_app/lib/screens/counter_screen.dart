@@ -397,14 +397,19 @@ class _CounterScreenState extends State<CounterScreen>
       print('[CounterScreen] Dhikr completion result: $result');
 
       if (result['success'] == true) {
-        // Refresh user data to update UI with new stats
-        await AuthService.refreshUserData();
-        // Reload local user data for UI update
+        // User data is already updated in ApiService, just reload local user data for UI update
         await _loadUserData();
+
+        // Force rebuild of the header to show updated heart score
+        if (mounted) {
+          setState(() {});
+        }
 
         // Show appropriate feedback messages
         final collectionCompleted = result['collection_completed'] == true;
         final heartScoreIncrease = result['heart_score_increase'] ?? 0;
+
+        print('[CounterScreen] Collection completed: $collectionCompleted, Heart score increase: $heartScoreIncrease');
 
         if (heartScoreIncrease > 0) {
           // Show heart score increase message
@@ -424,6 +429,7 @@ class _CounterScreenState extends State<CounterScreen>
         }
 
         if (collectionCompleted) {
+          print('[CounterScreen] Showing collection completion message');
           // Show collection completion message after a delay
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
@@ -1145,6 +1151,7 @@ class _CounterScreenState extends State<CounterScreen>
                         ? '❤️ امتیاز قلب: ${_userData!['heart_score'] ?? 0}'
                         : 'شمارش اذکار روزانه',
                     heartScore: _isAuthenticated && _userData != null ? _userData!['heart_score'] : null,
+                    streak: _isAuthenticated && _userData != null ? _userData!['streak'] : null,
                     isAuthenticated: _isAuthenticated,
                     onMenuTap: () => Scaffold.of(context).openDrawer(),
                   ),

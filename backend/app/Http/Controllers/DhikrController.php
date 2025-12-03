@@ -75,9 +75,14 @@ class DhikrController extends Controller
         $user->last_dhikr_completed_at = now();
 
         // Check if daily collection is completed (award additional 10 heart score points)
-        $collectionCompleted = $this->isDailyCollectionCompleted($todayCount);
+        // Only award once per day by checking if todayCount just reached the threshold
+        $collectionCompleted = $this->isDailyCollectionCompleted($todayCount) &&
+                              !$this->isDailyCollectionCompleted($todayCount - 1);
+
+        \Log::info("Dhikr completion - User: {$user->id}, TodayCount: $todayCount, CollectionCompleted: $collectionCompleted, HeartScore: {$user->heart_score}");
 
         if ($collectionCompleted) {
+            \Log::info("Awarding collection completion bonus to user {$user->id}");
             // Award additional 10 heart score points for completing the daily collection
             $user->heart_score = min(($user->heart_score ?? 0) + 10, 100);
         }
