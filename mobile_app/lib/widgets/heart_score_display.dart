@@ -25,7 +25,7 @@ class HeartScoreDisplay extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          '$heartScore/100',
+          '$heartScore',
           style: const TextStyle(
             color: Colors.white,
             fontSize: 14,

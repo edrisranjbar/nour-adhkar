@@ -409,7 +409,9 @@ class _CounterScreenState extends State<CounterScreen>
         final collectionCompleted = result['collection_completed'] == true;
         final heartScoreIncrease = result['heart_score_increase'] ?? 0;
 
-        print('[CounterScreen] Collection completed: $collectionCompleted, Heart score increase: $heartScoreIncrease');
+        print(
+          '[CounterScreen] Collection completed: $collectionCompleted, Heart score increase: $heartScoreIncrease',
+        );
 
         if (heartScoreIncrease > 0) {
           // Show heart score increase message
@@ -574,18 +576,7 @@ class _CounterScreenState extends State<CounterScreen>
       child: Container(
         margin: const EdgeInsets.only(left: 6),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-              : (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                : Colors.transparent,
-            width: 1.5,
-          ),
-        ),
+
         child: Center(
           child: Text(
             dhikr['title'] ?? NumberFormatter.formatNumber(index + 1),
@@ -654,7 +645,7 @@ class _CounterScreenState extends State<CounterScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkBgSecondary : AppTheme.bgSecondary,
+        // Remove background color for cleaner Arabic text display
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
@@ -794,55 +785,34 @@ class _CounterScreenState extends State<CounterScreen>
     showDialog(
       context: context,
       builder: (context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            backgroundColor: isDark
-                ? AppTheme.darkBgSecondary
-                : AppTheme.bgSecondary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: Text(
-              'تنظیمات',
-              style: TextStyle(
-                color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
-                fontFamily: AppTheme.fontPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'هدف شمارش',
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                backgroundColor: isDark
+                    ? AppTheme.darkBgSecondary
+                    : AppTheme.bgSecondary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                title: Text(
+                  'تنظیمات',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
                     color: isDark
                         ? AppTheme.darkTextPrimary
                         : AppTheme.textPrimary,
                     fontFamily: AppTheme.fontPrimary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _buildModalGoalChip(isDark, 33, '۳۳'),
-                    _buildModalGoalChip(isDark, 100, '۱۰۰'),
-                    _buildModalGoalChip(isDark, null, 'نامحدود'),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'نمایش تایمر',
+                      'هدف شمارش',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -852,46 +822,85 @@ class _CounterScreenState extends State<CounterScreen>
                         fontFamily: AppTheme.fontPrimary,
                       ),
                     ),
-                    Switch(
-                      value: _showTimer,
-                      onChanged: (value) {
-                        setState(() {
-                          _showTimer = value;
-                          if (!value && _timerStarted) {
-                            _stopTimer();
-                          }
-                        });
-                      },
-                      activeColor: isDark
-                          ? AppTheme.darkBrandPrimary
-                          : AppTheme.brandPrimary,
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildModalGoalChip(isDark, 33, '۳۳', setModalState),
+                        _buildModalGoalChip(isDark, 100, '۱۰۰', setModalState),
+                        _buildModalGoalChip(
+                          isDark,
+                          null,
+                          'نامحدود',
+                          setModalState,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'نمایش تایمر',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? AppTheme.darkTextPrimary
+                                : AppTheme.textPrimary,
+                            fontFamily: AppTheme.fontPrimary,
+                          ),
+                        ),
+                        Switch(
+                          value: _showTimer,
+                          onChanged: (value) {
+                            setModalState(() {
+                              _showTimer = value;
+                            });
+                            setState(() {
+                              if (!value && _timerStarted) {
+                                _stopTimer();
+                              }
+                            });
+                          },
+                          activeColor: isDark
+                              ? AppTheme.darkBrandPrimary
+                              : AppTheme.brandPrimary,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'بستن',
-                  style: TextStyle(
-                    color: isDark
-                        ? AppTheme.darkBrandPrimary
-                        : AppTheme.brandPrimary,
-                    fontFamily: AppTheme.fontPrimary,
-                    fontWeight: FontWeight.w600,
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'بستن',
+                      style: TextStyle(
+                        color: isDark
+                            ? AppTheme.darkBrandPrimary
+                            : AppTheme.brandPrimary,
+                        fontFamily: AppTheme.fontPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildModalGoalChip(bool isDark, int? value, String label) {
+  Widget _buildModalGoalChip(
+    bool isDark,
+    int? value,
+    String label,
+    StateSetter setModalState,
+  ) {
     final isSelected = _goalCount == value;
     final brandColor = isDark
         ? AppTheme.darkBrandPrimary
@@ -899,8 +908,10 @@ class _CounterScreenState extends State<CounterScreen>
 
     return GestureDetector(
       onTap: () {
-        setState(() {
+        setModalState(() {
           _goalCount = isSelected ? null : value;
+        });
+        setState(() {
           if (_goalCount != value) {
             _currentCount = 0;
             _hasCompleted = false;
@@ -910,24 +921,24 @@ class _CounterScreenState extends State<CounterScreen>
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
               ? brandColor
               : (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected
                 ? brandColor
                 : (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary),
-            width: 2,
+            width: 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
                     color: brandColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ]
               : null,
@@ -935,7 +946,7 @@ class _CounterScreenState extends State<CounterScreen>
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected
                 ? Colors.white
@@ -1150,8 +1161,12 @@ class _CounterScreenState extends State<CounterScreen>
                     description: _isAuthenticated && _userData != null
                         ? '❤️ امتیاز قلب: ${_userData!['heart_score'] ?? 0}'
                         : 'شمارش اذکار روزانه',
-                    heartScore: _isAuthenticated && _userData != null ? _userData!['heart_score'] : null,
-                    streak: _isAuthenticated && _userData != null ? _userData!['streak'] : null,
+                    heartScore: _isAuthenticated && _userData != null
+                        ? _userData!['heart_score']
+                        : null,
+                    streak: _isAuthenticated && _userData != null
+                        ? _userData!['streak']
+                        : null,
                     isAuthenticated: _isAuthenticated,
                     onMenuTap: () => Scaffold.of(context).openDrawer(),
                   ),
