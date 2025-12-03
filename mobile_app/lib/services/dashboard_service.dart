@@ -112,6 +112,7 @@ class DashboardService {
   }
 
   /// Gets Persian day name
+  /// weekday should be 0-6 (0 = Saturday, 6 = Friday)
   static String getPersianDayName(int weekday) {
     const days = [
       'شنبه',
@@ -122,7 +123,9 @@ class DashboardService {
       'پنج‌شنبه',
       'جمعه',
     ];
-    return days[weekday];
+    // Normalize weekday to 0-6 range (handle both 0-6 and 1-7 formats)
+    final normalizedWeekday = (weekday % 7);
+    return days[normalizedWeekday];
   }
 }
 

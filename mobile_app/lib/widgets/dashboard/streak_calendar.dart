@@ -26,19 +26,8 @@ class StreakCalendar extends StatelessWidget {
     });
 
     return Container(
-      margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkBgTertiary : AppTheme.bgSecondary,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      color: isDark ? AppTheme.darkBgPrimary : Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -72,7 +61,8 @@ class StreakCalendar extends StatelessWidget {
                   jalaliDate.year == today.year;
               
               // Get weekday (0 = Saturday, 6 = Friday)
-              final weekday = jalaliDate.weekDay;
+              // shamsi_date returns 1-7, we need to convert to 0-6
+              final weekday = (jalaliDate.weekDay - 1) % 7;
               final dayName = DashboardService.getPersianDayName(weekday);
 
               return DayCircle(

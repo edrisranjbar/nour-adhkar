@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../utils/number_formatter.dart';
+import 'heart_score_display.dart';
 
 class AppHeader extends StatelessWidget {
   final String title;
@@ -117,11 +118,7 @@ class AppHeader extends StatelessWidget {
                   // User Stats
                   Row(
                     children: [
-                      _StatItem(
-                        icon: FontAwesomeIcons.heart,
-                        value: heartScore ?? 0,
-                        isDark: isDark,
-                      ),
+                      HeartScoreDisplay(heartScore: heartScore ?? 0),
                       const SizedBox(width: 12),
                       _StatItem(
                         icon: FontAwesomeIcons.fire,

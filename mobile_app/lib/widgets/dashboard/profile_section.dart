@@ -20,19 +20,8 @@ class ProfileSection extends StatelessWidget {
         user?['photo'];
 
     return Container(
-      margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkBgTertiary : AppTheme.bgSecondary,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      color: isDark ? AppTheme.darkBgPrimary : Colors.white,
       child: Row(
         children: [
           // Profile Photo

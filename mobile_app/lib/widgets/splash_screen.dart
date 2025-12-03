@@ -6,10 +6,7 @@ import '../config.dart';
 class SplashScreen extends StatefulWidget {
   final VoidCallback? onComplete;
 
-  const SplashScreen({
-    super.key,
-    this.onComplete,
-  });
+  const SplashScreen({super.key, this.onComplete});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -71,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? AppTheme.darkBgPrimary : AppTheme.brandDark;
-    
+
     return Scaffold(
       backgroundColor: bgColor,
       body: Stack(
@@ -96,10 +93,7 @@ class _SplashScreenState extends State<SplashScreen>
                     // Large Stylized Arabic Text "أذكار"
                     ShaderMask(
                       shaderCallback: (bounds) => LinearGradient(
-                        colors: [
-                          Colors.white,
-                          Colors.white.withOpacity(0.9),
-                        ],
+                        colors: [Colors.white, Colors.white.withOpacity(0.9)],
                       ).createShader(bounds),
                       child: Text(
                         'اذکار نور',
@@ -108,7 +102,6 @@ class _SplashScreenState extends State<SplashScreen>
                           fontWeight: FontWeight.w300,
                           color: Colors.white,
                           fontFamily: AppTheme.fontArabic,
-                          letterSpacing: 8,
                           height: 1.2,
                           shadows: [
                             Shadow(
@@ -249,4 +242,3 @@ class GeometricPatternPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

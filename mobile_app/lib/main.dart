@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/counter_screen.dart';
@@ -9,6 +9,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/favorites_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/splash_screen.dart';
@@ -18,7 +19,7 @@ import 'services/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -26,7 +27,7 @@ void main() async {
       statusBarIconBrightness: Brightness.light,
     ),
   );
-  
+
   runApp(const MyApp());
 }
 
@@ -70,7 +71,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'اذکار نور',
       debugShowCheckedModeBanner: false,
       // Set locale to Persian (Farsi) for RTL support
@@ -89,16 +90,27 @@ class _MyAppState extends State<MyApp> {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: _themeMode,
-      home: SplashWrapper(
-        onThemeModeChanged: updateThemeMode,
-      ),
+      initialRoute: '/',
+      getPages: [
+        GetPage(
+          name: '/',
+          page: () => SplashWrapper(onThemeModeChanged: updateThemeMode),
+        ),
+        GetPage(name: '/welcome', page: () => const WelcomeScreen()),
+        GetPage(name: '/login', page: () => const LoginScreen()),
+        GetPage(name: '/register', page: () => const RegisterScreen()),
+        GetPage(
+          name: '/main',
+          page: () => MainScreen(onThemeModeChanged: updateThemeMode),
+        ),
+      ],
     );
   }
 }
 
 class SplashWrapper extends StatefulWidget {
   final Function(ThemeMode)? onThemeModeChanged;
-  
+
   const SplashWrapper({super.key, this.onThemeModeChanged});
 
   @override
@@ -119,7 +131,7 @@ class _SplashWrapperState extends State<SplashWrapper> {
   Future<void> _checkSplashAndAuth() async {
     try {
       final isAuth = await AuthService.isAuthenticated();
-      
+
       if (mounted) {
         setState(() {
           _showSplash = true; // Always show splash screen
@@ -147,22 +159,16 @@ class _SplashWrapperState extends State<SplashWrapper> {
     }
   }
 
-  void _onLoginSuccess() {
-    if (mounted) {
-      setState(() {
-        _isAuthenticated = true;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    debugPrint(
+      '[MainApp] Build called, _isAuthenticated = $_isAuthenticated, mounted = $mounted',
+    );
+
     if (_isChecking) {
       return const Scaffold(
         backgroundColor: AppTheme.bgPrimary,
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -170,20 +176,38 @@ class _SplashWrapperState extends State<SplashWrapper> {
       return SplashScreen(onComplete: _onSplashComplete);
     }
 
-    // Check authentication - show welcome screen if not authenticated
+    // Check authentication - navigate to appropriate screen
     if (!_isAuthenticated) {
-      return WelcomeScreen(onLoginSuccess: _onLoginSuccess);
+      debugPrint(
+        '[MainApp] User not authenticated, navigating to welcome screen',
+      );
+      // Navigate to welcome screen using GetX
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed('/welcome');
+      });
+      // Return loading screen while navigating
+      return const Scaffold(
+        backgroundColor: AppTheme.bgPrimary,
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
-    return MainScreen(
-      onThemeModeChanged: widget.onThemeModeChanged,
+    debugPrint('[MainApp] User authenticated, navigating to main screen');
+    // Navigate to main screen using GetX
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.offAllNamed('/main');
+    });
+    // Return loading screen while navigating
+    return const Scaffold(
+      backgroundColor: AppTheme.bgPrimary,
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeModeChanged;
-  
+
   const MainScreen({super.key, this.onThemeModeChanged});
 
   @override
@@ -206,17 +230,13 @@ class _MainScreenState extends State<MainScreen> {
         const CounterScreen(),
         const DashboardScreen(),
         const FavoritesScreen(),
-        SettingsScreen(
-          onThemeModeChanged: widget.onThemeModeChanged,
-        ),
+        SettingsScreen(onThemeModeChanged: widget.onThemeModeChanged),
       ];
     } else {
       return [
         const HomeScreen(),
         const CounterScreen(),
-        SettingsScreen(
-          onThemeModeChanged: widget.onThemeModeChanged,
-        ),
+        SettingsScreen(onThemeModeChanged: widget.onThemeModeChanged),
       ];
     }
   }
@@ -234,7 +254,8 @@ class _MainScreenState extends State<MainScreen> {
       setState(() {
         _isAuthenticated = true;
         _userName = user?['name'] ?? user?['email'] ?? 'کاربر';
-        _profilePhotoUrl = user?['avatar'] ?? user?['profile_photo'] ?? user?['photo'];
+        _profilePhotoUrl =
+            user?['avatar'] ?? user?['profile_photo'] ?? user?['photo'];
         // TODO: Load heart score and streak from API
         _heartScore = user?['heart_score'] ?? 0;
         _streak = user?['streak'] ?? 0;
@@ -243,8 +264,19 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onTabTapped(int index) {
+    // Map bottom nav index to screen index
+    int screenIndex;
+    if (_isAuthenticated) {
+      // Bottom nav: Home(0), Counter(1), Dashboard(2), Settings(3)
+      // Screens: Home(0), Counter(1), Dashboard(2), Favorites(3), Settings(4)
+      screenIndex = index == 3 ? 4 : index;
+    } else {
+      // Bottom nav: Home(0), Counter(1), Settings(2)
+      // Screens: Home(0), Counter(1), Settings(2)
+      screenIndex = index;
+    }
     setState(() {
-      _currentIndex = index;
+      _currentIndex = screenIndex;
     });
     // Close drawer if open
     _scaffoldKey.currentState?.closeDrawer();
@@ -265,16 +297,17 @@ class _MainScreenState extends State<MainScreen> {
         onLoginTap: () {
           // Should not happen since login is required
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const LoginScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         },
       ),
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigation(
-        currentIndex: _currentIndex.clamp(0, 2),
+        currentIndex: _isAuthenticated
+            ? (_currentIndex == 4 ? 3 : _currentIndex.clamp(0, 2))
+            : _currentIndex.clamp(0, 2),
         onTap: _onTabTapped,
+        isAuthenticated: _isAuthenticated,
       ),
     );
   }

@@ -49,6 +49,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPasswordContra
         'badges' => 'json',
         'favorites' => 'json',
         'completed_dates' => 'json',
+        'daily_counts' => 'json',
         'heart_score' => 'integer',
         'last_login_at' => 'datetime',
         'last_dhikr_completed_at' => 'datetime',

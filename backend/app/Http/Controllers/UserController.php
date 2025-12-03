@@ -183,13 +183,14 @@ class UserController extends Controller
         try {
             $user = Auth::user();
             $today = now()->format('Y-m-d');
-            
-            // Get today's dhikr count
-            $todayCount = in_array($today, $user->completed_dates ?? []) ? 1 : 0;
-            
-            // Get favorite dhikr count
+
+            // Get today's dhikr count from daily_counts
+            $dailyCounts = $user->daily_counts ?? [];
+            $todayCount = $dailyCounts[$today] ?? 0;
+
+            // Get favorite dhikr count (total days with completions)
             $favoriteCount = count($user->completed_dates ?? []);
-            
+
             return response()->json([
                 'today_count' => $todayCount,
                 'favorite_count' => $favoriteCount,

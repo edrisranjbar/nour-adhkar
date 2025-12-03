@@ -4,10 +4,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
-import '../services/auth_service.dart';
 import '../services/settings_service.dart';
-import '../utils/number_formatter.dart';
 import '../widgets/modern_toast.dart';
+import '../widgets/dhikr_view/dhikr_card.dart';
+import '../widgets/dhikr_view/counter_footer.dart';
+import '../widgets/dhikr_view/congratulations_modal.dart';
 
 class DhikrViewScreen extends StatefulWidget {
   final String collectionSlug;
@@ -29,8 +30,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
   Map<String, int> _counters = {}; // Counter for each dhikr by arabic_text
   int _currentIndex = 0;
   bool _isLoading = true;
-  bool _isAuthenticated = false;
-  Set<int> _favorites = {};
   String? _collectionName;
   String? _error;
   bool _bumping = false;
@@ -53,7 +52,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     );
     _loadSettings();
     _loadData();
-    _checkAuth();
   }
 
   @override
@@ -68,18 +66,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     _vibrationEnabled = await SettingsService.getVibrationEnabled();
   }
 
-  Future<void> _checkAuth() async {
-    final isAuth = await AuthService.isAuthenticated();
-    if (mounted) {
-      setState(() {
-        _isAuthenticated = isAuth;
-      });
-      if (isAuth) {
-        _loadFavorites();
-      }
-    }
-  }
-
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
@@ -90,20 +76,28 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
       
       if (collection != null && collection['adhkar'] != null) {
         final adhkarList = List<Map<String, dynamic>>.from(collection['adhkar']);
-        final adhkars = adhkarList.map((item) {
-          return {
-            'id': item['id'],
-            'title': item['title'] ?? '',
-            'arabic_text': item['arabic_text'] ?? '',
-            'translation': item['translation'] ?? '',
-            'transliteration': item['transliteration'] ?? '',
-            'count': item['count'] ?? 33,
-            'prefix': item['prefix'] ?? '',
-            'suffix': item['suffix'] ?? '',
-            'source': item['source'] ?? '',
-            'reference': item['reference'] ?? '',
-          };
-        }).toList();
+        final adhkars = adhkarList
+            .map((item) {
+              return {
+                'id': item['id'],
+                'title': item['title'] ?? '',
+                'arabic_text': item['arabic_text'] ?? '',
+                'translation': item['translation'] ?? '',
+                'transliteration': item['transliteration'] ?? '',
+                'count': item['count'] ?? 33,
+                'prefix': item['prefix'] ?? '',
+                'suffix': item['suffix'] ?? '',
+                'source': item['source'] ?? '',
+                'reference': item['reference'] ?? '',
+              };
+            })
+            .where((dhikr) {
+              // Filter out empty dhikrs - must have at least arabic_text or translation
+              final arabicText = (dhikr['arabic_text'] ?? '').toString().trim();
+              final translation = (dhikr['translation'] ?? '').toString().trim();
+              return arabicText.isNotEmpty || translation.isNotEmpty;
+            })
+            .toList();
 
         if (mounted) {
           setState(() {
@@ -112,8 +106,14 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
                              collection['name'] ?? 
                              'اذکار';
             _isLoading = false;
+            // Reset index if current index is out of bounds after filtering
+            if (_currentIndex >= adhkars.length && adhkars.isNotEmpty) {
+              _currentIndex = 0;
+            }
           });
           _initializeCounters();
+          // Initialize slide animation to show first dhikr immediately
+          _slideController?.value = 1.0;
         }
       } else {
         if (mounted) {
@@ -156,21 +156,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     if (_currentDhikr == null) return 0;
     final arabicText = _currentDhikr!['arabic_text'] ?? '';
     return _counters[arabicText] ?? 0;
-  }
-
-  bool get _isFavorite {
-    if (_currentDhikr == null) return false;
-    return _favorites.contains(_currentDhikr!['id']);
-  }
-
-  double get _totalProgress {
-    if (_adhkar.isEmpty) return 0;
-    return ((_currentIndex + 1) / _adhkar.length * 100).clamp(5.0, 100.0);
-  }
-
-  Future<void> _loadFavorites() async {
-    if (!_isAuthenticated) return;
-    // TODO: Implement favorites API call
   }
 
   void _incrementCounter() {
@@ -259,82 +244,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     }
   }
 
-  Future<void> _toggleFavorite() async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    if (!_isAuthenticated) {
-      ModernToast.show(
-        context,
-        message: 'لطفا ابتدا وارد شوید',
-        icon: FontAwesomeIcons.circleExclamation,
-        backgroundColor: Colors.orange,
-        iconColor: Colors.white,
-      );
-      return;
-    }
-    
-    if (_currentDhikr == null) return;
-    final dhikrId = _currentDhikr!['id'];
-    
-    // Optimistically update UI
-    final wasFavorite = _favorites.contains(dhikrId);
-    setState(() {
-      if (wasFavorite) {
-        _favorites.remove(dhikrId);
-      } else {
-        _favorites.add(dhikrId);
-      }
-    });
-    
-    // Call API
-    try {
-      final success = await ApiService.toggleFavorite(dhikrId);
-      if (success) {
-        ModernToast.show(
-          context,
-          message: wasFavorite 
-            ? 'ذکر از علاقه‌مندی‌ها حذف شد' 
-            : 'ذکر به علاقه‌مندی‌ها اضافه شد',
-          icon: FontAwesomeIcons.heart,
-          backgroundColor: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-          iconColor: Colors.white,
-        );
-      } else {
-        // Revert on failure
-        setState(() {
-          if (wasFavorite) {
-            _favorites.add(dhikrId);
-          } else {
-            _favorites.remove(dhikrId);
-          }
-        });
-        ModernToast.show(
-          context,
-          message: 'خطا در ثبت تغییرات',
-          icon: FontAwesomeIcons.circleExclamation,
-          backgroundColor: Colors.red,
-          iconColor: Colors.white,
-        );
-      }
-    } catch (e) {
-      // Revert on error
-      setState(() {
-        if (wasFavorite) {
-          _favorites.add(dhikrId);
-        } else {
-          _favorites.remove(dhikrId);
-        }
-      });
-      ModernToast.show(
-        context,
-        message: 'خطا در ثبت تغییرات',
-        icon: FontAwesomeIcons.circleExclamation,
-        backgroundColor: Colors.red,
-        iconColor: Colors.white,
-      );
-    }
-  }
-
   Future<void> _copyDhikr() async {
     if (_currentDhikr == null) return;
     
@@ -384,7 +293,7 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
         }
       },
       child: Container(
-        color: isDark ? AppTheme.darkBgPrimary : AppTheme.bgPrimary,
+        color: isDark ? AppTheme.darkBgPrimary : AppTheme.bgSecondary,
         child: SafeArea(
           child: Stack(
           children: [
@@ -392,9 +301,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
               children: [
                 // Header
                 _buildHeader(isDark),
-                
-                // Progress Bar (if multiple dhikrs)
-                if (_adhkar.length > 1) _buildProgressBar(isDark),
                 
                 // Main Content
                 Expanded(
@@ -464,26 +370,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     );
   }
 
-  Widget _buildProgressBar(bool isDark) {
-    return Container(
-      height: 4,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(2),
-        child: LinearProgressIndicator(
-          value: _totalProgress / 100,
-          backgroundColor: isDark
-              ? AppTheme.darkBgTertiary
-              : AppTheme.bgTertiary,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-          ),
-          minHeight: 4,
-        ),
-      ),
-    );
-  }
-
   Widget _buildErrorState(bool isDark) {
     return Center(
       child: Column(
@@ -539,20 +425,11 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
 
   Widget _buildDhikrContent(bool isDark) {
     if (_currentDhikr == null) return const SizedBox.shrink();
-    
-    final dhikr = _currentDhikr!;
-    final title = dhikr['title'] ?? '';
-    final prefix = dhikr['prefix'] ?? '';
-    final arabicText = dhikr['arabic_text'] ?? '';
-    final translation = dhikr['translation'] ?? '';
-    final targetCount = dhikr['count'] ?? 33;
-    final currentCount = _currentCounter;
-    final isCompleted = currentCount >= targetCount;
 
     return GestureDetector(
       onTap: _incrementCounter,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: SlideTransition(
           position: Tween<Offset>(
             begin: const Offset(0.1, 0),
@@ -564,261 +441,13 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
           child: FadeTransition(
             opacity: _slideController!,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
               children: [
-                // Navigation Dots (if multiple dhikrs)
-                if (_adhkar.length > 1) ...[
-                  _buildNavigationDots(isDark),
-                  const SizedBox(height: 20),
-                ],
-                
-                // Enhanced Dhikr Card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppTheme.darkBgSecondary : AppTheme.bgSecondary,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                        spreadRadius: 0,
-                      ),
-                      BoxShadow(
-                        color: (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                            .withOpacity(0.1),
-                        blurRadius: 30,
-                        offset: const Offset(0, 4),
-                        spreadRadius: -5,
-                      ),
-                    ],
-                    border: Border.all(
-                      color: isCompleted
-                          ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                              .withOpacity(0.3)
-                          : Colors.transparent,
-                      width: 2,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      // Title and Action Buttons
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (title.isNotEmpty)
-                            Expanded(
-                              child: Text(
-                                title,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark
-                                      ? AppTheme.darkBrandPrimary
-                                      : AppTheme.brandPrimary,
-                                  fontFamily: AppTheme.fontPrimary,
-                                ),
-                              ),
-                            )
-                          else
-                            const Spacer(),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: (_isFavorite ? Colors.red : (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary))
-                                      .withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: IconButton(
-                                  icon: Icon(
-                                    _isFavorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                                    color: _isFavorite ? Colors.red : (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary),
-                                    size: 20,
-                                  ),
-                                  onPressed: _toggleFavorite,
-                                  padding: const EdgeInsets.all(10),
-                                  constraints: const BoxConstraints(),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary)
-                                      .withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: IconButton(
-                                  icon: Icon(
-                                    FontAwesomeIcons.copy,
-                                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                                    size: 18,
-                                  ),
-                                  onPressed: _copyDhikr,
-                                  padding: const EdgeInsets.all(10),
-                                  constraints: const BoxConstraints(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Prefix
-                      if (prefix.isNotEmpty)
-                        Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary)
-                                  .withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              prefix,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: isDark
-                                    ? AppTheme.darkTextSecondary
-                                    : AppTheme.textSecondary,
-                                fontFamily: AppTheme.fontArabic,
-                                height: 2.0,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      
-                      if (prefix.isNotEmpty) const SizedBox(height: 20),
-                      
-                      // Arabic Text - Enhanced
-                      if (arabicText.isNotEmpty)
-                        Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                      .withOpacity(0.05),
-                                  Colors.transparent,
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              arabicText,
-                              style: TextStyle(
-                                fontSize: 28,
-                                height: 2.5,
-                                color: isDark
-                                    ? AppTheme.darkTextPrimary
-                                    : AppTheme.textPrimary,
-                                fontFamily: AppTheme.fontArabic,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Enhanced Separator
-                      Container(
-                        height: 1,
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.transparent,
-                              (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                  .withOpacity(0.3),
-                              (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                  .withOpacity(0.6),
-                              (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                  .withOpacity(0.3),
-                              Colors.transparent,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Translation - Enhanced
-                      if (translation.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          decoration: BoxDecoration(
-                            color: (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary)
-                                .withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Text(
-                            translation,
-                            style: TextStyle(
-                              fontSize: 18,
-                              height: 2.0,
-                              color: isDark
-                                  ? AppTheme.darkTextPrimary
-                                  : AppTheme.textPrimary,
-                              fontFamily: AppTheme.fontPrimary,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      
-                      // Completion Badge
-                      if (isCompleted) ...[
-                        const SizedBox(height: 20),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                .withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                FontAwesomeIcons.checkCircle,
-                                color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'تکمیل شد',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                                  fontFamily: AppTheme.fontPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                DhikrCard(
+                  dhikr: _currentDhikr!,
+                  isDark: isDark,
+                  currentCount: _currentCounter,
+                  onCopyTap: _copyDhikr,
                 ),
               ],
             ),
@@ -830,349 +459,28 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
 
   Widget _buildCounterFooter(bool isDark) {
     if (_currentDhikr == null) return const SizedBox.shrink();
-    
-    final targetCount = _currentDhikr!['count'] ?? 33;
-    final currentCount = _currentCounter;
-    final progress = targetCount > 0 ? (currentCount / targetCount).clamp(0.0, 1.0) : 0.0;
-    final isCompleted = currentCount >= targetCount;
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [
-                    const Color(0xFF1a1a1a),
-                    const Color(0xFF262626),
-                  ]
-                : [
-                    AppTheme.brandSecondary,
-                    AppTheme.brandSecondary.withOpacity(0.9),
-                  ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-          border: Border(
-            top: BorderSide(
-              color: Colors.white.withOpacity(0.1),
-              width: 1,
-            ),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Dhikr position (right side in RTL)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'ذکر ${NumberFormatter.formatNumber(_currentIndex + 1)} از ${NumberFormatter.formatNumber(_adhkar.length)}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontFamily: AppTheme.fontPrimary,
-                  ),
-                ),
-              ],
-            ),
-            
-            // Counter Button with Circular Progress (center)
-            GestureDetector(
-              onTap: _incrementCounter,
-              child: AnimatedBuilder(
-                animation: _bumpController!,
-                builder: (context, child) {
-                  final scale = _bumping ? 1.12 : 1.0;
-                  return Transform.scale(
-                    scale: scale,
-                    child: child,
-                  );
-                },
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Circular Progress Ring
-                    SizedBox(
-                      width: 80,
-                      height: 80,
-                      child: CircularProgressIndicator(
-                        value: progress,
-                        strokeWidth: 4,
-                        backgroundColor: Colors.white.withOpacity(0.2),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                        ),
-                        strokeCap: StrokeCap.round,
-                      ),
-                    ),
-                    // Counter Button
-                    Container(
-                      width: 70,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: isCompleted
-                              ? [
-                                  (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                      .withOpacity(0.3),
-                                  (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                      .withOpacity(0.2),
-                                ]
-                              : [
-                                  Colors.white,
-                                  Colors.white.withOpacity(0.95),
-                                ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isCompleted
-                              ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                  .withOpacity(0.5)
-                              : Colors.white.withOpacity(0.3),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                .withOpacity(0.3),
-                            blurRadius: 15,
-                            offset: const Offset(0, 4),
-                            spreadRadius: -2,
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          NumberFormatter.formatNumber(currentCount),
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            color: isCompleted
-                                ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                                : (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary),
-                            fontFamily: AppTheme.fontPrimary,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Progress details (left side in RTL)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'پیشرفت',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.white.withOpacity(0.7),
-                    fontFamily: AppTheme.fontPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${NumberFormatter.formatNumber(currentCount)}/${NumberFormatter.formatNumber(targetCount)}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    fontFamily: AppTheme.fontPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavigationDots(bool isDark) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(_adhkar.length, (index) {
-        final isActive = index == _currentIndex;
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _currentIndex = index;
-            });
-            _slideController?.forward(from: 0.0);
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: isActive ? 24 : 8,
-            height: 8,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              color: isActive
-                  ? (isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary)
-                  : (isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary)
-                      .withOpacity(0.5),
-            ),
-          ),
-        );
-      }),
+    return CounterFooter(
+      dhikr: _currentDhikr,
+      currentIndex: _currentIndex,
+      totalCount: _adhkar.length,
+      currentCount: _currentCounter,
+      isDark: isDark,
+      bumpController: _bumpController!,
+      bumping: _bumping,
+      onIncrement: _incrementCounter,
     );
   }
 
   Widget _buildCongratulationsModal(bool isDark) {
-    return GestureDetector(
-      onTap: () {
+    return CongratulationsModal(
+      isDark: isDark,
+      onClose: () {
         setState(() {
           _showCongratulations = false;
         });
+        Navigator.of(context).pop();
       },
-      child: Container(
-        color: Colors.black.withOpacity(0.7),
-        child: Center(
-          child: GestureDetector(
-            onTap: () {}, // Prevent tap from closing
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [
-                          AppTheme.darkBgSecondary,
-                          AppTheme.darkBgTertiary,
-                        ]
-                      : [
-                          Colors.white,
-                          AppTheme.bgSecondary,
-                        ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 30,
-                    offset: const Offset(0, 10),
-                    spreadRadius: 5,
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Celebration Icon
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppTheme.brandPrimary,
-                          AppTheme.brandSecondary,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.brandPrimary.withOpacity(0.4),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      FontAwesomeIcons.trophy,
-                      color: Colors.white,
-                      size: 50,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Title
-                  Text(
-                    'تبریک!',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                      fontFamily: AppTheme.fontPrimary,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Message
-                  Text(
-                    'شما تمام اذکار این مجموعه را با موفقیت به پایان رساندید',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      height: 1.8,
-                      color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
-                      fontFamily: AppTheme.fontPrimary,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Go Back Button
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _showCongratulations = false;
-                      });
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 8,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.arrow_back, size: 20),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'بازگشت',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: AppTheme.fontPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

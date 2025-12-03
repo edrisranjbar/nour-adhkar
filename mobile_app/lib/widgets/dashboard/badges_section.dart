@@ -1,47 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../theme/app_theme.dart';
-import '../../services/dashboard_service.dart';
-import 'achievement_badge.dart';
 
 class BadgesSection extends StatelessWidget {
-  final List<Map<String, dynamic>> badges;
-  final Map<String, dynamic>? userStats;
-  final int? streak;
   final bool isDark;
 
   const BadgesSection({
     super.key,
-    required this.badges,
-    required this.userStats,
-    required this.streak,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    // If no badges from API, show default achievement badges
-    final displayBadges = badges.isNotEmpty
-        ? badges
-        : DashboardService.getDefaultBadges(
-            userStats: userStats,
-            streak: streak,
-          );
-
     return Container(
-      margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkBgTertiary : AppTheme.bgSecondary,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      color: isDark ? AppTheme.darkBgPrimary : Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -53,7 +26,9 @@ class BadgesSection extends StatelessWidget {
                   Icon(
                     FontAwesomeIcons.trophy,
                     size: 20,
-                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                    color: isDark
+                        ? AppTheme.darkBrandPrimary.withOpacity(0.5)
+                        : AppTheme.brandPrimary.withOpacity(0.5),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -61,41 +36,99 @@ class BadgesSection extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                      color: isDark
+                          ? AppTheme.darkTextPrimary.withOpacity(0.5)
+                          : AppTheme.textPrimary.withOpacity(0.5),
                       fontFamily: AppTheme.fontPrimary,
                     ),
                   ),
                 ],
               ),
-              Text(
-                '${displayBadges.where((b) => b['unlocked'] == true).length}/${displayBadges.length}',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
-                  fontFamily: AppTheme.fontPrimary,
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.85,
+          // Coming Soon Overlay
+          Container(
+            height: 200, // Approximate height of the original grid
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppTheme.darkBgSecondary.withOpacity(0.3)
+                  : Colors.grey.shade100.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.grey.shade300.withOpacity(0.5),
+                width: 1,
+              ),
             ),
-            itemCount: displayBadges.length,
-            itemBuilder: (context, index) {
-              final badge = displayBadges[index];
-              return AchievementBadge(
-                badge: badge,
-                isDark: isDark,
-              );
-            },
+            child: Stack(
+              children: [
+                // Subtle background pattern
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.1,
+                    child: GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: 6,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withOpacity(0.05)
+                                : Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                // Coming Soon Content
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.tools,
+                        size: 32,
+                        color: isDark
+                            ? Colors.white.withOpacity(0.4)
+                            : Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'در حال توسعه',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? Colors.white.withOpacity(0.6)
+                              : Colors.grey.shade500,
+                          fontFamily: AppTheme.fontPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'به زودی قابل دسترسی خواهد بود',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark
+                              ? Colors.white.withOpacity(0.4)
+                              : Colors.grey.shade400,
+                          fontFamily: AppTheme.fontPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
