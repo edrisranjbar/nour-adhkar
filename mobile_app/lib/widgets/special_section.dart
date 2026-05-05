@@ -125,7 +125,7 @@ class _SpecialCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 180,
+        height: 120,
         decoration: BoxDecoration(
           gradient: gradient,
           borderRadius: BorderRadius.circular(16),
@@ -172,11 +172,11 @@ class _SpecialCard extends StatelessWidget {
                     size: 32,
                     color: textColor,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: textColor,
                       fontFamily: AppTheme.fontPrimary,

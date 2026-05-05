@@ -5,40 +5,26 @@ import 'stat_card.dart';
 
 class StatsSection extends StatelessWidget {
   final Map<String, dynamic>? userStats;
-  final int? heartScore;
   final int? streak;
   final bool isDark;
 
   const StatsSection({
     super.key,
     required this.userStats,
-    required this.heartScore,
     required this.streak,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final totalDhikrs = userStats?['total_dhikrs'] ?? 0;
-    final todayCount = userStats?['today_count'] ?? 0;
+    final totalDhikrs = userStats?['total_adhkar_completed'] ?? 0;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      color: isDark ? AppTheme.darkBgPrimary : Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'آمار شما',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: isDark
-                  ? AppTheme.darkBrandPrimary
-                  : AppTheme.brandPrimary,
-              fontFamily: AppTheme.fontPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -50,37 +36,13 @@ class StatsSection extends StatelessWidget {
                   isDark: isDark,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: StatCard(
-                  icon: FontAwesomeIcons.heart,
-                  label: 'امتیاز قلب',
-                  value: heartScore ?? 0,
-                  color: Colors.red,
-                  isDark: isDark,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
+              const SizedBox(width: 8),
               Expanded(
                 child: StatCard(
                   icon: FontAwesomeIcons.book,
                   label: 'کل اذکار',
                   value: totalDhikrs,
                   color: AppTheme.brandPrimary,
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: StatCard(
-                  icon: FontAwesomeIcons.calendarDay,
-                  label: 'امروز',
-                  value: todayCount,
-                  color: AppTheme.brandSecondary,
                   isDark: isDark,
                 ),
               ),
@@ -91,4 +53,3 @@ class StatsSection extends StatelessWidget {
     );
   }
 }
-

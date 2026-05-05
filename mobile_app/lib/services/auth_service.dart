@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config.dart';
@@ -45,68 +46,115 @@ class AuthService {
   }
 
   // Login
-  static Future<Map<String, dynamic>> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(
+    String email,
+    String password,
+  ) async {
+    debugPrint('[AuthService] Starting login request');
+    debugPrint('[AuthService] Email: $email');
+    debugPrint('[AuthService] API URL: ${AppConfig.baseApiUrl}/auth/login');
+
     try {
+      final requestBody = json.encode({'email': email, 'password': password});
+      debugPrint('[AuthService] Request body prepared (password hidden)');
+
       final response = await http.post(
         Uri.parse('${AppConfig.baseApiUrl}/auth/login'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'email': email,
-          'password': password,
-        }),
+        body: requestBody,
       );
+
+      debugPrint('[AuthService] Response received');
+      debugPrint('[AuthService] Status code: ${response.statusCode}');
+      debugPrint('[AuthService] Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         try {
           final data = json.decode(response.body);
-          
-          if (data['token'] != null) {
+          debugPrint('[AuthService] Response parsed successfully');
+          debugPrint('[AuthService] Success field: ${data['success']}');
+          debugPrint('[AuthService] Has token: ${data['token'] != null}');
+          debugPrint('[AuthService] Has user: ${data['user'] != null}');
+
+          // Check for success flag first
+          if (data['success'] == true && data['token'] != null) {
             final prefs = await SharedPreferences.getInstance();
-            
+
             // Store token
             await prefs.setString(_tokenKey, data['token']);
-            
+            debugPrint('[AuthService] Token stored in SharedPreferences');
+
             // Store user data
             if (data['user'] != null) {
               await prefs.setString(_userKey, json.encode(data['user']));
+              debugPrint('[AuthService] User data stored in SharedPreferences');
             }
-            
+
             // Set authenticated flag
             await prefs.setBool(_isAuthenticatedKey, true);
-            
+            debugPrint('[AuthService] Authentication flag set to true');
+            debugPrint('[AuthService] Login successful');
+
             return {
               'success': true,
               'token': data['token'],
               'user': data['user'],
             };
           } else {
+            debugPrint(
+              '[AuthService] Login failed: success=${data['success']}, hasToken=${data['token'] != null}',
+            );
+            debugPrint(
+              '[AuthService] Error message: ${data['message'] ?? 'خطای نامشخص در ورود'}',
+            );
             return {
               'success': false,
               'message': data['message'] ?? 'خطای نامشخص در ورود',
             };
           }
         } catch (e) {
+          debugPrint('[AuthService] JSON parsing error: $e');
+          debugPrint(
+            '[AuthService] Response body that failed to parse: ${response.body}',
+          );
           return {
             'success': false,
             'message': 'خطا در پردازش پاسخ سرور. لطفاً دوباره تلاش کنید.',
           };
         }
       } else if (response.statusCode == 401) {
-        return {
-          'success': false,
-          'message': 'ایمیل یا رمز عبور اشتباه است',
-        };
-      } else {
+        debugPrint('[AuthService] Unauthorized (401) - Invalid credentials');
         try {
           final data = json.decode(response.body);
+          debugPrint(
+            '[AuthService] Error message from server: ${data['message'] ?? 'N/A'}',
+          );
+          return {
+            'success': false,
+            'message': data['message'] ?? 'ایمیل یا رمز عبور اشتباه است',
+          };
+        } catch (e) {
+          debugPrint('[AuthService] Failed to parse 401 error response: $e');
+          return {'success': false, 'message': 'ایمیل یا رمز عبور اشتباه است'};
+        }
+      } else {
+        debugPrint(
+          '[AuthService] Unexpected status code: ${response.statusCode}',
+        );
+        try {
+          final data = json.decode(response.body);
+          debugPrint(
+            '[AuthService] Error message: ${data['message'] ?? 'N/A'}',
+          );
           return {
             'success': false,
             'message': data['message'] ?? 'خطا در ورود به سیستم',
           };
         } catch (e) {
+          debugPrint('[AuthService] Failed to parse error response: $e');
           return {
             'success': false,
             'message': 'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.',
@@ -114,27 +162,46 @@ class AuthService {
         }
       }
     } catch (e) {
-      if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+      debugPrint('[AuthService] Exception caught: $e');
+      debugPrint('[AuthService] Exception type: ${e.runtimeType}');
+      debugPrint('[AuthService] Exception toString: ${e.toString()}');
+
+      // Handle different exception types
+      final errorString = e.toString().toLowerCase();
+
+      if (errorString.contains('timeoutexception') ||
+          errorString.contains('timeout')) {
+        debugPrint('[AuthService] Timeout error detected');
         return {
           'success': false,
           'message': 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.',
         };
-      } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
+      } else if (errorString.contains('socketexception') ||
+          errorString.contains('network') ||
+          errorString.contains('failed to fetch') ||
+          errorString.contains('clientexception')) {
+        debugPrint('[AuthService] Network/CORS error detected');
         return {
           'success': false,
-          'message': 'اتصال اینترنت خود را بررسی کنید',
+          'message':
+              'اتصال اینترنت خود را بررسی کنید. اگر از مرورگر استفاده می‌کنید، ممکن است مشکل CORS باشد.',
         };
       } else {
+        debugPrint('[AuthService] Unknown error type: ${e.runtimeType}');
         return {
           'success': false,
-          'message': 'خطا در ورود به سیستم',
+          'message': 'خطا در ورود به سیستم: ${e.toString()}',
         };
       }
     }
   }
 
   // Register
-  static Future<Map<String, dynamic>> register(String name, String email, String password) async {
+  static Future<Map<String, dynamic>> register(
+    String name,
+    String email,
+    String password,
+  ) async {
     try {
       final response = await http.post(
         Uri.parse('${AppConfig.baseApiUrl}/auth/register'),
@@ -142,30 +209,26 @@ class AuthService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'name': name,
-          'email': email,
-          'password': password,
-        }),
+        body: json.encode({'name': name, 'email': email, 'password': password}),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         if (data['token'] != null) {
           final prefs = await SharedPreferences.getInstance();
-          
+
           // Store token
           await prefs.setString(_tokenKey, data['token']);
-          
+
           // Store user data
           if (data['user'] != null) {
             await prefs.setString(_userKey, json.encode(data['user']));
           }
-          
+
           // Set authenticated flag
           await prefs.setBool(_isAuthenticatedKey, true);
-          
+
           return {
             'success': true,
             'token': data['token'],
@@ -180,7 +243,7 @@ class AuthService {
       } else {
         final data = json.decode(response.body);
         String errorMessage = 'خطا در ثبت نام';
-        
+
         if (data['errors'] != null) {
           final errors = data['errors'] as Map<String, dynamic>;
           if (errors['email'] != null) {
@@ -193,28 +256,21 @@ class AuthService {
         } else if (data['message'] != null) {
           errorMessage = data['message'];
         }
-        
-        return {
-          'success': false,
-          'message': errorMessage,
-        };
+
+        return {'success': false, 'message': errorMessage};
       }
     } catch (e) {
-      if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('timeout')) {
         return {
           'success': false,
           'message': 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.',
         };
-      } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
-        return {
-          'success': false,
-          'message': 'اتصال اینترنت خود را بررسی کنید',
-        };
+      } else if (e.toString().contains('SocketException') ||
+          e.toString().contains('network')) {
+        return {'success': false, 'message': 'اتصال اینترنت خود را بررسی کنید'};
       } else {
-        return {
-          'success': false,
-          'message': 'خطا در ثبت نام',
-        };
+        return {'success': false, 'message': 'خطا در ثبت نام'};
       }
     }
   }
@@ -228,23 +284,23 @@ class AuthService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'email': email,
-        }),
+        body: json.encode({'email': email}),
       );
 
       final data = json.decode(response.body);
-      
+
       if (response.statusCode == 200) {
         return {
           'success': data['success'] ?? true,
-          'message': data['message'] ?? 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد',
+          'message':
+              data['message'] ?? 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد',
         };
       } else if (response.statusCode == 404) {
         // Account doesn't exist
         return {
           'success': false,
-          'message': data['message'] ?? 'کاربری با این ایمیل در سیستم ثبت نشده است',
+          'message':
+              data['message'] ?? 'کاربری با این ایمیل در سیستم ثبت نشده است',
         };
       } else {
         // Other errors (422, 500, etc.)
@@ -254,21 +310,17 @@ class AuthService {
         };
       }
     } catch (e) {
-      if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('timeout')) {
         return {
           'success': false,
           'message': 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.',
         };
-      } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
-        return {
-          'success': false,
-          'message': 'اتصال اینترنت خود را بررسی کنید',
-        };
+      } else if (e.toString().contains('SocketException') ||
+          e.toString().contains('network')) {
+        return {'success': false, 'message': 'اتصال اینترنت خود را بررسی کنید'};
       } else {
-        return {
-          'success': false,
-          'message': 'خطا در ارسال لینک بازیابی',
-        };
+        return {'success': false, 'message': 'خطا در ارسال لینک بازیابی'};
       }
     }
   }
@@ -282,27 +334,29 @@ class AuthService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'email': email,
-        }),
+        body: json.encode({'email': email}),
       );
 
       final data = json.decode(response.body);
-      
+
       if (response.statusCode == 200) {
         return {
           'success': data['success'] ?? true,
-          'message': data['message'] ?? 'لینک بازیابی رمز عبور مجدداً به ایمیل شما ارسال شد',
+          'message':
+              data['message'] ??
+              'لینک بازیابی رمز عبور مجدداً به ایمیل شما ارسال شد',
         };
       } else if (response.statusCode == 404) {
         return {
           'success': false,
-          'message': data['message'] ?? 'کاربری با این ایمیل در سیستم ثبت نشده است',
+          'message':
+              data['message'] ?? 'کاربری با این ایمیل در سیستم ثبت نشده است',
         };
       } else if (response.statusCode == 429) {
         return {
           'success': false,
-          'message': data['message'] ?? 'لطفاً قبل از درخواست مجدد ۲ دقیقه صبر کنید',
+          'message':
+              data['message'] ?? 'لطفاً قبل از درخواست مجدد ۲ دقیقه صبر کنید',
         };
       } else {
         return {
@@ -311,22 +365,44 @@ class AuthService {
         };
       }
     } catch (e) {
-      if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('timeout')) {
         return {
           'success': false,
           'message': 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.',
         };
-      } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
-        return {
-          'success': false,
-          'message': 'اتصال اینترنت خود را بررسی کنید',
-        };
+      } else if (e.toString().contains('SocketException') ||
+          e.toString().contains('network')) {
+        return {'success': false, 'message': 'اتصال اینترنت خود را بررسی کنید'};
       } else {
-        return {
-          'success': false,
-          'message': 'خطا در ارسال لینک بازیابی',
-        };
+        return {'success': false, 'message': 'خطا در ارسال لینک بازیابی'};
       }
+    }
+  }
+
+  // Refresh user data
+  static Future<void> refreshUserData() async {
+    try {
+      final token = await getToken();
+      if (token == null) return;
+
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseApiUrl}/user/profile'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && data['profile'] != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_userKey, json.encode(data['profile']));
+        }
+      }
+    } catch (e) {
+      debugPrint('Error refreshing user data: $e');
     }
   }
 
@@ -342,4 +418,3 @@ class AuthService {
     }
   }
 }
-

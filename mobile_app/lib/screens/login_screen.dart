@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'dart:ui';
+import 'package:get/get.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  final VoidCallback? onLoginSuccess;
-
-  const LoginScreen({
-    super.key,
-    this.onLoginSuccess,
-  });
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -26,10 +21,31 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    _checkIfAlreadyLoggedIn();
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkIfAlreadyLoggedIn() async {
+    debugPrint('[LoginScreen] Checking if user is already logged in...');
+    final isAuthenticated = await AuthService.isAuthenticated();
+
+    if (isAuthenticated && mounted) {
+      debugPrint(
+        '[LoginScreen] User is already authenticated, redirecting to dashboard',
+      );
+      // Navigate to main dashboard using GetX
+      Get.offAllNamed('/main');
+    } else {
+      debugPrint('[LoginScreen] User is not authenticated, showing login form');
+    }
   }
 
   void _togglePasswordVisibility() {
@@ -39,13 +55,20 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
+    debugPrint('[LoginScreen] Login button pressed');
+
     if (!_formKey.currentState!.validate()) {
+      debugPrint('[LoginScreen] Form validation failed');
       return;
     }
 
     if (_isLoading) {
+      debugPrint('[LoginScreen] Login already in progress, ignoring request');
       return;
     }
+
+    final email = _emailController.text.trim();
+    debugPrint('[LoginScreen] Starting login process for email: $email');
 
     setState(() {
       _isLoading = true;
@@ -53,35 +76,61 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final result = await AuthService.login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+      debugPrint('[LoginScreen] Calling AuthService.login()');
+      final result = await AuthService.login(email, _passwordController.text);
+
+      debugPrint('[LoginScreen] AuthService.login() completed');
+      debugPrint('[LoginScreen] Result: $result');
+      debugPrint('[LoginScreen] Success: ${result['success']}');
 
       if (mounted) {
         if (result['success'] == true) {
+          debugPrint(
+            '[LoginScreen] Login successful, calling onLoginSuccess callback',
+          );
           // Login successful
-          if (widget.onLoginSuccess != null) {
-            widget.onLoginSuccess!();
-          }
-        } else {
           setState(() {
-            _errorMessage = result['message'] ?? 'خطا در ورود به سیستم. لطفاً دوباره تلاش کنید.';
+            _isLoading = false;
+          });
+          debugPrint('[LoginScreen] Login successful, navigating to dashboard');
+          // Navigate to main dashboard using GetX
+          Get.offAllNamed('/main');
+        } else {
+          final errorMsg =
+              result['message'] ??
+              'خطا در ورود به سیستم. لطفاً دوباره تلاش کنید.';
+          debugPrint('[LoginScreen] Login failed: $errorMsg');
+          setState(() {
+            _errorMessage = errorMsg;
             _isLoading = false;
           });
         }
+      } else {
+        debugPrint('[LoginScreen] Widget not mounted, skipping state update');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('[LoginScreen] Exception caught in _handleLogin');
+      debugPrint('[LoginScreen] Exception: $e');
+      debugPrint('[LoginScreen] Stack trace: $stackTrace');
+
       if (mounted) {
         setState(() {
           // Show more specific error messages
           String errorMsg = 'خطا در ورود به سیستم';
-          if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+          if (e.toString().contains('TimeoutException') ||
+              e.toString().contains('timeout')) {
             errorMsg = 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.';
-          } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
+            debugPrint('[LoginScreen] Timeout error detected');
+          } else if (e.toString().contains('SocketException') ||
+              e.toString().contains('network')) {
             errorMsg = 'اتصال اینترنت خود را بررسی کنید';
-          } else if (e.toString().contains('FormatException') || e.toString().contains('JSON')) {
+            debugPrint('[LoginScreen] Network error detected');
+          } else if (e.toString().contains('FormatException') ||
+              e.toString().contains('JSON')) {
             errorMsg = 'خطا در پردازش پاسخ سرور. لطفاً دوباره تلاش کنید.';
+            debugPrint('[LoginScreen] JSON parsing error detected');
+          } else {
+            debugPrint('[LoginScreen] Unknown error type');
           }
           _errorMessage = errorMsg;
           _isLoading = false;
@@ -164,19 +213,19 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: InputDecoration(
                                 hintText: 'لطفاً ایمیل خود را وارد کنید',
                                 hintStyle: TextStyle(
-                                  color: isDark 
+                                  color: isDark
                                       ? Colors.white.withOpacity(0.4)
                                       : Colors.black38,
                                   fontFamily: AppTheme.fontPrimary,
                                 ),
                                 filled: true,
-                                fillColor: isDark 
+                                fillColor: isDark
                                     ? Colors.white.withOpacity(0.05)
                                     : Colors.white.withOpacity(0.7),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                    color: isDark 
+                                    color: isDark
                                         ? Colors.white.withOpacity(0.2)
                                         : Colors.black.withOpacity(0.1),
                                     width: 1.5,
@@ -185,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                    color: isDark 
+                                    color: isDark
                                         ? Colors.white.withOpacity(0.2)
                                         : Colors.black.withOpacity(0.1),
                                     width: 1.5,
@@ -207,7 +256,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (value == null || value.isEmpty) {
                                   return 'لطفاً ایمیل خود را وارد کنید';
                                 }
-                                if (!value.contains('@') || !value.contains('.')) {
+                                if (!value.contains('@') ||
+                                    !value.contains('.')) {
                                   return 'لطفاً یک ایمیل معتبر وارد کنید';
                                 }
                                 return null;
@@ -241,19 +291,19 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: InputDecoration(
                                 hintText: 'لطفاً رمز عبور خود را وارد کنید',
                                 hintStyle: TextStyle(
-                                  color: isDark 
+                                  color: isDark
                                       ? Colors.white.withOpacity(0.4)
                                       : Colors.black38,
                                   fontFamily: AppTheme.fontPrimary,
                                 ),
                                 filled: true,
-                                fillColor: isDark 
+                                fillColor: isDark
                                     ? Colors.white.withOpacity(0.05)
                                     : Colors.white.withOpacity(0.7),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                    color: isDark 
+                                    color: isDark
                                         ? Colors.white.withOpacity(0.2)
                                         : Colors.black.withOpacity(0.1),
                                     width: 1.5,
@@ -262,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                    color: isDark 
+                                    color: isDark
                                         ? Colors.white.withOpacity(0.2)
                                         : Colors.black.withOpacity(0.1),
                                     width: 1.5,
@@ -284,7 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     _passwordVisible
                                         ? FontAwesomeIcons.eyeSlash
                                         : FontAwesomeIcons.eye,
-                                    color: isDark 
+                                    color: isDark
                                         ? Colors.white.withOpacity(0.6)
                                         : Colors.black54,
                                     size: 20,
@@ -308,7 +358,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             // Error Message
                             if (_errorMessage != null)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
                                 margin: const EdgeInsets.only(bottom: 20),
                                 decoration: BoxDecoration(
                                   color: Colors.red.withOpacity(0.15),
@@ -351,7 +404,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppTheme.brandPrimary.withOpacity(0.3),
+                                    color: AppTheme.brandPrimary.withOpacity(
+                                      0.3,
+                                    ),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -374,9 +429,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                         width: 22,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            Colors.white,
-                                          ),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
                                         ),
                                       )
                                     : Text(
@@ -397,22 +453,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Additional Links
                       TextButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => RegisterScreen(
-                                onRegisterSuccess: widget.onLoginSuccess,
-                              ),
-                            ),
-                          );
+                          Get.to(() => const RegisterScreen());
                         },
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                         child: Text(
                           'حساب کاربری ندارید؟ ثبت نام کنید',
                           textDirection: TextDirection.rtl,
                           style: TextStyle(
-                            color: isDark 
+                            color: isDark
                                 ? Colors.white.withOpacity(0.9)
                                 : Colors.black87,
                             fontSize: 15,
@@ -423,11 +476,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -481,5 +534,3 @@ class GeometricPatternPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
-

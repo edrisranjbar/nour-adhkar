@@ -28,17 +28,17 @@ class _DailyVerseState extends State<DailyVerse> {
       {
         'arabic': 'وَمَا خَلَقْتُ الْجِنَّ وَالْإِنسَ إِلَّا لِيَعْبُدُونِ',
         'translation': 'و من جن و انس را جز برای عبادت نیافریدم',
-        'reference': 'ذاریات: 56',
+        'reference': 'ذاریات: آیه ۵۶',
       },
       {
         'arabic': 'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ',
         'translation': 'پروردگارا، به ما در دنیا نیکی و در آخرت نیکی عطا کن و ما را از عذاب آتش نگاه دار',
-        'reference': 'بقره: 201',
+        'reference': 'بقره: آیه ۲۰۱',
       },
       {
         'arabic': 'وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ',
         'translation': 'و توفیق من جز به خدا نیست',
-        'reference': 'هود: 88',
+        'reference': 'هود: آیه ۸۸',
       },
     ];
 
@@ -54,18 +54,32 @@ class _DailyVerseState extends State<DailyVerse> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Gradient colors based on theme
+    final gradientColors = isDark
+        ? [AppTheme.darkBgSecondary, AppTheme.darkBgSecondary] // Solid color for dark theme
+        : [AppTheme.brandSecondary, AppTheme.brandPrimary];
+    
+    // Text colors based on theme
+    final textColor = isDark ? AppTheme.darkTextPrimary : Colors.white;
+    final borderColor = isDark 
+        ? AppTheme.darkTextPrimary.withOpacity(0.2)
+        : Colors.white.withOpacity(0.2);
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppTheme.brandSecondary, AppTheme.brandPrimary],
+          colors: gradientColors,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.brandSecondary.withOpacity(0.2),
+            color: (isDark ? AppTheme.brandSecondary : AppTheme.brandSecondary)
+                .withOpacity(0.2),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -80,26 +94,30 @@ class _DailyVerseState extends State<DailyVerse> {
             Text(
               _dailyVerse['arabic'] ?? '',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 22,
+              style: TextStyle(
+                fontSize: 16,
                 height: 2.0,
-                color: Colors.white,
+                color: textColor,
                 fontFamily: AppTheme.fontArabic,
               ),
               textDirection: TextDirection.rtl,
+              overflow: TextOverflow.visible,
+              softWrap: true,
             ),
             const SizedBox(height: 16),
             // Translation
             Text(
               _dailyVerse['translation'] ?? '',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: 14,
                 height: 1.8,
-                color: Colors.white,
+                color: textColor,
                 fontFamily: AppTheme.fontPrimary,
               ),
               textDirection: TextDirection.rtl,
+              overflow: TextOverflow.visible,
+              softWrap: true,
             ),
             const SizedBox(height: 16),
             // Reference
@@ -108,22 +126,24 @@ class _DailyVerseState extends State<DailyVerse> {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: Colors.white.withOpacity(0.2),
+                    color: borderColor,
                     width: 1,
                   ),
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
                     _dailyVerse['reference'] ?? '',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withOpacity(0.9),
+                      color: textColor.withOpacity(0.9),
                       fontFamily: AppTheme.fontPrimary,
                     ),
                     textDirection: TextDirection.ltr,
+                    overflow: TextOverflow.visible,
+                    softWrap: true,
                   ),
                 ],
               ),

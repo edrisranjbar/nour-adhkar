@@ -3,18 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserDhikr;
-use App\Services\BadgeService;
 use Illuminate\Http\Request;
 
 class DhikrController extends Controller
 {
-    protected $badgeService;
-
-    public function __construct(BadgeService $badgeService)
-    {
-        $this->badgeService = $badgeService;
-    }
-
     public function index(Request $request)
     {
         $query = UserDhikr::query();
@@ -38,35 +30,50 @@ class DhikrController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        
-        // Update user statistics
+
+        $request->validate([
+            'count' => 'nullable|integer|min:1|max:10000'
+        ]);
+
         $user->total_dhikrs++;
-        
-        // Add 10 points to the user's score
-        $user->score += 10;
-        
-        // Track completion date
+
         $today = now()->format('Y-m-d');
+        $dailyCounts = $user->daily_counts ?? [];
+        $todayCount = ($dailyCounts[$today] ?? 0) + 1;
+        $dailyCounts[$today] = $todayCount;
+        $user->daily_counts = $dailyCounts;
+
         $completedDates = $user->completed_dates ?? [];
         if (!in_array($today, $completedDates)) {
             $completedDates[] = $today;
             $user->completed_dates = $completedDates;
         }
-        
-        // Update last_dhikr_completed_at for consistency
+
         $user->last_dhikr_completed_at = now();
-        
+
+        $collectionCompleted = $this->isDailyCollectionCompleted($todayCount) &&
+                              !$this->isDailyCollectionCompleted($todayCount - 1);
+
+        \Log::info("Dhikr completion - User: {$user->id}, TodayCount: $todayCount, CollectionCompleted: $collectionCompleted");
+
         $user->save();
-        
-        $this->badgeService->updateStreak($user);
-        
-        // Check and award badges
-        $newBadgeAwarded = $this->badgeService->checkAndAwardBadges($user);
-        
+
         return response()->json([
             'success' => true,
             'user' => $user->fresh(),
-            'new_badge_awarded' => $newBadgeAwarded
+            'collection_completed' => $collectionCompleted,
+            'today_count' => $todayCount,
         ]);
     }
-} 
+
+    private function isDailyCollectionCompleted($todayCount)
+    {
+        try {
+            $dailyCollectionCount = 4;
+
+            return $todayCount >= $dailyCollectionCount;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+}

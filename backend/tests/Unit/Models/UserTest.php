@@ -22,7 +22,6 @@ class UserTest extends TestCase
             'role' => 'user',
             'active' => true,
             'avatar' => 'avatar.jpg',
-            'score' => 100,
             'completed_dates' => [
                 now()->subDays(4)->format('Y-m-d'),
                 now()->subDays(3)->format('Y-m-d'),
@@ -30,7 +29,6 @@ class UserTest extends TestCase
                 now()->subDays(1)->format('Y-m-d'),
                 now()->format('Y-m-d')
             ],
-            'badges' => ['early_bird', 'consistent'],
             'last_login_at' => now(),
             'last_dhikr_completed_at' => now(),
             'favorites' => ['post_1', 'post_2']
@@ -41,9 +39,7 @@ class UserTest extends TestCase
         $this->assertEquals('user', $user->role);
         $this->assertTrue($user->active);
         $this->assertEquals('avatar.jpg', $user->avatar);
-        $this->assertEquals(100, $user->score);
         $this->assertEquals(5, $user->streak);
-        $this->assertEquals(['early_bird', 'consistent'], $user->badges);
         $this->assertNotNull($user->last_login_at);
         $this->assertNotNull($user->last_dhikr_completed_at);
         $this->assertEquals(['post_1', 'post_2'], $user->favorites);
@@ -82,9 +78,7 @@ class UserTest extends TestCase
 
         $this->assertEquals('user', $user->role);
         $this->assertTrue($user->active);
-        $this->assertEquals(0, $user->score);
         $this->assertEquals(0, $user->streak);
-        $this->assertEquals([], $user->badges);
         $this->assertEquals([], $user->favorites);
         $this->assertEquals([], $user->completed_dates);
     }
@@ -131,11 +125,9 @@ class UserTest extends TestCase
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'active' => 'boolean',
-            'score' => 'integer',
-            'badges' => 'json',
             'favorites' => 'json',
             'completed_dates' => 'json',
-            'heart_score' => 'integer',
+            'daily_counts' => 'json',
             'last_login_at' => 'datetime',
             'last_dhikr_completed_at' => 'datetime',
             'total_dhikrs' => 'integer'
@@ -153,10 +145,7 @@ class UserTest extends TestCase
             'role',
             'active',
             'avatar',
-            'score',
             'streak',
-            'badges',
-            'heart_score',
             'last_login_at',
             'last_dhikr_completed_at',
             'favorites',
@@ -172,46 +161,16 @@ class UserTest extends TestCase
         $this->assertEquals([], $user->getJWTCustomClaims());
     }
 
-    public function test_user_has_new_badge_attribute()
-    {
-        $user = User::factory()->create([
-            'badges' => ['early_bird'],
-            'last_login_at' => now()->subDay()
-        ]);
-        
-        $this->assertFalse($user->has_new_badge);
-        
-        $user->badges = [
-            'early_bird' => true,
-            'new_badge_date' => now()->format('Y-m-d H:i:s')
-        ];
-        $user->save();
-        
-        $this->assertTrue($user->has_new_badge);
-        
-        // Test with old badge date
-        $user->badges = [
-            'early_bird' => true,
-            'new_badge_date' => now()->subDays(2)->format('Y-m-d H:i:s')
-        ];
-        $user->save();
-        
-        $this->assertFalse($user->has_new_badge);
-    }
-
     public function test_streak_calculation()
     {
         $user = User::factory()->create();
         
-        // No completed dates
         $this->assertEquals(0, $user->streak);
         
-        // One completed date
         $user->completed_dates = [now()->format('Y-m-d')];
         $user->save();
         $this->assertEquals(1, $user->streak);
         
-        // Two consecutive days
         $user->completed_dates = [
             now()->subDay()->format('Y-m-d'),
             now()->format('Y-m-d')
@@ -219,7 +178,6 @@ class UserTest extends TestCase
         $user->save();
         $this->assertEquals(2, $user->streak);
         
-        // Three consecutive days
         $user->completed_dates = [
             now()->subDays(2)->format('Y-m-d'),
             now()->subDay()->format('Y-m-d'),
@@ -228,7 +186,6 @@ class UserTest extends TestCase
         $user->save();
         $this->assertEquals(3, $user->streak);
         
-        // Break in streak
         $user->completed_dates = [
             now()->subDays(3)->format('Y-m-d'),
             now()->format('Y-m-d')
@@ -236,4 +193,4 @@ class UserTest extends TestCase
         $user->save();
         $this->assertEquals(1, $user->streak);
     }
-} 
+}

@@ -8,7 +8,6 @@ class AppDrawer extends StatelessWidget {
   final bool isAuthenticated;
   final String? userName;
   final String? profilePhotoUrl;
-  final int? heartScore;
   final int? streak;
   final int currentIndex;
   final Function(int) onItemTap;
@@ -19,7 +18,6 @@ class AppDrawer extends StatelessWidget {
     this.isAuthenticated = false,
     this.userName,
     this.profilePhotoUrl,
-    this.heartScore,
     this.streak,
     required this.currentIndex,
     required this.onItemTap,
@@ -35,7 +33,6 @@ class AppDrawer extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            // Drawer Header
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -52,7 +49,6 @@ class AppDrawer extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Profile Photo
                   CircleAvatar(
                     radius: 40,
                     backgroundColor: Colors.white,
@@ -68,7 +64,6 @@ class AppDrawer extends StatelessWidget {
                         : null,
                   ),
                   const SizedBox(height: 16),
-                  // User Name
                   Text(
                     isAuthenticated ? (userName ?? 'کاربر') : 'اذکار نور',
                     textDirection: TextDirection.rtl,
@@ -80,45 +75,24 @@ class AppDrawer extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // Heart Score and Streak
-                  if (isAuthenticated && (heartScore != null || streak != null))
+                  if (isAuthenticated && streak != null)
                     Row(
                       children: [
-                        if (heartScore != null) ...[
-                          Icon(
-                            FontAwesomeIcons.heart,
+                        Icon(
+                          FontAwesomeIcons.fire,
+                          color: Colors.white.withOpacity(0.9),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          NumberFormatter.formatNumber(streak ?? 0),
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            fontSize: 14,
                             color: Colors.white.withOpacity(0.9),
-                            size: 16,
+                            fontFamily: AppTheme.fontPrimary,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            NumberFormatter.formatNumber(heartScore ?? 0),
-                            textDirection: TextDirection.rtl,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(0.9),
-                              fontFamily: AppTheme.fontPrimary,
-                            ),
-                          ),
-                          if (streak != null) const SizedBox(width: 16),
-                        ],
-                        if (streak != null) ...[
-                          Icon(
-                            FontAwesomeIcons.fire,
-                            color: Colors.white.withOpacity(0.9),
-                            size: 16,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            NumberFormatter.formatNumber(streak ?? 0),
-                            textDirection: TextDirection.rtl,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(0.9),
-                              fontFamily: AppTheme.fontPrimary,
-                            ),
-                          ),
-                        ],
+                        ),
                       ],
                     )
                   else if (!isAuthenticated)
@@ -135,7 +109,6 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
 
-            // Navigation Items
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
@@ -174,26 +147,14 @@ class AppDrawer extends StatelessWidget {
                       },
                       isDark: isDark,
                     ),
-                  if (isAuthenticated)
-                    _DrawerItem(
-                      icon: FontAwesomeIcons.heart,
-                      title: 'علاقه‌مندی‌ها',
-                      index: 3,
-                      currentIndex: currentIndex,
-                      onTap: () {
-                        Navigator.pop(context);
-                        onItemTap(3);
-                      },
-                      isDark: isDark,
-                    ),
                   _DrawerItem(
                     icon: FontAwesomeIcons.gear,
                     title: 'تنظیمات',
-                    index: isAuthenticated ? 4 : 2,
+                    index: isAuthenticated ? 3 : 2,
                     currentIndex: currentIndex,
                     onTap: () {
                       Navigator.pop(context);
-                      onItemTap(isAuthenticated ? 4 : 2);
+                      onItemTap(isAuthenticated ? 3 : 2);
                     },
                     isDark: isDark,
                   ),
@@ -201,14 +162,12 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
 
-            // Divider
             Divider(
               height: 1,
               thickness: 1,
               color: isDark ? Colors.grey[800] : Colors.grey[200],
             ),
 
-            // Login Button (only shown when not authenticated)
             if (!isAuthenticated && onLoginTap != null)
               _DrawerItem(
                 icon: FontAwesomeIcons.signInAlt,
@@ -222,7 +181,6 @@ class AppDrawer extends StatelessWidget {
                 isDark: isDark,
               ),
 
-            // Version Number (bottom center)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Text(
@@ -309,4 +267,3 @@ class _DrawerItem extends StatelessWidget {
     );
   }
 }
-

@@ -5,11 +5,13 @@ import '../theme/app_theme.dart';
 class BottomNavigation extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final bool isAuthenticated;
 
   const BottomNavigation({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.isAuthenticated = false,
   });
 
   @override
@@ -33,23 +35,46 @@ class BottomNavigation extends StatelessWidget {
         fontFamily: AppTheme.fontPrimary,
         fontWeight: FontWeight.w300,
       ),
-      items: const [
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.house, size: 20),
-          activeIcon: FaIcon(FontAwesomeIcons.house, size: 24),
-          label: 'خانه',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.handsPraying, size: 20),
-          activeIcon: FaIcon(FontAwesomeIcons.handsPraying, size: 24),
-          label: 'ذکرشمار',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.user, size: 20),
-          activeIcon: FaIcon(FontAwesomeIcons.user, size: 24),
-          label: 'داشبورد',
-        ),
-      ],
+      items: isAuthenticated
+          ? const [
+              BottomNavigationBarItem(
+                icon: FaIcon(FontAwesomeIcons.house, size: 20),
+                activeIcon: FaIcon(FontAwesomeIcons.house, size: 24),
+                label: 'خانه',
+              ),
+              BottomNavigationBarItem(
+                icon: FaIcon(FontAwesomeIcons.handsPraying, size: 20),
+                activeIcon: FaIcon(FontAwesomeIcons.handsPraying, size: 24),
+                label: 'ذکرشمار',
+              ),
+              BottomNavigationBarItem(
+                icon: FaIcon(FontAwesomeIcons.user, size: 20),
+                activeIcon: FaIcon(FontAwesomeIcons.user, size: 24),
+                label: 'داشبورد',
+              ),
+              BottomNavigationBarItem(
+                icon: FaIcon(FontAwesomeIcons.gear, size: 20),
+                activeIcon: FaIcon(FontAwesomeIcons.gear, size: 24),
+                label: 'تنظیمات',
+              ),
+            ]
+          : const [
+              BottomNavigationBarItem(
+                icon: FaIcon(FontAwesomeIcons.house, size: 20),
+                activeIcon: FaIcon(FontAwesomeIcons.house, size: 24),
+                label: 'خانه',
+              ),
+              BottomNavigationBarItem(
+                icon: FaIcon(FontAwesomeIcons.handsPraying, size: 20),
+                activeIcon: FaIcon(FontAwesomeIcons.handsPraying, size: 24),
+                label: 'ذکرشمار',
+              ),
+              BottomNavigationBarItem(
+                icon: FaIcon(FontAwesomeIcons.gear, size: 20),
+                activeIcon: FaIcon(FontAwesomeIcons.gear, size: 24),
+                label: 'تنظیمات',
+              ),
+            ],
     );
   }
 }

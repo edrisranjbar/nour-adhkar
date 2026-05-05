@@ -3,7 +3,7 @@
     <!-- Modern Header with Glass Effect -->
     <div class="relative overflow-hidden">
       <!-- Background Pattern -->
-      <div class="absolute inset-0 bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 dark:from-primary-800 dark:via-primary-900 dark:to-slate-900">
+      <div class="absolute inset-0 bg-black/50 ">
         <div class="absolute inset-0 opacity-10">
           <div class="absolute top-0 left-0 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-xl opacity-70 dark:opacity-30 animate-blob"></div>
           <div class="absolute top-0 right-0 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 dark:opacity-30 animate-blob animation-delay-2000"></div>
@@ -17,11 +17,8 @@
            <!-- Welcome Section -->
            <div class="flex-1 text-center lg:text-right">
              <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">
-               سلام {{ user?.name || 'کاربر' }} 👋
+               سلام {{ user?.name || 'کاربر' }}
              </h1>
-             <p class="text-primary-100 text-lg">
-              فراموش نکنید که ذکر الله آرامش قلب ها است
-            </p>
            </div>
            
            <!-- User Actions -->
@@ -34,8 +31,8 @@
               </div>
               <div class="w-px h-8 bg-white/20"></div>
               <div class="text-center">
-                <div class="text-2xl font-bold text-white">{{ user?.score || 0 }}</div>
-                <div class="text-xs text-primary-100">امتیاز کل</div>
+                <div class="text-2xl font-bold text-white">{{ totalDhikrs }}</div>
+                <div class="text-xs text-primary-100">ذکر انجام‌شده</div>
               </div>
             </div>
             
@@ -80,72 +77,8 @@
             </div>
             <StreakCalendar />
           </div>
-
-          <!-- Recent Achievements -->
-          <div class="bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 dark:border-white/10 p-6 lg:p-8">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
-                  <font-awesome-icon icon="fa-solid fa-award" class="text-white text-lg" />
-                </div>
-                دستاوردهای اخیر
-              </h2>
-              <div class="text-sm text-gray-500 dark:text-gray-300">
-                {{ earnedBadgesCount }} از {{ totalBadgesCount }} نشان
-              </div>
-            </div>
-            <BadgesList />
-          </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-8">
-          <!-- Quick Actions -->
-          <div class="bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 dark:border-white/10 p-6">
-            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <font-awesome-icon icon="fa-solid fa-bolt" class="text-primary-600" />
-              اقدامات سریع
-            </h3>
-            <div class="space-y-3">
-              <button 
-                @click="goToCounter" 
-                class="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl p-4 text-right font-medium transition-all duration-300 hover:scale-105 flex items-center justify-between"
-              >
-                <font-awesome-icon icon="fa-solid fa-pray" class="text-lg" />
-                تسبیح
-              </button>
-              <button 
-                @click="goToHome" 
-                class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl p-4 text-right font-medium transition-all duration-300 hover:scale-105 flex items-center justify-between"
-              >
-                <font-awesome-icon icon="fa-solid fa-book-open" class="text-lg" />
-                اذکار
-              </button>
-            </div>
-          </div>
-
-          <!-- League Progress -->
-          <div class="bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 dark:border-white/10 p-6">
-            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <font-awesome-icon icon="fa-solid fa-trophy" class="text-yellow-600" />
-              پیشرفت لیگ
-            </h3>
-            <LeagueProgress />
-          </div>
-
-          <!-- Motivation Quote -->
-          <div class="bg-gradient-to-br from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 rounded-3xl p-6 text-white">
-            <div class="text-center">
-              <font-awesome-icon icon="fa-solid fa-quote-right" class="text-3xl text-white/30 mb-4" />
-              <p class="text-lg font-medium mb-3">
-                "ذکر خداوند آرامش قلب است"
-              </p>
-              <p class="text-sm text-primary-100">
-                قرآن کریم - سوره رعد
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -162,8 +95,6 @@
 <script>
 import UserStats from '@/components/dashboard/UserStats.vue'
 import StreakCalendar from '@/components/dashboard/StreakCalendar.vue'
-import BadgesList from '@/components/dashboard/BadgesList.vue'
-import LeagueProgress from '@/components/dashboard/LeagueProgress.vue'
 import ProfileSettingsModal from '@/components/dashboard/ProfileSettingsModal.vue'
 import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
@@ -175,27 +106,22 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { 
   faUserPen, 
   faCalendarDay, 
-  faAward,
   faUser,
   faBolt,
   faPray,
   faBookOpen,
   faChartLine,
-  faTrophy,
   faQuoteRight
 } from '@fortawesome/free-solid-svg-icons'
 
-// Add icons to the library
 library.add(
   faUserPen, 
   faCalendarDay, 
-  faAward, 
   faUser, 
   faBolt, 
   faPray, 
   faBookOpen, 
   faChartLine, 
-  faTrophy, 
   faQuoteRight
 )
 
@@ -204,8 +130,6 @@ export default {
   components: {
     UserStats,
     StreakCalendar,
-    BadgesList,
-    LeagueProgress,
     ProfileSettingsModal,
     FontAwesomeIcon
   },
@@ -216,35 +140,21 @@ export default {
     const loading = ref(true)
     const user = computed(() => store.state.user)
     const showProfileSettings = ref(false)
-    const earnedBadgesCount = ref(0)
-    const totalBadgesCount = ref(0)
+
+    const totalDhikrs = computed(() =>
+      user.value?.total_adhkar_completed ?? user.value?.total_dhikrs ?? 0
+    )
 
     const fetchUserData = async () => {
       try {
         loading.value = true
-        const response = await store.dispatch('fetchUserStats')
-        console.log('User stats response:', response)
+        await store.dispatch('fetchUserStats')
         await store.dispatch('fetchCompletedDays')
-        await fetchBadgeStats()
       } catch (error) {
         console.error('Error fetching user data:', error)
         toast.error('خطا در دریافت اطلاعات کاربر')
       } finally {
         loading.value = false
-      }
-    }
-
-    const fetchBadgeStats = async () => {
-      try {
-        const [badgesResponse, userBadgesResponse] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/badges`),
-          axios.get(`${import.meta.env.VITE_API_URL}/user/badges`)
-        ])
-        
-        totalBadgesCount.value = badgesResponse.data.data?.length || 0
-        earnedBadgesCount.value = userBadgesResponse.data.data?.length || 0
-      } catch (error) {
-        console.error('Error fetching badge stats:', error)
       }
     }
 
@@ -311,10 +221,9 @@ export default {
 
     return {
       user,
+      totalDhikrs,
       loading,
       showProfileSettings,
-      earnedBadgesCount,
-      totalBadgesCount,
       handlePhotoUpload,
       handlePhotoError,
       handleNameUpdated,
