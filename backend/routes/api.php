@@ -12,8 +12,6 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Middleware\AdminMiddleware;
-use App\Http\Controllers\BadgeController;
-use App\Http\Controllers\Api\LeagueController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\AnalyticsController;
 
@@ -61,7 +59,6 @@ Route::middleware('auth:api')->group(function () {
         Route::post('avatar', [UserController::class, 'updateAvatar']);
         Route::patch('name', [UserController::class, 'updateName']);
         Route::patch('password', [UserController::class, 'updatePassword']);
-        Route::patch('heart', [UserController::class, 'updateHeartScore']);
         Route::get('stats', [UserController::class, 'getUserStats']);
         Route::get('dashboard', [UserController::class, 'getDashboard']);
         Route::get('completed-days', [UserController::class, 'getCompletedDays']);
@@ -78,16 +75,6 @@ Route::middleware('auth:api')->group(function () {
 
     // Authenticated donation routes
     Route::get('donations/user', [DonationController::class, 'getUserDonations']);
-
-    // Badge routes
-    Route::get('/badges', [BadgeController::class, 'index']);
-    Route::get('/user/badges', [BadgeController::class, 'userBadges']);
-    Route::post('/user/check-badges', [BadgeController::class, 'checkAndAwardBadges']);
-    Route::post('/user/badges/{badge}', [BadgeController::class, 'awardBadge']);
-    Route::delete('/user/badges/{badge}', [BadgeController::class, 'removeBadge']);
-
-    // League progress route
-    Route::get('/user/league-progress', [LeagueController::class, 'getProgress']);
 });
 
 // Admin routes

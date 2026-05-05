@@ -17,7 +17,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   List<Map<String, dynamic>> _favorites = [];
   bool _isLoading = true;
   bool _isAuthenticated = false;
-  int? _heartScore;
   int? _streak;
 
   @override
@@ -28,19 +27,18 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     final isAuth = await AuthService.isAuthenticated();
     setState(() => _isAuthenticated = isAuth);
 
     if (isAuth) {
       final user = await AuthService.getUser();
       setState(() {
-        _heartScore = user?['heart_score'] ?? 0;
         _streak = user?['streak'] ?? 0;
       });
       await _loadFavorites();
     }
-    
+
     setState(() => _isLoading = false);
   }
 
@@ -53,7 +51,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         });
       }
     } catch (e) {
-      print('Error loading favorites: $e');
+      debugPrint('Error loading favorites: $e');
     }
   }
 
@@ -62,7 +60,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       await ApiService.toggleFavorite(dhikrId);
       await _loadFavorites();
     } catch (e) {
-      print('Error removing favorite: $e');
+      debugPrint('Error removing favorite: $e');
     }
   }
 
@@ -80,7 +78,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               title: 'لیست علاقه‌مندی‌ها',
               description: 'اذکار مورد علاقه شما',
               isAuthenticated: _isAuthenticated,
-              heartScore: _heartScore,
               streak: _streak,
               onMenuTap: () {
                 Scaffold.of(context).openDrawer();
@@ -92,10 +89,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : !_isAuthenticated
-                      ? _buildNotAuthenticatedState(isDark)
-                      : _favorites.isEmpty
-                          ? _buildEmptyState(isDark)
-                          : _buildFavoritesList(isDark),
+                  ? _buildNotAuthenticatedState(isDark)
+                  : _favorites.isEmpty
+                  ? _buildEmptyState(isDark)
+                  : _buildFavoritesList(isDark),
             ),
           ],
         ),
@@ -113,7 +110,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             Icon(
               FontAwesomeIcons.lock,
               size: 64,
-              color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
             ),
             const SizedBox(height: 16),
             Text(
@@ -131,7 +130,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               'لطفا وارد حساب کاربری خود شوید',
               style: TextStyle(
                 fontSize: 14,
-                color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                color: isDark
+                    ? AppTheme.darkTextSecondary
+                    : AppTheme.textSecondary,
                 fontFamily: AppTheme.fontPrimary,
               ),
               textAlign: TextAlign.center,
@@ -152,7 +153,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             Icon(
               FontAwesomeIcons.heart,
               size: 64,
-              color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
             ),
             const SizedBox(height: 16),
             Text(
@@ -170,7 +173,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               'با ضربه روی آیکون قلب در صفحه اذکار، می‌توانید آنها را به علاقه‌مندی‌ها اضافه کنید',
               style: TextStyle(
                 fontSize: 14,
-                color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                color: isDark
+                    ? AppTheme.darkTextSecondary
+                    : AppTheme.textSecondary,
                 fontFamily: AppTheme.fontPrimary,
               ),
               textAlign: TextAlign.center,
@@ -206,9 +211,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       color: isDark ? AppTheme.darkBgTertiary : AppTheme.bgSecondary,
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
           // Navigate to the dhikr in its collection
@@ -273,9 +276,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Arabic text
               if (arabicText.isNotEmpty)
                 Directionality(
@@ -295,10 +298,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              
+
               if (arabicText.isNotEmpty && translation.isNotEmpty)
                 const SizedBox(height: 12),
-              
+
               // Translation
               if (translation.isNotEmpty)
                 Text(
@@ -321,4 +324,3 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 }
-

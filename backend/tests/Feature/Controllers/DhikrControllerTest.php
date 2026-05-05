@@ -5,9 +5,7 @@ namespace Tests\Feature\Controllers;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\UserDhikr;
-use App\Services\BadgeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Date;
 
 class DhikrControllerTest extends TestCase
 {
@@ -23,7 +21,6 @@ class DhikrControllerTest extends TestCase
 
     public function test_index_returns_dhikrs()
     {
-        // Create some dhikrs
         UserDhikr::factory()->count(3)->create([
             'user_id' => $this->user->id
         ]);
@@ -49,7 +46,6 @@ class DhikrControllerTest extends TestCase
 
     public function test_index_with_search_returns_filtered_dhikrs()
     {
-        // Create dhikrs with specific titles
         UserDhikr::factory()->create([
             'user_id' => $this->user->id,
             'title' => 'Test Dhikr 1'
@@ -68,11 +64,6 @@ class DhikrControllerTest extends TestCase
 
     public function test_store_updates_user_statistics()
     {
-        $this->mock(BadgeService::class, function ($mock) {
-            $mock->shouldReceive('updateStreak')->once();
-            $mock->shouldReceive('checkAndAwardBadges')->once()->andReturn(false);
-        });
-
         $initialTotal = $this->user->total_dhikrs;
         
         $response = $this->actingAs($this->user)
@@ -82,29 +73,11 @@ class DhikrControllerTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'user',
-                'new_badge_awarded'
             ]);
 
         $this->user->refresh();
         $this->assertEquals($initialTotal + 1, $this->user->total_dhikrs);
         $this->assertContains(now()->format('Y-m-d'), $this->user->completed_dates);
-    }
-
-    public function test_store_awards_badge_when_earned()
-    {
-        $this->mock(BadgeService::class, function ($mock) {
-            $mock->shouldReceive('updateStreak')->once();
-            $mock->shouldReceive('checkAndAwardBadges')->once()->andReturn(true);
-        });
-
-        $response = $this->actingAs($this->user)
-            ->postJson('/api/dhikr');
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'new_badge_awarded' => true
-            ]);
     }
 
     public function test_store_requires_authentication()
@@ -113,4 +86,4 @@ class DhikrControllerTest extends TestCase
 
         $response->assertStatus(401);
     }
-} 
+}

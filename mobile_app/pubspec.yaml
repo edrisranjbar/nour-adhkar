@@ -41,6 +41,7 @@ dependencies:
   shamsi_date: ^1.0.1
   url_launcher: ^6.2.5
   get: ^4.6.6
+  rive: ^0.13.20
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/animations/
 
   fonts:
     - family: Vazir

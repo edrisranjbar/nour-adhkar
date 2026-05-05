@@ -28,10 +28,8 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'role' => 'user',
             'active' => true,
-            'heart_score' => $this->faker->numberBetween(0, 1000),
             'streak' => $this->faker->numberBetween(0, 30),
             'completed_dates' => [],
-            'badges' => [],
             'last_login_at' => now(),
             'total_dhikrs' => $this->faker->numberBetween(0, 1000),
         ];

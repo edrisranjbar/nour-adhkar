@@ -6,7 +6,6 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Http\Resources\UserResource;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Carbon\Carbon;
 
 class UserResourceTest extends TestCase
 {
@@ -14,15 +13,18 @@ class UserResourceTest extends TestCase
 
     public function test_user_resource_transforms_user_model_correctly()
     {
+        $dates = [];
+        for ($i = 4; $i >= 0; $i--) {
+            $dates[] = now()->subDays($i)->format('Y-m-d');
+        }
         $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'avatar' => 'avatar.jpg',
-            'heart_score' => 100,
-            'streak' => 5,
+            'total_dhikrs' => 42,
+            'completed_dates' => $dates,
             'role' => 'user',
             'active' => true,
-            'badges' => ['test_badge_date' => now()->toDateTimeString()],
             'last_login_at' => now()->subDay(),
         ]);
 
@@ -33,12 +35,11 @@ class UserResourceTest extends TestCase
         $this->assertEquals($user->name, $array['name']);
         $this->assertEquals($user->email, $array['email']);
         $this->assertEquals($user->avatar, $array['avatar']);
-        $this->assertEquals($user->heart_score, $array['heart_score']);
-        $this->assertEquals($user->streak, $array['streak']);
-        $this->assertEquals($user->has_new_badge, $array['has_new_badge']);
+        $this->assertEquals(42, $array['total_adhkar_completed']);
+        $this->assertEquals(5, $array['streak']);
         $this->assertEquals($user->role, $array['role']);
         $this->assertEquals($user->active, $array['active']);
         $this->assertEquals($user->created_at, $array['created_at']);
         $this->assertEquals($user->updated_at, $array['updated_at']);
     }
-} 
+}

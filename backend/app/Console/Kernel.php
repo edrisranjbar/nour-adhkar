@@ -12,8 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Reset all users heart scores at midnight daily
-        $schedule->command('users:reset-heart-scores')->dailyAt('00:00');
+        //
     }
 
     /**

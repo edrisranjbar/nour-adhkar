@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
@@ -25,10 +23,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPasswordContra
         'role',
         'active',
         'avatar',
-        'score',
         'streak',
-        'badges',
-        'heart_score',
         'last_login_at',
         'last_dhikr_completed_at',
         'favorites',
@@ -45,12 +40,9 @@ class User extends Authenticatable implements JWTSubject, CanResetPasswordContra
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'active' => 'boolean',
-        'score' => 'integer',
-        'badges' => 'json',
         'favorites' => 'json',
         'completed_dates' => 'json',
         'daily_counts' => 'json',
-        'heart_score' => 'integer',
         'last_login_at' => 'datetime',
         'last_dhikr_completed_at' => 'datetime',
         'total_dhikrs' => 'integer'
@@ -59,9 +51,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPasswordContra
     protected $attributes = [
         'role' => 'user',
         'active' => true,
-        'score' => 0,
         'streak' => 0,
-        'badges' => '[]',
         'favorites' => '[]',
         'total_dhikrs' => 0
     ];
@@ -105,26 +95,8 @@ class User extends Authenticatable implements JWTSubject, CanResetPasswordContra
     {
         return $query->whereJsonContains('favorites', $postId);
     }
-
-    public function hasNewBadge(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                if (!$this->badges) return false;
-
-                $lastLogin = $this->last_login_at ?? now()->subYear();
-                foreach ($this->badges as $key => $value) {
-                    if (str_ends_with($key, '_date') && $value && Carbon::parse($value)->isAfter($lastLogin)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        );
-    }
     
     protected $appends = [
-        'has_new_badge',
         'streak'
     ];
 
@@ -138,12 +110,9 @@ class User extends Authenticatable implements JWTSubject, CanResetPasswordContra
             $lastDate = end($dates);
             $currentStreak = 1;
             
-            // If last completion was today, count the streak
             $lastCompletion = \Carbon\Carbon::parse($lastDate);
-            $now = now();
             
             if ($lastCompletion->isToday()) {
-                // Count backwards from the last date
                 for ($i = count($dates) - 2; $i >= 0; $i--) {
                     $currentDate = \Carbon\Carbon::parse($dates[$i]);
                     $expectedDate = \Carbon\Carbon::parse($dates[$i + 1])->subDay();
@@ -159,17 +128,5 @@ class User extends Authenticatable implements JWTSubject, CanResetPasswordContra
         }
         
         return $streak;
-    }
-
-    public function badges()
-    {
-        return $this->belongsToMany(Badge::class, 'user_badges')
-            ->withPivot('earned_at')
-            ->withTimestamps();
-    }
-
-    public function league()
-    {
-        return $this->belongsTo(League::class);
     }
 }

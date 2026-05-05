@@ -14,10 +14,6 @@
       <div class="header-right">
         <div v-if="isAuthenticated" class="user-stats">
           <div class="stat-item">
-            <font-awesome-icon icon="fa-solid fa-heart" class="stat-icon" />
-            <span>{{ user?.heart_score || 0 }}</span>
-          </div>
-          <div class="stat-item">
             <font-awesome-icon icon="fa-solid fa-fire" class="stat-icon" />
             <span>{{ user?.streak || 0 }}</span>
           </div>

@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
-use App\Services\BadgeService;
-use Mockery;
 
 class UserControllerTest extends TestCase
 {
@@ -18,7 +16,6 @@ class UserControllerTest extends TestCase
 
     protected $user;
     protected $token;
-    protected $badgeService;
 
     protected function setUp(): void
     {
@@ -29,17 +26,12 @@ class UserControllerTest extends TestCase
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => Hash::make('password123'),
-            'heart_score' => 50,
             'streak' => 5,
             'completed_dates' => [now()->format('Y-m-d')],
             'total_dhikrs' => 10
         ]);
         
         $this->token = JWTAuth::fromUser($this->user);
-        
-        // Mock BadgeService
-        $this->badgeService = Mockery::mock(BadgeService::class);
-        $this->app->instance(BadgeService::class, $this->badgeService);
     }
 
     public function test_can_get_user_profile()
@@ -56,9 +48,7 @@ class UserControllerTest extends TestCase
                     'name',
                     'email',
                     'avatar',
-                    'heart_score',
                     'streak',
-                    'has_new_badge',
                     'role',
                     'active',
                     'created_at',
@@ -174,42 +164,6 @@ class UserControllerTest extends TestCase
             ]);
     }
 
-    public function test_can_update_heart_score()
-    {
-        $this->badgeService->shouldReceive('checkAndAwardBadges')
-            ->once()
-            ->andReturn(true);
-
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token
-        ])->patchJson('/api/user/heart', [
-            'heart_score' => 75
-        ]);
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'message' => 'امتیاز قلب با موفقیت به‌روزرسانی شد',
-                'user' => [
-                    'heart_score' => 75
-                ],
-                'badge_awarded' => true
-            ]);
-    }
-
-    public function test_handles_error_in_update_heart_score()
-    {
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token
-        ])->patchJson('/api/user/heart', [
-            'heart_score' => 'invalid'
-        ]);
-
-        $response->assertStatus(500)
-            ->assertJson([
-                'message' => 'خطا در به‌روزرسانی امتیاز قلب'
-            ]);
-    }
-
     public function test_can_get_user_stats()
     {
         $response = $this->withHeaders([
@@ -221,7 +175,6 @@ class UserControllerTest extends TestCase
                 'today_count',
                 'favorite_count',
                 'streak',
-                'heart_score',
                 'total_dhikrs',
                 'completed_dates'
             ])
@@ -229,7 +182,6 @@ class UserControllerTest extends TestCase
                 'today_count' => 1,
                 'favorite_count' => 1,
                 'streak' => 1,
-                'heart_score' => 50,
                 'total_dhikrs' => 10
             ]);
     }
@@ -285,9 +237,4 @@ class UserControllerTest extends TestCase
             ]);
     }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        Mockery::close();
-    }
 } 

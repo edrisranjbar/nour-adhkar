@@ -126,7 +126,7 @@ class _CounterScreenState extends State<CounterScreen>
         });
       }
     } catch (e) {
-      print('Error loading user data: $e');
+      debugPrint('Error loading user data: $e');
     }
   }
 
@@ -179,7 +179,7 @@ class _CounterScreenState extends State<CounterScreen>
         }
       }
     } catch (e) {
-      print('Error loading counter data: $e');
+      debugPrint('Error loading counter data: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -200,7 +200,7 @@ class _CounterScreenState extends State<CounterScreen>
         await _checkAuth();
       }
     } catch (e) {
-      print('Error refreshing data: $e');
+      debugPrint('Error refreshing data: $e');
     }
   }
 
@@ -362,18 +362,6 @@ class _CounterScreenState extends State<CounterScreen>
     // Save completion to backend if authenticated
     if (_isAuthenticated) {
       _saveCompletion();
-      // Show additional heart score message after a delay
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('❤️ امتیاز قلب شما افزایش یافت!'),
-              backgroundColor: Colors.pink.shade500,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      });
     }
 
     // Show completion message
@@ -388,57 +376,35 @@ class _CounterScreenState extends State<CounterScreen>
 
   Future<void> _saveCompletion() async {
     try {
-      print('[CounterScreen] Saving dhikr completion...');
-      // Get the dhikr count for heart score calculation
+      debugPrint('[CounterScreen] Saving dhikr completion...');
       final dhikrCount = _currentDhikr?['count'] ?? 33;
-      print('[CounterScreen] Dhikr count: $dhikrCount');
+      debugPrint('[CounterScreen] Dhikr count: $dhikrCount');
 
       final result = await ApiService.completeDhikrWithDetails(dhikrCount);
-      print('[CounterScreen] Dhikr completion result: $result');
+      debugPrint('[CounterScreen] Dhikr completion result: $result');
 
       if (result['success'] == true) {
         // User data is already updated in ApiService, just reload local user data for UI update
         await _loadUserData();
 
-        // Force rebuild of the header to show updated heart score
         if (mounted) {
           setState(() {});
         }
 
-        // Show appropriate feedback messages
         final collectionCompleted = result['collection_completed'] == true;
-        final heartScoreIncrease = result['heart_score_increase'] ?? 0;
 
-        print(
-          '[CounterScreen] Collection completed: $collectionCompleted, Heart score increase: $heartScoreIncrease',
+        debugPrint(
+          '[CounterScreen] Collection completed: $collectionCompleted',
         );
 
-        if (heartScoreIncrease > 0) {
-          // Show heart score increase message
-          Future.delayed(const Duration(seconds: 1), () {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '❤️ امتیاز قلب شما $heartScoreIncrease امتیاز افزایش یافت!',
-                  ),
-                  backgroundColor: Colors.pink.shade500,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            }
-          });
-        }
-
         if (collectionCompleted) {
-          print('[CounterScreen] Showing collection completion message');
-          // Show collection completion message after a delay
+          debugPrint('[CounterScreen] Showing collection completion message');
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text(
-                    '🎉 مجموعه روزانه تکمیل شد! ۱۰ امتیاز قلب دریافت کردید',
+                    '🎉 مجموعه روزانه تکمیل شد!',
                   ),
                   backgroundColor: Colors.orange.shade600,
                   duration: const Duration(seconds: 3),
@@ -449,7 +415,7 @@ class _CounterScreenState extends State<CounterScreen>
         }
       }
     } catch (e) {
-      print('[CounterScreen] Error saving completion: $e');
+      debugPrint('[CounterScreen] Error saving completion: $e');
     }
   }
 
@@ -1158,12 +1124,7 @@ class _CounterScreenState extends State<CounterScreen>
                 children: [
                   AppHeader(
                     title: 'ذکرشمار',
-                    description: _isAuthenticated && _userData != null
-                        ? '❤️ امتیاز قلب: ${_userData!['heart_score'] ?? 0}'
-                        : 'شمارش اذکار روزانه',
-                    heartScore: _isAuthenticated && _userData != null
-                        ? _userData!['heart_score']
-                        : null,
+                    description: 'شمارش اذکار روزانه',
                     streak: _isAuthenticated && _userData != null
                         ? _userData!['streak']
                         : null,

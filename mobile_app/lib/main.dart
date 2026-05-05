@@ -218,7 +218,6 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isAuthenticated = false;
-  int? _heartScore;
   int? _streak;
   String? _userName;
   String? _profilePhotoUrl;
@@ -256,8 +255,6 @@ class _MainScreenState extends State<MainScreen> {
         _userName = user?['name'] ?? user?['email'] ?? 'کاربر';
         _profilePhotoUrl =
             user?['avatar'] ?? user?['profile_photo'] ?? user?['photo'];
-        // TODO: Load heart score and streak from API
-        _heartScore = user?['heart_score'] ?? 0;
         _streak = user?['streak'] ?? 0;
       });
     }
@@ -290,7 +287,6 @@ class _MainScreenState extends State<MainScreen> {
         isAuthenticated: _isAuthenticated,
         userName: _userName,
         profilePhotoUrl: _profilePhotoUrl,
-        heartScore: _heartScore,
         streak: _streak,
         currentIndex: _currentIndex,
         onItemTap: _onTabTapped,

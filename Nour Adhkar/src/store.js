@@ -69,9 +69,8 @@ const store = createStore({
                 if (response.data) {
                     // Create a user object with the stats
                     const userData = {
-                        ...state.user, // Preserve existing user data including name
+                        ...state.user,
                         streak: response.data.streak,
-                        heart_score: response.data.heart_score,
                         today_count: response.data.today_count,
                         favorite_count: response.data.favorite_count,
                         total_dhikrs: response.data.total_dhikrs

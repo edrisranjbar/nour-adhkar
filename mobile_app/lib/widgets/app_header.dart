@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../utils/number_formatter.dart';
-import 'heart_score_display.dart';
 
 class AppHeader extends StatelessWidget {
   final String title;
   final String description;
   final bool isAuthenticated;
-  final int? heartScore;
   final int? streak;
   final VoidCallback? onLoginTap;
   final VoidCallback? onLogoutTap;
@@ -19,7 +17,6 @@ class AppHeader extends StatelessWidget {
     required this.title,
     required this.description,
     this.isAuthenticated = false,
-    this.heartScore,
     this.streak,
     this.onLoginTap,
     this.onLogoutTap,
@@ -57,7 +54,6 @@ class AppHeader extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Menu Button
                   IconButton(
                     icon: const Icon(
                       Icons.menu,
@@ -71,11 +67,9 @@ class AppHeader extends StatelessWidget {
                     constraints: const BoxConstraints(),
                   ),
                   
-                  // Logo and Title Section
                   Expanded(
                     child: Row(
                       children: [
-                        // Logo
                         Container(
                           width: 50,
                           height: 50,
@@ -98,7 +92,6 @@ class AppHeader extends StatelessWidget {
                               height: 50,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
-                                // Fallback to icon if image fails to load
                                 return const Icon(
                             Icons.mosque,
                             color: AppTheme.brandSecondary,
@@ -113,19 +106,11 @@ class AppHeader extends StatelessWidget {
                     ),
                   ),
                 
-                // Right Section - Auth buttons or user stats
                 if (isAuthenticated) ...[
-                  // User Stats
-                  Row(
-                    children: [
-                      HeartScoreDisplay(heartScore: heartScore ?? 0),
-                      const SizedBox(width: 12),
-                      _StatItem(
-                        icon: FontAwesomeIcons.fire,
-                        value: streak ?? 0,
-                        isDark: isDark,
-                      ),
-                    ],
+                  _StatItem(
+                    icon: FontAwesomeIcons.fire,
+                    value: streak ?? 0,
+                    isDark: isDark,
                   ),
                 ] else if (onLoginTap != null) ...[
                   _HeaderButton(
@@ -242,4 +227,3 @@ class _HeaderButton extends StatelessWidget {
     );
     }
 }
-

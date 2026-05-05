@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback;
+import 'package:flutter/services.dart'
+    show Clipboard, ClipboardData, HapticFeedback;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import '../theme/app_theme.dart';
@@ -72,10 +73,14 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
       _error = null;
     });
     try {
-      final collection = await ApiService.getCollectionBySlug(widget.collectionSlug);
-      
+      final collection = await ApiService.getCollectionBySlug(
+        widget.collectionSlug,
+      );
+
       if (collection != null && collection['adhkar'] != null) {
-        final adhkarList = List<Map<String, dynamic>>.from(collection['adhkar']);
+        final adhkarList = List<Map<String, dynamic>>.from(
+          collection['adhkar'],
+        );
         final adhkars = adhkarList
             .map((item) {
               return {
@@ -94,7 +99,9 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
             .where((dhikr) {
               // Filter out empty dhikrs - must have at least arabic_text or translation
               final arabicText = (dhikr['arabic_text'] ?? '').toString().trim();
-              final translation = (dhikr['translation'] ?? '').toString().trim();
+              final translation = (dhikr['translation'] ?? '')
+                  .toString()
+                  .trim();
               return arabicText.isNotEmpty || translation.isNotEmpty;
             })
             .toList();
@@ -102,9 +109,8 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
         if (mounted) {
           setState(() {
             _adhkar = adhkars;
-            _collectionName = widget.collectionName ?? 
-                             collection['name'] ?? 
-                             'اذکار';
+            _collectionName =
+                widget.collectionName ?? collection['name'] ?? 'اذکار';
             _isLoading = false;
             // Reset index if current index is out of bounds after filtering
             if (_currentIndex >= adhkars.length && adhkars.isNotEmpty) {
@@ -124,7 +130,7 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
         }
       }
     } catch (e) {
-      print('Error loading dhikr data: $e');
+      debugPrint('Error loading dhikr data: $e');
       if (mounted) {
         setState(() {
           _error = 'خطایی رخ داده است';
@@ -160,11 +166,11 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
 
   void _incrementCounter() {
     if (_currentDhikr == null) return;
-    
+
     final arabicText = _currentDhikr!['arabic_text'] ?? '';
     final targetCount = _currentDhikr!['count'] ?? 33;
     final currentCount = _counters[arabicText] ?? 0;
-    
+
     if (currentCount >= targetCount) {
       // If completed, go to next dhikr if available
       if (_currentIndex < _adhkar.length - 1) {
@@ -172,17 +178,17 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
       }
       return;
     }
-    
+
     setState(() {
       _counters[arabicText] = currentCount + 1;
     });
-    
+
     _triggerCounterBump();
-    
+
     if (_vibrationEnabled) {
       HapticFeedback.lightImpact();
     }
-    
+
     // Auto-advance to next dhikr when completed
     if (currentCount + 1 >= targetCount) {
       if (_currentIndex < _adhkar.length - 1) {
@@ -246,13 +252,14 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
 
   Future<void> _copyDhikr() async {
     if (_currentDhikr == null) return;
-    
+
     final dhikr = _currentDhikr!;
-    final text = '${dhikr['title'] ?? ''}\n\n'
+    final text =
+        '${dhikr['title'] ?? ''}\n\n'
         '${dhikr['prefix'] ?? ''}\n'
         '${dhikr['arabic_text'] ?? ''}\n'
         '${dhikr['translation'] ?? ''}';
-    
+
     try {
       await Clipboard.setData(ClipboardData(text: text));
       ModernToast.show(
@@ -276,7 +283,6 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -296,34 +302,33 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
         color: isDark ? AppTheme.darkBgPrimary : AppTheme.bgSecondary,
         child: SafeArea(
           child: Stack(
-          children: [
-            Column(
-              children: [
-                // Header
-                _buildHeader(isDark),
-                
-                // Main Content
-                Expanded(
-                  child: _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : _error != null
-                          ? _buildErrorState(isDark)
-                          : _currentDhikr == null
-                              ? _buildEmptyState(isDark)
-                              : _buildDhikrContent(isDark),
-                ),
-                
-                // Footer Counter
-                if (!_isLoading && _error == null && _currentDhikr != null)
-                  _buildCounterFooter(isDark),
-              ],
-            ),
-            
-            // Congratulations Modal
-            if (_showCongratulations)
-              _buildCongratulationsModal(isDark),
-          ],
-        ),
+            children: [
+              Column(
+                children: [
+                  // Header
+                  _buildHeader(isDark),
+
+                  // Main Content
+                  Expanded(
+                    child: _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _error != null
+                        ? _buildErrorState(isDark)
+                        : _currentDhikr == null
+                        ? _buildEmptyState(isDark)
+                        : _buildDhikrContent(isDark),
+                  ),
+
+                  // Footer Counter
+                  if (!_isLoading && _error == null && _currentDhikr != null)
+                    _buildCounterFooter(isDark),
+                ],
+              ),
+
+              // Congratulations Modal
+              if (_showCongratulations) _buildCongratulationsModal(isDark),
+            ],
+          ),
         ),
       ),
     );
@@ -337,10 +342,7 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF262626) : AppTheme.brandSecondary,
           border: Border(
-            bottom: BorderSide(
-              color: Colors.white.withOpacity(0.1),
-              width: 1,
-            ),
+            bottom: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
           ),
         ),
         child: Row(
@@ -385,15 +387,14 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
             _error ?? 'خطایی رخ داده است',
             style: TextStyle(
               fontSize: 18,
-              color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
               fontFamily: AppTheme.fontPrimary,
             ),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadData,
-            child: const Text('تلاش مجدد'),
-          ),
+          ElevatedButton(onPressed: _loadData, child: const Text('تلاش مجدد')),
         ],
       ),
     );
@@ -414,7 +415,9 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
             'هیچ ذکری یافت نشد',
             style: TextStyle(
               fontSize: 18,
-              color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
               fontFamily: AppTheme.fontPrimary,
             ),
           ),
@@ -431,13 +434,13 @@ class _DhikrViewScreenState extends State<DhikrViewScreen>
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0.1, 0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: _slideController!,
-            curve: Curves.easeOut,
-          )),
+          position: Tween<Offset>(begin: const Offset(0.1, 0), end: Offset.zero)
+              .animate(
+                CurvedAnimation(
+                  parent: _slideController!,
+                  curve: Curves.easeOut,
+                ),
+              ),
           child: FadeTransition(
             opacity: _slideController!,
             child: Column(

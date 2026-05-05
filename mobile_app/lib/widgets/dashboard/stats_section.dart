@@ -5,14 +5,12 @@ import 'stat_card.dart';
 
 class StatsSection extends StatelessWidget {
   final Map<String, dynamic>? userStats;
-  final int? heartScore;
   final int? streak;
   final bool isDark;
 
   const StatsSection({
     super.key,
     required this.userStats,
-    required this.heartScore,
     required this.streak,
     required this.isDark,
   });
@@ -41,16 +39,6 @@ class StatsSection extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: StatCard(
-                  icon: FontAwesomeIcons.heart,
-                  label: 'امتیاز قلب',
-                  value: heartScore ?? 0,
-                  color: Colors.red,
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: StatCard(
                   icon: FontAwesomeIcons.book,
                   label: 'کل اذکار',
                   value: totalDhikrs,
@@ -65,4 +53,3 @@ class StatsSection extends StatelessWidget {
     );
   }
 }
-

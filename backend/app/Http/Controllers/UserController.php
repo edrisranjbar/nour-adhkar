@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Services\BadgeService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,13 +13,6 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
-    protected $badgeService;
-
-    public function __construct(BadgeService $badgeService)
-    {
-        $this->badgeService = $badgeService;
-    }
-
     /**
      * Get user profile
      *
@@ -138,42 +130,6 @@ class UserController extends Controller
     }
 
     /**
-     * Update user's heart score
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updateHeartScore(Request $request)
-    {
-        try {
-            $request->validate(['heart_score' => 'required|integer|min:0']);
-
-            $user = Auth::user();
-            $new_score = min((int)$request->heart_score, 100);
-            $user->heart_score = $new_score;
-            $user->save();
-
-            // Check and award badges
-            $badgeAwarded = $this->badgeService->checkAndAwardBadges($user);
-
-            // Get updated user data with badges
-            $user->refresh();
-
-            return response()->json([
-                'message' => 'امتیاز قلب با موفقیت به‌روزرسانی شد',
-                'user' => new UserResource($user),
-                'badges' => $user->badges,
-                'badge_awarded' => $badgeAwarded
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => 'خطا در به‌روزرسانی امتیاز قلب',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
      * Get user statistics
      *
      * @return \Illuminate\Http\JsonResponse
@@ -195,7 +151,6 @@ class UserController extends Controller
                 'today_count' => $todayCount,
                 'favorite_count' => $favoriteCount,
                 'streak' => $user->streak,
-                'heart_score' => $user->heart_score ?? 0,
                 'total_dhikrs' => $user->total_dhikrs ?? 0,
                 'completed_dates' => $user->completed_dates ?? []
             ]);
@@ -268,7 +223,6 @@ class UserController extends Controller
                 'totalContributions' => $user->contributions()->count(),
                 'totalDonations' => $user->donations()->count(),
                 'streak' => $user->streak,
-                'heartScore' => $user->heart_score ?? 0
             ];
 
             // Get recent activities

@@ -19,9 +19,7 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'avatar' => $this->avatar,
-            'heart_score' => $this->heart_score,
             'streak' => $this->streak,
-            'has_new_badge' => $this->has_new_badge,
             'role' => $this->role,
             'active' => $this->active,
             'total_adhkar_completed' => $this->total_dhikrs,
@@ -29,4 +27,4 @@ class UserResource extends JsonResource
             'updated_at' => $this->updated_at,
         ];
     }
-} 
+}

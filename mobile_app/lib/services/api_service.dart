@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config.dart';
@@ -46,7 +47,7 @@ class ApiService {
       }
       return [];
     } catch (e) {
-      print('Error fetching collections: $e');
+      debugPrint('Error fetching collections: $e');
       return [];
     }
   }
@@ -65,7 +66,7 @@ class ApiService {
       }
       return null;
     } catch (e) {
-      print('Error fetching collection: $e');
+      debugPrint('Error fetching collection: $e');
       return null;
     }
   }
@@ -96,7 +97,7 @@ class ApiService {
       }
       return [];
     } catch (e) {
-      print('Error fetching adhkar: $e');
+      debugPrint('Error fetching adhkar: $e');
       return [];
     }
   }
@@ -122,7 +123,7 @@ class ApiService {
       }
       return null;
     } catch (e) {
-      print('Error fetching user profile: $e');
+      debugPrint('Error fetching user profile: $e');
       return null;
     }
   }
@@ -144,8 +145,9 @@ class ApiService {
         final data = json.decode(response.body);
         return {
           'streak': data['streak'] ?? 0,
-          'heart_score': data['heart_score'] ?? 0,
-          'total_adhkar_completed': data['total_adhkar_completed'] ?? 0,
+          'total_adhkar_completed': data['total_dhikrs'] ??
+              data['total_adhkar_completed'] ??
+              0,
           'today_count': data['today_count'] ?? 0,
           'favorite_count': data['favorite_count'] ?? 0,
           'completed_dates': data['completed_dates'] ?? [],
@@ -153,7 +155,7 @@ class ApiService {
       }
       return null;
     } catch (e) {
-      print('Error fetching user stats: $e');
+      debugPrint('Error fetching user stats: $e');
       return null;
     }
   }
@@ -180,34 +182,8 @@ class ApiService {
       }
       return null;
     } catch (e) {
-      print('Error fetching dashboard: $e');
+      debugPrint('Error fetching dashboard: $e');
       return null;
-    }
-  }
-
-  static Future<List<Map<String, dynamic>>> getUserBadges() async {
-    try {
-      final token = await AuthService.getToken();
-      if (token == null) return [];
-
-      final response = await http.get(
-        Uri.parse('${AppConfig.baseApiUrl}/user/badges'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['success'] == true && data['data'] != null) {
-          return List<Map<String, dynamic>>.from(data['data']);
-        }
-      }
-      return [];
-    } catch (e) {
-      print('Error fetching user badges: $e');
-      return [];
     }
   }
 
@@ -216,10 +192,11 @@ class ApiService {
   ]) async {
     try {
       final token = await AuthService.getToken();
-      if (token == null)
+      if (token == null) {
         return {'success': false, 'error': 'No authentication token'};
+      }
 
-      print('[ApiService] Completing dhikr...');
+      debugPrint('[ApiService] Completing dhikr...');
 
       final requestBody = dhikrCount != null
           ? json.encode({'count': dhikrCount})
@@ -235,43 +212,38 @@ class ApiService {
         body: requestBody,
       );
 
-      print(
+      debugPrint(
         '[ApiService] Dhikr completion response: ${response.statusCode} - ${response.body}',
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
-          print('[ApiService] Dhikr completed successfully on backend');
+          debugPrint('[ApiService] Dhikr completed successfully on backend');
 
           // Use the updated user data directly from the response instead of fetching again
           if (data['user'] != null) {
             final prefs = await SharedPreferences.getInstance();
             await prefs.setString('user', json.encode(data['user']));
-            print('[ApiService] Updated user data stored locally');
+            debugPrint('[ApiService] Updated user data stored locally');
           }
 
-          // Check if collection was completed (extra 10 heart score points)
           final collectionCompleted = data['collection_completed'] == true;
-          final heartScoreIncrease = data['heart_score_increase'] ?? 0;
 
           if (collectionCompleted) {
-            print(
-              '[ApiService] Collection completed! Awarded 10 heart score points',
-            );
+            debugPrint('[ApiService] Daily collection completed.');
           }
 
           return {
             'success': true,
             'collection_completed': collectionCompleted,
-            'heart_score_increase': heartScoreIncrease,
             'today_count': data['today_count'] ?? 0,
           };
         }
       }
       return {'success': false};
     } catch (e) {
-      print('Error completing dhikr: $e');
+      debugPrint('Error completing dhikr: $e');
       return {'success': false, 'error': e.toString()};
     }
   }
@@ -303,7 +275,7 @@ class ApiService {
       }
       return [];
     } catch (e) {
-      print('Error fetching favorites: $e');
+      debugPrint('Error fetching favorites: $e');
       return [];
     }
   }
@@ -324,7 +296,7 @@ class ApiService {
 
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      print('Error toggling favorite: $e');
+      debugPrint('Error toggling favorite: $e');
       return false;
     }
   }

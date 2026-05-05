@@ -11,7 +11,7 @@ import '../utils/number_formatter.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeModeChanged;
-  
+
   const SettingsScreen({super.key, this.onThemeModeChanged});
 
   @override
@@ -71,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _handleThemeModeChange(String? value) async {
     if (value == null) return;
-    
+
     await SettingsService.setThemeMode(value);
     setState(() {
       _themeMode = value;
@@ -130,19 +130,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            backgroundColor: isDark ? AppTheme.darkBgSecondary : AppTheme.bgPrimary,
+            backgroundColor: isDark
+                ? AppTheme.darkBgSecondary
+                : AppTheme.bgPrimary,
             title: Row(
               children: [
                 Icon(
                   FontAwesomeIcons.mosque,
-                  color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                  color: isDark
+                      ? AppTheme.darkBrandPrimary
+                      : AppTheme.brandPrimary,
                   size: 24,
                 ),
                 const SizedBox(width: 12),
                 Text(
                   'اذکار نور',
                   style: TextStyle(
-                    color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                    color: isDark
+                        ? AppTheme.darkTextPrimary
+                        : AppTheme.textPrimary,
                     fontFamily: AppTheme.fontPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -158,7 +164,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     'نسخه ${AppConfig.appVersion}',
                     style: TextStyle(
-                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                      color: isDark
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.textSecondary,
                       fontFamily: AppTheme.fontPrimary,
                       fontSize: 14,
                     ),
@@ -167,7 +175,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     'اذکار نور یک برنامه جامع برای خواندن و شمارش اذکار و ادعیه اسلامی است. این برنامه با هدف تسهیل در یادآوری و خواندن اذکار روزانه، صبحگاهی، شامگاهی و سایر اذکار مهم طراحی شده است.',
                     style: TextStyle(
-                      color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                      color: isDark
+                          ? AppTheme.darkTextPrimary
+                          : AppTheme.textPrimary,
                       fontFamily: AppTheme.fontPrimary,
                       fontSize: 14,
                       height: 1.8,
@@ -182,7 +192,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Text(
                   'بستن',
                   style: TextStyle(
-                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                    color: isDark
+                        ? AppTheme.darkBrandPrimary
+                        : AppTheme.brandPrimary,
                     fontFamily: AppTheme.fontPrimary,
                   ),
                 ),
@@ -233,7 +245,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                    color: isDark
+                        ? AppTheme.darkBrandPrimary
+                        : AppTheme.brandPrimary,
                     width: 1,
                   ),
                 ),
@@ -262,7 +276,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                              color: isDark
+                                  ? AppTheme.darkTextPrimary
+                                  : AppTheme.textPrimary,
                               fontFamily: AppTheme.fontPrimary,
                             ),
                           ),
@@ -273,7 +289,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               '+989962933405',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                                color: isDark
+                                    ? AppTheme.darkTextSecondary
+                                    : AppTheme.textSecondary,
                                 fontFamily: AppTheme.fontPrimary,
                               ),
                             ),
@@ -284,7 +302,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
-                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                      color: isDark
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.textSecondary,
                     ),
                   ],
                 ),
@@ -301,7 +321,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: isDark ? AppTheme.darkBgTertiary : AppTheme.bgTertiary,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                    color: isDark
+                        ? AppTheme.darkBrandPrimary
+                        : AppTheme.brandPrimary,
                     width: 1,
                   ),
                 ),
@@ -311,7 +333,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                        color: isDark
+                            ? AppTheme.darkBrandPrimary
+                            : AppTheme.brandPrimary,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
@@ -330,7 +354,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                              color: isDark
+                                  ? AppTheme.darkTextPrimary
+                                  : AppTheme.textPrimary,
                               fontFamily: AppTheme.fontPrimary,
                             ),
                           ),
@@ -341,7 +367,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               'edrisranjbar.dev@gmail.com',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                                color: isDark
+                                    ? AppTheme.darkTextSecondary
+                                    : AppTheme.textSecondary,
                                 fontFamily: AppTheme.fontPrimary,
                               ),
                             ),
@@ -352,7 +380,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
-                      color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                      color: isDark
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.textSecondary,
                     ),
                   ],
                 ),
@@ -366,7 +396,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               'بستن',
               style: TextStyle(
-                color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
+                color: isDark
+                    ? AppTheme.darkBrandPrimary
+                    : AppTheme.brandPrimary,
                 fontFamily: AppTheme.fontPrimary,
                 fontWeight: FontWeight.w500,
               ),
@@ -380,19 +412,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _openWhatsApp() async {
     final phoneNumber = '+989962933405';
     final url = Uri.parse('https://wa.me/$phoneNumber');
-    
+
     try {
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
         Navigator.of(context).pop(); // Close dialog
       } else {
         if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('واتساپ نصب نشده است'),
-            backgroundColor: Colors.red,
-          ),
-        );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('واتساپ نصب نشده است'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       }
     } catch (e) {
@@ -412,19 +444,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final subject = Uri.encodeComponent('پشتیبانی اذکار نور');
     final body = Uri.encodeComponent('سلام،\n\n');
     final url = Uri.parse('mailto:$email?subject=$subject&body=$body');
-    
+
     try {
       if (await canLaunchUrl(url)) {
         await launchUrl(url);
         Navigator.of(context).pop(); // Close dialog
       } else {
         if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('نرم‌افزار ایمیل یافت نشد'),
-            backgroundColor: Colors.red,
-          ),
-        );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('نرم‌افزار ایمیل یافت نشد'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       }
     } catch (e) {
@@ -437,21 +469,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     }
-  }
-
-  Widget _buildFeatureItem(String text, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
-          fontFamily: AppTheme.fontPrimary,
-          fontSize: 14,
-          height: 1.6,
-        ),
-      ),
-    );
   }
 
   Future<void> _handleLogout() async {
@@ -477,9 +494,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await AuthService.logout();
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
           (route) => false,
         );
       }
@@ -489,14 +504,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       color: isDark ? AppTheme.darkBgPrimary : AppTheme.bgPrimary,
       child: SafeArea(
         child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
+            ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
                 child: Column(
                   children: [
@@ -635,9 +648,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: isDark
-                  ? AppTheme.darkBrandPrimary
-                  : AppTheme.brandPrimary,
+              color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
               fontFamily: AppTheme.fontPrimary,
             ),
           ),
@@ -659,9 +670,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: isDark
-                  ? AppTheme.darkTextPrimary
-                  : AppTheme.textPrimary,
+              color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
               fontFamily: AppTheme.fontPrimary,
             ),
           ),
@@ -705,9 +714,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: isDark
-                  ? AppTheme.darkTextPrimary
-                  : AppTheme.textPrimary,
+              color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
               fontFamily: AppTheme.fontPrimary,
             ),
           ),
@@ -721,14 +728,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: const Icon(Icons.remove_circle_outline),
                 color: _fontSize > 1
                     ? (isDark
-                        ? AppTheme.darkBrandPrimary
-                        : AppTheme.brandPrimary)
+                          ? AppTheme.darkBrandPrimary
+                          : AppTheme.brandPrimary)
                     : Colors.grey,
               ),
               Container(
                 width: 60,
                 alignment: Alignment.center,
-        child: Text(
+                child: Text(
                   NumberFormatter.formatNumber(_fontSize),
                   style: TextStyle(
                     fontSize: 20,
@@ -747,8 +754,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: const Icon(Icons.add_circle_outline),
                 color: _fontSize < 5
                     ? (isDark
-                        ? AppTheme.darkBrandPrimary
-                        : AppTheme.brandPrimary)
+                          ? AppTheme.darkBrandPrimary
+                          : AppTheme.brandPrimary)
                     : Colors.grey,
               ),
               const Spacer(),
@@ -788,9 +795,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Icon(
             icon,
             size: 20,
-            color: isDark
-                ? AppTheme.darkBrandPrimary
-                : AppTheme.brandPrimary,
+            color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -856,8 +861,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: isDestructive
                     ? Colors.red
                     : (isDark
-                        ? AppTheme.darkBrandPrimary
-                        : AppTheme.brandPrimary),
+                          ? AppTheme.darkBrandPrimary
+                          : AppTheme.brandPrimary),
               ),
               const SizedBox(width: 12),
             ],
@@ -873,8 +878,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: isDestructive
                           ? Colors.red
                           : (isDark
-                              ? AppTheme.darkTextPrimary
-                              : AppTheme.textPrimary),
+                                ? AppTheme.darkTextPrimary
+                                : AppTheme.textPrimary),
                       fontFamily: AppTheme.fontPrimary,
                     ),
                   ),
@@ -898,8 +903,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: isDestructive && rightIcon != null
                   ? Colors.red
                   : (isDark
-                      ? AppTheme.darkTextSecondary
-                      : AppTheme.textSecondary),
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.textSecondary),
             ),
           ],
         ),
@@ -920,9 +925,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Icon(
             icon,
             size: 20,
-            color: isDark
-                ? AppTheme.darkBrandPrimary
-                : AppTheme.brandPrimary,
+            color: isDark ? AppTheme.darkBrandPrimary : AppTheme.brandPrimary,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -931,9 +934,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: isDark
-                    ? AppTheme.darkTextPrimary
-                    : AppTheme.textPrimary,
+                color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
                 fontFamily: AppTheme.fontPrimary,
               ),
             ),
