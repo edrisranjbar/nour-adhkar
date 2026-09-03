@@ -76,11 +76,14 @@ export default {
       
       // Check if response.data exists and has collections array
       if (response.data?.success && Array.isArray(response.data.collections)) {
-        this.adhkarCollections = response.data.collections.map(collection => ({
-          name: collection.name,
-          path: collection.slug,
-          items: collection.adhkar_count
-        }));
+        const hiddenHomeCollections = new Set(['sleep', 'ramadan']);
+        this.adhkarCollections = response.data.collections
+          .filter(collection => !hiddenHomeCollections.has(collection.slug))
+          .map(collection => ({
+            name: collection.name,
+            path: collection.slug,
+            items: collection.adhkar_count
+          }));
       } else {
         console.error('Invalid collections data format:', response.data);
         this.adhkarCollections = []; // Set empty array as fallback

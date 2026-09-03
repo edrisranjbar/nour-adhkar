@@ -39,31 +39,6 @@
         </CategoryCard>
       </RouterLink>
 
-      <RouterLink to="/collections/ramadan" class="card-sm">
-        <CategoryCard image-src="src/assets/images/ramadan.svg">
-          <div class="card-content">
-            <div class="card-icon">
-              <font-awesome-icon icon="fa-solid fa-star-and-crescent" />
-            </div>
-            <h2 class="card-text-top">اذکار ماه رمضان</h2>
-            <span class="card-items-count">{{ ramadanCollection?.adhkar?.length || 0 }} ذکر</span>
-          </div>
-        </CategoryCard>
-      </RouterLink>
-    </section>
-
-    <section class="small-cards-row">
-      <RouterLink to="/collections/sleep" class="card-sm">
-        <CategoryCard image-src="src/assets/images/sleep.jpg" size="small">
-          <div class="card-content">
-            <div class="card-icon">
-              <font-awesome-icon icon="fa-solid fa-bed" />
-            </div>
-            <h2 class="card-text-top">دعای خواب</h2>
-            <span class="card-items-count">{{ sleepCollection?.adhkar?.length || 0 }} ذکر</span>
-          </div>
-        </CategoryCard>
-      </RouterLink>
       <RouterLink to="/collections/istikhara" class="card-sm">
         <CategoryCard image-src="src/assets/images/prayer.png" size="small">
           <div class="card-content">
@@ -97,20 +72,14 @@ import CategoryCard from "@/components/CategoryCard.vue";
 import { morningCollection } from '@/assets/js/collections/morning';
 import { nightCollection } from '@/assets/js/collections/night';
 import { dailyCollection } from '@/assets/js/collections/daily';
-import { ramadanCollection } from '@/assets/js/collections/ramadan';
-import { sleepCollection } from '@/assets/js/collections/sleep';
 import { istikharaCollection } from '@/assets/js/collections/istikhara';
-import { specialCollection } from '@/assets/js/collections/special';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { 
   faSun, 
   faMoon, 
   faCalendarDay, 
-  faStarAndCrescent, 
-  faBed, 
   faHandsPraying, 
-  faGift, 
   faCircleNotch 
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -118,10 +87,7 @@ library.add(
   faSun, 
   faMoon, 
   faCalendarDay, 
-  faStarAndCrescent, 
-  faBed, 
   faHandsPraying, 
-  faGift, 
   faCircleNotch
 );
 
@@ -136,10 +102,7 @@ export default {
       morningCollection,
       nightCollection,
       dailyCollection,
-      ramadanCollection,
-      sleepCollection,
-      istikharaCollection,
-      specialCollection
+      istikharaCollection
     };
   }
 };
@@ -253,4 +216,4 @@ export default {
     font-size: 1.2rem;
   }
 }
-</style> 
+</style>
