@@ -89,6 +89,7 @@
             <a href="{{ route('panel.notices.index') }}" @class(['active' => request()->routeIs('panel.notices.*')])>پیام‌ها</a>
             <a href="{{ route('panel.feedback.index') }}" @class(['active' => request()->routeIs('panel.feedback.*')])>بازخوردها</a>
             <a href="{{ route('panel.users.index') }}" @class(['active' => request()->routeIs('panel.users.*')])>کاربران</a>
+            <a href="{{ route('panel.profile') }}" @class(['active' => request()->routeIs('panel.profile*')])>پروفایل</a>
         </nav>
         <form method="POST" action="{{ route('panel.logout') }}">
             @csrf
