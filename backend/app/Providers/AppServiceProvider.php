@@ -24,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
     {
         JsonResource::withoutWrapping();
 
+        if ($this->app->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         ResetPassword::toMailUsing(function ($notifiable, $token) {
             return (new ResetPasswordFa($token))->toMail($notifiable);
         });
