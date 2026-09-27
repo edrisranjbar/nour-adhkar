@@ -41,7 +41,7 @@ export default {
   gap: 40px;
   padding: 48px 16px;
   text-align: center;
-  font-family: Vazirmatn, sans-serif;
+  font-family: "Vazirmatn FD", sans-serif;
   color: #2b2620;
   background: linear-gradient(180deg, #f8f4ee 0%, #efe6d8 100%);
 }
