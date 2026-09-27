@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Password;
@@ -145,6 +146,88 @@ class AuthController extends Controller
                 'message' => 'خطا در ورود به سیستم. لطفاً دوباره تلاش کنید.'
             ], 500);
         }
+    }
+
+    /**
+     * Sign in (or register) with a Google ID token issued to the Android app.
+     * The token is verified with Google and its audience must match a configured client id.
+     */
+    public function googleLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id_token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $clientIds = array_filter(array_map('trim', explode(',', (string) config('services.google.client_ids'))));
+        if (empty($clientIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ورود با گوگل هنوز پیکربندی نشده است.'
+            ], 503);
+        }
+
+        try {
+            $response = Http::timeout(10)->get('https://oauth2.googleapis.com/tokeninfo', [
+                'id_token' => $request->id_token,
+            ]);
+        } catch (Exception $e) {
+            \Log::error('Google token verification failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'ارتباط با گوگل برقرار نشد. لطفاً دوباره تلاش کنید.'
+            ], 502);
+        }
+
+        $claims = $response->json() ?? [];
+        $verified = in_array($claims['email_verified'] ?? null, [true, 'true'], true);
+        if (
+            !$response->successful()
+            || !in_array($claims['aud'] ?? null, $clientIds, true)
+            || !in_array($claims['iss'] ?? null, ['accounts.google.com', 'https://accounts.google.com'], true)
+            || empty($claims['email'])
+            || !$verified
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'اعتبار حساب گوگل تأیید نشد.'
+            ], 401);
+        }
+
+        $user = User::where('email', $claims['email'])->first();
+        $created = false;
+        if (!$user) {
+            $user = User::create([
+                'name' => $claims['name'] ?? Str::before($claims['email'], '@'),
+                'email' => $claims['email'],
+                'password' => Hash::make(Str::random(40)),
+            ]);
+            $user->forceFill(['email_verified_at' => now()])->save();
+            $created = true;
+        }
+
+        if (!$user->active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حساب کاربری شما غیرفعال شده است. لطفاً با پشتیبانی تماس بگیرید.'
+            ], 403);
+        }
+
+        $token = auth()->login($user);
+        $user->update(['last_login_at' => now()]);
+
+        return response()->json([
+            'success' => true,
+            'user' => new UserResource($user),
+            'token' => $token,
+            'message' => 'ورود موفقیت‌آمیز'
+        ], $created ? 201 : 200);
     }
 
     public function logout(Request $request)

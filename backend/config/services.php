@@ -39,4 +39,9 @@ return [
         'merchant_id' => env('ZARINPAL_MERCHANT_ID', '1234567890123456789012345678901234'),
     ],
 
+    'google' => [
+        // Comma-separated OAuth client ids whose ID tokens are accepted (Android app's web client id).
+        'client_ids' => env('GOOGLE_CLIENT_IDS', ''),
+    ],
+
 ];

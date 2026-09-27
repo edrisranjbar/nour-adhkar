@@ -319,7 +319,8 @@ export const adminRoutes = [
         name: 'admin-comments',
         component: () => import('@/views/admin/CommentsManageView.vue'),
         meta: { title: 'مدیریت نظرات' }
-      }
+      },
+      { path: 'app-inbox', name: 'admin-app-inbox', component: () => import('@/views/admin/AppInboxView.vue'), meta: { title: 'پیام‌های برنامه' } }
     ]
   }
 ];

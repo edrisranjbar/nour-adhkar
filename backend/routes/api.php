@@ -14,11 +14,16 @@ use App\Http\Controllers\Admin\LogController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\AppInboxController;
 
 // Public routes
+Route::post('app-feedback', [AppInboxController::class, 'sendFeedback'])->middleware('throttle:5,1');
+Route::get('app-notices', [AppInboxController::class, 'notices'])->middleware('throttle:60,1');
+Route::post('app-notices/{id}/read', [AppInboxController::class, 'markRead'])->middleware('throttle:60,1');
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('google', [AuthController::class, 'googleLogin'])->middleware('throttle:10,1');
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:10,1');
     Route::post('resend-password-reset', [AuthController::class, 'resendPasswordReset'])->middleware('throttle:10,1');
@@ -81,6 +86,10 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware(['auth:api', AdminMiddleware::class])
     ->prefix('admin')
     ->group(function () {
+        Route::get('app-feedback', [AppInboxController::class, 'adminFeedback']);
+        Route::get('app-notices', [AppInboxController::class, 'adminNotices']);
+        Route::post('app-notices', [AppInboxController::class, 'createNotice']);
+        Route::put('app-notices/{id}', [AppInboxController::class, 'updateNotice']);
         // Posts management
         Route::prefix('posts')->group(function () {
             Route::get('/', [PostController::class, 'adminIndex']);

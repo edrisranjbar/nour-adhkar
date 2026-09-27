@@ -30,6 +30,7 @@ export default {
         { path: '/admin/blog', title: 'مقالات', icon: 'fa-solid fa-file-lines', exact: true },
         { path: '/admin/categories', title: 'دسته‌بندی‌ها', icon: 'fa-solid fa-folder', exact: true },
         { path: '/admin/comments', title: 'نظرات', icon: 'fa-solid fa-comments', exact: true },
+        { path: '/admin/app-inbox', title: 'پیام‌های برنامه', icon: 'fa-solid fa-envelope', exact: true },
         { path: '/admin/media', title: 'رسانه‌ها', icon: 'fa-solid fa-images', exact: true },
         { path: '/admin/users', title: 'کاربران', icon: 'fa-solid fa-users', exact: true },
         {
