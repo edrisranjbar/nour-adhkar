@@ -1,14 +1,14 @@
 <template>
   <main class="policy" dir="rtl">
     <article class="card">
-      <header class="head">
+      <div class="head">
         <router-link to="/" class="brand">
           <img src="@/assets/icons/logo.png" alt="" width="48" height="48" />
           <span>اذکار نور</span>
         </router-link>
         <h1>سیاست حریم خصوصی</h1>
         <p class="updated">آخرین به‌روزرسانی: ۶ مهر ۱۴۰۵ (۲۸ سپتامبر ۲۰۲۶)</p>
-      </header>
+      </div>
 
       <p>
         اذکار نور (اپلیکیشن اندروید با شناسه <span dir="ltr">ir.adhkar.app</span> و وب‌سایت adhkar.ir) یک پروژه
@@ -78,7 +78,7 @@
         <a href="mailto:edris.qeshm2@gmail.com" dir="ltr">edris.qeshm2@gmail.com</a>
       </p>
     </article>
-    <footer class="foot"><router-link to="/">بازگشت به صفحه اصلی</router-link> · © اذکار نور</footer>
+    <div class="foot"><router-link to="/">بازگشت به صفحه اصلی</router-link> · © اذکار نور</div>
   </main>
 </template>
 
@@ -105,7 +105,17 @@ export default {
   line-height: 2;
   font-size: 1rem;
 }
-.head { text-align: center; margin-bottom: 24px; }
+/* Plain div, not <header>: the site's global CSS paints every <header> as a patterned banner. */
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(107, 90, 63, 0.18);
+}
 .brand {
   display: inline-flex;
   align-items: center;
@@ -115,9 +125,9 @@ export default {
   font-weight: 700;
 }
 .brand img { border-radius: 12px; }
-h1 { margin: 16px 0 4px; font-size: 1.8rem; font-weight: 800; }
+h1 { display: block; margin: 10px 0 0; font-size: 1.8rem; font-weight: 800; color: #2b2620; }
 h2 { margin: 28px 0 8px; font-size: 1.2rem; font-weight: 700; color: #6b5a3f; }
-.updated { margin: 0; color: #7a6f62; font-size: 0.9rem; }
+.updated { margin: 0; color: #5e5448; font-size: 0.9rem; }
 ul { padding-inline-start: 22px; margin: 0; }
 li { margin-bottom: 6px; }
 a { color: #7a5f3c; }
@@ -130,7 +140,9 @@ a { color: #7a5f3c; }
 @media (prefers-color-scheme: dark) {
   .policy { color: #eee6da; background: linear-gradient(180deg, #1c1a17 0%, #12110f 100%); }
   .card { background: rgba(255, 255, 255, 0.06); }
+  h1 { color: #eee6da; }
   h2 { color: #d9c4a0; }
+  .head { border-bottom-color: rgba(255, 255, 255, 0.12); }
   .updated, .foot { color: #b3a898; }
   a { color: #e0c28f; }
 }
