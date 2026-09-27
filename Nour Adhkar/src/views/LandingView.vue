@@ -21,7 +21,7 @@
       <li><strong>تسبیح و یادآور</strong><span>پیگیری عادت‌ها و پیشرفت روزانه</span></li>
     </ul>
 
-    <footer class="foot">© اذکار نور</footer>
+    <footer class="foot">© اذکار نور · <router-link to="/privacy">حریم خصوصی</router-link></footer>
   </main>
 </template>
 
@@ -80,6 +80,7 @@ h1 { margin: 8px 0 0; font-size: 2.25rem; font-weight: 800; }
 }
 .features span { color: #6b6054; font-size: 0.95rem; }
 .foot { color: #8a7f72; font-size: 0.9rem; }
+.foot a { color: inherit; }
 
 @media (prefers-color-scheme: dark) {
   .landing { color: #eee6da; background: linear-gradient(180deg, #1c1a17 0%, #12110f 100%); }

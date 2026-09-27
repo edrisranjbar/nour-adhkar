@@ -4,6 +4,7 @@ import NotFoundView from '../views/NotFoundView.vue'
 import { adminGuard } from './guards';
 import ForgotPasswordView from '../views/ForgotPasswordView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
+import PrivacyView from '../views/PrivacyView.vue'
 
 // Lazy loading for admin components
 const AdminLayout = () => import('../views/admin/AdminLayout.vue');
@@ -30,6 +31,17 @@ export const publicRoutes = [
       description: 'اذکار نور، همراه روزانه برای اذکار صبح و شام، قرآن کریم، اوقات شرعی و تسبیح. دریافت از کافه بازار.',
       changefreq: 'monthly',
       priority: '1.0'
+    }
+  },
+  {
+    path: '/privacy',
+    name: 'privacy',
+    component: PrivacyView,
+    meta: {
+      title: 'سیاست حریم خصوصی | اذکار نور',
+      description: 'اذکار نور چه اطلاعاتی را، چرا و کجا پردازش می‌کند؛ حساب اختیاری، ورود با گوگل و داده‌های روی گوشی.',
+      changefreq: 'yearly',
+      priority: '0.3'
     }
   },
   {
