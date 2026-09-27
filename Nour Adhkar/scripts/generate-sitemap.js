@@ -17,82 +17,8 @@ const siteUrl = 'https://adhkar.ir';
 const routes = [
   {
     path: '/',
-    changefreq: 'daily',
+    changefreq: 'monthly',
     priority: '1.0'
-  },
-  // Protected routes (not included in sitemap)
-  {
-    path: '/login',
-    noindex: true
-  },
-  {
-    path: '/register',
-    noindex: true
-  },
-  {
-    path: '/dashboard',
-    noindex: true
-  },
-  // Public routes
-  {
-    path: '/counter',
-    changefreq: 'monthly',
-    priority: '0.8'
-  },
-  {
-    path: '/morning',
-    changefreq: 'weekly',
-    priority: '0.9'
-  },
-  {
-    path: '/night',
-    changefreq: 'weekly',
-    priority: '0.9'
-  },
-  {
-    path: '/sleep',
-    changefreq: 'monthly',
-    priority: '0.7'
-  },
-  {
-    path: '/istikhara',
-    changefreq: 'monthly',
-    priority: '0.8'
-  },
-  {
-    path: '/daily',
-    changefreq: 'monthly',
-    priority: '0.7'
-  },
-  {
-    path: '/ramadan',
-    changefreq: 'yearly',
-    priority: '0.6'
-  },
-  {
-    path: '/special',
-    changefreq: 'yearly',
-    priority: '0.6'
-  },
-  {
-    path: '/settings',
-    changefreq: 'monthly',
-    priority: '0.5'
-  },
-  {
-    path: '/donation',
-    changefreq: 'monthly',
-    priority: '0.7'
-  },
-  {
-    path: '/contribution',
-    changefreq: 'monthly',
-    priority: '0.6'
-  },
-  {
-    path: '/about',
-    changefreq: 'monthly',
-    priority: '0.5'
   }
 ];
 

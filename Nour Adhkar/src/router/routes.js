@@ -1,23 +1,9 @@
-import HomeView from '../views/HomeView.vue'
-import DhikrView from '../views/DhikrView.vue'
-import CounterView from '../views/CounterView.vue'
+import LandingView from '../views/LandingView.vue'
 import Login from '../views/LoginView.vue';
-import Register from '../views/RegisterView.vue';
-import SettingsView from '../views/SettingsView.vue'
-import DonationView from '../views/DonationView.vue'
-import DonationSuccessView from '../views/DonationSuccessView.vue'
-import DonationFailedView from '../views/DonationFailedView.vue'
-import ContributionView from '../views/ContributionView.vue'
-import AboutView from '../views/AboutView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
-import { authGuard, adminGuard } from './guards';
-import DashboardView from '../views/DashboardView.vue'
+import { adminGuard } from './guards';
 import ForgotPasswordView from '../views/ForgotPasswordView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
-
-// Lazy loading for blog components
-const BlogView = () => import('../views/BlogView.vue');
-const BlogPostView = () => import('../views/BlogPostView.vue');
 
 // Lazy loading for admin components
 const AdminLayout = () => import('../views/admin/AdminLayout.vue');
@@ -33,169 +19,36 @@ import AdminAdhkarView from '@/views/admin/AdminAdhkarView.vue';
 import AdminCollectionsView from '@/views/admin/AdminCollectionsView.vue';
 const AdminAnalyticsView = () => import('../views/admin/AdminAnalyticsView.vue');
 
-// Public routes that everyone can access
+// Public routes: the landing page plus the auth pages the admin panel needs
 export const publicRoutes = [
-  { 
-    path: '/login', 
-    component: Login,
-    meta: { 
-      noindex: true // exclude from sitemap 
+  {
+    path: '/',
+    name: 'home',
+    component: LandingView,
+    meta: {
+      title: 'اذکار نور | اپلیکیشن اذکار، قرآن و اوقات شرعی',
+      description: 'اذکار نور، همراه روزانه برای اذکار صبح و شام، قرآن کریم، اوقات شرعی و تسبیح. دریافت از کافه بازار.',
+      changefreq: 'monthly',
+      priority: '1.0'
     }
+  },
+  {
+    path: '/login',
+    component: Login,
+    meta: { noindex: true }
   },
   {
     path: '/forgot-password',
     name: 'forgot-password',
     component: ForgotPasswordView,
-    meta: {
-      title: 'بازیابی رمز عبور | اذکار نور',
-      noindex: true
-    }
+    meta: { title: 'بازیابی رمز عبور | اذکار نور', noindex: true }
   },
   {
     path: '/reset-password',
     name: 'reset-password',
     component: ResetPasswordView,
-    meta: {
-      title: 'تنظیم رمز عبور جدید | اذکار نور',
-      noindex: true
-    }
+    meta: { title: 'تنظیم رمز عبور جدید | اذکار نور', noindex: true }
   },
-  { 
-    path: '/register', 
-    component: Register,
-    meta: { 
-      noindex: true // exclude from sitemap 
-    }
-  },
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView,
-    meta: {
-      title: 'اذکار نور | مجموعه کامل اذکار و ادعیه',
-      description: 'دسترسی آسان به اذکار صبحگاهی، شامگاهی و ادعیه مختلف در یک اپلیکیشن سبک و کاربرپسند',
-      changefreq: 'daily',
-      priority: '1.0'
-    }
-  },
-  {
-    path: '/counter',
-    name: 'counter',
-    component: CounterView,
-    meta: {
-      title: 'تسبیح شمار دیجیتال | اذکار نور',
-      description: 'ذکر گفتن با تسبیح شمار دیجیتال، همراه با امکان ذخیره و آمار ذکرهای روزانه',
-      changefreq: 'monthly',
-      priority: '0.8'
-    }
-  },
-  {
-    path: '/collections/:slug',
-    name: 'collection',
-    component: DhikrView,
-    meta: {
-      title: 'مجموعه اذکار | اذکار نور',
-      description: 'مجموعه اذکار و ادعیه با ترجمه فارسی و منبع',
-      changefreq: 'weekly',
-      priority: '0.8'
-    }
-  },
-  {
-    path: '/settings',
-    name: 'settings',
-    component: SettingsView,
-    meta: {
-      title: 'تنظیمات | اذکار نور',
-      description: 'تنظیمات شخصی‌سازی اپلیکیشن اذکار نور',
-      changefreq: 'monthly',
-      priority: '0.5'
-    }
-  },
-  {
-    path: '/donation',
-    name: 'donation',
-    component: DonationView,
-    meta: {
-      title: 'حمایت از ما | اذکار نور',
-      description: 'حمایت مالی از پروژه منبع باز اذکار نور',
-      changefreq: 'monthly',
-      priority: '0.7'
-    }
-  },
-  {
-    path: '/donation/success',
-    name: 'donation-success',
-    component: DonationSuccessView,
-    meta: {
-      noindex: true // Don't include in search results or sitemap
-    }
-  },
-  {
-    path: '/donation/failed',
-    name: 'donation-failed',
-    component: DonationFailedView,
-    meta: {
-      noindex: true // Don't include in search results or sitemap
-    }
-  },
-  {
-    path: '/contribution',
-    name: 'contribution',
-    component: ContributionView,
-    meta: {
-      title: 'مشارکت در پروژه | اذکار نور',
-      description: 'نحوه مشارکت در بهبود و توسعه پروژه منبع باز اذکار نور',
-      changefreq: 'monthly',
-      priority: '0.6'
-    }
-  },
-  {
-    path: '/about',
-    name: 'about',
-    component: AboutView,
-    meta: {
-      title: 'درباره ما | اذکار نور',
-      description: 'اطلاعات درباره اذکار نور و تیم آن',
-      changefreq: 'monthly',
-      priority: '0.5'
-    }
-  },
-  {
-    path: '/blog',
-    name: 'blog',
-    component: BlogView,
-    meta: {
-      title: 'مقالات و نوشته‌ها | اذکار نور',
-      description: 'مقالات و نوشته‌ها در مورد فضیلت ذکر و دعا',
-      changefreq: 'weekly',
-      priority: '0.7'
-    }
-  },
-  {
-    path: '/blog/:slug',
-    name: 'blog-post',
-    component: BlogPostView,
-    meta: {
-      changefreq: 'monthly',
-      priority: '0.6'
-    }
-  },
-];
-
-// Protected routes that require authentication
-export const protectedRoutes = [
-  {
-    path: '/dashboard',
-    name: 'dashboard',
-    component: DashboardView,
-    beforeEnter: authGuard,
-    meta: {
-      title: 'داشبورد | اذکار نور',
-      description: 'داشبورد کاربری اذکار نور',
-      changefreq: 'daily',
-      priority: '0.9'
-    }
-  }
 ];
 
 // Admin routes that require admin privileges
@@ -328,7 +181,6 @@ export const adminRoutes = [
 // Combine all routes
 export const routes = [
   ...publicRoutes,
-  ...protectedRoutes,
   ...adminRoutes,
   // 404 catch-all route must be the last one
   {

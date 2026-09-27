@@ -70,12 +70,6 @@
         <!-- Additional Links -->
         <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
-            حساب کاربری ندارید؟ 
-            <RouterLink to="/register" class="text-primary-600 hover:text-primary-700 font-medium">
-              اینجا ثبت نام کنید
-            </RouterLink>
-          </p>
-          <p class="text-sm text-gray-600 mt-2">
             <RouterLink to="/forgot-password" class="text-primary-600 hover:text-primary-700 font-medium">
               فراموشی رمز عبور
             </RouterLink>
@@ -153,8 +147,8 @@ export default {
           // Set default authorization header for future requests
           axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
           
-          // Redirect to home
-          this.$router.push('/');
+          // Redirect to the admin panel (the only signed-in area of the site)
+          this.$router.push('/admin');
         } else {
           this.serverError = response.data?.message || 'خطای نامشخص در ورود';
         }

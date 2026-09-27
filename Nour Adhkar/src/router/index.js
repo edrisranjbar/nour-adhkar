@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+﻿import { createRouter, createWebHistory } from 'vue-router';
 import store from '../store';
 import { routes } from './routes';
 
@@ -21,7 +21,7 @@ router.beforeEach((to, from, next) => {
   
   // Redirect logged-in users away from login and register pages
   if ((to.path === '/login' || to.path === '/register') && token) {
-    next('/');
+    next('/admin');
     return;
   }
   
