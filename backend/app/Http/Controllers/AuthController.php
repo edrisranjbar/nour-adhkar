@@ -69,7 +69,7 @@ class AuthController extends Controller
             // Send welcome email
             try {
                 $user->notify(new WelcomeEmail());
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 // Log error but don't fail registration
                 \Log::error('Failed to send welcome email: ' . $e->getMessage());
             }
@@ -79,7 +79,7 @@ class AuthController extends Controller
                 'token' => $token,
                 'message' => 'ثبت نام با موفقیت انجام شد'
             ], 201);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Registration error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -148,7 +148,7 @@ class AuthController extends Controller
                 'token' => $token,
                 'message' => 'ورود موفقیت‌آمیز'
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Login error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -186,7 +186,7 @@ class AuthController extends Controller
             $response = Http::timeout(10)->get('https://oauth2.googleapis.com/tokeninfo', [
                 'id_token' => $request->id_token,
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Google token verification failed: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -254,7 +254,7 @@ class AuthController extends Controller
         $codes = app(EmailVerificationService::class);
         try {
             $codes->send($user);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Failed to send verification code: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -278,7 +278,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'خروج با موفقیت انجام شد'
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['message' => 'خطا در خروج از حساب کاربری', 'error' => $e->getMessage()], 500);
         }
     }
@@ -294,7 +294,7 @@ class AuthController extends Controller
                 'expires_in' => auth()->factory()->getTTL() * 60,
                 'message' => 'توکن با موفقیت به‌روزرسانی شد'
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['message' => 'خطا در به‌روزرسانی توکن', 'error' => $e->getMessage()], 401);
         }
     }
@@ -312,7 +312,7 @@ class AuthController extends Controller
                 'message' => 'وضعیت کاربر با موفقیت به‌روزرسانی شد',
                 'user' => new UserResource($user)
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['message' => 'خطا در به‌روزرسانی وضعیت کاربر', 'error' => $e->getMessage()], 500);
         }
     }
@@ -329,7 +329,7 @@ class AuthController extends Controller
                 'message' => 'نقش کاربر با موفقیت به‌روزرسانی شد',
                 'user' => new UserResource($user)
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['message' => 'خطا در به‌روزرسانی نقش کاربر', 'error' => $e->getMessage()], 500);
         }
     }
@@ -358,7 +358,7 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'کاربر با موفقیت حذف شد'
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['success' => false, 'message' => 'خطا در حذف کاربر', 'error' => $e->getMessage()], 500);
         }
     }
@@ -367,7 +367,7 @@ class AuthController extends Controller
     {
         try {
             return UserResource::collection(User::latest()->paginate(10));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['message' => 'خطا در دریافت لیست کاربران', 'error' => $e->getMessage()], 500);
         }
     }
@@ -413,7 +413,7 @@ class AuthController extends Controller
                 'success' => true,
                 'users' => $users
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'خطا در دریافت لیست کاربران',
@@ -487,7 +487,7 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد.'
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Failed to send password reset email: ' . $e->getMessage());
             
             return response()->json([
@@ -570,7 +570,7 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => __('passwords.reset', [], 'fa')
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Failed to reset password: ' . $e->getMessage());
             
             return response()->json([
@@ -639,7 +639,7 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'لینک بازیابی رمز عبور مجدداً به ایمیل شما ارسال شد.'
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Failed to resend password reset email: ' . $e->getMessage());
             
             return response()->json([

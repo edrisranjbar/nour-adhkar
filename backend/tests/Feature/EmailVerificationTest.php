@@ -91,3 +91,17 @@ it('enforces a resend cooldown', function () {
     $this->postJson('/api/auth/resend-code', ['email' => 'reader@example.com'])->assertOk();
     Mail::assertSent(EmailVerificationCode::class, 2);
 });
+
+it('answers in Persian instead of a raw Server Error when the codes table is missing', function () {
+    User::create(['name' => 'Old', 'email' => 'old@example.com', 'password' => Hash::make('secret12')]);
+    Illuminate\Support\Facades\Schema::drop('email_verification_codes');
+
+    foreach ([
+        ['/api/auth/login', ['email' => 'old@example.com', 'password' => 'secret12']],
+        ['/api/auth/resend-code', ['email' => 'old@example.com']],
+        ['/api/auth/verify-email', ['email' => 'old@example.com', 'password' => 'secret12', 'code' => '12345']],
+    ] as [$url, $body]) {
+        $response = $this->withHeaders(appHeaders())->postJson($url, $body)->assertStatus(500);
+        expect($response->json('message'))->toMatch('/\p{Arabic}/u')->not->toBe('Server Error');
+    }
+});

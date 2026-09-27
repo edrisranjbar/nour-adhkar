@@ -19,6 +19,16 @@ class EmailVerificationController extends Controller
 
     public function verify(Request $request)
     {
+        try {
+            return $this->verifyCode($request);
+        } catch (\Throwable $e) {
+            \Log::error('Email verification failed: ' . $e->getMessage());
+            return $this->serverError();
+        }
+    }
+
+    private function verifyCode(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'code' => ['required', 'string', 'regex:/^\d{5}$/'],
@@ -72,6 +82,16 @@ class EmailVerificationController extends Controller
 
     public function resend(Request $request)
     {
+        try {
+            return $this->resendCode($request);
+        } catch (\Throwable $e) {
+            \Log::error('Verification code resend failed: ' . $e->getMessage());
+            return $this->serverError();
+        }
+    }
+
+    private function resendCode(Request $request)
+    {
         $validator = Validator::make($request->all(), ['email' => 'required|email']);
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
@@ -90,7 +110,7 @@ class EmailVerificationController extends Controller
             }
             try {
                 $this->codes->send($user);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 \Log::error('Failed to send verification code: ' . $e->getMessage());
                 return response()->json(['success' => false, 'message' => 'ارسال ایمیل انجام نشد. لطفاً دوباره تلاش کنید.'], 500);
             }
@@ -101,5 +121,13 @@ class EmailVerificationController extends Controller
             'message' => 'اگر این ایمیل نیاز به تأیید داشته باشد، کد جدید ارسال شد.',
             'retry_after' => EmailVerificationService::RESEND_COOLDOWN_SECONDS,
         ]);
+    }
+
+    private function serverError()
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'مشکلی در سرور پیش آمده است. لطفاً چند دقیقه دیگر دوباره تلاش کنید.'
+        ], 500);
     }
 }
