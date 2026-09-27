@@ -25,7 +25,8 @@ return [
     ],
 
     'resend' => [
-        'key' => env('RESEND_KEY'),
+        // .env.example documents RESEND_API_KEY; RESEND_KEY is kept for existing deployments.
+        'key' => env('RESEND_KEY', env('RESEND_API_KEY')),
     ],
 
     'slack' => [

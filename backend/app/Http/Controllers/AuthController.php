@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\WelcomeEmail;
 use App\Notifications\ResetPasswordFa;
+use App\Services\EmailVerificationService;
 
 class AuthController extends Controller
 {
@@ -58,6 +59,10 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
+
+            if ($this->isAppClient($request)) {
+                return $this->verificationRequired($user, 201);
+            }
 
             $token = auth()->login($user);
 
@@ -125,6 +130,10 @@ class AuthController extends Controller
                     'success' => false,
                     'message' => 'رمز عبور اشتباه است'
                 ], 401);
+            }
+
+            if ($this->isAppClient($request) && $user->email_verified_at === null) {
+                return $this->verificationRequired($user, 403);
             }
 
             // Generate token
@@ -228,6 +237,38 @@ class AuthController extends Controller
             'token' => $token,
             'message' => 'ورود موفقیت‌آمیز'
         ], $created ? 201 : 200);
+    }
+
+    /**
+     * The Android app sends `X-Nour-Client: android`. Email verification is enforced only for
+     * the app so existing website accounts keep signing in as before.
+     */
+    private function isAppClient(Request $request): bool
+    {
+        return $request->header('X-Nour-Client') === 'android';
+    }
+
+    /** Sends a verification code (respecting the resend cooldown) and tells the app to ask for it. */
+    private function verificationRequired(User $user, int $status)
+    {
+        $codes = app(EmailVerificationService::class);
+        try {
+            $codes->send($user);
+        } catch (Exception $e) {
+            \Log::error('Failed to send verification code: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'ارسال کد تأیید انجام نشد. لطفاً دوباره تلاش کنید.'
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => false,
+            'verification_required' => true,
+            'email' => $user->email,
+            'retry_after' => $codes->cooldownRemaining($user->email),
+            'message' => 'کد تأیید ۵ رقمی به ایمیل شما ارسال شد.'
+        ], $status);
     }
 
     public function logout(Request $request)
