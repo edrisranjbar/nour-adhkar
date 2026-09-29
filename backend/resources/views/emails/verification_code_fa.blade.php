@@ -5,10 +5,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>کد تأیید اذکار نور</title>
+  <title>{{ ($purpose ?? 'verify') === 'reset' ? 'کد بازیابی رمز عبور اذکار نور' : 'کد تأیید اذکار نور' }}</title>
 </head>
 <body style="margin:0;padding:0;background:#FBF7ED;direction:rtl;text-align:right;font-family:Tahoma,'Segoe UI',Arial,sans-serif;">
-  <span style="display:none;max-height:0;overflow:hidden;opacity:0;">کد تأیید شما: {{ $code }}</span>
+  <span style="display:none;max-height:0;overflow:hidden;opacity:0;">{{ ($purpose ?? 'verify') === 'reset' ? 'کد بازیابی رمز عبور' : 'کد تأیید شما' }}: {{ $code }}</span>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF7ED;padding:32px 12px;">
     <tr>
       <td align="center">
@@ -22,7 +22,7 @@
           <tr>
             <td style="padding:28px 24px 8px 24px;color:#222A20;font-size:15px;line-height:1.9;">
               <p style="margin:0 0 12px 0;">سلام {{ $name ?: 'دوست عزیز' }}،</p>
-              <p style="margin:0;">برای تأیید ایمیل و فعال شدن حساب اذکار نور، این کد را در برنامه وارد کنید:</p>
+              <p style="margin:0;">@if(($purpose ?? 'verify') === 'reset')برای تعیین رمز عبور تازه حساب اذکار نور، این کد را در برنامه وارد کنید:@else برای تأیید ایمیل و فعال شدن حساب اذکار نور، این کد را در برنامه وارد کنید:@endif</p>
             </td>
           </tr>
           <tr>
@@ -34,7 +34,7 @@
           <tr>
             <td style="padding:4px 24px 24px 24px;color:#746F63;font-size:13px;line-height:1.9;">
               <p style="margin:0 0 8px 0;">این کد تا {{ $expiresInMinutes }} دقیقه معتبر است و فقط یک بار قابل استفاده است.</p>
-              <p style="margin:0;">اگر شما در اذکار نور ثبت‌نام نکرده‌اید، این ایمیل را نادیده بگیرید؛ کسی بدون این کد نمی‌تواند حساب را فعال کند.</p>
+              <p style="margin:0;">@if(($purpose ?? 'verify') === 'reset')اگر شما درخواست بازیابی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید؛ رمز عبور شما بدون این کد تغییر نمی‌کند.@else اگر شما در اذکار نور ثبت‌نام نکرده‌اید، این ایمیل را نادیده بگیرید؛ کسی بدون این کد نمی‌تواند حساب را فعال کند.@endif</p>
             </td>
           </tr>
           <tr>

@@ -9,8 +9,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 /**
- * One-time 5-digit email verification codes, delivered with the configured mailer (Resend).
+ * One-time 5-digit email codes, delivered with the configured mailer (Resend).
  * Codes are stored hashed, expire after EXPIRES_MINUTES, and allow MAX_ATTEMPTS guesses.
+ * This class handles email verification; PasswordResetCodeService reuses it for resets.
  */
 class EmailVerificationService
 {
@@ -18,10 +19,28 @@ class EmailVerificationService
     public const RESEND_COOLDOWN_SECONDS = 60;
     public const MAX_ATTEMPTS = 5;
 
+    /** Table holding the hashed codes for this purpose. */
+    protected function table(): string
+    {
+        return 'email_verification_codes';
+    }
+
+    /** 'verify' or 'reset'; selects the email wording. */
+    protected function purpose(): string
+    {
+        return 'verify';
+    }
+
+    /** Runs after a correct code, before the code is consumed. */
+    protected function onVerified(User $user): void
+    {
+        $user->forceFill(['email_verified_at' => now()])->save();
+    }
+
     /** Seconds until another code may be sent for this email (0 when allowed now). */
     public function cooldownRemaining(string $email): int
     {
-        $row = DB::table('email_verification_codes')->where('email', $email)->first();
+        $row = DB::table($this->table())->where('email', $email)->first();
         if (!$row) {
             return 0;
         }
@@ -37,7 +56,7 @@ class EmailVerificationService
         }
 
         $code = str_pad((string) random_int(0, 99999), 5, '0', STR_PAD_LEFT);
-        DB::table('email_verification_codes')->updateOrInsert(
+        DB::table($this->table())->updateOrInsert(
             ['email' => $user->email],
             [
                 'code_hash' => Hash::make($code),
@@ -49,17 +68,17 @@ class EmailVerificationService
             ]
         );
 
-        Mail::to($user->email)->send(new EmailVerificationCode($code, $user->name, self::EXPIRES_MINUTES));
+        Mail::to($user->email)->send(new EmailVerificationCode($code, $user->name, self::EXPIRES_MINUTES, $this->purpose()));
         return true;
     }
 
     /**
      * Checks a code. Returns one of: 'ok', 'invalid', 'expired', 'too_many'.
-     * A successful check marks the user verified and consumes the code.
+     * A successful check runs onVerified() and consumes the code.
      */
     public function verify(User $user, string $code): string
     {
-        $row = DB::table('email_verification_codes')->where('email', $user->email)->first();
+        $row = DB::table($this->table())->where('email', $user->email)->first();
         if (!$row) {
             return 'expired';
         }
@@ -70,12 +89,12 @@ class EmailVerificationService
             return 'too_many';
         }
         if (!Hash::check($code, $row->code_hash)) {
-            DB::table('email_verification_codes')->where('email', $user->email)->increment('attempts');
+            DB::table($this->table())->where('email', $user->email)->increment('attempts');
             return $row->attempts + 1 >= self::MAX_ATTEMPTS ? 'too_many' : 'invalid';
         }
 
-        $user->forceFill(['email_verified_at' => now()])->save();
-        DB::table('email_verification_codes')->where('email', $user->email)->delete();
+        $this->onVerified($user);
+        DB::table($this->table())->where('email', $user->email)->delete();
         return 'ok';
     }
 }
