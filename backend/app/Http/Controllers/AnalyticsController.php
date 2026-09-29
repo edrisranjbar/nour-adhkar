@@ -129,7 +129,9 @@ class AnalyticsController extends Controller
 
             // Totals
             $total = DB::table('page_visits')->where('visited_at', '>=', $startDate)->count();
-            $uniqueVisitors = DB::table('page_visits')->where('visited_at', '>=', $startDate)->distinct('ip')->count('ip');
+            // Raw IPs are no longer stored; count the daily visitor hash (older rows fall back to their IP).
+            $uniqueVisitors = (int) DB::table('page_visits')->where('visited_at', '>=', $startDate)
+                ->selectRaw('COUNT(DISTINCT COALESCE(visitor_hash, ip)) as c')->value('c');
 
             // Browsers
             $browsers = DB::table('page_visits')

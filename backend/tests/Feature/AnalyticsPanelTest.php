@@ -77,3 +77,22 @@ it('renders website and app analytics for an admin', function () {
         ->assertOk()
         ->assertSee('ثبت‌نام و بازخورد');
 });
+
+it('counts visitors behind the CDN by their real IP, not the edge server', function () {
+    // Same phone model and browser, same CDN edge (REMOTE_ADDR), different real visitors.
+    $this->withServerVariables(['REMOTE_ADDR' => '185.143.232.1'])->withHeaders(['User-Agent' => PHONE_UA, 'X-Forwarded-For' => '5.160.0.10'])
+        ->postJson('/api/analytics/visit', ['path' => '/', 'ua' => PHONE_UA])->assertOk();
+    $this->withServerVariables(['REMOTE_ADDR' => '185.143.232.1'])->withHeaders(['User-Agent' => PHONE_UA, 'X-Forwarded-For' => '5.160.0.11'])
+        ->postJson('/api/analytics/visit', ['path' => '/', 'ua' => PHONE_UA])->assertOk();
+    $this->withServerVariables(['REMOTE_ADDR' => '185.143.232.1'])->withHeaders(['User-Agent' => PHONE_UA, 'ar-real-ip' => '5.160.0.12'])
+        ->postJson('/api/analytics/visit', ['path' => '/', 'ua' => PHONE_UA])->assertOk();
+    // The same visitor again is still one visitor.
+    $this->withServerVariables(['REMOTE_ADDR' => '185.143.232.1'])->withHeaders(['User-Agent' => PHONE_UA, 'X-Forwarded-For' => '5.160.0.10'])
+        ->postJson('/api/analytics/visit', ['path' => '/privacy', 'ua' => PHONE_UA])->assertOk();
+
+    expect(DB::table('page_visits')->distinct()->count('visitor_hash'))->toBe(3);
+
+    $admin = User::factory()->create(['role' => 'admin', 'active' => true]);
+    $this->actingAs($admin, 'api')->getJson('/api/admin/analytics/overview')
+        ->assertOk()->assertJsonPath('data.uniqueVisitors', 3)->assertJsonPath('data.total', 4);
+});

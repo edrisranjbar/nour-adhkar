@@ -12,7 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // The API sits behind the ArvanCloud CDN: trust its forwarded headers so request()->ip()
+        // is the visitor's address (analytics, rate limits) rather than a CDN edge server.
+        // Narrow TRUSTED_PROXIES to the CDN's ranges (comma-separated) if the origin is reachable directly.
+        $middleware->trustProxies(at: env('TRUSTED_PROXIES', '*'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
