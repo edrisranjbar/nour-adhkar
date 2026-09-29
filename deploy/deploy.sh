@@ -17,6 +17,8 @@ fi
 php artisan down --retry=15 || true
 trap 'php artisan up || true' EXIT
 php artisan migrate --force
+# Uploaded lecture audio is served from public/storage.
+[ -e public/storage ] || php artisan storage:link
 php artisan optimize:clear
 php artisan optimize
 php artisan up

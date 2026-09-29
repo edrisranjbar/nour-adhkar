@@ -50,3 +50,12 @@ sudo -u deploy git -C /path/to/nour-adhkar fetch origin main
 | `DEPLOY_KNOWN_HOSTS` | secret | output of `ssh-keyscan -p <port> <host>` run from your own machine |
 | `DEPLOY_APP_DIR` | variable | absolute path of the checkout, e.g. `/var/www/nour-adhkar` |
 | `DEPLOY_WEB_ROOT` | variable | directory the web server serves for adhkar.ir (optional; default `<checkout>/Nour Adhkar/dist`) |
+
+## Lecture audio uploads (admin «علما و سخنرانی‌ها»)
+
+Admins can upload lecture audio up to **100 MB** per file. The web server and PHP must allow that too, otherwise large uploads fail before Laravel sees them:
+
+- nginx (server block for the API): `client_max_body_size 110m;`
+- PHP (`/etc/php/8.x/fpm/php.ini`): `upload_max_filesize = 100M`, `post_max_size = 110M`, then `systemctl reload php8.x-fpm`
+
+Files are stored in `backend/storage/app/public/lectures` and served from `/storage/...`; the deploy script creates the `public/storage` link when it is missing. Audio links in `GET /api/scholars` are built from the request host, so they stay correct even if `APP_URL` is not set.

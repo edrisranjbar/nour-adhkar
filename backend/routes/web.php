@@ -29,6 +29,24 @@ Route::prefix('admin')->name('panel.')->group(function () {
         Route::patch('notices/{id}/toggle', [Panel\NoticeController::class, 'toggle'])->name('notices.toggle');
         Route::delete('notices/{id}', [Panel\NoticeController::class, 'destroy'])->name('notices.destroy');
 
+        Route::get('scholars', [Panel\ScholarController::class, 'index'])->name('scholars.index');
+        Route::get('scholars/create', [Panel\ScholarController::class, 'create'])->name('scholars.create');
+        Route::post('scholars', [Panel\ScholarController::class, 'store'])->name('scholars.store');
+        Route::get('scholars/{id}/edit', [Panel\ScholarController::class, 'edit'])->name('scholars.edit');
+        Route::put('scholars/{id}', [Panel\ScholarController::class, 'update'])->name('scholars.update');
+        Route::patch('scholars/{id}/toggle', [Panel\ScholarController::class, 'toggle'])->name('scholars.toggle');
+        Route::patch('scholars/{id}/move/{direction}', [Panel\ScholarController::class, 'move'])->name('scholars.move');
+        Route::delete('scholars/{id}', [Panel\ScholarController::class, 'destroy'])->name('scholars.destroy');
+
+        Route::get('scholars/{scholar}/lectures', [Panel\LectureController::class, 'index'])->name('lectures.index');
+        Route::get('scholars/{scholar}/lectures/create', [Panel\LectureController::class, 'create'])->name('lectures.create');
+        Route::post('scholars/{scholar}/lectures', [Panel\LectureController::class, 'store'])->name('lectures.store');
+        Route::get('scholars/{scholar}/lectures/{id}/edit', [Panel\LectureController::class, 'edit'])->name('lectures.edit');
+        Route::put('scholars/{scholar}/lectures/{id}', [Panel\LectureController::class, 'update'])->name('lectures.update');
+        Route::patch('scholars/{scholar}/lectures/{id}/toggle', [Panel\LectureController::class, 'toggle'])->name('lectures.toggle');
+        Route::patch('scholars/{scholar}/lectures/{id}/move/{direction}', [Panel\LectureController::class, 'move'])->name('lectures.move');
+        Route::delete('scholars/{scholar}/lectures/{id}', [Panel\LectureController::class, 'destroy'])->name('lectures.destroy');
+
         Route::get('users', [Panel\UserController::class, 'index'])->name('users.index');
         Route::patch('users/{id}/toggle', [Panel\UserController::class, 'toggle'])->name('users.toggle');
 
