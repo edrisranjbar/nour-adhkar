@@ -5,18 +5,20 @@ namespace App\Services;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 /**
  * Verifies Google ID tokens locally (RS256 signature + claims) instead of calling Google's
- * tokeninfo endpoint per login. Google's APIs are not reachable from servers in Iran, so the
- * public signing keys (JWKS) are loaded from a list of URLs: Google first, then a mirror kept
- * up to date by a scheduled GitHub Action. The last good key set is cached for a week so short
- * outages of every source do not break sign-in.
+ * tokeninfo endpoint per login. Google's APIs (and GitHub's raw hosts) are blocked from the
+ * Iran-hosted server, so Google's public signing keys (JWKS) are *pushed* to the API every
+ * 6 hours by a GitHub workflow (POST /api/internal/google-jwks) and stored in cache and on disk.
+ * Fetching from GOOGLE_JWKS_URLS remains as a fallback for hosts that can reach those URLs.
  */
 class GoogleIdTokenVerifier
 {
     private const CACHE_KEY = 'google_jwks';
+    private const STORE_FILE = 'google-jwks.json';
     private const ISSUERS = ['accounts.google.com', 'https://accounts.google.com'];
     private const LEEWAY_SECONDS = 120;
 
@@ -65,7 +67,7 @@ class GoogleIdTokenVerifier
     /** PEM public key for a key id, refreshing the key set once if the id is unknown. */
     private function publicKey(string $kid): string
     {
-        $keys = Cache::get(self::CACHE_KEY);
+        $keys = $this->storedKeys();
         // Refetch when there are no keys, or for an unknown key id at most once per 5 minutes, so
         // tokens with made-up key ids cannot trigger an outbound request on every call.
         if (!is_array($keys) || (!isset($keys[$kid]) && Cache::add(self::CACHE_KEY . '_refetch', 1, 300))) {
@@ -80,6 +82,45 @@ class GoogleIdTokenVerifier
         return $keys[$kid];
     }
 
+    /**
+     * Saves a JWKS (Google's `{"keys": [...]}` format) as the current key set, in cache and on
+     * disk so it survives cache clears. Returns the number of usable RSA keys (0 = nothing saved).
+     * Used by the fetcher below and by the push endpoint the GitHub workflow calls.
+     */
+    public function storeKeys(mixed $jwks): int
+    {
+        $pems = [];
+        foreach (is_array($jwks) ? $jwks : [] as $jwk) {
+            if (is_array($jwk) && ($jwk['kty'] ?? null) === 'RSA' && !empty($jwk['kid']) && !empty($jwk['n']) && !empty($jwk['e'])) {
+                $pem = $this->rsaPem((string) $jwk['n'], (string) $jwk['e']);
+                if (openssl_pkey_get_public($pem) !== false) {
+                    $pems[(string) $jwk['kid']] = $pem;
+                }
+            }
+        }
+        if ($pems) {
+            Cache::forever(self::CACHE_KEY, $pems);
+            Storage::disk('local')->put(self::STORE_FILE, json_encode($pems));
+        }
+        return count($pems);
+    }
+
+    /** kid => PEM from cache, falling back to the copy on disk. */
+    private function storedKeys(): ?array
+    {
+        $keys = Cache::get(self::CACHE_KEY);
+        if (is_array($keys)) {
+            return $keys;
+        }
+        $disk = Storage::disk('local');
+        $keys = $disk->exists(self::STORE_FILE) ? json_decode((string) $disk->get(self::STORE_FILE), true) : null;
+        if (is_array($keys) && $keys) {
+            Cache::forever(self::CACHE_KEY, $keys);
+            return $keys;
+        }
+        return null;
+    }
+
     /** kid => PEM from the first source that answers with a valid JWKS; null if none does. */
     private function fetchKeys(): ?array
     {
@@ -87,16 +128,8 @@ class GoogleIdTokenVerifier
         foreach ($sources as $url) {
             try {
                 $response = Http::timeout(5)->connectTimeout(3)->get($url);
-                $jwks = $response->successful() ? $response->json('keys') : null;
-                $pems = [];
-                foreach (is_array($jwks) ? $jwks : [] as $jwk) {
-                    if (($jwk['kty'] ?? null) === 'RSA' && !empty($jwk['kid']) && !empty($jwk['n']) && !empty($jwk['e'])) {
-                        $pems[$jwk['kid']] = $this->rsaPem($jwk['n'], $jwk['e']);
-                    }
-                }
-                if ($pems) {
-                    Cache::put(self::CACHE_KEY, $pems, now()->addDays(7));
-                    return $pems;
+                if ($response->successful() && $this->storeKeys($response->json('keys')) > 0) {
+                    return $this->storedKeys();
                 }
             } catch (\Throwable $e) {
                 Log::warning("Google JWKS source failed ($url): " . $e->getMessage());

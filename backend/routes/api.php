@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GoogleJwksController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DhikrController;
@@ -21,6 +22,8 @@ use App\Http\Controllers\AppInboxController;
 Route::post('app-feedback', [AppInboxController::class, 'sendFeedback'])->middleware('throttle:5,1');
 Route::get('app-notices', [AppInboxController::class, 'notices'])->middleware('throttle:60,1');
 Route::post('app-notices/{id}/read', [AppInboxController::class, 'markRead'])->middleware('throttle:60,1');
+// Google sign-in keys pushed by the Nour-Adhkar-App GitHub workflow (server cannot reach Google).
+Route::post('internal/google-jwks', [GoogleJwksController::class, 'store'])->middleware('throttle:10,1');
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
