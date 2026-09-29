@@ -45,6 +45,8 @@ return [
         'client_ids' => env('GOOGLE_CLIENT_IDS', ''),
         // Google's public signing keys, tried in order. Google itself is unreachable from Iran,
         // so a mirror refreshed by a GitHub Action (Nour-Adhkar-App/.github/workflows/google-jwks.yml) follows.
+        // Shared secret the GitHub workflow uses to push keys to POST /api/internal/google-jwks.
+        'jwks_push_token' => env('GOOGLE_JWKS_PUSH_TOKEN', ''),
         'jwks_urls' => env('GOOGLE_JWKS_URLS', 'https://www.googleapis.com/oauth2/v3/certs,https://raw.githubusercontent.com/edrisranjbar/Nour-Adhkar-App/main/google-jwks.json'),
     ],
 

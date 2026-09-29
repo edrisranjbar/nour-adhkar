@@ -49,6 +49,7 @@ function idToken($privateKey, string $kid, array $overrides = []): string
 
 beforeEach(function () {
     Cache::flush();
+    Illuminate\Support\Facades\Storage::fake('local');
     config([
         'services.google.client_ids' => TEST_CLIENT_ID,
         'services.google.jwks_urls' => GOOGLE_CERTS . ',' . MIRROR_CERTS,
@@ -97,6 +98,30 @@ it('refetches keys for an unknown key id at most once per five minutes', functio
     }
     // One refetch (Google + mirror) for the first unknown id, none for the rest.
     expect(count(Http::recorded()) - $before)->toBe(2);
+});
+
+it('accepts keys pushed with the shared token and uses them when nothing outside is reachable', function () {
+    Illuminate\Support\Facades\Storage::fake('local');
+    config(['services.google.jwks_push_token' => 'push-secret']);
+    [$key, $jwk] = testKey();
+    Http::fake(['*' => fn () => throw new Illuminate\Http\Client\ConnectionException('refused')]);
+
+    $this->postJson('/api/internal/google-jwks', ['keys' => [$jwk]])->assertUnauthorized();
+    $this->withToken('wrong')->postJson('/api/internal/google-jwks', ['keys' => [$jwk]])->assertUnauthorized();
+    $this->withToken('push-secret')->postJson('/api/internal/google-jwks', ['keys' => [['kty' => 'RSA', 'kid' => 'x']]])
+        ->assertUnprocessable();
+    $this->withToken('push-secret')->postJson('/api/internal/google-jwks', ['keys' => [$jwk]])
+        ->assertOk()->assertJsonPath('stored', 1);
+
+    // Survives a cache clear: the keys are also kept on disk.
+    Cache::flush();
+    $this->flushHeaders()->postJson('/api/auth/google', ['id_token' => idToken($key, 'kid-1')])->assertCreated();
+});
+
+it('refuses pushes when no push token is configured', function () {
+    config(['services.google.jwks_push_token' => '']);
+    [, $jwk] = testKey();
+    $this->withToken('')->postJson('/api/internal/google-jwks', ['keys' => [$jwk]])->assertUnauthorized();
 });
 
 it('answers with a friendly Persian 503 when no key source is reachable', function () {
