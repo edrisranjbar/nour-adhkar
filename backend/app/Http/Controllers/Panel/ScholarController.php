@@ -42,8 +42,9 @@ class ScholarController extends Controller
 
     public function update(Request $request, int $id)
     {
-        abort_unless(DB::table('scholars')->where('id', $id)->exists(), 404);
-        DB::table('scholars')->where('id', $id)->update($this->validated($request, $id) + ['updated_at' => now()]);
+        $existing = DB::table('scholars')->find($id);
+        abort_unless($existing, 404);
+        DB::table('scholars')->where('id', $id)->update($this->validated($request, $existing) + ['updated_at' => now()]);
         return redirect()->route('panel.scholars.index')->with('status', 'اطلاعات استاد به‌روزرسانی شد.');
     }
 
@@ -67,24 +68,44 @@ class ScholarController extends Controller
         foreach (DB::table('lectures')->where('scholar_id', $id)->whereNotNull('audio_path')->pluck('audio_path') as $path) {
             Storage::disk('public')->delete($path);
         }
+        if ($photo = DB::table('scholars')->where('id', $id)->value('photo_path')) {
+            Storage::disk('public')->delete($photo);
+        }
         DB::table('scholars')->where('id', $id)->delete();
         return back()->with('status', 'استاد و سخنرانی‌هایش حذف شدند.');
     }
 
-    private function validated(Request $request, ?int $id = null): array
+    private function validated(Request $request, ?object $existing = null): array
     {
         $data = $request->validate([
             'name' => 'required|string|max:120',
-            'slug' => ['required', 'string', 'max:40', 'regex:/^[a-z0-9_-]+$/', Rule::unique('scholars', 'slug')->ignore($id)],
+            'slug' => ['required', 'string', 'max:40', 'regex:/^[a-z0-9_-]+$/', Rule::unique('scholars', 'slug')->ignore($existing?->id)],
             'tagline' => 'nullable|string|max:160',
             'bio' => 'nullable|string|max:5000',
             'hue' => 'required|integer|min:0|max:360',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
         ], [
             'slug.regex' => 'شناسه فقط می‌تواند حروف کوچک انگلیسی، عدد، خط تیره و زیرخط داشته باشد.',
             'slug.unique' => 'این شناسه قبلاً استفاده شده است.',
+            'photo.image' => 'عکس باید تصویر باشد.',
+            'photo.mimes' => 'عکس باید jpg، png یا webp باشد.',
+            'photo.max' => 'حجم عکس حداکثر ۳ مگابایت است.',
         ], [
-            'name' => 'نام', 'slug' => 'شناسه', 'tagline' => 'زیرعنوان', 'bio' => 'معرفی', 'hue' => 'رنگ جلد',
+            'name' => 'نام', 'slug' => 'شناسه', 'tagline' => 'زیرعنوان', 'bio' => 'معرفی', 'hue' => 'رنگ جلد', 'photo' => 'عکس',
         ]);
+        unset($data['photo']);
+
+        if ($request->hasFile('photo')) {
+            // A new photo replaces the previous file.
+            if ($existing?->photo_path) {
+                Storage::disk('public')->delete($existing->photo_path);
+            }
+            $data['photo_path'] = $request->file('photo')->store('scholars', 'public');
+        } elseif ($request->boolean('remove_photo') && $existing?->photo_path) {
+            Storage::disk('public')->delete($existing->photo_path);
+            $data['photo_path'] = null;
+        }
+
         return $data + ['published' => $request->boolean('published')];
     }
 }

@@ -99,3 +99,41 @@ it('keeps the admin pages behind the panel login', function () {
     $this->get("/admin/scholars/$id/lectures/create")->assertOk();
     $this->get('/admin/scholars/create')->assertOk();
 });
+
+it('renames Sheikh Pordel and serves no photo until one is uploaded', function () {
+    $pordel = collect($this->getJson('/api/scholars')->json('data'))->firstWhere('id', 'pordel');
+    expect($pordel['name'])->toBe('شیخ محمد صالح پردل')->and($pordel['photoUrl'])->toBeNull();
+});
+
+it('uploads, replaces and removes a scholar photo, and deletes it with the scholar', function () {
+    $this->actingAs(scholarsAdmin(), 'admin');
+    $scholar = DB::table('scholars')->where('slug', 'ziaei')->first();
+    $fields = ['name' => $scholar->name, 'slug' => 'ziaei', 'tagline' => $scholar->tagline, 'hue' => $scholar->hue, 'published' => 1];
+
+    $this->put("/admin/scholars/{$scholar->id}", $fields + ['photo' => UploadedFile::fake()->image('a.jpg', 400, 400)])->assertRedirect();
+    $first = DB::table('scholars')->find($scholar->id)->photo_path;
+    Storage::disk('public')->assertExists($first);
+    $ziaei = collect($this->getJson('/api/scholars')->json('data'))->firstWhere('id', 'ziaei');
+    expect($ziaei['photoUrl'])->toStartWith('http')->toContain('/storage/scholars/');
+
+    // Saving without a new file keeps the photo; a new file replaces the old one.
+    $this->put("/admin/scholars/{$scholar->id}", $fields)->assertRedirect();
+    expect(DB::table('scholars')->find($scholar->id)->photo_path)->toBe($first);
+    $this->put("/admin/scholars/{$scholar->id}", $fields + ['photo' => UploadedFile::fake()->image('b.png', 300, 300)])->assertRedirect();
+    $second = DB::table('scholars')->find($scholar->id)->photo_path;
+    Storage::disk('public')->assertMissing($first);
+    Storage::disk('public')->assertExists($second);
+
+    // Non-images are rejected.
+    $this->put("/admin/scholars/{$scholar->id}", $fields + ['photo' => UploadedFile::fake()->create('x.pdf', 10, 'application/pdf')])
+        ->assertSessionHasErrors('photo');
+
+    $this->put("/admin/scholars/{$scholar->id}", $fields + ['remove_photo' => 1])->assertRedirect();
+    Storage::disk('public')->assertMissing($second);
+    expect(DB::table('scholars')->find($scholar->id)->photo_path)->toBeNull();
+
+    $this->put("/admin/scholars/{$scholar->id}", $fields + ['photo' => UploadedFile::fake()->image('c.webp', 200, 200)]);
+    $third = DB::table('scholars')->find($scholar->id)->photo_path;
+    $this->delete("/admin/scholars/{$scholar->id}")->assertRedirect();
+    Storage::disk('public')->assertMissing($third);
+});

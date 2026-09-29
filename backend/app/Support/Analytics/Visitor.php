@@ -16,7 +16,18 @@ class Visitor
     {
         $day = now('Asia/Tehran')->toDateString();
 
-        return hash('sha256', $day.'|'.$request->ip().'|'.($userAgent ?? '').'|'.config('app.key'));
+        return hash('sha256', $day.'|'.self::clientIp($request).'|'.($userAgent ?? '').'|'.config('app.key'));
+    }
+
+    /**
+     * The visitor's own IP. ArvanCloud also passes it in "ar-real-ip"; otherwise use the
+     * address resolved through the trusted proxies (X-Forwarded-For). Only used for hashing.
+     */
+    public static function clientIp(Request $request): ?string
+    {
+        $cdn = trim((string) $request->header('ar-real-ip'));
+
+        return filter_var($cdn, FILTER_VALIDATE_IP) ? $cdn : $request->ip();
     }
 
     public static function isBot(?string $userAgent): bool
