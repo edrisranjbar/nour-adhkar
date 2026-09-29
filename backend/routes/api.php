@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ScholarController;
 use App\Http\Controllers\GoogleJwksController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\PasswordResetCodeController;
@@ -43,6 +44,7 @@ Route::prefix('auth')->group(function () {
 });
 
 // Public content routes
+Route::get('scholars', [ScholarController::class, 'index']);
 Route::get('adhkars', [AdhkarController::class, 'index']);
 Route::get('collections', [CollectionController::class, 'index']);
 Route::get('collections/{slug}', [CollectionController::class, 'show']);
