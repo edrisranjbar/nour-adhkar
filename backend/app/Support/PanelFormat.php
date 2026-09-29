@@ -32,4 +32,32 @@ class PanelFormat
         }
         return self::digits($date->format('Y/m/d – H:i'));
     }
+
+    // Short Solar Hijri day label (e.g. ۰۷/۰۵) for a Tehran Y-m-d key.
+    public static function day(string $ymd): string
+    {
+        $date = Carbon::parse($ymd, 'Asia/Tehran');
+        if (class_exists(\IntlDateFormatter::class)) {
+            $formatter = new \IntlDateFormatter('fa_IR@calendar=persian', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, 'Asia/Tehran', \IntlDateFormatter::TRADITIONAL, 'd MMMM');
+            $formatted = $formatter->format($date);
+            if ($formatted !== false) {
+                return self::digits($formatted);
+            }
+        }
+        return self::digits($date->format('m/d'));
+    }
+
+    public static function decimal($value): string
+    {
+        return self::digits(str_replace('.', '٫', (string) $value));
+    }
+
+    /** Percentage change against the previous period, or null when there is nothing to compare. */
+    public static function delta(?float $now, ?float $before): ?int
+    {
+        if ($before === null || $now === null || $before == 0) {
+            return null;
+        }
+        return (int) round(($now - $before) * 100 / $before);
+    }
 }

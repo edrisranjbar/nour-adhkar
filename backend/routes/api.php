@@ -56,6 +56,7 @@ Route::post('comments', [CommentController::class, 'store']);
 
 // Public analytics route (track page visit)
 Route::post('analytics/visit', [AnalyticsController::class, 'track'])->middleware('throttle:60,1');
+Route::post('analytics/event', [AnalyticsController::class, 'event'])->middleware('throttle:60,1');
 
 // Public donation routes
 Route::prefix('donations')->group(function () {

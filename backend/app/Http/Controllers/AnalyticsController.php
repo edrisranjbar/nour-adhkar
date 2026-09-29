@@ -7,15 +7,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use App\Support\Analytics\Visitor;
 
 class AnalyticsController extends Controller
 {
+    // Landing-page actions the site may report; anything else is rejected.
+    public const EVENTS = ['store_click', 'donate_click', 'github_click', 'video_play', 'video_unmute', 'lang_switch', 'theme_toggle', 'section_view'];
+
     public function track(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'path' => 'required|string|max:255',
             'referrer' => 'nullable|string|max:255',
             'ua' => 'nullable|string|max:512',
+            'session_id' => 'nullable|string|max:64',
+            'lang' => 'nullable|string|max:8',
+            'utm_source' => 'nullable|string|max:100',
+            'utm_medium' => 'nullable|string|max:100',
+            'utm_campaign' => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -24,33 +34,32 @@ class AnalyticsController extends Controller
 
         try {
             $data = $validator->validated();
-            $ip = $request->ip();
             $userAgent = $data['ua'] ?? $request->userAgent();
 
-            // Basic UA parse (very naive)
-            $browser = null;
-            if ($userAgent) {
-                $ua = strtolower($userAgent);
-                $browser = str_contains($ua, 'chrome') ? 'Chrome'
-                    : (str_contains($ua, 'firefox') ? 'Firefox'
-                    : (str_contains($ua, 'safari') ? 'Safari'
-                    : (str_contains($ua, 'edge') ? 'Edge'
-                    : (str_contains($ua, 'opera') || str_contains($ua, 'opr') ? 'Opera'
-                    : null))));
+            if (Visitor::isBot($userAgent)) {
+                return response()->json(['success' => true]);
             }
 
-            // Country detection: use Cloudflare or Proxy headers if present
+            $client = Visitor::parse($userAgent);
             $country = $request->header('CF-IPCountry');
-            $countryCode = $country ? strtoupper($country) : null;
 
             DB::table('page_visits')->insert([
                 'path' => $data['path'],
                 'referrer' => $data['referrer'] ?? null,
-                'ip' => $ip,
+                'referrer_host' => Visitor::referrerHost($data['referrer'] ?? null),
+                'ip' => null,
+                'visitor_hash' => Visitor::hash($request, $userAgent),
+                'session_id' => $data['session_id'] ?? null,
                 'user_agent' => $userAgent,
-                'browser' => $browser,
+                'browser' => $client['browser'],
+                'os' => $client['os'],
+                'device' => $client['device'],
+                'lang' => isset($data['lang']) ? strtolower($data['lang']) : null,
                 'country' => null,
-                'country_code' => $countryCode,
+                'country_code' => $country ? strtoupper(substr($country, 0, 2)) : null,
+                'utm_source' => $data['utm_source'] ?? null,
+                'utm_medium' => $data['utm_medium'] ?? null,
+                'utm_campaign' => $data['utm_campaign'] ?? null,
                 'visited_at' => now(),
             ]);
 
@@ -58,6 +67,30 @@ class AnalyticsController extends Controller
         } catch (\Throwable $e) {
             return response()->json(['success' => false], 500);
         }
+    }
+
+    public function event(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', Rule::in(self::EVENTS)],
+            'label' => 'nullable|string|max:100',
+            'path' => 'nullable|string|max:255',
+            'session_id' => 'nullable|string|max:64',
+        ]);
+
+        $userAgent = $request->userAgent();
+        if (!Visitor::isBot($userAgent)) {
+            DB::table('analytics_events')->insert([
+                'name' => $data['name'],
+                'label' => $data['label'] ?? null,
+                'path' => $data['path'] ?? null,
+                'visitor_hash' => Visitor::hash($request, $userAgent),
+                'session_id' => $data['session_id'] ?? null,
+                'created_at' => now(),
+            ]);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     public function overview(Request $request)

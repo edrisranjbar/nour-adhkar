@@ -1,6 +1,7 @@
 ﻿import { createRouter, createWebHistory } from 'vue-router';
 import store from '../store';
 import { routes } from './routes';
+import { trackVisit } from '../services/analytics';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,18 +44,8 @@ router.afterEach((to) => {
       document.querySelector('html').setAttribute('http-equiv-status', '404');
     }
   }
-  // Lightweight page visit tracking (skip admin routes)
-  try {
-    if (!to.path.startsWith('/admin')) {
-      const path = to.fullPath || to.path
-      const referrer = document.referrer || null
-      const ua = navigator.userAgent
-      // Use relative API path; axios baseURL is already set
-      import('axios').then(({ default: axios }) => {
-        axios.post('analytics/visit', { path, referrer, ua }).catch(() => {})
-      })
-    }
-  } catch (_) {}
+  // First-party page visit tracking (skip admin routes)
+  if (!to.path.startsWith('/admin')) trackVisit(to.path)
 });
 
 export default router

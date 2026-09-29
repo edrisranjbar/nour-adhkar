@@ -78,6 +78,7 @@
             main { padding: 20px 16px; }
         }
     </style>
+    @stack('head')
 </head>
 <body>
 @auth('admin')
@@ -86,6 +87,7 @@
         <div class="brand">اذکار نور<small>مدیریت برنامه</small></div>
         <nav>
             <a href="{{ route('panel.dashboard') }}" @class(['active' => request()->routeIs('panel.dashboard')])>داشبورد</a>
+            <a href="{{ route('panel.analytics') }}" @class(['active' => request()->routeIs('panel.analytics')])>آمار</a>
             <a href="{{ route('panel.notices.index') }}" @class(['active' => request()->routeIs('panel.notices.*')])>پیام‌ها</a>
             <a href="{{ route('panel.feedback.index') }}" @class(['active' => request()->routeIs('panel.feedback.*')])>بازخوردها</a>
             <a href="{{ route('panel.users.index') }}" @class(['active' => request()->routeIs('panel.users.*')])>کاربران</a>

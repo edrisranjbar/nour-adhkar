@@ -16,6 +16,7 @@ Route::prefix('admin')->name('panel.')->group(function () {
     Route::middleware(PanelAdmin::class)->group(function () {
         Route::post('logout', [Panel\AuthController::class, 'logout'])->name('logout');
         Route::get('/', Panel\DashboardController::class)->name('dashboard');
+        Route::get('analytics', Panel\AnalyticsController::class)->name('analytics');
 
         Route::get('feedback', [Panel\FeedbackController::class, 'index'])->name('feedback.index');
         Route::delete('feedback/{id}', [Panel\FeedbackController::class, 'destroy'])->name('feedback.destroy');

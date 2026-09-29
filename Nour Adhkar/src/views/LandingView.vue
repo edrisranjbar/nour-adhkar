@@ -51,7 +51,7 @@
             <p class="tagline rise" style="--d: 2">{{ t.tagline }}</p>
             <p class="lead rise" style="--d: 3">{{ t.lead }}</p>
             <div class="cta rise" style="--d: 4">
-              <a class="lbtn primary" :href="storeUrl" target="_blank" rel="noopener noreferrer">
+              <a class="lbtn primary" :href="storeUrl" target="_blank" rel="noopener noreferrer" @click="track('store_click', 'hero')">
                 {{ t.download }}
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14" /></svg>
               </a>
@@ -72,7 +72,7 @@
                 loop
                 playsinline
                 preload="metadata"
-                @play="playing = true"
+                @play="onPlay"
                 @pause="playing = false"
               ></video>
               <div class="video-ctrl">
@@ -162,8 +162,8 @@
               <p>{{ t.finalSub }}</p>
             </div>
             <div class="cta">
-              <a class="lbtn light" :href="storeUrl" target="_blank" rel="noopener noreferrer">{{ t.download }}</a>
-              <a class="lbtn outline" href="https://edrisranjbar.ir/donation" target="_blank" rel="noopener noreferrer">{{ t.support }}</a>
+              <a class="lbtn light" :href="storeUrl" target="_blank" rel="noopener noreferrer" @click="track('store_click', 'footer')">{{ t.download }}</a>
+              <a class="lbtn outline" href="https://edrisranjbar.ir/donation" target="_blank" rel="noopener noreferrer" @click="track('donate_click')">{{ t.support }}</a>
             </div>
           </div>
         </section>
@@ -174,13 +174,14 @@
       <span>{{ t.footer }}</span>
       <nav :aria-label="t.footLabel">
         <router-link to="/privacy">{{ t.navPrivacy }}</router-link>
-        <a href="https://github.com/edrisranjbar/Nour-Adhkar-App" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/edrisranjbar/Nour-Adhkar-App" target="_blank" rel="noopener noreferrer" @click="track('github_click')">GitHub</a>
       </nav>
     </footer>
   </div>
 </template>
 
 <script>
+import { trackEvent } from '@/services/analytics'
 import introVideo from '@/assets/videos/nour-intro.mp4'
 import introPoster from '@/assets/videos/nour-intro-poster.jpg'
 import checklist from '@/assets/images/landing/checklist.webp'
@@ -264,7 +265,7 @@ const T = {
 
 const store = {
   get(k) { try { return localStorage.getItem(k) } catch (_) { return null } },
-  set(k, v) { try { localStorage.setItem(k, v) } catch (_) {} }
+  set(k, v) { try { localStorage.setItem(k, v) } catch (_) { /* storage unavailable: keep the in-memory value */ } }
 }
 
 export default {
@@ -279,6 +280,7 @@ export default {
       introVideo,
       introPoster,
       playing: false,
+      tracked: new Set(),
       muted: true,
       sizes,
       storeUrl: 'https://cafebazaar.ir/app/ir.adhkar.app'
@@ -291,9 +293,11 @@ export default {
     this.motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     this.observe()
     this.setupVideo()
+    this.watchSections()
   },
   beforeUnmount() {
     if (this.vio) this.vio.disconnect()
+    if (this.sio) this.sio.disconnect()
     if (this.io) this.io.disconnect()
   },
   methods: {
@@ -305,12 +309,14 @@ export default {
       if (l === this.lang) return
       this.lang = l
       store.set('nour-lang', l)
+      this.track('lang_switch', l)
       this.$nextTick(this.observe)
     },
     toggleTheme() {
       const dark = this.theme ? this.theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
       this.theme = dark ? 'light' : 'dark'
       store.set('nour-theme', this.theme)
+      this.track('theme_toggle', this.theme)
     },
     setupVideo() {
       const v = this.$refs.intro
@@ -322,6 +328,30 @@ export default {
       }, { threshold: 0.25 })
       this.vio.observe(v)
     },
+    track(name, label = null) {
+      trackEvent(name, label)
+    },
+    // Some events only make sense once per page view (e.g. the looping video).
+    trackOnce(name, label = null) {
+      const key = label ? `${name}:${label}` : name
+      if (this.tracked.has(key)) return
+      this.tracked.add(key)
+      trackEvent(name, label)
+    },
+    onPlay() {
+      this.playing = true
+      this.trackOnce('video_play', this.userPaused === false ? 'manual' : 'auto')
+    },
+    watchSections() {
+      if (!('IntersectionObserver' in window)) return
+      this.sio = new IntersectionObserver((entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { this.trackOnce('section_view', e.target.id); this.sio.unobserve(e.target) }
+      }), { threshold: 0.3 })
+      ;['features', 'privacy', 'download'].forEach((id) => {
+        const el = this.$el.querySelector('#' + id)
+        if (el) this.sio.observe(el)
+      })
+    },
     togglePlay() {
       const v = this.$refs.intro
       if (v.paused) { this.userPaused = false; v.play().catch(() => {}) } else { this.userPaused = true; v.pause() }
@@ -330,6 +360,7 @@ export default {
       const v = this.$refs.intro
       v.muted = !v.muted
       this.muted = v.muted
+      if (!v.muted) this.trackOnce('video_unmute')
       if (!v.muted && v.paused) { this.userPaused = false; v.play().catch(() => {}) }
     },
     observe() {
