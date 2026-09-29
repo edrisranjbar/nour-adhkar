@@ -26,8 +26,13 @@
                     </form>
                 </td>
                 <td>
-                    <span aria-hidden="true" style="display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;background:hsl({{ $item->hue }},45%,40%)"></span>
+                    @if ($item->photo_path)
+                        <img src="{{ asset('storage/' . $item->photo_path) }}" alt="" style="width:36px;height:36px;border-radius:10px;object-fit:cover;vertical-align:middle">
+                    @else
+                        <span title="بدون عکس" aria-hidden="true" style="display:inline-block;width:36px;height:36px;border-radius:10px;vertical-align:middle;background:hsl({{ $item->hue }},45%,40%)"></span>
+                    @endif
                     <strong>{{ $item->name }}</strong>
+                    @unless ($item->photo_path)<span class="badge draft">بدون عکس</span>@endunless
                     <div class="muted msg">{{ $item->tagline }} <span dir="ltr">({{ $item->slug }})</span></div>
                 </td>
                 <td>

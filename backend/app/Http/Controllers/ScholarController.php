@@ -26,6 +26,8 @@ class ScholarController extends Controller
             'tagline' => (string) $s->tagline,
             'bio' => (string) $s->bio,
             'hue' => (int) $s->hue,
+            // Absolute URL of the uploaded photo, or null (the app then draws generated cover art).
+            'photoUrl' => $s->photo_path ? asset('storage/' . ltrim($s->photo_path, '/')) : null,
             'lectures' => ($lectures[$s->id] ?? collect())
                 ->map(fn ($l) => array_filter([
                     'id' => (string) $l->id,
