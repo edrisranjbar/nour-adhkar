@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GoogleJwksController;
 use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\PasswordResetCodeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DhikrController;
 use App\Http\Controllers\AdhkarController;
@@ -30,6 +31,8 @@ Route::prefix('auth')->group(function () {
     Route::post('google', [AuthController::class, 'googleLogin'])->middleware('throttle:10,1');
     Route::post('verify-email', [EmailVerificationController::class, 'verify'])->middleware('throttle:10,1');
     Route::post('resend-code', [EmailVerificationController::class, 'resend'])->middleware('throttle:5,1');
+    Route::post('password-reset/request', [PasswordResetCodeController::class, 'request'])->middleware('throttle:5,1');
+    Route::post('password-reset/confirm', [PasswordResetCodeController::class, 'confirm'])->middleware('throttle:10,1');
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:10,1');
     Route::post('resend-password-reset', [AuthController::class, 'resendPasswordReset'])->middleware('throttle:10,1');

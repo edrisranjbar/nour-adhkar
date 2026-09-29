@@ -8,7 +8,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-/** Branded Adhkar Nour email carrying a one-time 5-digit verification code (sent through Resend). */
+/**
+ * Branded Adhkar Nour email carrying a one-time 5-digit code (sent through Resend).
+ * $purpose is 'verify' (confirm email) or 'reset' (password reset); it changes the wording.
+ */
 class EmailVerificationCode extends Mailable
 {
     use Queueable, SerializesModels;
@@ -17,12 +20,14 @@ class EmailVerificationCode extends Mailable
         public string $code,
         public ?string $name,
         public int $expiresInMinutes,
+        public string $purpose = 'verify',
     ) {
     }
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'کد تأیید ایمیل اذکار نور: ' . $this->code);
+        $subject = $this->purpose === 'reset' ? 'کد بازیابی رمز عبور اذکار نور: ' : 'کد تأیید ایمیل اذکار نور: ';
+        return new Envelope(subject: $subject . $this->code);
     }
 
     public function content(): Content
