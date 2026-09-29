@@ -1,0 +1,61 @@
+name: Deploy
+
+# Runs when develop is merged into main: deploys the Laravel API and the website.
+# The server (Iran) cannot reach GitHub's download hosts, Packagist or npm reliably, so
+# dependencies are built here and uploaded; the server only pulls code and runs deploy/deploy.sh.
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", "Nour Adhkar/**", "deploy/**", ".github/workflows/deploy.yml"]
+  workflow_dispatch:
+
+concurrency: deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, intl, zip, pdo_mysql, bcmath, gd
+          tools: composer
+
+      - name: Build backend vendor
+        working-directory: backend
+        run: |
+          composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+          tar czf ../backend-vendor.tgz vendor
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build website
+        working-directory: Nour Adhkar
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          tar czf ../web-dist.tgz -C dist .
+
+      - name: Deploy over SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
+          WEB_ROOT: ${{ vars.DEPLOY_WEB_ROOT }}
+        run: |
+          test -n "$APP_DIR" || { echo "::error::Set the DEPLOY_APP_DIR repository variable"; exit 1; }
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_ed25519
+          echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+          scp -P "$SSH_PORT" backend-vendor.tgz web-dist.tgz "$SSH_USER@$SSH_HOST:$APP_DIR/../"
+          # Update the checkout first so the deploy script itself is always current.
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "cd '$APP_DIR' && git fetch --quiet origin main && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
