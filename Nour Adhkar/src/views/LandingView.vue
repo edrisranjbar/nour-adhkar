@@ -28,7 +28,7 @@
     <main id="main">
       <div :key="lang" class="swap">
         <!-- Hero -->
-        <section id="top" class="hero" :style="heroVars">
+        <section id="top" class="hero">
           <svg class="hero-pattern" aria-hidden="true" width="100%" height="100%">
             <defs>
               <pattern id="khatam" width="72" height="72" patternUnits="userSpaceOnUse">
@@ -59,18 +59,37 @@
             </div>
           </div>
 
-          <div class="stage">
-            <figure class="shot phone p-side p-start">
-              <img :src="shots.adhkar" :alt="t.alt.adhkar" width="576" height="1280" />
-            </figure>
-            <figure class="shot phone p-center">
-              <img class="for-light" :src="shots.home" :alt="t.alt.home" width="576" height="1280" fetchpriority="high" />
-              <img class="for-dark" :src="shots.homeDark" :alt="t.alt.homeDark" width="576" height="1280" />
-            </figure>
-            <figure class="shot phone p-side p-end">
-              <img class="for-light" :src="shots.homeDark" :alt="t.alt.homeDark" width="576" height="1280" />
-              <img class="for-dark" :src="shots.home" :alt="t.alt.home" width="576" height="1280" />
-            </figure>
+          <div class="wrap stage">
+            <div class="video-frame">
+              <video
+                ref="intro"
+                :src="introVideo"
+                :poster="introPoster"
+                :aria-label="t.videoLabel"
+                width="1280"
+                height="720"
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                @play="playing = true"
+                @pause="playing = false"
+              ></video>
+              <div class="video-ctrl">
+                <button type="button" @click="togglePlay" :aria-label="playing ? t.pause : t.play">
+                  <svg v-if="playing" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+                  <svg v-else viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
+                </button>
+                <button type="button" @click="toggleSound" :aria-label="muted ? t.unmute : t.mute" :aria-pressed="!muted">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 10v4h4l5 4V6L8 10z" fill="currentColor" />
+                    <path v-if="muted" d="m16 9 5 6m0-6-5 6" />
+                    <path v-else d="M16 9a4 4 0 0 1 0 6m2.5-8.5a7.5 7.5 0 0 1 0 11" />
+                  </svg>
+                  <span>{{ muted ? t.unmute : t.mute }}</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="ticker" aria-hidden="true">
@@ -162,14 +181,14 @@
 </template>
 
 <script>
-import home from '@/assets/images/landing/home.webp'
-import homeDark from '@/assets/images/landing/home-dark.webp'
+import introVideo from '@/assets/videos/nour-intro.mp4'
+import introPoster from '@/assets/videos/nour-intro-poster.jpg'
 import checklist from '@/assets/images/landing/checklist.webp'
 import tasbih from '@/assets/images/landing/tasbih.webp'
 import prayer from '@/assets/images/landing/prayer.webp'
 import adhkar from '@/assets/images/landing/adhkar.webp'
 
-const shots = { home, homeDark, adhkar, prayer, checklist, tasbih }
+const shots = { adhkar, prayer, checklist, tasbih }
 const sizes = { adhkar: [576, 1280], prayer: [532, 402], checklist: [576, 1280], tasbih: [576, 1280] }
 
 const T = {
@@ -178,12 +197,12 @@ const T = {
     langLabel: 'زبان', themeLabel: 'تغییر حالت روشن و تاریک',
     name: 'اذکار نور', navFeatures: 'امکانات', navPrivacy: 'حریم خصوصی', navDownload: 'دریافت',
     nameA: 'اذکار', nameB: 'نور',
+    videoLabel: 'ویدیوی معرفی اذکار نور', play: 'پخش ویدیو', pause: 'توقف ویدیو', unmute: 'پخش صدا', mute: 'بی‌صدا',
     tagline: 'اپلیکیشن جامع اذکار و ادعیه اهل سنت',
     lead: 'اذکار صبح و شام، ادعیهٔ قرآنی و دعاهای سنت، اوقات شرعی و ذکرشمار؛ آفلاین و بدون تبلیغ.',
     ticker: ['اذکار صبحگاه', 'اذکار شامگاه', 'ادعیهٔ قرآنی', 'دعاهای سنت', 'اوقات شرعی', 'ذکرشمار', 'قبله‌نما', 'قرآن کریم', 'چک‌لیست روزانه', 'پخش صوتی'],
     download: 'دریافت از کافه‌بازار', explore: 'دیدن امکانات',
     verseRef: 'سورهٔ رعد، آیهٔ ۲۸',
-    alt: { adhkar: 'صفحهٔ اذکار صبحگاه با پخش صوتی و متن عربی', home: 'صفحهٔ اصلی اذکار نور با استمرار عبادت و اذکار صبحگاه و شامگاه', homeDark: 'صفحهٔ اصلی اذکار نور در حالت تاریک' },
     featTitle: 'آنچه در برنامه پیدا می‌کنید',
     feats: [
       { key: 'adhkar', title: 'اذکار صبح و شام', text: 'هر ذکر با متن عربی خوانا، ترجمهٔ فارسی و شمارندهٔ تکرار نمایش داده می‌شود.', points: ['پخش صوتی با صدای مشاری راشد العفاسی', 'افزودن به علاقه‌مندی‌ها و اشتراک‌گذاری ذکر', 'اذکار خواب، روزانه، ادعیهٔ قرآنی و دعاهای سنت'], alt: 'صفحهٔ اذکار صبحگاه با پخش صوتی، متن عربی آیةالکرسی و ترجمهٔ فارسی' },
@@ -212,12 +231,12 @@ const T = {
     langLabel: 'اللغة', themeLabel: 'تبديل الوضع الفاتح والداكن',
     name: 'أذكار نور', navFeatures: 'المزايا', navPrivacy: 'الخصوصية', navDownload: 'التحميل',
     nameA: 'أذكار', nameB: 'نور',
+    videoLabel: 'فيديو تعريفي بأذكار نور', play: 'تشغيل الفيديو', pause: 'إيقاف الفيديو', unmute: 'تشغيل الصوت', mute: 'كتم الصوت',
     tagline: 'التطبيق الشامل لأذكار وأدعية أهل السنة',
     lead: 'أذكار الصباح والمساء، والأدعية القرآنية والنبوية، ومواقيت الصلاة، وعدّاد الذكر؛ دون اتصال وبلا إعلانات.',
     ticker: ['أذكار الصباح', 'أذكار المساء', 'أدعية قرآنية', 'أدعية نبوية', 'مواقيت الصلاة', 'عدّاد الذكر', 'اتجاه القبلة', 'القرآن الكريم', 'المهام اليومية', 'التشغيل الصوتي'],
     download: 'حمّل من كافه بازار', explore: 'استعرض المزايا',
     verseRef: 'سورة الرعد، الآية ٢٨',
-    alt: { adhkar: 'شاشة أذكار الصباح مع التشغيل الصوتي', home: 'الشاشة الرئيسية لأذكار نور مع سلسلة المداومة وأذكار الصباح والمساء', homeDark: 'الشاشة الرئيسية لأذكار نور في الوضع الداكن' },
     featTitle: 'ما ستجده في التطبيق',
     feats: [
       { key: 'adhkar', title: 'أذكار الصباح والمساء', text: 'كل ذكر بنصه العربي الواضح وعدّاد للتكرار.', points: ['تشغيل صوتي بصوت مشاري راشد العفاسي', 'الإضافة إلى المفضلة ومشاركة الذكر', 'أذكار النوم واليوم والأدعية القرآنية والنبوية'], alt: 'شاشة أذكار الصباح مع التشغيل الصوتي ونص آية الكرسي' },
@@ -255,24 +274,26 @@ export default {
     return {
       lang: store.get('nour-lang') || (nav.startsWith('ar') ? 'ar' : 'fa'),
       theme: store.get('nour-theme') || '',
-      scrollY: 0,
       motion: true,
       shots,
+      introVideo,
+      introPoster,
+      playing: false,
+      muted: true,
       sizes,
       storeUrl: 'https://cafebazaar.ir/app/ir.adhkar.app'
     }
   },
   computed: {
-    t() { return T[this.lang] },
-    heroVars() { return this.motion ? { '--s': (this.scrollY / 600).toFixed(3) } : null }
+    t() { return T[this.lang] }
   },
   mounted() {
     this.motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (this.motion) window.addEventListener('scroll', this.onScroll, { passive: true })
     this.observe()
+    this.setupVideo()
   },
   beforeUnmount() {
-    window.removeEventListener('scroll', this.onScroll)
+    if (this.vio) this.vio.disconnect()
     if (this.io) this.io.disconnect()
   },
   methods: {
@@ -291,12 +312,25 @@ export default {
       this.theme = dark ? 'light' : 'dark'
       store.set('nour-theme', this.theme)
     },
-    onScroll() {
-      if (this.raf) return
-      this.raf = requestAnimationFrame(() => { this.scrollY = Math.min(window.scrollY, 900); this.raf = null })
+    setupVideo() {
+      const v = this.$refs.intro
+      if (!v || !this.motion) return
+      // Autoplay only while visible, so the loop never runs off-screen.
+      this.vio = new IntersectionObserver(([e]) => {
+        if (e.isIntersecting && !this.userPaused) v.play().catch(() => {})
+        else if (!e.isIntersecting) v.pause()
+      }, { threshold: 0.25 })
+      this.vio.observe(v)
     },
-    parallax(f) {
-      return this.motion ? { '--py': `${(this.scrollY * f).toFixed(1)}px` } : null
+    togglePlay() {
+      const v = this.$refs.intro
+      if (v.paused) { this.userPaused = false; v.play().catch(() => {}) } else { this.userPaused = true; v.pause() }
+    },
+    toggleSound() {
+      const v = this.$refs.intro
+      v.muted = !v.muted
+      this.muted = v.muted
+      if (!v.muted && v.paused) { this.userPaused = false; v.play().catch(() => {}) }
     },
     observe() {
       const els = this.$el.querySelectorAll('.reveal:not(.in)')
@@ -384,12 +418,8 @@ p { margin: 0; }
 .shot img { display: block; width: 100%; height: auto; }
 
 /* Hero */
-.for-dark { display: none !important; }
-.landing[data-theme="dark"] .for-dark { display: block !important; }
-.landing[data-theme="dark"] .for-light { display: none !important; }
 @media (prefers-color-scheme: dark) {
-  .landing:not([data-theme="light"]) .for-dark { display: block !important; }
-  .landing:not([data-theme="light"]) .for-light { display: none !important; }
+  .landing:not([data-theme="light"])   .landing:not([data-theme="light"]) .for-light { display: none !important; }
 }
 .hero { position: relative; isolation: isolate; overflow: hidden; padding-top: 72px; text-align: center; }
 .hero-pattern { position: absolute; inset: 0; z-index: -1; color: var(--line); opacity: 0.7;
@@ -403,15 +433,23 @@ h1 .w2::after { content: ""; position: absolute; inset-inline: 10%; bottom: -0.1
 .hero .lead { margin: 14px auto 32px; max-width: 30em; text-wrap: balance; font-size: 1.05rem; color: var(--muted); }
 .hero .cta { justify-content: center; }
 
-.stage { position: relative; height: clamp(360px, 52vw, 600px); margin-top: 64px; display: flex; justify-content: center; }
-.stage::after { content: ""; position: absolute; inset: auto 0 0; height: 45%; background: linear-gradient(to bottom, transparent, var(--bg)); z-index: 3; pointer-events: none; }
-.phone { position: absolute; top: 0; width: clamp(180px, 24vw, 290px); border-radius: clamp(22px, 3vw, 34px); border: 6px solid #0f130e; animation: phoneIn 1.1s var(--ease) both; }
-.p-center { z-index: 2; animation-delay: 0.35s; transform: translateY(calc(var(--s, 0) * -30px)); }
-.p-side { z-index: 1; top: 48px; opacity: 0.96; }
-.p-start { animation-delay: 0.55s; transform: translateX(calc(62% + var(--s, 0) * 60px)) rotate(calc(6deg + var(--s, 0) * 4deg)); }
-.p-end { animation-delay: 0.55s; transform: translateX(calc(-62% - var(--s, 0) * 60px)) rotate(calc(-6deg - var(--s, 0) * 4deg)); }
+.stage { position: relative; margin-top: 56px; padding-bottom: 72px; }
+.video-frame { position: relative; max-width: 1040px; margin-inline: auto; border-radius: 28px; overflow: hidden; background: #0d1a0c; aspect-ratio: 16 / 9;
+  box-shadow: 0 0 0 1px var(--line), 0 2px 4px rgba(0, 0, 0, 0.06), 0 40px 80px -30px rgba(20, 40, 18, 0.45);
+  animation: videoIn 1.1s var(--ease) 0.35s both; }
+.video-frame video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.video-ctrl { position: absolute; inset-inline-end: 16px; bottom: 16px; display: flex; gap: 8px; }
+.video-ctrl button { font: inherit; font-size: 0.875rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; height: 42px; min-width: 42px; justify-content: center; padding: 0 12px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 999px; color: #fff; background: rgba(10, 20, 9, 0.55); backdrop-filter: blur(8px); cursor: pointer; transition: background-color 0.2s, transform 0.2s var(--ease); }
+.video-ctrl button:hover { background: rgba(10, 20, 9, 0.75); }
+.video-ctrl button:active { transform: scale(0.95); }
+@media (max-width: 700px) {
+  .stage { margin-top: 40px; padding-bottom: 48px; }
+  .video-frame { border-radius: 18px; }
+  .video-ctrl { inset-inline-end: 10px; bottom: 10px; }
+  .video-ctrl span { display: none; }
+}
 
-.ticker { position: relative; z-index: 4; margin-top: -28px; padding-block: 18px; border-block: 1px solid var(--line); background: var(--bg); overflow: hidden;
+.ticker { position: relative; z-index: 4; padding-block: 18px; border-block: 1px solid var(--line); background: var(--bg); overflow: hidden;
   -webkit-mask-image: linear-gradient(to left, transparent, #000 12%, #000 88%, transparent);
   mask-image: linear-gradient(to left, transparent, #000 12%, #000 88%, transparent); }
 .ticker-track { display: flex; width: max-content; gap: 44px; animation: ticker 38s linear infinite; }
@@ -509,7 +547,7 @@ h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.3; }
 .more-list .reveal:nth-child(3n + 2) { transition-delay: 0.06s; }
 .more-list .reveal:nth-child(3n + 3) { transition-delay: 0.12s; }
 .swap { animation: swap 0.35s var(--ease); }
-@keyframes phoneIn { from { opacity: 0; translate: 0 120px; } }
+@keyframes videoIn { from { opacity: 0; translate: 0 60px; scale: 0.96; } }
 @keyframes rise { from { opacity: 0; translate: 0 18px; filter: blur(6px); } }
 @keyframes draw { from { transform: scaleX(0); } }
 @keyframes ticker { to { transform: translateX(50%); } }
