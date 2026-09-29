@@ -43,6 +43,9 @@ return [
     'google' => [
         // Comma-separated OAuth client ids whose ID tokens are accepted (Android app's web client id).
         'client_ids' => env('GOOGLE_CLIENT_IDS', ''),
+        // Google's public signing keys, tried in order. Google itself is unreachable from Iran,
+        // so a mirror refreshed by a GitHub Action (Nour-Adhkar-App/.github/workflows/google-jwks.yml) follows.
+        'jwks_urls' => env('GOOGLE_JWKS_URLS', 'https://www.googleapis.com/oauth2/v3/certs,https://raw.githubusercontent.com/edrisranjbar/Nour-Adhkar-App/main/google-jwks.json'),
     ],
 
 ];
