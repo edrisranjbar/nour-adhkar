@@ -8,7 +8,6 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Password;
@@ -20,6 +19,7 @@ use Illuminate\Support\Facades\Notification;
 use App\Notifications\WelcomeEmail;
 use App\Notifications\ResetPasswordFa;
 use App\Services\EmailVerificationService;
+use App\Services\GoogleIdTokenVerifier;
 
 class AuthController extends Controller
 {
@@ -182,30 +182,20 @@ class AuthController extends Controller
             ], 503);
         }
 
+        // Verified locally: Google's APIs are unreachable from the (Iran-hosted) server.
         try {
-            $response = Http::timeout(10)->get('https://oauth2.googleapis.com/tokeninfo', [
-                'id_token' => $request->id_token,
-            ]);
-        } catch (\Throwable $e) {
-            \Log::error('Google token verification failed: ' . $e->getMessage());
+            $claims = app(GoogleIdTokenVerifier::class)->verify($request->id_token, $clientIds);
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() === GoogleIdTokenVerifier::KEYS_UNAVAILABLE) {
+                \Log::error('Google sign-in keys unavailable from every JWKS source.');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ورود با گوگل موقتاً در دسترس نیست. لطفاً کمی بعد دوباره تلاش کنید یا با ایمیل وارد شوید.'
+                ], 503);
+            }
             return response()->json([
                 'success' => false,
-                'message' => 'ارتباط با گوگل برقرار نشد. لطفاً دوباره تلاش کنید.'
-            ], 502);
-        }
-
-        $claims = $response->json() ?? [];
-        $verified = in_array($claims['email_verified'] ?? null, [true, 'true'], true);
-        if (
-            !$response->successful()
-            || !in_array($claims['aud'] ?? null, $clientIds, true)
-            || !in_array($claims['iss'] ?? null, ['accounts.google.com', 'https://accounts.google.com'], true)
-            || empty($claims['email'])
-            || !$verified
-        ) {
-            return response()->json([
-                'success' => false,
-                'message' => 'اعتبار حساب گوگل تأیید نشد.'
+                'message' => 'اعتبار حساب گوگل تأیید نشد. لطفاً دوباره تلاش کنید.'
             ], 401);
         }
 
