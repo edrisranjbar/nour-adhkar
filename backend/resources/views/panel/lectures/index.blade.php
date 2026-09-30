@@ -13,20 +13,35 @@
     <div class="alert err" role="status">این استاد پنهان است؛ سخنرانی‌هایش تا نمایش دادن استاد در برنامه دیده نمی‌شوند.</div>
 @endunless
 
+<style>
+    .sort-btn { all: unset; cursor: pointer; font: inherit; color: inherit; display: inline-flex; gap: 4px; align-items: center; border-radius: 6px; padding: 0 2px; }
+    .sort-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .sort-btn::after { content: '↕'; opacity: .4; font-size: 12px; }
+    th[aria-sort="ascending"] .sort-btn::after { content: '▲'; opacity: 1; }
+    th[aria-sort="descending"] .sort-btn::after { content: '▼'; opacity: 1; }
+</style>
 <div class="card table-wrap">
-    <table>
-        <thead><tr><th>ترتیب</th><th>عنوان</th><th>صوت</th><th>وضعیت</th><th></th></tr></thead>
+    <table id="lectures-table">
+        <thead><tr>
+            <th aria-sort="ascending" data-sort="pos"><button type="button" class="sort-btn">#</button></th>
+            <th>ترتیب</th>
+            <th aria-sort="none" data-sort="title"><button type="button" class="sort-btn">عنوان</button></th>
+            <th>صوت</th>
+            <th aria-sort="none" data-sort="status"><button type="button" class="sort-btn">وضعیت</button></th>
+            <th></th>
+        </tr></thead>
         <tbody>
         @forelse ($items as $item)
-            <tr>
+            <tr data-pos="{{ $loop->iteration }}" data-title="{{ $item->title }}" data-status="{{ $item->published ? 1 : 0 }}">
+                <td style="white-space:nowrap">{{ $loop->iteration }}</td>
                 <td style="white-space:nowrap">
                     <form method="POST" action="{{ route('panel.lectures.move', [$scholar->id, $item->id, 'up']) }}" style="display:inline">
                         @csrf @method('PATCH')
-                        <button class="btn sm" type="submit" @disabled($loop->first) aria-label="بالاتر">▲</button>
+                        <button class="btn sm" type="submit" data-move @disabled($loop->first) aria-label="بالاتر">▲</button>
                     </form>
                     <form method="POST" action="{{ route('panel.lectures.move', [$scholar->id, $item->id, 'down']) }}" style="display:inline">
                         @csrf @method('PATCH')
-                        <button class="btn sm" type="submit" @disabled($loop->last) aria-label="پایین‌تر">▼</button>
+                        <button class="btn sm" type="submit" data-move @disabled($loop->last) aria-label="پایین‌تر">▼</button>
                     </form>
                 </td>
                 <td>
@@ -63,9 +78,52 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="5" class="empty">هنوز سخنرانی‌ای اضافه نشده است؛ در برنامه «به‌زودی» نمایش داده می‌شود.</td></tr>
+            <tr><td colspan="6" class="empty">هنوز سخنرانی‌ای اضافه نشده است؛ در برنامه «به‌زودی» نمایش داده می‌شود.</td></tr>
         @endforelse
         </tbody>
     </table>
 </div>
+<script>
+    // Client-side sorting. "#" is each lecture's position in the app's order and stays with its row;
+    // the ▲/▼ reorder buttons act on that real order, so they are disabled while another sort is shown.
+    (function () {
+        var table = document.getElementById('lectures-table');
+        var body = table.tBodies[0];
+        var rows = Array.prototype.slice.call(body.querySelectorAll('tr[data-pos]'));
+        if (rows.length < 2) return;
+        var heads = table.querySelectorAll('th[data-sort]');
+        var collator = new Intl.Collator('fa', { numeric: true, sensitivity: 'base' });
+        var keys = {
+            pos: function (r) { return Number(r.dataset.pos); },
+            title: function (r) { return r.dataset.title; },
+            status: function (r) { return Number(r.dataset.status); }
+        };
+        function compare(a, b) {
+            return typeof a === 'number' ? a - b : collator.compare(a, b);
+        }
+        function setMoveButtons(enabled) {
+            table.querySelectorAll('button[data-move]').forEach(function (btn) {
+                if (enabled) {
+                    if (btn.dataset.wasDisabled !== '1') btn.disabled = false;
+                } else {
+                    if (btn.dataset.wasDisabled === undefined) btn.dataset.wasDisabled = btn.disabled ? '1' : '0';
+                    btn.disabled = true;
+                }
+            });
+        }
+        heads.forEach(function (th) {
+            th.querySelector('button').addEventListener('click', function () {
+                var key = th.dataset.sort;
+                var dir = th.getAttribute('aria-sort') === 'ascending' ? -1 : 1;
+                heads.forEach(function (h) { h.setAttribute('aria-sort', 'none'); });
+                th.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+                var get = keys[key];
+                rows.slice().sort(function (a, b) {
+                    return dir * compare(get(a), get(b)) || Number(a.dataset.pos) - Number(b.dataset.pos);
+                }).forEach(function (r) { body.appendChild(r); });
+                setMoveButtons(key === 'pos' && dir === 1);
+            });
+        });
+    })();
+</script>
 @endsection
