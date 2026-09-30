@@ -21,6 +21,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AppInboxController;
 
 // Public routes
+require __DIR__.'/progress.php';
 Route::post('app-feedback', [AppInboxController::class, 'sendFeedback'])->middleware('throttle:5,1');
 Route::get('app-notices', [AppInboxController::class, 'notices'])->middleware('throttle:60,1');
 Route::post('app-notices/{id}/read', [AppInboxController::class, 'markRead'])->middleware('throttle:60,1');
