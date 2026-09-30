@@ -69,6 +69,17 @@ it('verifies the token locally using the mirror when Google is unreachable, and 
     expect(User::count())->toBe(1)->and(User::first()->email_verified_at)->not->toBeNull();
 });
 
+it('confirms an existing unverified account when it signs in with Google', function () {
+    [$key, $jwk] = testKey();
+    Http::fake([MIRROR_CERTS => Http::response(['keys' => [$jwk]]), GOOGLE_CERTS => Http::response([], 500)]);
+    $user = User::factory()->unverified()->create(['email' => 'reader@example.com']);
+
+    $this->postJson('/api/auth/google', ['id_token' => idToken($key, 'kid-1')])
+        ->assertOk()->assertJsonPath('user.email', 'reader@example.com');
+
+    expect(User::count())->toBe(1)->and($user->fresh()->email_verified_at)->not->toBeNull();
+});
+
 it('rejects wrong audience, expired, unverified-email and tampered tokens', function () {
     [$key, $jwk] = testKey();
     [$otherKey] = testKey();

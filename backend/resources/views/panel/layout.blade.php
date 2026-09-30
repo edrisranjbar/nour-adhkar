@@ -67,24 +67,67 @@
         .tabs a.active { background: var(--primary); border-color: var(--primary); color: #fff; }
         .pager { margin-top: 16px; display: flex; gap: 8px; align-items: center; }
         .empty { text-align: center; color: var(--muted); padding: 30px 0; }
-        @media (max-width: 760px) {
-            .shell { flex-direction: column; }
-            aside { width: auto; flex-direction: row; flex-wrap: wrap; align-items: center; border-inline-end: 0; border-bottom: 1px solid var(--line); padding: 10px 16px; }
-            .brand { padding: 0 6px 0 12px; font-size: 16px; }
-            .brand small { display: none; }
-            nav { display: flex; flex-wrap: wrap; gap: 2px; }
-            nav a { padding: 6px 10px; }
-            aside form { margin: 0 auto 0 0; }
+        aside .close { display: none; margin-inline-start: auto; }
+        .aside-head { display: flex; align-items: flex-start; gap: 8px; }
+        .topbar, .backdrop { display: none; }
+        .menu-btn { width: 44px; height: 44px; display: inline-grid; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); cursor: pointer; }
+        .menu-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+        .menu-btn svg { width: 22px; height: 22px; }
+        @media (max-width: 860px) {
+            .shell { display: block; }
+            .topbar { display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 20; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+            .topbar .brand { padding: 0; font-size: 16px; }
+            .topbar .page { margin-inline-start: auto; color: var(--muted); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            aside { position: fixed; inset-block: 0; inset-inline-start: 0; z-index: 40; width: min(82vw, 290px); overflow-y: auto; box-shadow: 0 0 40px rgba(0, 0, 0, .18);
+                transform: translateX(100%); visibility: hidden; transition: transform .25s ease, visibility 0s linear .25s; }
+            .nav-open aside { transform: none; visibility: visible; transition: transform .25s ease; }
+            aside .close { display: inline-grid; }
+            nav a { padding: 12px; font-size: 16px; }
+            .backdrop { display: block; position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .4); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+            .nav-open .backdrop { opacity: 1; pointer-events: auto; }
+            .nav-open { overflow: hidden; }
             main { padding: 20px 16px; }
+            h1 { font-size: 20px; }
+            .head > form, .head > .btn { width: 100%; }
+            .head > form input { min-width: 0; }
+            th, td { padding: 10px 8px; }
         }
+        /* Phones: each table row becomes a card; cells are labelled from the column headers (see script). */
+        @media (max-width: 640px) {
+            table.stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+            table.stack, table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+            table.stack tr { padding: 10px 0; border-bottom: 1px solid var(--line); }
+            table.stack tr:last-child { border-bottom: 0; }
+            table.stack td { border: 0; padding: 5px 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; text-align: start; }
+            table.stack td[data-label]::before { content: attr(data-label); flex: 0 0 76px; color: var(--muted); font-size: 12px; font-weight: 600; }
+            table.stack td[data-label=""]::before { content: none; }
+            table.stack td[dir="ltr"] { direction: rtl; text-align: start !important; }
+            table.stack td > * { min-width: 0; }
+            table.stack td.empty { justify-content: center; }
+            .msg { max-width: none; }
+        }
+        @media (prefers-reduced-motion: reduce) { aside, .backdrop { transition: none !important; } }
     </style>
     @stack('head')
 </head>
 <body>
 @auth('admin')
 <div class="shell">
-    <aside>
-        <div class="brand">اذکار نور<small>مدیریت برنامه</small></div>
+    <header class="topbar">
+        <button class="menu-btn" type="button" aria-controls="panel-nav" aria-expanded="false" aria-label="باز کردن منو" data-nav-open>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+        </button>
+        <div class="brand">اذکار نور</div>
+        <span class="page">@yield('title', 'پنل')</span>
+    </header>
+    <div class="backdrop" data-nav-close></div>
+    <aside id="panel-nav" aria-label="منوی مدیریت">
+        <div class="aside-head">
+            <div class="brand">اذکار نور<small>مدیریت برنامه</small></div>
+            <button class="menu-btn close" type="button" aria-label="بستن منو" data-nav-close>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
+        </div>
         <nav>
             <a href="{{ route('panel.dashboard') }}" @class(['active' => request()->routeIs('panel.dashboard')])>داشبورد</a>
             <a href="{{ route('panel.analytics') }}" @class(['active' => request()->routeIs('panel.analytics')])>آمار</a>
@@ -106,6 +149,31 @@
         @yield('content')
     </main>
 </div>
+<script>
+    // Mobile navigation drawer: toggles body.nav-open; closes on backdrop, Escape or link tap.
+    (function () {
+        var body = document.body, openBtn = document.querySelector('[data-nav-open]'), aside = document.getElementById('panel-nav');
+        function set(open) {
+            body.classList.toggle('nav-open', open);
+            openBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) { var first = aside.querySelector('a'); if (first) first.focus(); } else { openBtn.focus({ preventScroll: true }); }
+        }
+        openBtn.addEventListener('click', function () { set(true); });
+        document.querySelectorAll('[data-nav-close]').forEach(function (el) { el.addEventListener('click', function () { set(false); }); });
+        aside.querySelectorAll('nav a').forEach(function (a) { a.addEventListener('click', function () { body.classList.remove('nav-open'); }); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && body.classList.contains('nav-open')) set(false); });
+
+        // Label table cells with their column header so rows can stack as cards on phones.
+        document.querySelectorAll('main table').forEach(function (table) {
+            var heads = Array.prototype.map.call(table.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
+            if (!heads.length) return;
+            table.classList.add('stack');
+            table.querySelectorAll('tbody tr').forEach(function (tr) {
+                Array.prototype.forEach.call(tr.children, function (td, i) { if (!td.hasAttribute('colspan')) td.setAttribute('data-label', heads[i] || ''); });
+            });
+        });
+    })();
+</script>
 @else
     @yield('content')
 @endauth
