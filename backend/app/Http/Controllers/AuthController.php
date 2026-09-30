@@ -209,6 +209,10 @@ class AuthController extends Controller
             ]);
             $user->forceFill(['email_verified_at' => now()])->save();
             $created = true;
+        } elseif ($user->email_verified_at === null) {
+            // The account pre-dates Google sign-in (e.g. email registration that was never
+            // confirmed). Google has just verified this address, so confirm it here too.
+            $user->forceFill(['email_verified_at' => now()])->save();
         }
 
         if (!$user->active) {
