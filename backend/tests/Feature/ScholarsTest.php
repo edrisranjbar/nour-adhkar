@@ -59,6 +59,14 @@ it('lets an admin add a scholar and lectures by upload or link, in order, publis
     $this->patch("/admin/scholars/$id/lectures/$second/move/up")->assertRedirect();
     $scholar = collect($this->getJson('/api/scholars')->json('data'))->firstWhere('id', 'new-one');
     expect($scholar['lectures'][0]['title'])->toBe('جلسه دوم');
+
+    // The lectures table shows each lecture's position and offers sortable headers.
+    $this->get("/admin/scholars/$id/lectures")
+        ->assertOk()
+        ->assertSee('id="lectures-table"', false)
+        ->assertSee('data-sort="title"', false)
+        ->assertSee('data-pos="1" data-title="جلسه دوم"', false)
+        ->assertSee('data-pos="2" data-title="جلسه اول"', false);
 });
 
 it('requires audio, validates links and slugs, and hides unpublished scholars', function () {
