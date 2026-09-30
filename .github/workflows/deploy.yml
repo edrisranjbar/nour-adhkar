@@ -71,6 +71,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
@@ -83,8 +85,7 @@ jobs:
           php artisan test --filter=ProgressSyncTest
       - name: Prepare scoped patch
         run: |
-          git fetch --quiet origin main
-          git diff origin/main HEAD -- backend/app/Http/Controllers/ProgressSyncController.php backend/database/migrations/2026_10_01_000000_create_app_progress_backups_table.php backend/routes/progress.php backend/routes/api.php > progress-sync.patch
+          git show --format= dc8490f -- backend/app/Http/Controllers/ProgressSyncController.php backend/database/migrations/2026_10_01_000000_create_app_progress_backups_table.php backend/routes/progress.php backend/routes/api.php > progress-sync.patch
           test -s progress-sync.patch
       - name: Deploy only progress sync
         env:
