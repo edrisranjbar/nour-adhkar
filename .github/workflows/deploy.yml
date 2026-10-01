@@ -8,11 +8,17 @@ on:
     branches: [main]
     paths: ["backend/**", "Nour Adhkar/**", "deploy/**", ".github/workflows/deploy.yml"]
   workflow_dispatch:
+    inputs:
+      progress_sync_only:
+        description: "Deploy only Android progress sync without resetting the checkout"
+        type: boolean
+        default: false
 
 concurrency: deploy
 
 jobs:
   deploy:
+    if: ${{ !inputs.progress_sync_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,3 +65,60 @@ jobs:
           # Update the checkout first so the deploy script itself is always current.
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
             "cd '$APP_DIR' && git fetch --quiet origin main && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
+
+  progress-sync:
+    if: ${{ inputs.progress_sync_only }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, intl, zip, pdo_sqlite, bcmath
+          tools: composer
+      - name: Test progress sync
+        working-directory: backend
+        run: |
+          composer install --no-interaction --prefer-dist
+          php artisan test --filter=ProgressSyncTest
+      - name: Prepare scoped patch
+        run: |
+          git show --format= dc8490f -- backend/app/Http/Controllers/ProgressSyncController.php backend/database/migrations/2026_10_01_000000_create_app_progress_backups_table.php backend/routes/progress.php backend/routes/api.php > progress-sync.patch
+          test -s progress-sync.patch
+      - name: Deploy only progress sync
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
+        run: |
+          test -n "$APP_DIR"
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+          scp -P "$SSH_PORT" progress-sync.patch "$SSH_USER@$SSH_HOST:$APP_DIR/../progress-sync.patch"
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "cd '$APP_DIR' && bash -s" <<'REMOTE'
+          set -euo pipefail
+          if git apply --reverse --check ../progress-sync.patch 2>/dev/null; then
+            echo 'Progress sync patch already applied.'
+          else
+            git apply --check ../progress-sync.patch
+            git apply ../progress-sync.patch
+          fi
+          cd backend
+          php artisan migrate --force --path=database/migrations/2026_10_01_000000_create_app_progress_backups_table.php
+          php artisan route:clear
+          php artisan route:cache
+          php artisan route:list --path=progress/sync
+          FPM_SERVICE=$(systemctl list-units --type=service --all --no-legend | awk '/php[0-9.]+-fpm.service/ {print $1; exit}')
+          if [ -n "$FPM_SERVICE" ]; then sudo -n systemctl reload "$FPM_SERVICE"; fi
+          REMOTE
+      - name: Verify authenticated endpoint is live
+        run: |
+          status=$(curl -sS -o /tmp/progress-response.json -w '%{http_code}' -X POST https://api.adhkar.ir/api/progress/sync -H 'Accept: application/json' -H 'Content-Type: application/json' --data '{"version":1,"records":[]}')
+          test "$status" = 401
