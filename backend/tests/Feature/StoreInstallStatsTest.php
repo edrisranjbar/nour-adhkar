@@ -148,5 +148,6 @@ it('puts the live install card on the dashboard', function () {
         ->assertOk()
         ->assertSee('id="installs"', false)
         ->assertSee(route('panel.installs'), false)
-        ->assertSee('id="inst-sound"', false);
+        ->assertSee('id="inst-sound"', false)
+        ->assertSeeInOrder(['class="kpis"', 'id="installs"', 'آخرین بازخوردها'], false);
 });
