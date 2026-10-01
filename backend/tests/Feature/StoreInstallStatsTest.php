@@ -151,3 +151,12 @@ it('puts the live install card on the dashboard', function () {
         ->assertSee('id="inst-sound"', false)
         ->assertSeeInOrder(['class="kpis"', 'id="installs"', 'آخرین بازخوردها'], false);
 });
+
+it('shows an icon beside every sidebar item and the logout button', function () {
+    $html = $this->actingAs(installAdmin(), 'admin')->get('/admin')->assertOk()->getContent();
+
+    preg_match('~<nav>(.*?)</nav>~s', $html, $nav);
+    expect(substr_count($nav[1], '<a '))->toBe(7)
+        ->and(substr_count($nav[1], 'class="ic"'))->toBe(7)
+        ->and($html)->toMatch('~<button class="btn sm" type="submit"><svg class="ic"~');
+});

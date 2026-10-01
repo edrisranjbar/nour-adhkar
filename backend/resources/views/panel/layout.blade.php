@@ -26,7 +26,11 @@
         aside { width: 230px; flex-shrink: 0; background: var(--surface); border-inline-end: 1px solid var(--line); padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; }
         .brand { font-weight: 800; font-size: 18px; padding: 0 10px 16px; }
         .brand small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
-        nav a { display: block; padding: 9px 12px; border-radius: 10px; color: var(--text); }
+        nav a { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; color: var(--text); }
+        .ic { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        nav a .ic { color: var(--muted); transition: color .15s ease; }
+        nav a:hover .ic, nav a.active .ic { color: var(--primary); }
+        aside form .btn { gap: 8px; }
         nav a:hover { background: var(--bg); }
         nav a.active { background: var(--primary-soft); color: var(--primary); font-weight: 700; }
         aside form { margin-top: auto; }
@@ -129,17 +133,17 @@
             </button>
         </div>
         <nav>
-            <a href="{{ route('panel.dashboard') }}" @class(['active' => request()->routeIs('panel.dashboard')])>داشبورد</a>
-            <a href="{{ route('panel.analytics') }}" @class(['active' => request()->routeIs('panel.analytics')])>آمار</a>
-            <a href="{{ route('panel.notices.index') }}" @class(['active' => request()->routeIs('panel.notices.*')])>پیام‌ها</a>
-            <a href="{{ route('panel.scholars.index') }}" @class(['active' => request()->routeIs('panel.scholars.*', 'panel.lectures.*')])>علما و سخنرانی‌ها</a>
-            <a href="{{ route('panel.feedback.index') }}" @class(['active' => request()->routeIs('panel.feedback.*')])>بازخوردها</a>
-            <a href="{{ route('panel.users.index') }}" @class(['active' => request()->routeIs('panel.users.*')])>کاربران</a>
-            <a href="{{ route('panel.profile') }}" @class(['active' => request()->routeIs('panel.profile*')])>پروفایل</a>
+            <a href="{{ route('panel.dashboard') }}" @class(['active' => request()->routeIs('panel.dashboard')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg><span>داشبورد</span></a>
+            <a href="{{ route('panel.analytics') }}" @class(['active' => request()->routeIs('panel.analytics')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>آمار</span></a>
+            <a href="{{ route('panel.notices.index') }}" @class(['active' => request()->routeIs('panel.notices.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>پیام‌ها</span></a>
+            <a href="{{ route('panel.scholars.index') }}" @class(['active' => request()->routeIs('panel.scholars.*', 'panel.lectures.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg><span>علما و سخنرانی‌ها</span></a>
+            <a href="{{ route('panel.feedback.index') }}" @class(['active' => request()->routeIs('panel.feedback.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>بازخوردها</span></a>
+            <a href="{{ route('panel.users.index') }}" @class(['active' => request()->routeIs('panel.users.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>کاربران</span></a>
+            <a href="{{ route('panel.profile') }}" @class(['active' => request()->routeIs('panel.profile*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>پروفایل</span></a>
         </nav>
         <form method="POST" action="{{ route('panel.logout') }}">
             @csrf
-            <button class="btn sm" type="submit">خروج</button>
+            <button class="btn sm" type="submit"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>خروج</button>
         </form>
     </aside>
     <main>
