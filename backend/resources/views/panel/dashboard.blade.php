@@ -5,6 +5,8 @@
 @section('content')
 <div class="head"><h1>داشبورد</h1></div>
 
+@include('panel._installs')
+
 <div class="grid">
     <div class="card stat"><div class="n">{{ F::number($stats['users']) }}</div><div class="l">کاربران · {{ F::number($stats['usersWeek']) }} در هفته اخیر</div></div>
     <div class="card stat"><div class="n">{{ F::number($stats['verified']) }}</div><div class="l">ایمیل تأییدشده</div></div>
