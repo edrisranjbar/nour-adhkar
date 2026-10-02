@@ -29,6 +29,22 @@
         .kpi-n { font-size: 24px; }
     }
     @media (prefers-reduced-motion: reduce) { .kpi { transition: none; } .kpi:hover { transform: none; } }
+
+    .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .dash-grid .card h2 { font-size: 17px; margin: 0; }
+    .list-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); min-width: 0; }
+    .list-row .grow { flex: 1; min-width: 0; }
+    .list-row .grow > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .avatar { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px;
+        background: var(--primary-soft); color: var(--primary); }
+    .ai-progress { margin: 10px 0 14px; }
+    .ai-progress .track { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+    .ai-progress .fill { height: 100%; border-radius: inherit; background: var(--primary); }
+    .ai-progress .meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; font-size: 13px; color: var(--muted); }
+    .ai-counts { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pulse { width: 8px; height: 8px; border-radius: 50%; background: #e08a1e; flex: none; animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: .3; } }
+    @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
 </style>
 @endpush
 
@@ -81,6 +97,82 @@
 </div>
 
 @include('panel._installs')
+
+<div class="dash-grid">
+    <div class="card">
+        <div class="head" style="margin-bottom:6px">
+            <h2>کاربران تازه</h2>
+            <a href="{{ route('panel.users.index') }}">همه</a>
+        </div>
+        @forelse ($recentUsers as $user)
+            <div class="list-row">
+                <span class="avatar" aria-hidden="true">{{ mb_substr(trim($user->name ?: $user->email), 0, 1) }}</span>
+                <div class="grow">
+                    <div><strong>{{ $user->name ?: '—' }}</strong></div>
+                    <div class="muted" dir="ltr" style="text-align:start">{{ $user->email }}</div>
+                </div>
+                <div style="text-align:end;flex:none">
+                    @if ($user->email_verified_at)
+                        <span class="badge ok">تأییدشده</span>
+                    @else
+                        <span class="badge draft">تأییدنشده</span>
+                    @endif
+                    <div class="muted">{{ F::date($user->created_at) }}</div>
+                </div>
+            </div>
+        @empty
+            <div class="empty">هنوز کاربری ثبت‌نام نکرده است.</div>
+        @endforelse
+    </div>
+
+    <div class="card">
+        <div class="head" style="margin-bottom:0">
+            <h2>توضیح سخنرانی‌ها از روی صوت</h2>
+            <a href="{{ route('panel.scholars.index') }}">سخنرانی‌ها</a>
+        </div>
+        @php($pct = $ai['total'] > 0 ? (int) round($ai['done'] * 100 / $ai['total']) : 0)
+        <div class="ai-progress">
+            <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $pct }}" aria-label="پیشرفت کل">
+                <div class="fill" style="width:{{ $pct }}%"></div>
+            </div>
+            <div class="meta">
+                <span>{{ F::number($ai['done']) }} از {{ F::number($ai['total']) }} سخنرانی پردازش شده</span>
+                <span>{{ F::digits($pct) }}٪</span>
+            </div>
+        </div>
+        <div class="ai-counts">
+            <span class="badge draft">در حال پردازش: {{ F::number($ai['processing']) }}</span>
+            <span class="badge">در صف: {{ F::number($ai['queued']) }}</span>
+            @if ($ai['failed'])
+                <span class="badge off">ناموفق: {{ F::number($ai['failed']) }}</span>
+            @endif
+        </div>
+        @forelse ($ai['active'] as $lecture)
+            <div class="list-row">
+                @if ($lecture->ai_status === 'processing')
+                    <span class="pulse" aria-hidden="true"></span>
+                @endif
+                <div class="grow">
+                    <div><a href="{{ route('panel.lectures.edit', [$lecture->scholar_id, $lecture->id]) }}"><strong>{{ $lecture->title }}</strong></a></div>
+                    <div class="muted">
+                        {{ $lecture->scholar }}
+                        @if ($lecture->ai_status === 'failed' && $lecture->ai_error) · <span dir="auto">{{ \Illuminate\Support\Str::limit($lecture->ai_error, 80) }}</span>@endif
+                    </div>
+                </div>
+                <div style="text-align:end;flex:none">
+                    @switch($lecture->ai_status)
+                        @case('processing') <span class="badge draft">تبدیل و خلاصه‌نویسی</span> @break
+                        @case('queued') <span class="badge">در صف</span> @break
+                        @default <span class="badge off">ناموفق</span>
+                    @endswitch
+                    <div class="muted">{{ F::date($lecture->ai_claimed_at ?? $lecture->updated_at) }}</div>
+                </div>
+            </div>
+        @empty
+            <div class="empty" style="padding:18px 0 4px">اکنون سخنرانی‌ای در حال پردازش نیست.</div>
+        @endforelse
+    </div>
+</div>
 
 <div class="card">
     <div class="head" style="margin-bottom:6px">
