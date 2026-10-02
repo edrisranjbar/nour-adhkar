@@ -55,7 +55,7 @@
         <div class="kpi-body">
             <div class="kpi-l">پیام منتشرشده</div>
             <div class="kpi-n">{{ F::number($stats['notices']) }}</div>
-            <div class="kpi-s">{{ F::number($stats['drafts']) }} پیش‌نویس</div>
+            <div class="kpi-s">{{ F::number($stats['reads']) }} بار خوانده‌شدن</div>
         </div>
     </div>
 </div>
