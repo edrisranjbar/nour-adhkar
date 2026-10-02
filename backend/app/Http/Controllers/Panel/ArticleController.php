@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -16,7 +17,7 @@ class ArticleController extends Controller
 {
     public function index()
     {
-        $items = DB::table('posts')->orderByRaw("status = 'published' desc")->orderByDesc('published_at')->orderByDesc('id')->paginate(30);
+        $items = DB::table('posts')->orderByRaw("status = 'published' desc")->orderByRaw('published_at > ? desc', [now()])->orderByDesc('published_at')->orderByDesc('id')->paginate(30);
         return view('panel.articles.index', compact('items'));
     }
 
@@ -73,16 +74,21 @@ class ArticleController extends Controller
             'title' => 'required|string|max:200',
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string|max:200000',
-        ], [], ['title' => 'عنوان', 'excerpt' => 'خلاصه', 'content' => 'متن مقاله']);
+            'publish_at' => 'nullable|date_format:Y-m-d\TH:i',
+        ], [], ['title' => 'عنوان', 'excerpt' => 'خلاصه', 'content' => 'متن مقاله', 'publish_at' => 'زمان انتشار']);
 
         $publish = $request->boolean('published');
+        // The form uses Tehran time; a future date schedules the article (the app API hides it until then).
+        $publishAt = isset($data['publish_at'])
+            ? Carbon::createFromFormat('Y-m-d\TH:i', $data['publish_at'], 'Asia/Tehran')->utc()
+            : null;
         return [
             'title' => trim($data['title']),
             'excerpt' => isset($data['excerpt']) ? trim($data['excerpt']) : null,
             'content' => trim($data['content']),
             'status' => $publish ? 'published' : 'draft',
             // Keep the first publication date when an article is edited or re-published.
-            'published_at' => $publish ? ($existing?->published_at ?? now()) : $existing?->published_at,
+            'published_at' => $publishAt ?? ($publish ? ($existing?->published_at ?? now()) : $existing?->published_at),
         ];
     }
 

@@ -34,9 +34,14 @@
         <textarea id="content" name="content" required style="min-height:420px;line-height:2">{{ old('content', $article->content ?? '') }}</textarea>
     </div>
     <div class="field">
+        <label for="publish_at">زمان انتشار (اختیاری؛ زمان آینده یعنی انتشار زمان‌بندی‌شده)</label>
+        <input id="publish_at" type="datetime-local" name="publish_at" dir="ltr" style="max-width:260px"
+            value="{{ old('publish_at', !empty($article?->published_at) ? \Illuminate\Support\Carbon::parse($article->published_at, 'UTC')->setTimezone('Asia/Tehran')->format('Y-m-d\TH:i') : '') }}">
+    </div>
+    <div class="field">
         <label class="check">
             <input type="checkbox" name="published" value="1" @checked(old('published', ($article->status ?? '') === 'published'))>
-            منتشر شود (در بخش مقالات برنامه نمایش داده می‌شود)
+            منتشر شود (در بخش مقالات برنامه نمایش داده می‌شود؛ اگر زمان انتشار در آینده باشد، از همان زمان)
         </label>
     </div>
     <button class="btn primary" type="submit">ذخیره</button>

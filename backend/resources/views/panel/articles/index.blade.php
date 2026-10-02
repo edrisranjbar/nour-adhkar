@@ -19,7 +19,9 @@
                     <div class="muted msg">{{ \Illuminate\Support\Str::limit($item->excerpt ?: strip_tags($item->content), 140) }}</div>
                 </td>
                 <td>
-                    @if ($item->status === 'published')
+                    @if ($item->status === 'published' && $item->published_at && \Illuminate\Support\Carbon::parse($item->published_at, 'UTC')->isFuture())
+                        <span class="badge scheduled">زمان‌بندی‌شده</span>
+                    @elseif ($item->status === 'published')
                         <span class="badge ok">منتشرشده</span>
                     @else
                         <span class="badge draft">پیش‌نویس</span>

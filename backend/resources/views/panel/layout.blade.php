@@ -51,6 +51,7 @@
         .badge { display: inline-block; padding: 1px 10px; border-radius: 99px; font-size: 12px; background: var(--bg); white-space: nowrap; }
         .badge.ok { background: var(--primary-soft); color: var(--primary); }
         .badge.off { background: var(--danger-soft); color: var(--danger); }
+        .badge.scheduled { background: var(--primary-soft); color: var(--primary); outline: 1px dashed var(--primary); }
         .badge.draft { background: var(--warn-soft); }
         .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 6px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; cursor: pointer; }
         .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
