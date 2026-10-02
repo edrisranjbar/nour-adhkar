@@ -32,10 +32,18 @@
                 <td class="muted" style="white-space:nowrap">{{ F::date($user->last_login_at) }}</td>
                 <td>
                     @if ($user->id !== auth('admin')->id())
-                        <form method="POST" action="{{ route('panel.users.toggle', $user->id) }}" onsubmit="return confirm('وضعیت این حساب تغییر کند؟')">
-                            @csrf @method('PATCH')
-                            <button class="btn sm {{ $user->active ? 'danger' : '' }}" type="submit">{{ $user->active ? 'غیرفعال‌سازی' : 'فعال‌سازی' }}</button>
-                        </form>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap">
+                            <form method="POST" action="{{ route('panel.users.toggle', $user->id) }}" onsubmit="return confirm('وضعیت این حساب تغییر کند؟')">
+                                @csrf @method('PATCH')
+                                <button class="btn sm {{ $user->active ? 'danger' : '' }}" type="submit">{{ $user->active ? 'غیرفعال‌سازی' : 'فعال‌سازی' }}</button>
+                            </form>
+                            @if (!$user->active)
+                                <form method="POST" action="{{ route('panel.users.destroy', $user->id) }}" onsubmit="return confirm('آیا از حذف این حساب کاربری و اطلاعات وابسته به آن مطمئن هستید؟ این عملیات قابل بازگشت نیست.')">
+                                    @csrf @method('DELETE')
+                                    <button class="btn sm danger" type="submit" aria-label="حذف حساب {{ $user->name }}">حذف</button>
+                                </form>
+                            @endif
+                        </div>
                     @endif
                 </td>
             </tr>

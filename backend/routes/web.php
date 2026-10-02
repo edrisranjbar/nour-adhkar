@@ -58,6 +58,7 @@ Route::prefix('admin')->name('panel.')->group(function () {
 
         Route::get('users', [Panel\UserController::class, 'index'])->name('users.index');
         Route::patch('users/{id}/toggle', [Panel\UserController::class, 'toggle'])->name('users.toggle');
+        Route::delete('users/{id}', [Panel\UserController::class, 'destroy'])->name('users.destroy');
 
         Route::get('profile', [Panel\ProfileController::class, 'edit'])->name('profile');
         Route::put('profile/name', [Panel\ProfileController::class, 'updateName'])->name('profile.name');
