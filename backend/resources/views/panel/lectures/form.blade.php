@@ -48,7 +48,7 @@
     </div>
     @if ($lecture)
         <fieldset class="field" style="border:1px solid var(--line);border-radius:12px;padding:12px 14px">
-            <legend>متن و خلاصه (هوش مصنوعی)</legend>
+            <legend>متن سخنرانی (تبدیل خودکار گفتار)</legend>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
                 @include('panel.lectures._ai_badge', ['lecture' => $lecture])
                 @if ($lecture->ai_status === 'failed' && $lecture->ai_error)
@@ -56,21 +56,17 @@
                 @endif
             </div>
             @if ($lecture->ai_status === 'done' || $lecture->transcript)
-                <p class="muted">متن با Whisper و خلاصه با مدل زبانی ساخته شده‌اند و ممکن است خطا داشته باشند. پیش از نمایش در برنامه، به‌ویژه آیات، احادیث و نام‌ها را بررسی و اصلاح کنید.</p>
-                <div class="field">
-                    <label for="summary">خلاصه</label>
-                    <textarea id="summary" name="summary" maxlength="20000" style="min-height:160px">{{ old('summary', $lecture->summary) }}</textarea>
-                </div>
+                <p class="muted">متن به‌صورت خودکار با Whisper ساخته شده و ممکن است خطا داشته باشد. پیش از نمایش در برنامه، به‌ویژه آیات، احادیث و نام‌ها را بررسی و اصلاح کنید.</p>
                 <div class="field">
                     <label for="transcript">متن کامل سخنرانی</label>
                     <textarea id="transcript" name="transcript" style="min-height:320px">{{ old('transcript', $lecture->transcript) }}</textarea>
                 </div>
                 <label class="check">
                     <input type="checkbox" name="text_published" value="1" @checked(old('text_published', $lecture->text_published))>
-                    خلاصه و متن را بررسی کرده‌ام؛ در برنامه نمایش داده شوند
+                    متن را بررسی کرده‌ام؛ در برنامه نمایش داده شود
                 </label>
             @else
-                <p class="muted">پردازش خودکار هر ۳۰ دقیقه اجرا می‌شود؛ پس از آن، متن و خلاصه این‌جا برای بررسی نمایش داده می‌شوند.</p>
+                <p class="muted">تبدیل خودکار هر ۳۰ دقیقه اجرا می‌شود؛ پس از آن، متن این‌جا برای بررسی نمایش داده می‌شود.</p>
             @endif
         </fieldset>
     @endif
@@ -86,9 +82,9 @@
 
 @if ($lecture && in_array($lecture->ai_status, ['done', 'failed'], true))
     <form method="POST" action="{{ route('panel.lectures.reprocess', [$scholar->id, $lecture->id]) }}" style="margin-top:12px"
-          onsubmit="return confirm('متن و خلاصه دوباره ساخته شوند؟ ویرایش‌های فعلی با متن تازه جایگزین می‌شوند و تا بررسی دوباره در برنامه نمایش داده نمی‌شوند.')">
+          onsubmit="return confirm('متن دوباره ساخته شود؟ ویرایش‌های فعلی با متن تازه جایگزین می‌شود و تا بررسی دوباره در برنامه نمایش داده نمی‌شود.')">
         @csrf @method('PATCH')
-        <button class="btn sm" type="submit">ساخت دوباره متن و خلاصه</button>
+        <button class="btn sm" type="submit">ساخت دوباره متن</button>
     </form>
 @endif
 @endsection
