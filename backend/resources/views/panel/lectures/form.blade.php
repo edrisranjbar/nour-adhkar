@@ -56,7 +56,6 @@
                 @endif
             </div>
             @if ($lecture->ai_status === 'done' || $lecture->transcript)
-                <p class="muted">متن به‌صورت خودکار با Whisper ساخته شده و ممکن است خطا داشته باشد. پیش از نمایش در برنامه، به‌ویژه آیات، احادیث و نام‌ها را بررسی و اصلاح کنید.</p>
                 <div class="field">
                     <label for="transcript">متن کامل سخنرانی</label>
                     <textarea id="transcript" name="transcript" style="min-height:320px">{{ old('transcript', $lecture->transcript) }}</textarea>
