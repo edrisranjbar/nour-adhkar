@@ -196,6 +196,8 @@
     }
 
     function handle(data) {
+        var bazaarReviews = document.getElementById('bazaar-reviews');
+        if (bazaarReviews && typeof data.bazaar_reviews_html === 'string') bazaarReviews.innerHTML = data.bazaar_reviews_html;
         var feedbackCount = document.getElementById('feedback-count');
         if (feedbackCount && data.feedback !== undefined) feedbackCount.textContent = nf.format(data.feedback);
         var bazaar = data.stores.bazaar;
