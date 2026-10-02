@@ -19,6 +19,30 @@
     .sort-btn::after { content: '↕'; opacity: .4; font-size: 12px; }
     th[aria-sort="ascending"] .sort-btn::after { content: '▲'; opacity: 1; }
     th[aria-sort="descending"] .sort-btn::after { content: '▼'; opacity: 1; }
+
+    /* Segmented button group: one outline, dividers between items. */
+    .btn-group { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+    .btn-group form { display: contents; }
+    .btn-group a, .btn-group button {
+        all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+        min-height: 34px; min-width: 34px; padding: 0 12px; font: inherit; font-size: 13px; color: var(--text); white-space: nowrap;
+    }
+    .btn-group > * + *, .btn-group form + form button, .btn-group a + form button { border-inline-start: 1px solid var(--line); }
+    .btn-group a:hover, .btn-group button:hover:not(:disabled) { background: var(--bg); }
+    .btn-group button:disabled { opacity: .35; cursor: default; }
+    .btn-group .danger { color: var(--danger); }
+    .btn-group a:focus-visible, .btn-group button:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+    /* Compact audio player: play button, seek bar, time left. */
+    .mini-player { display: flex; align-items: center; gap: 10px; min-width: 200px; max-width: 260px; }
+    .mini-player .play { all: unset; cursor: pointer; flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+        background: var(--primary-soft); color: var(--primary); }
+    .mini-player .play:hover { filter: brightness(.96); }
+    .mini-player .play:focus-visible, .mini-player .bar:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .mini-player .play svg { width: 14px; height: 14px; fill: currentColor; }
+    .mini-player .bar { flex: 1; height: 4px; border-radius: 99px; background: var(--line); cursor: pointer; position: relative; direction: ltr; }
+    .mini-player .bar span { position: absolute; top: 0; bottom: 0; left: 0; width: 0; border-radius: inherit; background: var(--primary); }
+    .mini-player .time { flex: none; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; direction: ltr; min-width: 38px; text-align: end; }
 </style>
 <div id="reorder-status" class="alert" role="status" aria-live="polite" hidden></div>
 <div class="card table-wrap">
@@ -36,14 +60,16 @@
             <tr data-id="{{ $item->id }}" data-pos="{{ $loop->iteration }}" data-title="{{ $item->title }}" data-status="{{ $item->published ? 1 : 0 }}">
                 <td data-position style="white-space:nowrap">{{ $loop->iteration }}</td>
                 <td style="white-space:nowrap">
-                    <form method="POST" action="{{ route('panel.lectures.move', [$scholar->id, $item->id, 'up']) }}" style="display:inline">
-                        @csrf @method('PATCH')
-                        <button class="btn sm" type="submit" data-move="up" @disabled($loop->first) aria-label="بالاتر">▲</button>
-                    </form>
-                    <form method="POST" action="{{ route('panel.lectures.move', [$scholar->id, $item->id, 'down']) }}" style="display:inline">
-                        @csrf @method('PATCH')
-                        <button class="btn sm" type="submit" data-move="down" @disabled($loop->last) aria-label="پایین‌تر">▼</button>
-                    </form>
+                    <div class="btn-group" role="group" aria-label="ترتیب">
+                        <form method="POST" action="{{ route('panel.lectures.move', [$scholar->id, $item->id, 'up']) }}">
+                            @csrf @method('PATCH')
+                            <button type="submit" data-move="up" @disabled($loop->first) aria-label="بالاتر">▲</button>
+                        </form>
+                        <form method="POST" action="{{ route('panel.lectures.move', [$scholar->id, $item->id, 'down']) }}">
+                            @csrf @method('PATCH')
+                            <button type="submit" data-move="down" @disabled($loop->last) aria-label="پایین‌تر">▼</button>
+                        </form>
+                    </div>
                 </td>
                 <td>
                     <strong>{{ $item->title }}</strong>
@@ -53,8 +79,14 @@
                 </td>
                 <td>
                     @if ($item->resolved_url)
-                        <audio controls preload="none" src="{{ $item->resolved_url }}" style="max-width:260px"></audio>
-                        <div class="muted msg">{{ $item->audio_path ? 'فایل بارگذاری‌شده' : 'لینک خارجی' }}@if ($item->duration_sec) · {{ intdiv($item->duration_sec, 60) }}:{{ str_pad($item->duration_sec % 60, 2, '0', STR_PAD_LEFT) }}@endif</div>
+                        <div class="mini-player" data-src="{{ $item->resolved_url }}" data-duration="{{ (int) $item->duration_sec }}">
+                            <button type="button" class="play" aria-label="پخش">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+                            </button>
+                            <div class="bar" role="slider" tabindex="0" aria-label="جلو و عقب بردن" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+                            <span class="time">{{ $item->duration_sec ? intdiv($item->duration_sec, 60) . ':' . str_pad($item->duration_sec % 60, 2, '0', STR_PAD_LEFT) : '0:00' }}</span>
+                        </div>
+                        <div class="muted msg">{{ $item->audio_path ? 'فایل بارگذاری‌شده' : 'لینک خارجی' }}</div>
                     @endif
                 </td>
                 <td>
@@ -66,15 +98,15 @@
                     <div style="margin-top:4px">@include('panel.lectures._ai_badge', ['lecture' => $item])</div>
                 </td>
                 <td>
-                    <div class="actions">
-                        <a class="btn sm" href="{{ route('panel.lectures.edit', [$scholar->id, $item->id]) }}">ویرایش</a>
+                    <div class="btn-group" role="group" aria-label="کارها">
+                        <a href="{{ route('panel.lectures.edit', [$scholar->id, $item->id]) }}">ویرایش</a>
                         <form method="POST" action="{{ route('panel.lectures.toggle', [$scholar->id, $item->id]) }}">
                             @csrf @method('PATCH')
-                            <button class="btn sm" type="submit">{{ $item->published ? 'پنهان کردن' : 'نمایش' }}</button>
+                            <button type="submit">{{ $item->published ? 'پنهان کردن' : 'نمایش' }}</button>
                         </form>
                         <form method="POST" action="{{ route('panel.lectures.destroy', [$scholar->id, $item->id]) }}" onsubmit="return confirm('این سخنرانی (و فایل صوتی‌اش) حذف شود؟')">
                             @csrf @method('DELETE')
-                            <button class="btn sm danger" type="submit">حذف</button>
+                            <button type="submit" class="danger">حذف</button>
                         </form>
                     </div>
                 </td>
@@ -86,6 +118,63 @@
     </table>
 </div>
 <script>
+    // Compact players share one <audio> element, so starting a lecture stops the previous one.
+    (function () {
+        var players = document.querySelectorAll('.mini-player');
+        if (!players.length) return;
+        var audio = new Audio();
+        audio.preload = 'none';
+        var current = null;
+        var PLAY = '<path d="M8 5.5v13l10.5-6.5z"/>';
+        var PAUSE = '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/>';
+        function fmt(sec) {
+            sec = Math.max(0, Math.floor(sec || 0));
+            return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+        }
+        function render(player, playing) {
+            player.querySelector('.play svg').innerHTML = playing ? PAUSE : PLAY;
+            player.querySelector('.play').setAttribute('aria-label', playing ? 'توقف' : 'پخش');
+        }
+        function reset(player) {
+            render(player, false);
+            player.querySelector('.bar span').style.width = '0';
+            player.querySelector('.bar').setAttribute('aria-valuenow', '0');
+            player.querySelector('.time').textContent = fmt(Number(player.dataset.duration));
+        }
+        players.forEach(function (player) {
+            player.querySelector('.play').addEventListener('click', function () {
+                if (current !== player) {
+                    if (current) reset(current);
+                    current = player;
+                    audio.src = player.dataset.src;
+                }
+                if (audio.paused) audio.play().catch(function () { render(player, false); });
+                else audio.pause();
+            });
+            var bar = player.querySelector('.bar');
+            bar.addEventListener('click', function (e) {
+                if (current !== player || !isFinite(audio.duration)) return;
+                var rect = bar.getBoundingClientRect();
+                audio.currentTime = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1) * audio.duration;
+            });
+            bar.addEventListener('keydown', function (e) {
+                if (current !== player) return;
+                if (e.key === 'ArrowRight') { audio.currentTime += 10; e.preventDefault(); }
+                if (e.key === 'ArrowLeft') { audio.currentTime -= 10; e.preventDefault(); }
+            });
+        });
+        audio.addEventListener('play', function () { if (current) render(current, true); });
+        audio.addEventListener('pause', function () { if (current) render(current, false); });
+        audio.addEventListener('ended', function () { if (current) reset(current); });
+        audio.addEventListener('timeupdate', function () {
+            if (!current || !isFinite(audio.duration)) return;
+            var pct = audio.currentTime / audio.duration * 100;
+            current.querySelector('.bar span').style.width = pct + '%';
+            current.querySelector('.bar').setAttribute('aria-valuenow', String(Math.round(pct)));
+            current.querySelector('.time').textContent = fmt(audio.duration - audio.currentTime);
+        });
+    })();
+
     // Client-side sorting. "#" is each lecture's position in the app's order and stays with its row;
     // the ▲/▼ reorder buttons act on that real order, so they are disabled while another sort is shown.
     (function () {
