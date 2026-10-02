@@ -1,15 +1,13 @@
-"""Transcribe and summarize Nour lectures with Groq's free tier, outside Iran.
+"""Transcribe Nour lectures with Groq's free tier, outside Iran.
 
 Run by .github/workflows/lecture-ai.yml. api.adhkar.ir cannot reach Groq, so this job claims
-pending lectures from the backend, downloads the audio, transcribes it with Whisper, summarizes
-the transcript with an LLM, and posts both back. Nothing reaches the app until an admin reviews
-the text and ticks «نمایش در برنامه» in the panel.
+pending lectures from the backend, downloads the audio, transcribes it with Whisper, and posts the
+transcript back. Nothing reaches the app until an admin reviews the text and ticks it in the panel.
 
 Environment:
   GROQ_API_KEY         Groq key (repository secret)
   LECTURE_AI_TOKEN     shared secret, same as LECTURE_AI_TOKEN in the backend .env
   LECTURE_AI_API       backend API base, default https://api.adhkar.ir/api
-  GROQ_SUMMARY_MODEL   chat model for summaries, default llama-3.3-70b-versatile
   LECTURES_PER_RUN     default 1
 """
 
@@ -27,22 +25,12 @@ TOKEN = os.environ["LECTURE_AI_TOKEN"]
 GROQ_KEY = os.environ["GROQ_API_KEY"]
 GROQ = "https://api.groq.com/openai/v1"
 WHISPER_MODEL = "whisper-large-v3"
-SUMMARY_MODEL = os.environ.get("GROQ_SUMMARY_MODEL") or "llama-3.3-70b-versatile"
 PER_RUN = int(os.environ.get("LECTURES_PER_RUN") or 1)
 
 # Ten-minute mono 16 kHz Opus chunks are ~1.2 MB, far under Groq's 25 MB free-tier file limit.
 CHUNK_SECONDS = 600
-# Transcript slices for the summary's first pass; sized for the free tier's tokens-per-minute.
-SUMMARY_SLICE_CHARS = 6000
 # Total time one lecture may spend waiting on rate limits before it is handed back for later.
 MAX_WAIT_SECONDS = 25 * 60
-
-SYSTEM_PROMPT = (
-    "تو خلاصه‌نویس دقیق سخنرانی‌های دینی فارسی هستی. فقط آنچه سخنران واقعاً گفته را بنویس؛ "
-    "هیچ آیه، حدیث، حکم یا نظری اضافه نکن و چیزی را به سخنران نسبت نده که در متن نیست. "
-    "متن با تبدیل خودکار گفتار به نوشتار ساخته شده و ممکن است غلط داشته باشد؛ اگر بخشی نامفهوم است، از آن بگذر. "
-    "به فارسی روان و ساده بنویس. از قالب‌بندی مارک‌داون، عنوان و ستاره استفاده نکن."
-)
 
 
 class RetryLater(Exception):
@@ -120,59 +108,13 @@ def transcribe(chunks, budget):
     return "\n\n".join(parts)
 
 
-def chat(prompt, budget, max_tokens):
-    response = groq(
-        "chat/completions", budget,
-        json={
-            "model": SUMMARY_MODEL, "temperature": 0.2, "max_tokens": max_tokens,
-            "messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
-        },
-    )
-    return response.json()["choices"][0]["message"]["content"].strip()
-
-
-def slices(text):
-    """Splits on paragraph or sentence boundaries into pieces of about SUMMARY_SLICE_CHARS."""
-    pieces, current = [], ""
-    for sentence in text.replace("\n", " ").split(". "):
-        if current and len(current) + len(sentence) > SUMMARY_SLICE_CHARS:
-            pieces.append(current)
-            current = ""
-        current += sentence + ". "
-    if current.strip():
-        pieces.append(current)
-    # Whisper sometimes emits long runs without punctuation; cut those at a fixed size.
-    return [p[i:i + SUMMARY_SLICE_CHARS] for p in pieces for i in range(0, len(p), SUMMARY_SLICE_CHARS)]
-
-
-def summarize(title, transcript, budget):
-    notes = []
-    pieces = slices(transcript)
-    for index, piece in enumerate(pieces, 1):
-        print(f"  summarizing part {index}/{len(pieces)}", flush=True)
-        notes.append(chat(
-            f"بخش {index} از {len(pieces)} سخنرانی «{title}». نکته‌های اصلی این بخش را "
-            f"در چند خط کوتاه، هر خط با «• »، بنویس:\n\n{piece}",
-            budget, 600,
-        ))
-    return chat(
-        f"این‌ها یادداشت‌های بخش‌های پیاپی سخنرانی «{title}» است. از روی آن‌ها بنویس:\n"
-        "۱. یک بند کوتاه (سه تا پنج جمله) درباره موضوع و پیام اصلی سخنرانی.\n"
-        "۲. یک خط خالی و سپس چهار تا هشت نکته اصلی، هر خط با «• ».\n"
-        "فقط همین دو بخش را بنویس.\n\n" + "\n\n".join(notes),
-        budget, 1200,
-    )
-
-
 def process(lecture):
     print(f"Lecture {lecture['id']}: {lecture['title']}", flush=True)
-    budget = Budget()
     with tempfile.TemporaryDirectory() as workdir:
-        transcript = transcribe(split_audio(lecture["audioUrl"], workdir), budget)
+        transcript = transcribe(split_audio(lecture["audioUrl"], workdir), Budget())
     if not transcript:
         raise RuntimeError("Whisper returned no text")
-    summary = summarize(lecture["title"], transcript, budget)
-    return transcript, summary
+    return transcript
 
 
 def main():
@@ -183,8 +125,7 @@ def main():
     failed = 0
     for lecture in lectures:
         try:
-            transcript, summary = process(lecture)
-            backend("POST", f"internal/lectures/{lecture['id']}/ai", json={"transcript": transcript, "summary": summary})
+            backend("POST", f"internal/lectures/{lecture['id']}/ai", json={"transcript": process(lecture)})
             print("  done", flush=True)
         except RetryLater as error:
             backend("POST", f"internal/lectures/{lecture['id']}/ai", json={"error": str(error), "retry": True})
