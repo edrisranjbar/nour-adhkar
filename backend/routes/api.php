@@ -20,6 +20,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AppInboxController;
 use App\Http\Controllers\AppVersionController;
+use App\Http\Controllers\AppArticlesController;
 use App\Http\Controllers\LectureAiController;
 
 // Public routes
@@ -27,6 +28,7 @@ require __DIR__.'/progress.php';
 Route::post('app-feedback', [AppInboxController::class, 'sendFeedback'])->middleware('throttle:5,1');
 Route::get('app-notices', [AppInboxController::class, 'notices'])->middleware('throttle:60,1');
 Route::get('app-version', [AppVersionController::class, 'latest'])->middleware('throttle:60,1');
+Route::get('app-articles', [AppArticlesController::class, 'index'])->middleware('throttle:60,1');
 Route::post('app-notices/{id}/read', [AppInboxController::class, 'markRead'])->middleware('throttle:60,1');
 // Google sign-in keys pushed by the Nour-Adhkar-App GitHub workflow (server cannot reach Google).
 Route::post('internal/google-jwks', [GoogleJwksController::class, 'store'])->middleware('throttle:10,1');
