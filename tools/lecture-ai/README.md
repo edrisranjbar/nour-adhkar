@@ -3,7 +3,7 @@
 `process.py` runs from `.github/workflows/lecture-ai.yml` every 30 minutes (or manually with "Run workflow"). It uses Groq's free tier:
 
 - `whisper-large-v3` for Persian speech-to-text, sent as 10-minute Opus chunks.
-- `llama-3.3-70b-versatile` for the summary (override with the repository variable `GROQ_SUMMARY_MODEL`). It summarizes each slice of the transcript first, then the whole lecture.
+- The first available model from `PREFERRED_MODELS` in `process.py` for the summary (Groq retires models, so the script checks Groq's model list and logs its choice; set the repository variable `GROQ_SUMMARY_MODEL` to force one). It summarizes each slice of the transcript first, then the whole lecture.
 
 The API server in Iran cannot reach Groq, so the workflow does the work in three steps:
 

@@ -9,12 +9,13 @@ Environment:
   GROQ_API_KEY         Groq key (repository secret)
   LECTURE_AI_TOKEN     shared secret, same as LECTURE_AI_TOKEN in the backend .env
   LECTURE_AI_API       backend API base, default https://api.adhkar.ir/api
-  GROQ_SUMMARY_MODEL   chat model for summaries, default llama-3.3-70b-versatile
+  GROQ_SUMMARY_MODEL   chat model for summaries; default: the first of PREFERRED_MODELS Groq offers
   LECTURES_PER_RUN     default 1
 """
 
 import glob
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -27,7 +28,16 @@ TOKEN = os.environ["LECTURE_AI_TOKEN"]
 GROQ_KEY = os.environ["GROQ_API_KEY"]
 GROQ = "https://api.groq.com/openai/v1"
 WHISPER_MODEL = "whisper-large-v3"
-SUMMARY_MODEL = os.environ.get("GROQ_SUMMARY_MODEL") or "llama-3.3-70b-versatile"
+SUMMARY_MODEL = os.environ.get("GROQ_SUMMARY_MODEL") or ""
+# Groq retires models; the summary uses the first of these that the account can still see.
+PREFERRED_MODELS = [
+    "openai/gpt-oss-120b",
+    "moonshotai/kimi-k2-instruct",
+    "qwen/qwen3-32b",
+    "meta-llama/llama-4-maverick-17b-128e-instruct",
+    "llama-3.3-70b-versatile",
+    "openai/gpt-oss-20b",
+]
 PER_RUN = int(os.environ.get("LECTURES_PER_RUN") or 1)
 
 # Ten-minute mono 16 kHz Opus chunks are ~1.2 MB, far under Groq's 25 MB free-tier file limit.
@@ -120,6 +130,19 @@ def transcribe(chunks, budget):
     return "\n\n".join(parts)
 
 
+def pick_summary_model():
+    response = requests.get(f"{GROQ}/models", timeout=60, headers={"Authorization": f"Bearer {GROQ_KEY}"})
+    response.raise_for_status()
+    available = {m["id"] for m in response.json().get("data", []) if m.get("active", True)}
+    for model in PREFERRED_MODELS:
+        if model in available:
+            return model
+    chat_models = sorted(m for m in available if "whisper" not in m and "guard" not in m and "tts" not in m)
+    if not chat_models:
+        raise RuntimeError("Groq offers no chat model for summaries")
+    return chat_models[0]
+
+
 def chat(prompt, budget, max_tokens):
     response = groq(
         "chat/completions", budget,
@@ -128,7 +151,12 @@ def chat(prompt, budget, max_tokens):
             "messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
         },
     )
-    return response.json()["choices"][0]["message"]["content"].strip()
+    text = response.json()["choices"][0]["message"].get("content") or ""
+    # Some models (e.g. qwen3) inline their reasoning; keep only the answer.
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
+    if not text:
+        raise RuntimeError(f"{SUMMARY_MODEL} returned an empty summary")
+    return text
 
 
 def slices(text):
@@ -153,14 +181,14 @@ def summarize(title, transcript, budget):
         notes.append(chat(
             f"بخش {index} از {len(pieces)} سخنرانی «{title}». نکته‌های اصلی این بخش را "
             f"در چند خط کوتاه، هر خط با «• »، بنویس:\n\n{piece}",
-            budget, 600,
+            budget, 2000,
         ))
     return chat(
         f"این‌ها یادداشت‌های بخش‌های پیاپی سخنرانی «{title}» است. از روی آن‌ها بنویس:\n"
         "۱. یک بند کوتاه (سه تا پنج جمله) درباره موضوع و پیام اصلی سخنرانی.\n"
         "۲. یک خط خالی و سپس چهار تا هشت نکته اصلی، هر خط با «• ».\n"
         "فقط همین دو بخش را بنویس.\n\n" + "\n\n".join(notes),
-        budget, 1200,
+        budget, 4000,
     )
 
 
@@ -176,6 +204,10 @@ def process(lecture):
 
 
 def main():
+    global SUMMARY_MODEL
+    if not SUMMARY_MODEL:
+        SUMMARY_MODEL = pick_summary_model()
+    print(f"Summary model: {SUMMARY_MODEL}", flush=True)
     lectures = backend("GET", "internal/lectures/claim", params={"limit": PER_RUN})["data"]
     if not lectures:
         print("No lectures waiting.")
