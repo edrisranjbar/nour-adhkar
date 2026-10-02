@@ -1,6 +1,7 @@
 # Transcribes and summarizes scholars' lectures with Groq's free tier (Whisper + a chat model).
 # api.adhkar.ir runs in Iran and cannot reach Groq, so this job does the work and posts the text
-# back to the API. Admins review it in /admin before it appears in the app.
+# back to the API, which writes it into the lecture description. Lectures are queued with the
+# «ساخت توضیح از روی صوت» button on the admin edit form.
 #
 # Setup: repository secrets GROQ_API_KEY and LECTURE_AI_TOKEN (same value as LECTURE_AI_TOKEN in
 # the backend .env). Optional repository variables: LECTURE_AI_API, GROQ_SUMMARY_MODEL.
@@ -8,7 +9,7 @@ name: Lecture transcripts
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/5 * * * *"   # picks up lectures queued from the admin edit form; exits at once when none
   workflow_dispatch:
 
 concurrency:

@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * Work queue for the lecture-ai GitHub workflow, which transcribes and summarizes lectures outside
  * Iran (this server cannot reach Groq). Protected by LECTURE_AI_TOKEN. The workflow claims
- * lectures, downloads their audio, and posts the transcript and summary back here.
+ * lectures an admin queued from the edit form, downloads their audio, and posts the transcript and
+ * summary back here; the result is written into the lecture description.
  */
 class LectureAiController extends Controller
 {
@@ -25,7 +26,7 @@ class LectureAiController extends Controller
         $lectures = DB::transaction(function () use ($limit) {
             $rows = DB::table('lectures')
                 ->where(function ($q) {
-                    $q->where('ai_status', 'pending')
+                    $q->where('ai_status', 'queued')
                         ->orWhere(fn ($q) => $q->where('ai_status', 'processing')
                             ->where('ai_claimed_at', '<', now()->subMinutes(self::CLAIM_MINUTES)));
                 })
@@ -64,7 +65,7 @@ class LectureAiController extends Controller
 
         if (!empty($data['error']) || empty($data['transcript'])) {
             DB::table('lectures')->where('id', $id)->update([
-                'ai_status' => $request->boolean('retry') ? 'pending' : 'failed',
+                'ai_status' => $request->boolean('retry') ? 'queued' : 'failed',
                 'ai_error' => mb_substr($data['error'] ?? 'Empty transcript', 0, 500),
                 'ai_claimed_at' => null,
                 'updated_at' => now(),
@@ -72,13 +73,16 @@ class LectureAiController extends Controller
             return response()->json(['success' => true]);
         }
 
-        // Never overwrite text an admin has already reviewed and published.
-        $update = ['ai_status' => 'done', 'ai_error' => null, 'ai_claimed_at' => null, 'ai_processed_at' => now(), 'updated_at' => now()];
-        if (!$lecture->text_published) {
-            $update['transcript'] = trim($data['transcript']);
-            $update['summary'] = isset($data['summary']) ? trim($data['summary']) : null;
-        }
-        DB::table('lectures')->where('id', $id)->update($update);
+        // The admin asked for this from the edit form, so the result replaces the description.
+        $transcript = trim($data['transcript']);
+        $summary = trim((string) ($data['summary'] ?? ''));
+        DB::table('lectures')->where('id', $id)->update([
+            'description' => $summary === '' ? $transcript : "خلاصه\n{$summary}\n\nمتن کامل سخنرانی\n{$transcript}",
+            'transcript' => $transcript,
+            'summary' => $summary === '' ? null : $summary,
+            'ai_status' => 'done', 'ai_error' => null, 'ai_claimed_at' => null,
+            'ai_processed_at' => now(), 'updated_at' => now(),
+        ]);
 
         return response()->json(['success' => true]);
     }

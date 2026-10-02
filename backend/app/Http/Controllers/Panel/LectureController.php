@@ -61,15 +61,28 @@ class LectureController extends Controller
         return back()->with('status', $lecture->published ? 'سخنرانی از برنامه پنهان شد.' : 'سخنرانی در برنامه نمایش داده می‌شود.');
     }
 
-    /** Queues the lecture for a fresh transcript and summary on the next lecture-ai run. */
-    public function reprocess(int $scholarId, int $id)
+    /**
+     * «ساخت توضیح از روی صوت»: queues the lecture for the lecture-ai workflow, which transcribes and
+     * summarizes it and writes the result into the description.
+     */
+    public function generate(int $scholarId, int $id)
     {
         $this->lecture($scholarId, $id);
         DB::table('lectures')->where('id', $id)->update([
-            'ai_status' => 'pending', 'ai_error' => null, 'ai_claimed_at' => null,
-            'text_published' => false, 'updated_at' => now(),
+            'ai_status' => 'queued', 'ai_error' => null, 'ai_claimed_at' => null, 'updated_at' => now(),
         ]);
-        return back()->with('status', 'سخنرانی در صف پردازش دوباره قرار گرفت. متن تازه پس از اجرای بعدی ساخته می‌شود.');
+        return back()->with('status', 'ساخت توضیح شروع شد. چند دقیقه طول می‌کشد؛ این صفحه را باز نگه دارید تا توضیح خودکار جایگزین شود.');
+    }
+
+    /** Polled by the edit form while a description is being generated. */
+    public function aiStatus(int $scholarId, int $id)
+    {
+        $lecture = $this->lecture($scholarId, $id);
+        return response()->json([
+            'status' => $lecture->ai_status,
+            'error' => $lecture->ai_status === 'failed' ? $lecture->ai_error : null,
+            'description' => $lecture->ai_status === 'done' ? (string) $lecture->description : null,
+        ]);
     }
 
     public function move(Request $request, int $scholarId, int $id, string $direction)
@@ -97,20 +110,17 @@ class LectureController extends Controller
     {
         $data = $request->validate([
             'title' => 'required|string|max:200',
-            'description' => 'nullable|string|max:5000',
+            'description' => 'nullable|string|max:1000000',
             'audio_file' => 'nullable|file|mimes:mp3,m4a,aac,ogg,oga,wav|max:' . self::MAX_UPLOAD_KB,
             'audio_url' => 'nullable|string|max:500|url:https',
             'duration_min' => 'nullable|integer|min:0|max:1440',
             'duration_sec_part' => 'nullable|integer|min:0|max:59',
-            'summary' => 'nullable|string|max:20000',
-            'transcript' => 'nullable|string|max:1000000',
         ], [
             'audio_file.mimes' => 'فایل صوتی باید mp3، m4a، aac، ogg یا wav باشد.',
             'audio_file.max' => 'حجم فایل صوتی حداکثر ۱۰۰ مگابایت است.',
             'audio_url.url' => 'لینک صوت باید با https:// شروع شود.',
         ], [
             'title' => 'عنوان', 'description' => 'توضیح', 'audio_file' => 'فایل صوتی', 'audio_url' => 'لینک صوت',
-            'summary' => 'خلاصه', 'transcript' => 'متن سخنرانی',
         ]);
 
         $row = [
@@ -118,13 +128,6 @@ class LectureController extends Controller
             'description' => $data['description'] ?? null,
             'published' => $request->boolean('published'),
         ];
-
-        // Summary and transcript are only on the edit form, after the workflow has produced them.
-            $row['summary'] = isset($data['summary']) ? trim($data['summary']) : null;
-        if ($existing) {
-            $row['transcript'] = isset($data['transcript']) ? trim($data['transcript']) : null;
-            $row['text_published'] = $request->boolean('text_published') && !empty($row['transcript']);
-        }
 
         $minutes = $data['duration_min'] ?? null;
         $seconds = $data['duration_sec_part'] ?? null;
@@ -155,13 +158,10 @@ class LectureController extends Controller
         return $row;
     }
 
-    /** New audio means the old transcript no longer applies: hide it and queue the lecture again. */
+    /** New audio: forget the old transcript; the admin can generate a new description from the edit form. */
     private static function freshAi(): array
     {
-        return [
-            'ai_status' => 'pending', 'ai_error' => null, 'ai_claimed_at' => null,
-            'transcript' => null, 'summary' => null, 'text_published' => false,
-        ];
+        return ['ai_status' => 'idle', 'ai_error' => null, 'ai_claimed_at' => null, 'transcript' => null, 'summary' => null];
     }
 
     private function scholar(int $id): object
