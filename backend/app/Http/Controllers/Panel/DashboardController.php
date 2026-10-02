@@ -18,7 +18,6 @@ class DashboardController extends Controller
                 'verified' => User::whereNotNull('email_verified_at')->count(),
                 'usersWeek' => User::where('created_at', '>=', $weekAgo)->count(),
                 'feedback' => DB::table('app_feedback')->count(),
-                'feedbackWeek' => DB::table('app_feedback')->where('created_at', '>=', $weekAgo)->count(),
                 'notices' => DB::table('app_notices')->where('published', true)->count(),
                 'reads' => DB::table('app_notice_reads')->count(),
             ],

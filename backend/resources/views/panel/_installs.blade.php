@@ -1,5 +1,5 @@
 {{--
-    Live install counts per store. Reads the JSON feed at panel.installs every 60 seconds, redraws the
+    Live store metrics. Reads the JSON feed at panel.installs every ten minutes, redraws the
     chart, and plays a short chime when a count goes up (after the sound button has been switched on).
 --}}
 @push('head')
@@ -29,7 +29,7 @@
 </style>
 @endpush
 
-<div class="card installs" id="installs" data-url="{{ route('panel.installs') }}" style="margin-bottom:14px">
+<div class="card installs" id="installs" data-url="{{ route('panel.installs') }}" data-interval="{{ config('stores.cache_seconds', 600) }}" style="margin-bottom:14px">
     <div class="inst-top">
         <h2>نصب‌ها <span class="inst-meta" id="inst-status">در حال دریافت…</span></h2>
         <button type="button" class="btn" id="inst-sound" aria-pressed="false">🔕 صدا: خاموش</button>
@@ -196,6 +196,18 @@
     }
 
     function handle(data) {
+        var feedbackCount = document.getElementById('feedback-count');
+        if (feedbackCount && data.feedback !== undefined) feedbackCount.textContent = nf.format(data.feedback);
+        var bazaar = data.stores.bazaar;
+        var votesEl = document.getElementById('bazaar-votes');
+        var ratingEl = document.getElementById('bazaar-rating');
+        var ratingStatus = document.getElementById('bazaar-rating-status');
+        if (votesEl && ratingEl && ratingStatus) {
+            votesEl.textContent = !bazaar || bazaar.rating_count === null ? '—' : nf.format(bazaar.rating_count);
+            ratingEl.textContent = !bazaar || bazaar.rating === null ? '—' : nf.format(bazaar.rating) + ' از ۵';
+            ratingStatus.textContent = !bazaar || bazaar.rating === null ? 'آمار بازار در دسترس نیست' : (bazaar.rating_stale ? 'آخرین آمار معتبر بازار' : '');
+            ratingStatus.title = bazaar && bazaar.rating_updated_at ? new Date(bazaar.rating_updated_at * 1000).toLocaleString('fa-IR') : '';
+        }
         var increased = [];
         Object.keys(data.stores).forEach(function (key) {
             var value = data.stores[key].installs;
@@ -215,11 +227,15 @@
         fetch(url, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
             .then(function (response) { if (!response.ok) throw new Error(response.status); return response.json(); })
             .then(handle)
-            .catch(function () { statusEl.textContent = 'دریافت ناموفق بود؛ یک دقیقهٔ دیگر دوباره تلاش می‌شود'; });
+            .catch(function () {
+                statusEl.textContent = 'دریافت ناموفق بود؛ ۱۰ دقیقهٔ دیگر دوباره تلاش می‌شود';
+                var ratingStatus = document.getElementById('bazaar-rating-status');
+                if (ratingStatus) ratingStatus.textContent = 'به‌روزرسانی آمار بازار ناموفق بود';
+            });
     }
 
     paintSound();
     poll();
-    setInterval(poll, 60000);
+    setInterval(poll, Number(root.dataset.interval) * 1000);
 })();
 </script>

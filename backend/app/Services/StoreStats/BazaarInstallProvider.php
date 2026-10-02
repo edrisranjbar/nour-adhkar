@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Reads the install count shown on the app's public Cafe Bazaar page. The number is part of the
+ * Reads installs, rating and votes shown on the app's public Cafe Bazaar page. The metrics are part of the
  * server-rendered HTML, so no API token or JavaScript is needed (Bazaar's Pishkhan API only manages
  * releases and has no statistics).
  */
@@ -24,6 +24,13 @@ class BazaarInstallProvider implements StoreInstallProvider
 
     public function installs(): ?int
     {
+        return $this->metrics()['installs'];
+    }
+
+    /** @return array{installs: ?int, rating: ?float, rating_count: ?int} */
+    public function metrics(): array
+    {
+        $empty = ['installs' => null, 'rating' => null, 'rating_count' => null];
         $url = 'https://cafebazaar.ir/app/' . config('stores.package');
 
         try {
@@ -32,12 +39,12 @@ class BazaarInstallProvider implements StoreInstallProvider
                 ->get($url);
         } catch (\Throwable $e) {
             Log::warning('Bazaar install count request failed: ' . $e->getMessage());
-            return null;
+            return $empty;
         }
 
         if (!$response->successful()) {
             Log::warning('Bazaar install count request returned HTTP ' . $response->status());
-            return null;
+            return $empty;
         }
 
         $installs = self::parseInstalls($response->body());
@@ -45,7 +52,30 @@ class BazaarInstallProvider implements StoreInstallProvider
             Log::warning('Bazaar install count was not found on the page; its layout may have changed.');
         }
 
-        return $installs;
+        $rating = self::parseRating($response->body());
+        if ($rating['rating'] === null) {
+            Log::warning('Bazaar rating and vote count were not found or invalid; its layout may have changed.');
+        }
+        return ['installs' => $installs] + $rating;
+    }
+
+    /** The rating cell is labelled «از ... رأی»; its count is votes, not written reviews. */
+    public static function parseRating(string $html): array
+    {
+        $empty = ['rating' => null, 'rating_count' => null];
+        if (!preg_match('~InfoCube__title[^>]*>\s*از\s+([^<]+?)\s+رأی\s*</td>\s*<td[^>]*>(.*?)</td>~su', $html, $match)) {
+            return $empty;
+        }
+        $count = self::parseCount(html_entity_decode($match[1], ENT_QUOTES, 'UTF-8'));
+        $text = trim(strip_tags(preg_replace('/<!--.*?-->/s', '', $match[2])));
+        $text = strtr($text, array_combine(
+            preg_split('//u', '۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩٫', -1, PREG_SPLIT_NO_EMPTY),
+            str_split('01234567890123456789.')
+        ));
+        if ($count === null || !preg_match('/^\d+(?:\.\d+)?$/', $text) || (float) $text < 0 || (float) $text > 5) {
+            return $empty;
+        }
+        return ['rating' => (float) $text, 'rating_count' => $count];
     }
 
     /**

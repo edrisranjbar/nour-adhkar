@@ -58,7 +58,11 @@ it('serves the count and chart to an admin, calling Bazaar once per cache window
         ->assertJsonPath('stores.bazaar.installs', 550)
         ->assertJsonPath('stores.bazaar.stale', false)
         ->assertJsonPath('stores.bazaar.label', 'کافه‌بازار')
-        ->assertJsonPath('interval', 60)
+        ->assertJsonPath('stores.bazaar.rating', 5)
+        ->assertJsonPath('stores.bazaar.rating_count', 21)
+        ->assertJsonPath('stores.bazaar.rating_stale', false)
+        ->assertJsonPath('feedback', 0)
+        ->assertJsonPath('interval', 600)
         ->assertJsonCount(1, 'series.bazaar');
 
     $this->actingAs($admin, 'admin')->getJson('/admin/installs')->assertOk()->assertJsonPath('stores.bazaar.installs', 550);
@@ -133,6 +137,9 @@ it('shows no number and no history before the first successful read', function (
         ->assertOk()
         ->assertJsonPath('stores.bazaar.installs', null)
         ->assertJsonPath('stores.bazaar.stale', true)
+        ->assertJsonPath('stores.bazaar.rating', null)
+        ->assertJsonPath('stores.bazaar.rating_count', null)
+        ->assertJsonPath('stores.bazaar.rating_stale', true)
         ->assertJsonCount(0, 'series.bazaar');
 });
 
@@ -149,6 +156,9 @@ it('puts the live install card on the dashboard', function () {
         ->assertSee('id="installs"', false)
         ->assertSee(route('panel.installs'), false)
         ->assertSee('id="inst-sound"', false)
+        ->assertSee('رأی بازار:')
+        ->assertSee('امتیاز بازار:')
+        ->assertSee('بازخورد درون‌برنامه')
         ->assertSeeInOrder(['class="kpis"', 'id="installs"', 'آخرین بازخوردها'], false);
 });
 
@@ -156,7 +166,53 @@ it('shows an icon beside every sidebar item and the logout button', function () 
     $html = $this->actingAs(installAdmin(), 'admin')->get('/admin')->assertOk()->getContent();
 
     preg_match('~<nav>(.*?)</nav>~s', $html, $nav);
-    expect(substr_count($nav[1], '<a '))->toBe(7)
-        ->and(substr_count($nav[1], 'class="ic"'))->toBe(7)
+    expect(substr_count($nav[1], '<a '))->toBe(8)
+        ->and(substr_count($nav[1], 'class="ic"'))->toBe(8)
         ->and($html)->toMatch('~<button class="btn sm" type="submit"><svg class="ic"~');
+});
+
+it('parses the public vote count and rating without mistaking them for installs', function () {
+    $page = str_replace(['۲۱ رأی', '<div>۵</div>'], ['۱٬۲۵۰ رأی', '<div>۴٫۷</div>'], bazaarPage('۵۵۰'));
+    expect(BazaarInstallProvider::parseRating($page))->toBe(['rating' => 4.7, 'rating_count' => 1250])
+        ->and(BazaarInstallProvider::parseInstalls($page))->toBe(550)
+        ->and(BazaarInstallProvider::parseRating(str_replace('۴٫۷', '6', $page)))
+        ->toBe(['rating' => null, 'rating_count' => null])
+        ->and(BazaarInstallProvider::parseRating('<html>no rating</html>'))
+        ->toBe(['rating' => null, 'rating_count' => null]);
+});
+
+it('refreshes all listing metrics after ten minutes and updates the in-app feedback count', function () {
+    $page = bazaarPage('۵۵۰');
+    Http::fake(['cafebazaar.ir/*' => fn () => Http::response($page)]);
+    $admin = installAdmin();
+    $this->actingAs($admin, 'admin')->getJson('/admin/installs')->assertOk();
+    $this->travel(9)->minutes();
+    DB::table('app_feedback')->insert(['type' => 'suggestion', 'message' => 'Hello', 'created_at' => now(), 'updated_at' => now()]);
+    $this->getJson('/admin/installs')->assertJsonPath('feedback', 1);
+    Http::assertSentCount(1);
+    $this->travel(1)->minutes();
+    $this->getJson('/admin/installs')->assertOk();
+    Http::assertSentCount(2);
+    expect(DB::table('store_rating_snapshots')->count())->toBe(2);
+});
+
+it('preserves rating and votes independently when only installs can still be read', function () {
+    $page = bazaarPage('۵۵۰');
+    Http::fake(['cafebazaar.ir/*' => function () use (&$page) { return Http::response($page); }]);
+    $this->actingAs(installAdmin(), 'admin')->getJson('/admin/installs')->assertOk();
+    Cache::flush();
+    $page = str_replace('از ۲۱ رأی', 'changed layout', bazaarPage('۶۰۰'));
+    $this->getJson('/admin/installs')
+        ->assertJsonPath('stores.bazaar.installs', 600)
+        ->assertJsonPath('stores.bazaar.stale', false)
+        ->assertJsonPath('stores.bazaar.rating', 5)
+        ->assertJsonPath('stores.bazaar.rating_count', 21)
+        ->assertJsonPath('stores.bazaar.rating_stale', true);
+    Cache::flush();
+    $page = str_replace('>نصب<', '>changed<', str_replace('<div>۵</div>', '<div>۴٫۹</div>', bazaarPage('۶۰۰')));
+    $this->getJson('/admin/installs')
+        ->assertJsonPath('stores.bazaar.installs', 600)
+        ->assertJsonPath('stores.bazaar.stale', true)
+        ->assertJsonPath('stores.bazaar.rating', 4.9)
+        ->assertJsonPath('stores.bazaar.rating_stale', false);
 });

@@ -46,8 +46,11 @@
         <span class="kpi-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
         <div class="kpi-body">
             <div class="kpi-l">بازخورد</div>
-            <div class="kpi-n">{{ F::number($stats['feedback']) }}</div>
-            <div class="kpi-s">{{ F::number($stats['feedbackWeek']) }} در هفته اخیر</div>
+            <div class="kpi-n" id="feedback-count">{{ F::number($stats['feedback']) }}</div>
+            <div class="kpi-s">بازخورد درون‌برنامه</div>
+            <div class="kpi-s">رأی بازار: <span id="bazaar-votes">—</span></div>
+            <div class="kpi-s">امتیاز بازار: <span id="bazaar-rating">—</span></div>
+            <div class="kpi-s" id="bazaar-rating-status" aria-live="polite">در حال دریافت…</div>
         </div>
     </div>
     <div class="kpi" style="--accent:#8b5cf6">
