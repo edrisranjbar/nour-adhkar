@@ -13,4 +13,7 @@ interface StoreInstallProvider
 
     /** The current public install count, or null when it could not be read. */
     public function installs(): ?int;
+
+    /** Public listing metrics; missing values stay null, never zero. */
+    public function metrics(): array;
 }
