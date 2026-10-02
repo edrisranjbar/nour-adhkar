@@ -48,6 +48,14 @@ Route::prefix('admin')->name('panel.')->group(function () {
         Route::patch('scholars/{scholar}/lectures/{id}/move/{direction}', [Panel\LectureController::class, 'move'])->name('lectures.move');
         Route::delete('scholars/{scholar}/lectures/{id}', [Panel\LectureController::class, 'destroy'])->name('lectures.destroy');
 
+        Route::get('versions', [Panel\AppVersionController::class, 'index'])->name('versions.index');
+        Route::get('versions/create', [Panel\AppVersionController::class, 'create'])->name('versions.create');
+        Route::post('versions', [Panel\AppVersionController::class, 'store'])->name('versions.store');
+        Route::get('versions/{id}/edit', [Panel\AppVersionController::class, 'edit'])->name('versions.edit');
+        Route::put('versions/{id}', [Panel\AppVersionController::class, 'update'])->name('versions.update');
+        Route::patch('versions/{id}/toggle', [Panel\AppVersionController::class, 'toggle'])->name('versions.toggle');
+        Route::delete('versions/{id}', [Panel\AppVersionController::class, 'destroy'])->name('versions.destroy');
+
         Route::get('users', [Panel\UserController::class, 'index'])->name('users.index');
         Route::patch('users/{id}/toggle', [Panel\UserController::class, 'toggle'])->name('users.toggle');
 
