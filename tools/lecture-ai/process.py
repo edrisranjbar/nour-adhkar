@@ -22,7 +22,7 @@ import time
 
 import requests
 
-API = os.environ.get("LECTURE_AI_API", "https://api.adhkar.ir/api").rstrip("/")
+API = (os.environ.get("LECTURE_AI_API") or "https://api.adhkar.ir/api").rstrip("/")
 TOKEN = os.environ["LECTURE_AI_TOKEN"]
 GROQ_KEY = os.environ["GROQ_API_KEY"]
 GROQ = "https://api.groq.com/openai/v1"
