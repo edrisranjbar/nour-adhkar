@@ -62,8 +62,8 @@ class LectureController extends Controller
     }
 
     /**
-     * «ساخت توضیح از روی صوت»: queues the lecture for the lecture-ai workflow, which transcribes and
-     * summarizes it and writes the result into the description.
+     * «ساخت توضیح از روی صوت»: queues the lecture for the lecture-ai workflow, which transcribes it
+     * and writes the transcript into the description.
      */
     public function generate(int $scholarId, int $id)
     {
@@ -71,7 +71,7 @@ class LectureController extends Controller
         DB::table('lectures')->where('id', $id)->update([
             'ai_status' => 'queued', 'ai_error' => null, 'ai_claimed_at' => null, 'updated_at' => now(),
         ]);
-        return back()->with('status', 'ساخت توضیح شروع شد. چند دقیقه طول می‌کشد؛ این صفحه را باز نگه دارید تا توضیح خودکار جایگزین شود.');
+        return back()->with('status', 'تبدیل صوت به متن شروع شد؛ این صفحه را باز نگه دارید تا متن خودکار در توضیح قرار بگیرد.');
     }
 
     /** Polled by the edit form while a description is being generated. */

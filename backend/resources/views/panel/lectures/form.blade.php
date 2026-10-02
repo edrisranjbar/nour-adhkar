@@ -30,7 +30,7 @@
                 <button class="btn sm" type="submit" form="generate-form" @disabled($busy)>ساخت توضیح از روی صوت</button>
                 <span class="muted" id="ai-generate-status" role="status" aria-live="polite">
                     @if ($busy)
-                        در حال تبدیل صوت به متن و خلاصه‌نویسی… چند دقیقه طول می‌کشد.
+                        در حال تبدیل صوت به متن…
                     @elseif ($lecture->ai_status === 'failed')
                         ساخت توضیح ناموفق بود: <span dir="auto">{{ $lecture->ai_error }}</span>
                     @endif
@@ -59,7 +59,7 @@
 
 @if ($lecture && ($lecture->audio_path || $lecture->audio_url))
     <form id="generate-form" method="POST" action="{{ route('panel.lectures.generate', [$scholar->id, $lecture->id]) }}" hidden
-          onsubmit="return document.getElementById('description').value.trim() === '' || confirm('توضیح فعلی با خلاصه و متن کامل سخنرانی جایگزین شود؟')">
+          onsubmit="return document.getElementById('description').value.trim() === '' || confirm('توضیح فعلی با متن کامل سخنرانی جایگزین شود؟')">
         @csrf
     </form>
     <script>

@@ -1,25 +1,26 @@
-"""Transcribe and summarize Nour lectures with Groq's free tier, outside Iran.
+"""Transcribe Nour lectures with Groq's free Whisper, outside Iran.
 
-Run by .github/workflows/lecture-ai.yml. api.adhkar.ir cannot reach Groq, so this job claims
-pending lectures from the backend, downloads the audio, transcribes it with Whisper, summarizes the
-transcript with a free Groq chat model, and posts both back; the backend writes them into the
-lecture description. Lectures are queued from the admin edit form.
+Run by .github/workflows/lecture-ai.yml. api.adhkar.ir cannot reach Groq, so this job claims the
+lectures an admin queued with «ساخت توضیح از روی صوت», downloads the audio, transcribes all parts in
+parallel, and posts the transcript back; the backend writes it into the lecture description.
+
+Each run keeps checking the queue for WATCH_MINUTES, so a click on the button is picked up within
+POLL_SECONDS while a run is alive, rather than waiting for the next scheduled start.
 
 Environment:
   GROQ_API_KEY         Groq key (repository secret)
   LECTURE_AI_TOKEN     shared secret, same as LECTURE_AI_TOKEN in the backend .env
   LECTURE_AI_API       backend API base, default https://api.adhkar.ir/api
-  LECTURES_PER_RUN     default 1
-  GROQ_SUMMARY_MODEL   optional; default is the first of PREFERRED_MODELS that Groq still offers
+  WATCH_MINUTES        how long one run keeps checking the queue, default 28
 """
 
 import glob
 import os
-import re
 import subprocess
 import sys
 import tempfile
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
@@ -28,47 +29,18 @@ TOKEN = os.environ["LECTURE_AI_TOKEN"]
 GROQ_KEY = os.environ["GROQ_API_KEY"]
 GROQ = "https://api.groq.com/openai/v1"
 WHISPER_MODEL = "whisper-large-v3"
-PER_RUN = int(os.environ.get("LECTURES_PER_RUN") or 1)
-SUMMARY_MODEL = os.environ.get("GROQ_SUMMARY_MODEL") or ""
-# Groq retires models, so the summary uses the first of these the account can still see.
-PREFERRED_MODELS = [
-    "openai/gpt-oss-120b",
-    "moonshotai/kimi-k2-instruct",
-    "qwen/qwen3-32b",
-    "meta-llama/llama-4-maverick-17b-128e-instruct",
-    "openai/gpt-oss-20b",
-]
-# Transcript slices for the summary's first pass, sized for the free tier's tokens per minute.
-SUMMARY_SLICE_CHARS = 6000
+WATCH_MINUTES = float(os.environ.get("WATCH_MINUTES") or 28)
+POLL_SECONDS = 20
 
-SYSTEM_PROMPT = (
-    "تو خلاصه‌نویس دقیق سخنرانی‌های دینی فارسی هستی. فقط آنچه سخنران واقعاً گفته را بنویس؛ "
-    "هیچ آیه، حدیث، حکم یا نظری اضافه نکن و چیزی را به سخنران نسبت نده که در متن نیست. "
-    "متن با تبدیل خودکار گفتار به نوشتار ساخته شده و ممکن است غلط داشته باشد؛ اگر بخشی نامفهوم است، از آن بگذر. "
-    "به فارسی روان و ساده بنویس. از قالب‌بندی مارک‌داون، عنوان و ستاره استفاده نکن."
-)
-
-# Ten-minute mono 16 kHz Opus chunks are ~1.2 MB, far under Groq's 25 MB free-tier file limit.
-CHUNK_SECONDS = 600
+# Five-minute mono 16 kHz Opus parts (~0.6 MB each), sent to Whisper several at a time.
+CHUNK_SECONDS = 300
+PARALLEL = 6
 # Total time one lecture may spend waiting on rate limits before it is handed back for later.
-MAX_WAIT_SECONDS = 25 * 60
+MAX_WAIT_SECONDS = 15 * 60
 
 
 class RetryLater(Exception):
     """A rate limit outlasted MAX_WAIT_SECONDS; the lecture goes back to the queue."""
-
-
-class Budget:
-    def __init__(self):
-        self.waited = 0
-
-    def sleep(self, response):
-        delay = float(response.headers.get("retry-after") or 30)
-        if self.waited + delay > MAX_WAIT_SECONDS:
-            raise RetryLater(f"Groq rate limit (retry after {int(delay)}s)")
-        print(f"  rate limited, waiting {int(delay)}s", flush=True)
-        time.sleep(delay + 1)
-        self.waited += delay
 
 
 def backend(method, path, **kwargs):
@@ -80,20 +52,31 @@ def backend(method, path, **kwargs):
     return response.json()
 
 
-def groq(path, budget, **kwargs):
-    for _ in range(50):
+def transcribe_part(path):
+    """One part, retrying on rate limits (honouring retry-after) and on Groq server errors."""
+    with open(path, "rb") as audio:
+        payload = audio.read()
+    waited = 0.0
+    for _ in range(40):
         response = requests.post(
-            f"{GROQ}/{path}", timeout=300, headers={"Authorization": f"Bearer {GROQ_KEY}"}, **kwargs,
+            f"{GROQ}/audio/transcriptions", timeout=300,
+            headers={"Authorization": f"Bearer {GROQ_KEY}"},
+            files={"file": (os.path.basename(path), payload, "audio/ogg")},
+            data={"model": WHISPER_MODEL, "language": "fa", "response_format": "text", "temperature": "0"},
         )
         if response.status_code == 429:
-            budget.sleep(response)
+            delay = float(response.headers.get("retry-after") or 30)
+            if waited + delay > MAX_WAIT_SECONDS:
+                raise RetryLater(f"Groq rate limit (retry after {int(delay)}s)")
+            time.sleep(delay + 1)
+            waited += delay
             continue
         if response.status_code >= 500:
-            time.sleep(10)
+            time.sleep(5)
             continue
         if response.status_code >= 400:
             raise RuntimeError(f"Groq {response.status_code}: {response.text[:300]}")
-        return response
+        return response.text.strip()
     raise RuntimeError("Groq kept failing")
 
 
@@ -105,132 +88,61 @@ def split_audio(url, workdir):
             for block in response.iter_content(1 << 20):
                 out.write(block)
     subprocess.run(
-        ["ffmpeg", "-loglevel", "error", "-i", source, "-vn", "-ac", "1", "-ar", "16000",
+        ["ffmpeg", "-loglevel", "error", "-threads", "0", "-i", source, "-vn", "-ac", "1", "-ar", "16000",
          "-c:a", "libopus", "-b:a", "16k", "-f", "segment", "-segment_time", str(CHUNK_SECONDS),
-         os.path.join(workdir, "chunk%03d.ogg")],
+         os.path.join(workdir, "part%03d.ogg")],
         check=True,
     )
-    return sorted(glob.glob(os.path.join(workdir, "chunk*.ogg")))
-
-
-def transcribe(chunks, budget):
-    parts = []
-    for index, path in enumerate(chunks, 1):
-        print(f"  transcribing {index}/{len(chunks)}", flush=True)
-        with open(path, "rb") as audio:
-            response = groq(
-                "audio/transcriptions", budget,
-                files={"file": (os.path.basename(path), audio.read(), "audio/ogg")},
-                data={"model": WHISPER_MODEL, "language": "fa", "response_format": "text", "temperature": "0"},
-            )
-        text = response.text.strip()
-        if text:
-            parts.append(text)
-    return "\n\n".join(parts)
-
-
-def pick_summary_model():
-    response = requests.get(f"{GROQ}/models", timeout=60, headers={"Authorization": f"Bearer {GROQ_KEY}"})
-    response.raise_for_status()
-    available = {m["id"] for m in response.json().get("data", []) if m.get("active", True)}
-    for model in PREFERRED_MODELS:
-        if model in available:
-            return model
-    others = sorted(m for m in available if not any(k in m for k in ("whisper", "guard", "tts", "orpheus")))
-    if not others:
-        raise RuntimeError("Groq offers no chat model for summaries")
-    return others[0]
-
-
-def chat(prompt, budget, max_tokens):
-    response = groq(
-        "chat/completions", budget,
-        json={
-            "model": SUMMARY_MODEL, "temperature": 0.2, "max_tokens": max_tokens,
-            "messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
-        },
-    )
-    text = response.json()["choices"][0]["message"].get("content") or ""
-    # Some models (e.g. qwen3) inline their reasoning; keep only the answer.
-    text = re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
-    if not text:
-        raise RuntimeError(f"{SUMMARY_MODEL} returned an empty summary")
-    return text
-
-
-def slices(text):
-    """Pieces of about SUMMARY_SLICE_CHARS, split at sentence ends where possible."""
-    pieces, current = [], ""
-    for sentence in text.replace("\n", " ").split(". "):
-        if current and len(current) + len(sentence) > SUMMARY_SLICE_CHARS:
-            pieces.append(current)
-            current = ""
-        current += sentence + ". "
-    if current.strip():
-        pieces.append(current)
-    # Whisper sometimes emits long runs without punctuation; cut those at a fixed size.
-    return [p[i:i + SUMMARY_SLICE_CHARS] for p in pieces for i in range(0, len(p), SUMMARY_SLICE_CHARS)]
-
-
-def summarize(title, transcript, budget):
-    pieces = slices(transcript)
-    notes = []
-    for index, piece in enumerate(pieces, 1):
-        print(f"  summarizing part {index}/{len(pieces)}", flush=True)
-        notes.append(chat(
-            f"بخش {index} از {len(pieces)} سخنرانی «{title}». نکته‌های اصلی این بخش را "
-            f"در چند خط کوتاه، هر خط با «• »، بنویس:\n\n{piece}",
-            budget, 2000,  # reasoning models spend part of this before answering
-        ))
-    return chat(
-        f"این‌ها یادداشت‌های بخش‌های پیاپی سخنرانی «{title}» است. از روی آن‌ها بنویس:\n"
-        "۱. یک بند کوتاه (سه تا پنج جمله) درباره موضوع و پیام اصلی سخنرانی.\n"
-        "۲. یک خط خالی و سپس چهار تا هشت نکته اصلی، هر خط با «• ».\n"
-        "فقط همین دو بخش را بنویس.\n\n" + "\n\n".join(notes),
-        budget, 4000,
-    )
+    return sorted(glob.glob(os.path.join(workdir, "part*.ogg")))
 
 
 def process(lecture):
+    started = time.time()
     print(f"Lecture {lecture['id']}: {lecture['title']}", flush=True)
-    budget = Budget()
     with tempfile.TemporaryDirectory() as workdir:
-        transcript = transcribe(split_audio(lecture["audioUrl"], workdir), budget)
+        parts = split_audio(lecture["audioUrl"], workdir)
+        print(f"  {len(parts)} parts, transcribing {min(PARALLEL, len(parts))} at a time", flush=True)
+        with ThreadPoolExecutor(max_workers=PARALLEL) as pool:
+            texts = list(pool.map(transcribe_part, parts))  # map keeps the parts in order
+    transcript = "\n\n".join(t for t in texts if t)
     if not transcript:
         raise RuntimeError("Whisper returned no text")
+    print(f"  transcribed in {int(time.time() - started)}s", flush=True)
+    return transcript
+
+
+def handle(lecture):
     try:
-        summary = summarize(lecture["title"], transcript, budget)
-    except RetryLater:
-        raise
-    except Exception as error:
-        # Keep the transcript; the admin can edit the description or press the button again.
-        print(f"  summary failed, saving transcript only: {error}", flush=True)
-        summary = None
-    return transcript, summary
+        backend("POST", f"internal/lectures/{lecture['id']}/ai", json={"transcript": process(lecture)})
+        print("  done", flush=True)
+        return True
+    except RetryLater as error:
+        backend("POST", f"internal/lectures/{lecture['id']}/ai", json={"error": str(error), "retry": True})
+        print(f"  postponed: {error}", flush=True)
+    except Exception as error:  # report every other failure to the panel, then keep watching
+        backend("POST", f"internal/lectures/{lecture['id']}/ai", json={"error": str(error)[:1000]})
+        print(f"  failed: {error}", flush=True)
+    return False
 
 
 def main():
-    global SUMMARY_MODEL
-    if not SUMMARY_MODEL:
-        SUMMARY_MODEL = pick_summary_model()
-    print(f"Summary model: {SUMMARY_MODEL}", flush=True)
-    lectures = backend("GET", "internal/lectures/claim", params={"limit": PER_RUN})["data"]
-    if not lectures:
-        print("No lectures waiting.")
-        return 0
+    deadline = time.time() + WATCH_MINUTES * 60
     failed = 0
-    for lecture in lectures:
+    while True:
         try:
-            transcript, summary = process(lecture)
-            backend("POST", f"internal/lectures/{lecture['id']}/ai", json={"transcript": transcript, "summary": summary})
-            print("  done", flush=True)
-        except RetryLater as error:
-            backend("POST", f"internal/lectures/{lecture['id']}/ai", json={"error": str(error), "retry": True})
-            print(f"  postponed: {error}", flush=True)
-        except Exception as error:  # report every other failure to the panel, then continue
-            failed += 1
-            backend("POST", f"internal/lectures/{lecture['id']}/ai", json={"error": str(error)[:1000]})
-            print(f"  failed: {error}", flush=True)
+            lectures = backend("GET", "internal/lectures/claim", params={"limit": 1})["data"]
+        except requests.RequestException as error:
+            print(f"Queue check failed: {error}", flush=True)
+            lectures = []
+        for lecture in lectures:
+            if not handle(lecture):
+                failed += 1
+        if lectures:
+            continue  # look again straight away; more may be queued
+        if time.time() + POLL_SECONDS > deadline:
+            break
+        time.sleep(POLL_SECONDS)
+    print("Finished watching the queue.")
     return 1 if failed else 0
 
 

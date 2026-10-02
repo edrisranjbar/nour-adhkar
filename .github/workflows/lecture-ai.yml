@@ -1,15 +1,17 @@
-# Transcribes and summarizes scholars' lectures with Groq's free tier (Whisper + a chat model).
-# api.adhkar.ir runs in Iran and cannot reach Groq, so this job does the work and posts the text
-# back to the API, which writes it into the lecture description. Lectures are queued with the
-# «ساخت توضیح از روی صوت» button on the admin edit form.
+# Transcribes scholars' lectures with Groq's free Whisper. api.adhkar.ir runs in Iran and cannot
+# reach Groq, so this job does the work and posts the transcript back; the backend writes it into the
+# lecture description. Lectures are queued with «ساخت توضیح از روی صوت» on the admin edit form.
+#
+# Each run watches the queue for about 28 minutes (checking every 20 seconds), and a new run starts
+# every 30 minutes, so a queued lecture is picked up within seconds while a run is alive.
 #
 # Setup: repository secrets GROQ_API_KEY and LECTURE_AI_TOKEN (same value as LECTURE_AI_TOKEN in
-# the backend .env). Optional repository variables: LECTURE_AI_API, GROQ_SUMMARY_MODEL.
+# the backend .env). Optional repository variable: LECTURE_AI_API.
 name: Lecture transcripts
 
 on:
   schedule:
-    - cron: "*/5 * * * *"   # picks up lectures queued from the admin edit form; exits at once when none
+    - cron: "1,31 * * * *"
   workflow_dispatch:
 
 concurrency:
@@ -22,7 +24,7 @@ permissions:
 jobs:
   process:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,17 +43,17 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install tools
+      # ffmpeg and python3-requests ship with ubuntu-latest; install only if an image ever drops them.
+      - name: Check tools
         if: steps.config.outputs.ready == 'true'
         run: |
           command -v ffmpeg >/dev/null || (sudo apt-get update -q && sudo apt-get install -yq ffmpeg)
-          pip install --quiet requests
+          python3 -c "import requests" 2>/dev/null || pip install --quiet requests
 
-      - name: Transcribe and summarize
+      - name: Transcribe
         if: steps.config.outputs.ready == 'true'
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           LECTURE_AI_TOKEN: ${{ secrets.LECTURE_AI_TOKEN }}
           LECTURE_AI_API: ${{ vars.LECTURE_AI_API }}
-          GROQ_SUMMARY_MODEL: ${{ vars.GROQ_SUMMARY_MODEL }}
-        run: python tools/lecture-ai/process.py
+        run: python3 tools/lecture-ai/process.py

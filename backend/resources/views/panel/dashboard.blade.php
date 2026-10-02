@@ -161,7 +161,7 @@
                 </div>
                 <div style="text-align:end;flex:none">
                     @switch($lecture->ai_status)
-                        @case('processing') <span class="badge draft">تبدیل و خلاصه‌نویسی</span> @break
+                        @case('processing') <span class="badge draft">تبدیل به متن</span> @break
                         @case('queued') <span class="badge">در صف</span> @break
                         @default <span class="badge off">ناموفق</span>
                     @endswitch
