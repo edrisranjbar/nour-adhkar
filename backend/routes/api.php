@@ -20,6 +20,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AppInboxController;
 use App\Http\Controllers\AppVersionController;
+use App\Http\Controllers\LectureAiController;
 
 // Public routes
 require __DIR__.'/progress.php';
@@ -29,6 +30,9 @@ Route::get('app-version', [AppVersionController::class, 'latest'])->middleware('
 Route::post('app-notices/{id}/read', [AppInboxController::class, 'markRead'])->middleware('throttle:60,1');
 // Google sign-in keys pushed by the Nour-Adhkar-App GitHub workflow (server cannot reach Google).
 Route::post('internal/google-jwks', [GoogleJwksController::class, 'store'])->middleware('throttle:10,1');
+// Lecture transcripts and summaries, produced by the nour-adhkar lecture-ai GitHub workflow.
+Route::get('internal/lectures/claim', [LectureAiController::class, 'claim'])->middleware('throttle:30,1');
+Route::post('internal/lectures/{id}/ai', [LectureAiController::class, 'report'])->middleware('throttle:30,1');
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
@@ -48,6 +52,7 @@ Route::prefix('auth')->group(function () {
 
 // Public content routes
 Route::get('scholars', [ScholarController::class, 'index']);
+Route::get('lectures/{id}/transcript', [ScholarController::class, 'transcript'])->whereNumber('id')->middleware('throttle:60,1');
 Route::get('adhkars', [AdhkarController::class, 'index']);
 Route::get('collections', [CollectionController::class, 'index']);
 Route::get('collections/{slug}', [CollectionController::class, 'show']);

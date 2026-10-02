@@ -62,6 +62,7 @@
                     @else
                         <span class="badge draft">پنهان</span>
                     @endif
+                    <div style="margin-top:4px">@include('panel.lectures._ai_badge', ['lecture' => $item])</div>
                 </td>
                 <td>
                     <div class="actions">

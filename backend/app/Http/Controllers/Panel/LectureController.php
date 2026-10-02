@@ -61,6 +61,17 @@ class LectureController extends Controller
         return back()->with('status', $lecture->published ? 'سخنرانی از برنامه پنهان شد.' : 'سخنرانی در برنامه نمایش داده می‌شود.');
     }
 
+    /** Queues the lecture for a fresh transcript and summary on the next lecture-ai run. */
+    public function reprocess(int $scholarId, int $id)
+    {
+        $this->lecture($scholarId, $id);
+        DB::table('lectures')->where('id', $id)->update([
+            'ai_status' => 'pending', 'ai_error' => null, 'ai_claimed_at' => null,
+            'text_published' => false, 'updated_at' => now(),
+        ]);
+        return back()->with('status', 'سخنرانی در صف پردازش دوباره قرار گرفت. متن تازه پس از اجرای بعدی ساخته می‌شود.');
+    }
+
     public function move(int $scholarId, int $id, string $direction)
     {
         $this->lecture($scholarId, $id);
@@ -87,12 +98,15 @@ class LectureController extends Controller
             'audio_url' => 'nullable|string|max:500|url:https',
             'duration_min' => 'nullable|integer|min:0|max:1440',
             'duration_sec_part' => 'nullable|integer|min:0|max:59',
+            'summary' => 'nullable|string|max:20000',
+            'transcript' => 'nullable|string|max:1000000',
         ], [
             'audio_file.mimes' => 'فایل صوتی باید mp3، m4a، aac، ogg یا wav باشد.',
             'audio_file.max' => 'حجم فایل صوتی حداکثر ۱۰۰ مگابایت است.',
             'audio_url.url' => 'لینک صوت باید با https:// شروع شود.',
         ], [
             'title' => 'عنوان', 'description' => 'توضیح', 'audio_file' => 'فایل صوتی', 'audio_url' => 'لینک صوت',
+            'summary' => 'خلاصه', 'transcript' => 'متن سخنرانی',
         ]);
 
         $row = [
@@ -100,6 +114,13 @@ class LectureController extends Controller
             'description' => $data['description'] ?? null,
             'published' => $request->boolean('published'),
         ];
+
+        // Transcript and summary are only on the edit form, after the workflow has produced them.
+        if ($existing) {
+            $row['summary'] = isset($data['summary']) ? trim($data['summary']) : null;
+            $row['transcript'] = isset($data['transcript']) ? trim($data['transcript']) : null;
+            $row['text_published'] = $request->boolean('text_published') && !empty($row['transcript']);
+        }
 
         $minutes = $data['duration_min'] ?? null;
         $seconds = $data['duration_sec_part'] ?? null;
@@ -113,17 +134,30 @@ class LectureController extends Controller
             }
             $row['audio_path'] = $request->file('audio_file')->store('lectures', 'public');
             $row['audio_url'] = null;
+            $row += self::freshAi();
         } elseif (!empty($data['audio_url'])) {
             if ($existing?->audio_path) {
                 Storage::disk('public')->delete($existing->audio_path);
             }
             $row['audio_path'] = null;
+            if ($existing?->audio_url !== $data['audio_url']) {
+                $row += self::freshAi();
+            }
             $row['audio_url'] = $data['audio_url'];
         } elseif (!$existing || (!$existing->audio_path && !$existing->audio_url)) {
             throw ValidationException::withMessages(['audio_file' => 'یک فایل صوتی بارگذاری کنید یا لینک صوت را وارد کنید.']);
         }
 
         return $row;
+    }
+
+    /** New audio means the old transcript no longer applies: hide it and queue the lecture again. */
+    private static function freshAi(): array
+    {
+        return [
+            'ai_status' => 'pending', 'ai_error' => null, 'ai_claimed_at' => null,
+            'transcript' => null, 'summary' => null, 'text_published' => false,
+        ];
     }
 
     private function scholar(int $id): object

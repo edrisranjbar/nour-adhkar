@@ -45,6 +45,7 @@ Route::prefix('admin')->name('panel.')->group(function () {
         Route::get('scholars/{scholar}/lectures/{id}/edit', [Panel\LectureController::class, 'edit'])->name('lectures.edit');
         Route::put('scholars/{scholar}/lectures/{id}', [Panel\LectureController::class, 'update'])->name('lectures.update');
         Route::patch('scholars/{scholar}/lectures/{id}/toggle', [Panel\LectureController::class, 'toggle'])->name('lectures.toggle');
+        Route::patch('scholars/{scholar}/lectures/{id}/reprocess', [Panel\LectureController::class, 'reprocess'])->name('lectures.reprocess');
         Route::patch('scholars/{scholar}/lectures/{id}/move/{direction}', [Panel\LectureController::class, 'move'])->name('lectures.move');
         Route::delete('scholars/{scholar}/lectures/{id}', [Panel\LectureController::class, 'destroy'])->name('lectures.destroy');
 

@@ -35,12 +35,28 @@ class ScholarController extends Controller
                     'description' => (string) $l->description,
                     'audioUrl' => self::audioUrl($l),
                     'durationSec' => $l->duration_sec ? (int) $l->duration_sec : null,
+                    // Shown only after an admin reviewed the generated text (see LectureAiController).
+                    'summary' => $l->text_published && $l->summary ? $l->summary : null,
+                    // The full transcript is large, so the app loads it on demand from GET /api/lectures/{id}/transcript.
+                    'hasTranscript' => $l->text_published && $l->transcript ? true : null,
                 ], fn ($v) => $v !== null))
                 ->filter(fn ($l) => !empty($l['audioUrl']))
                 ->values(),
         ])->values();
 
         return response()->json(['data' => $data]);
+    }
+
+    /** GET /api/lectures/{id}/transcript: the reviewed transcript of a published lecture. */
+    public function transcript(int $id)
+    {
+        $lecture = DB::table('lectures as l')
+            ->join('scholars as s', 's.id', '=', 'l.scholar_id')
+            ->where('l.id', $id)->where('l.published', true)->where('s.published', true)
+            ->where('l.text_published', true)->whereNotNull('l.transcript')
+            ->first(['l.transcript']);
+        abort_unless($lecture, 404);
+        return response()->json(['data' => ['transcript' => $lecture->transcript]]);
     }
 
     /**
