@@ -7,6 +7,9 @@ chime whenever a count goes up.
 The feedback card shows three separate figures: in-app feedback, Bazaar's public vote count («رأی بازار»),
 and Bazaar's rating out of 5 («امتیاز بازار»). Votes are not written review counts and are not added to
 in-app feedback. All displayed numbers use Persian digits. These figures refresh with the install feed.
+The card retains three compact rows: title, in-app/Bazaar counts side by side, and five SVG stars with
+the numeric rating beside them. Fractional ratings fill the stars proportionally. Loading, unavailable,
+and stale descriptions use the rating row's accessible label and tooltip instead of extra visible rows.
 
 ## Where the number comes from
 

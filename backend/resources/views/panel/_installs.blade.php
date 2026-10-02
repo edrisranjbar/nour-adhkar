@@ -202,11 +202,17 @@
         var votesEl = document.getElementById('bazaar-votes');
         var ratingEl = document.getElementById('bazaar-rating');
         var ratingStatus = document.getElementById('bazaar-rating-status');
+        var stars = document.getElementById('bazaar-stars');
         if (votesEl && ratingEl && ratingStatus) {
             votesEl.textContent = !bazaar || bazaar.rating_count === null ? '—' : nf.format(bazaar.rating_count);
-            ratingEl.textContent = !bazaar || bazaar.rating === null ? '—' : nf.format(bazaar.rating) + ' از ۵';
-            ratingStatus.textContent = !bazaar || bazaar.rating === null ? 'آمار بازار در دسترس نیست' : (bazaar.rating_stale ? 'آخرین آمار معتبر بازار' : '');
-            ratingStatus.title = bazaar && bazaar.rating_updated_at ? new Date(bazaar.rating_updated_at * 1000).toLocaleString('fa-IR') : '';
+            var available = bazaar && bazaar.rating !== null;
+            ratingEl.textContent = available ? nf.format(bazaar.rating) : '—';
+            if (stars) stars.style.setProperty('--rating-fill', available ? Math.max(0, Math.min(100, bazaar.rating * 20)) + '%' : '0%');
+            var description = available ? 'امتیاز بازار: ' + nf.format(bazaar.rating) + ' از ۵' : 'آمار بازار در دسترس نیست';
+            if (available && bazaar.rating_stale) description += '؛ آخرین آمار معتبر بازار';
+            ratingStatus.classList.toggle('stale', !!(bazaar && bazaar.rating_stale));
+            ratingStatus.setAttribute('aria-label', description);
+            ratingStatus.title = description + (bazaar && bazaar.rating_updated_at ? '؛ ' + new Date(bazaar.rating_updated_at * 1000).toLocaleString('fa-IR') : '');
         }
         var increased = [];
         Object.keys(data.stores).forEach(function (key) {
@@ -230,7 +236,12 @@
             .catch(function () {
                 statusEl.textContent = 'دریافت ناموفق بود؛ ۱۰ دقیقهٔ دیگر دوباره تلاش می‌شود';
                 var ratingStatus = document.getElementById('bazaar-rating-status');
-                if (ratingStatus) ratingStatus.textContent = 'به‌روزرسانی آمار بازار ناموفق بود';
+                if (ratingStatus) {
+                    ratingStatus.classList.add('stale');
+                    var rating = document.getElementById('bazaar-rating');
+                    ratingStatus.setAttribute('aria-label', (rating && rating.textContent !== '—' ? 'امتیاز بازار: ' + rating.textContent + ' از ۵؛ ' : '') + 'به‌روزرسانی ناموفق بود');
+                    ratingStatus.title = ratingStatus.getAttribute('aria-label');
+                }
             });
     }
 
