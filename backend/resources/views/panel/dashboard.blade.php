@@ -13,6 +13,16 @@
     .kpi-l { color: var(--muted); font-size: 13px; line-height: 1.5; }
     .kpi-n { font-size: 28px; font-weight: 800; line-height: 1.3; font-variant-numeric: tabular-nums; }
     .kpi-s { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .feedback-kpi { gap: 8px; }
+    .feedback-kpi .kpi-ic { width: 32px; height: 32px; }
+    .feedback-kpi .kpi-body { flex: 1; }
+    .feedback-counts { display: flex; align-items: baseline; gap: 6px; font-size: 24px; white-space: nowrap; }
+    .feedback-counts small { font-size: 10px; font-weight: 400; color: var(--muted); }
+    .feedback-rating { display: flex; align-items: center; gap: 5px; min-height: 18px; }
+    .rating-stars { position: relative; display: inline-flex; width: 60px; height: 12px; direction: ltr; color: var(--line); flex: none; }
+    .rating-stars svg { width: 60px; height: 12px; fill: currentColor; }
+    .rating-stars-fill { position: absolute; inset: 0 auto 0 0; width: var(--rating-fill, 0%); overflow: hidden; color: #e08a1e; }
+    .feedback-rating.stale { opacity: .6; }
     @media (max-width: 560px) {
         .kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .kpi { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; }
@@ -42,15 +52,22 @@
             <div class="kpi-s">{{ F::digits($stats['users'] > 0 ? (int) round($stats['verified'] * 100 / $stats['users']) : 0) }}٪ از کاربران</div>
         </div>
     </div>
-    <div class="kpi" style="--accent:#e08a1e">
+    <div class="kpi feedback-kpi" style="--accent:#e08a1e">
         <span class="kpi-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
         <div class="kpi-body">
             <div class="kpi-l">بازخورد</div>
-            <div class="kpi-n" id="feedback-count">{{ F::number($stats['feedback']) }}</div>
-            <div class="kpi-s">بازخورد درون‌برنامه</div>
-            <div class="kpi-s">رأی بازار: <span id="bazaar-votes">—</span></div>
-            <div class="kpi-s">امتیاز بازار: <span id="bazaar-rating">—</span></div>
-            <div class="kpi-s" id="bazaar-rating-status" aria-live="polite">در حال دریافت…</div>
+            <div class="kpi-n feedback-counts">
+                <span title="بازخورد درون‌برنامه"><span id="feedback-count">{{ F::number($stats['feedback']) }}</span> <small>برنامه</small></span>
+                <span title="رأی بازار"><span id="bazaar-votes">—</span> <small>بازار</small></span>
+            </div>
+            <div class="kpi-s feedback-rating" id="bazaar-rating-status" role="img" aria-label="امتیاز بازار در حال دریافت" title="امتیاز بازار در حال دریافت">
+                <span class="rating-stars" id="bazaar-stars" aria-hidden="true">
+                    <svg viewBox="0 0 120 24" xmlns="http://www.w3.org/2000/svg"><defs><path id="bazaar-star" d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2-6.2 3.2L7 14.2l-5-4.9 6.9-1z"/></defs><use href="#bazaar-star"/><use href="#bazaar-star" x="24"/><use href="#bazaar-star" x="48"/><use href="#bazaar-star" x="72"/><use href="#bazaar-star" x="96"/></svg>
+
+                    <span class="rating-stars-fill"><svg viewBox="0 0 120 24" aria-hidden="true"><use href="#bazaar-star"/><use href="#bazaar-star" x="24"/><use href="#bazaar-star" x="48"/><use href="#bazaar-star" x="72"/><use href="#bazaar-star" x="96"/></svg></span>
+                </span>
+                <span id="bazaar-rating">—</span>
+            </div>
         </div>
     </div>
     <div class="kpi" style="--accent:#8b5cf6">

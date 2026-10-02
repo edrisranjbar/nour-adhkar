@@ -156,9 +156,9 @@ it('puts the live install card on the dashboard', function () {
         ->assertSee('id="installs"', false)
         ->assertSee(route('panel.installs'), false)
         ->assertSee('id="inst-sound"', false)
-        ->assertSee('رأی بازار:')
-        ->assertSee('امتیاز بازار:')
-        ->assertSee('بازخورد درون‌برنامه')
+        ->assertSee('id="bazaar-votes"', false)
+        ->assertSee('id="bazaar-stars"', false)
+        ->assertSee('id="bazaar-rating"', false)
         ->assertSeeInOrder(['class="kpis"', 'id="installs"', 'آخرین بازخوردها'], false);
 });
 
