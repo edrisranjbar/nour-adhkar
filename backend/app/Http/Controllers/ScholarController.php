@@ -32,19 +32,28 @@ class ScholarController extends Controller
                 ->map(fn ($l) => array_filter([
                     'id' => (string) $l->id,
                     'title' => $l->title,
-                    'description' => (string) $l->description,
+                    'description' => self::description($l),
                     'audioUrl' => self::audioUrl($l),
                     'durationSec' => $l->duration_sec ? (int) $l->duration_sec : null,
-                    // Shown only after an admin reviewed the generated text (see LectureAiController).
-                    'summary' => $l->text_published && $l->summary ? $l->summary : null,
-                    // The full transcript is large, so the app loads it on demand from GET /api/lectures/{id}/transcript.
-                    'hasTranscript' => $l->text_published && $l->transcript ? true : null,
                 ], fn ($v) => $v !== null))
                 ->filter(fn ($l) => !empty($l['audioUrl']))
                 ->values(),
         ])->values();
 
         return response()->json(['data' => $data]);
+    }
+
+    /**
+     * The lecture's description, followed by its transcript once an admin has reviewed it. Every
+     * app version already shows this field, so older installs get the transcript too.
+     */
+    private static function description(object $lecture): string
+    {
+        $description = trim((string) $lecture->description);
+        if (!$lecture->text_published || !$lecture->transcript) {
+            return $description;
+        }
+        return $description === '' ? $lecture->transcript : $description . "\n\n" . $lecture->transcript;
     }
 
     /** GET /api/lectures/{id}/transcript: the reviewed transcript of a published lecture. */
