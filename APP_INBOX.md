@@ -1,5 +1,7 @@
 # App feedback and admin notices
 
+At `/admin/users`, only inactive accounts have a delete button. Deletion requires browser confirmation and permanently removes the account and dependent records according to the existing database relationships. The server rejects deletion of active accounts (including accounts reactivated after the page loaded) and the signed-in administrator's own account. Search and pagination are preserved when returning to the list.
+
 Run the Laravel migrations before enabling the Android client. The Android app sends feedback to `POST /api/app-feedback` with `type` (`suggestion`, `criticism`, or `other`) and `message`. The endpoint is public and rate limited. Feedback is visible to administrators in the Blade admin panel at `/admin/feedback` on the API host (session login at `/admin/login`, users with `role = admin`). The panel only manages the app: notices (`/admin/notices`), feedback, and app users. The website is becoming a landing page and has no admin.
 
 Administrators create, edit, publish/unpublish, or delete notices at `/admin/notices`. Only published notices are returned by `GET /api/app-notices?installation_id=<uuid>`. The Android app stores a random installation UUID locally and calls `POST /api/app-notices/{id}/read` with that UUID when a notice is tapped. Read state is per installation; reinstalling or clearing app data creates a new inbox identity. The API is read on demand when opening the app inbox and needs an internet connection. This is an in-app inbox, not a push notification service.

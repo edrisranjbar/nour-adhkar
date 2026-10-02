@@ -32,4 +32,19 @@ class UserController extends Controller
         $user->update(['active' => !$user->active]);
         return back()->with('status', $user->active ? 'حساب فعال شد.' : 'حساب غیرفعال شد.');
     }
+
+    public function destroy(int $id)
+    {
+        $user = User::findOrFail($id);
+        if ($user->id === Auth::guard('admin')->id()) {
+            return back()->with('status', 'نمی‌توانید حساب خودتان را حذف کنید.');
+        }
+
+        // Check inactivity in the DELETE itself, including changes since the page loaded.
+        $deleted = User::whereKey($user->id)->where('active', false)->delete();
+
+        return back()->with('status', $deleted
+            ? 'حساب کاربر حذف شد.'
+            : 'فقط حساب‌های غیرفعال قابل حذف هستند.');
+    }
 }
