@@ -129,10 +129,12 @@ class LectureController extends Controller
             'published' => $request->boolean('published'),
         ];
 
-        $minutes = $data['duration_min'] ?? null;
-        $seconds = $data['duration_sec_part'] ?? null;
-        $total = (int) $minutes * 60 + (int) $seconds;
-        $row['duration_sec'] = $total > 0 ? $total : null;
+        // Duration is no longer on the form (the app reads the real length from the audio); only
+        // set it when a client still sends it, so existing values are kept.
+        if ($request->hasAny(['duration_min', 'duration_sec_part'])) {
+            $total = (int) ($data['duration_min'] ?? 0) * 60 + (int) ($data['duration_sec_part'] ?? 0);
+            $row['duration_sec'] = $total > 0 ? $total : null;
+        }
 
         if ($request->hasFile('audio_file')) {
             // New upload replaces any previous file or link.
