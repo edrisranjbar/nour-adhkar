@@ -59,3 +59,5 @@ Admins can upload lecture audio up to **100 MB** per file. The web server and PH
 - PHP (`/etc/php/8.x/fpm/php.ini`): `upload_max_filesize = 100M`, `post_max_size = 110M`, then `systemctl reload php8.x-fpm`
 
 Files are stored in `backend/storage/app/public/lectures` and served from `/storage/...`; the deploy script creates the `public/storage` link when it is missing. Audio links in `GET /api/scholars` are built from the request host, so they stay correct even if `APP_URL` is not set.
+
+Lecture ▲/▼ controls save via AJAX without reloading the page. All move and column-sort buttons are locked during the request; confirmed server order updates the rows, position numbers, and first/last button states. Reordering is available in ascending `#` order. Failed requests show an inline error and unlock the controls for retry. Normal form submission remains available without JavaScript.
