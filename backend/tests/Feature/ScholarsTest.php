@@ -15,6 +15,31 @@ function scholarsAdmin(): User
 
 beforeEach(fn () => Storage::fake('public'));
 
+it('returns the saved lecture order for ajax moves and keeps moves inside their scholar', function () {
+    $this->actingAs(scholarsAdmin(), 'admin');
+    $scholar = DB::table('scholars')->where('slug', 'ziaei')->value('id');
+    $other = DB::table('scholars')->where('slug', 'pordel')->value('id');
+    foreach (['اول', 'دوم', 'سوم'] as $title) {
+        $this->post("/admin/scholars/$scholar/lectures", [
+            'title' => $title, 'audio_url' => 'https://example.com/lecture.mp3', 'published' => 1,
+        ])->assertRedirect();
+    }
+    $ids = DB::table('lectures')->where('scholar_id', $scholar)->orderBy('id')->pluck('id')->all();
+    $move = "/admin/scholars/$scholar/lectures/{$ids[1]}/move";
+    $this->patchJson("$move/up")->assertOk()->assertExactJson(['order' => [$ids[1], $ids[0], $ids[2]]]);
+    // Already first: a no-op still returns the actual order.
+    $this->patchJson("$move/up")->assertOk()->assertExactJson(['order' => [$ids[1], $ids[0], $ids[2]]]);
+    $this->patchJson("$move/down")->assertOk()->assertExactJson(['order' => $ids]);
+    expect(DB::table('lectures')->where('scholar_id', $scholar)->orderBy('sort_order')->pluck('id')->all())->toBe($ids);
+    $this->patchJson("/admin/scholars/$other/lectures/{$ids[0]}/move/up")->assertNotFound();
+    $this->patchJson("$move/invalid")->assertNotFound();
+    $this->get("/admin/scholars/$scholar/lectures")->assertOk()->assertSee('data-move="up"', false);
+});
+
+it('requires panel login for ajax lecture moves', function () {
+    $this->patchJson('/admin/scholars/1/lectures/1/move/up')->assertRedirect(route('panel.login'));
+});
+
 it('serves the seeded scholars in the shape the app parses', function () {
     $this->getJson('/api/scholars')->assertOk()
         ->assertJsonPath('data.0.id', 'ziaei')
