@@ -2,8 +2,8 @@
 
 Run by .github/workflows/lecture-ai.yml. api.adhkar.ir cannot reach Groq, so this job claims
 pending lectures from the backend, downloads the audio, transcribes it with Whisper, summarizes the
-transcript with a free Groq chat model, and posts both back. Nothing reaches the app until an admin
-reviews the text and ticks it in the panel.
+transcript with a free Groq chat model, and posts both back; the backend writes them into the
+lecture description. Lectures are queued from the admin edit form.
 
 Environment:
   GROQ_API_KEY         Groq key (repository secret)
@@ -203,7 +203,7 @@ def process(lecture):
     except RetryLater:
         raise
     except Exception as error:
-        # Keep the transcript; the admin can write the summary or press «ساخت دوباره».
+        # Keep the transcript; the admin can edit the description or press the button again.
         print(f"  summary failed, saving transcript only: {error}", flush=True)
         summary = None
     return transcript, summary

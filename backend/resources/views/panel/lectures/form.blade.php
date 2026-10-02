@@ -22,7 +22,23 @@
     </div>
     <div class="field">
         <label for="description">توضیح (اختیاری)</label>
-        <textarea id="description" name="description" maxlength="5000">{{ old('description', $lecture->description ?? '') }}</textarea>
+        <textarea id="description" name="description">{{ old('description', $lecture->description ?? '') }}</textarea>
+        @if ($lecture && ($lecture->audio_path || $lecture->audio_url))
+            @php($busy = in_array($lecture->ai_status, ['queued', 'processing'], true))
+            <div id="ai-generate" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px"
+                 data-status-url="{{ route('panel.lectures.ai-status', [$scholar->id, $lecture->id]) }}" data-busy="{{ $busy ? 1 : 0 }}">
+                <button class="btn sm" type="submit" form="generate-form" @disabled($busy)>ساخت توضیح از روی صوت</button>
+                <span class="muted" id="ai-generate-status" role="status" aria-live="polite">
+                    @if ($busy)
+                        در حال تبدیل صوت به متن و خلاصه‌نویسی… چند دقیقه طول می‌کشد.
+                    @elseif ($lecture->ai_status === 'failed')
+                        ساخت توضیح ناموفق بود: <span dir="auto">{{ $lecture->ai_error }}</span>
+                    @else
+                        صوت به متن تبدیل و خلاصه می‌شود و جایگزین توضیح فعلی می‌شود.
+                    @endif
+                </span>
+            </div>
+        @endif
     </div>
 
     <fieldset class="field" style="border:1px solid var(--border, #e5e0d5);border-radius:12px;padding:12px 14px">
@@ -46,34 +62,6 @@
             <input type="number" name="duration_sec_part" min="0" max="59" placeholder="ثانیه" value="{{ old('duration_sec_part', $dur ? $dur % 60 : '') }}" aria-label="ثانیه">
         </div>
     </div>
-    @if ($lecture)
-        <fieldset class="field" style="border:1px solid var(--line);border-radius:12px;padding:12px 14px">
-            <legend>خلاصه و متن سخنرانی (خودکار)</legend>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-                @include('panel.lectures._ai_badge', ['lecture' => $lecture])
-                @if ($lecture->ai_status === 'failed' && $lecture->ai_error)
-                    <span class="muted" dir="auto">{{ $lecture->ai_error }}</span>
-                @endif
-            </div>
-            @if ($lecture->ai_status === 'done' || $lecture->transcript)
-                <div class="field">
-                    <label for="summary">خلاصه</label>
-                    <textarea id="summary" name="summary" maxlength="20000" style="min-height:160px">{{ old('summary', $lecture->summary) }}</textarea>
-                </div>
-                <div class="field">
-                    <label for="transcript">متن کامل سخنرانی</label>
-                    <textarea id="transcript" name="transcript" style="min-height:320px">{{ old('transcript', $lecture->transcript) }}</textarea>
-                </div>
-                <label class="check">
-                    <input type="checkbox" name="text_published" value="1" @checked(old('text_published', $lecture->text_published))>
-                    خلاصه و متن را بررسی کرده‌ام؛ در برنامه نمایش داده شوند
-                </label>
-            @else
-                <p class="muted">پردازش خودکار هر ۳۰ دقیقه اجرا می‌شود؛ پس از آن، خلاصه و متن این‌جا برای بررسی نمایش داده می‌شوند.</p>
-            @endif
-        </fieldset>
-    @endif
-
     <div class="field">
         <label class="check">
             <input type="checkbox" name="published" value="1" @checked(old('published', $lecture->published ?? true))>
@@ -83,11 +71,36 @@
     <button class="btn primary" type="submit">ذخیره</button>
 </form>
 
-@if ($lecture && in_array($lecture->ai_status, ['done', 'failed'], true))
-    <form method="POST" action="{{ route('panel.lectures.reprocess', [$scholar->id, $lecture->id]) }}" style="margin-top:12px"
-          onsubmit="return confirm('خلاصه و متن دوباره ساخته شوند؟ ویرایش‌های فعلی جایگزین می‌شوند و تا بررسی دوباره در برنامه نمایش داده نمی‌شوند.')">
-        @csrf @method('PATCH')
-        <button class="btn sm" type="submit">ساخت دوباره خلاصه و متن</button>
+@if ($lecture && ($lecture->audio_path || $lecture->audio_url))
+    <form id="generate-form" method="POST" action="{{ route('panel.lectures.generate', [$scholar->id, $lecture->id]) }}" hidden
+          onsubmit="return document.getElementById('description').value.trim() === '' || confirm('توضیح فعلی با خلاصه و متن کامل سخنرانی جایگزین شود؟')">
+        @csrf
     </form>
+    <script>
+        // While a description is being generated, check every 15 seconds and drop the result into the field.
+        (function () {
+            var box = document.getElementById('ai-generate');
+            if (!box || box.dataset.busy !== '1') return;
+            var status = document.getElementById('ai-generate-status');
+            var button = box.querySelector('button');
+            var timer = setInterval(async function () {
+                try {
+                    var response = await fetch(box.dataset.statusUrl, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+                    if (!response.ok) return;
+                    var data = await response.json();
+                    if (data.status === 'done') {
+                        clearInterval(timer);
+                        document.getElementById('description').value = data.description || '';
+                        status.textContent = 'توضیح ساخته و ذخیره شد. در صورت نیاز ویرایش کنید.';
+                        button.disabled = false;
+                    } else if (data.status === 'failed') {
+                        clearInterval(timer);
+                        status.textContent = 'ساخت توضیح ناموفق بود: ' + (data.error || '');
+                        button.disabled = false;
+                    }
+                } catch (e) { /* network blip; try again next tick */ }
+            }, 15000);
+        })();
+    </script>
 @endif
 @endsection

@@ -52,7 +52,6 @@ Route::prefix('auth')->group(function () {
 
 // Public content routes
 Route::get('scholars', [ScholarController::class, 'index']);
-Route::get('lectures/{id}/transcript', [ScholarController::class, 'transcript'])->whereNumber('id')->middleware('throttle:60,1');
 Route::get('adhkars', [AdhkarController::class, 'index']);
 Route::get('collections', [CollectionController::class, 'index']);
 Route::get('collections/{slug}', [CollectionController::class, 'show']);
