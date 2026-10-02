@@ -30,6 +30,14 @@ Route::prefix('admin')->name('panel.')->group(function () {
         Route::patch('notices/{id}/toggle', [Panel\NoticeController::class, 'toggle'])->name('notices.toggle');
         Route::delete('notices/{id}', [Panel\NoticeController::class, 'destroy'])->name('notices.destroy');
 
+        Route::get('articles', [Panel\ArticleController::class, 'index'])->name('articles.index');
+        Route::get('articles/create', [Panel\ArticleController::class, 'create'])->name('articles.create');
+        Route::post('articles', [Panel\ArticleController::class, 'store'])->name('articles.store');
+        Route::get('articles/{id}/edit', [Panel\ArticleController::class, 'edit'])->name('articles.edit');
+        Route::put('articles/{id}', [Panel\ArticleController::class, 'update'])->name('articles.update');
+        Route::patch('articles/{id}/toggle', [Panel\ArticleController::class, 'toggle'])->name('articles.toggle');
+        Route::delete('articles/{id}', [Panel\ArticleController::class, 'destroy'])->name('articles.destroy');
+
         Route::get('scholars', [Panel\ScholarController::class, 'index'])->name('scholars.index');
         Route::get('scholars/create', [Panel\ScholarController::class, 'create'])->name('scholars.create');
         Route::post('scholars', [Panel\ScholarController::class, 'store'])->name('scholars.store');
