@@ -50,4 +50,9 @@ return [
         'jwks_urls' => env('GOOGLE_JWKS_URLS', 'https://www.googleapis.com/oauth2/v3/certs,https://raw.githubusercontent.com/edrisranjbar/Nour-Adhkar-App/main/google-jwks.json'),
     ],
 
+    // Shared secret for the lecture-ai GitHub workflow (transcripts and summaries via Groq).
+    'lecture_ai' => [
+        'token' => env('LECTURE_AI_TOKEN', ''),
+    ],
+
 ];

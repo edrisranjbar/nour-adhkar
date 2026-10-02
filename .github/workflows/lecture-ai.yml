@@ -1,0 +1,56 @@
+# Transcribes and summarizes scholars' lectures with Groq's free tier (Whisper + an LLM).
+# api.adhkar.ir runs in Iran and cannot reach Groq, so this job does the work and posts the text
+# back to the API. Admins review it in /admin before it appears in the app.
+#
+# Setup: repository secrets GROQ_API_KEY and LECTURE_AI_TOKEN (same value as LECTURE_AI_TOKEN in
+# the backend .env). Optional repository variables: GROQ_SUMMARY_MODEL, LECTURE_AI_API.
+name: Lecture transcripts
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: lecture-ai
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/lecture-ai
+
+      - name: Check configuration
+        id: config
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          LECTURE_AI_TOKEN: ${{ secrets.LECTURE_AI_TOKEN }}
+        run: |
+          if [ -z "$GROQ_API_KEY" ] || [ -z "$LECTURE_AI_TOKEN" ]; then
+            echo "::warning::GROQ_API_KEY or LECTURE_AI_TOKEN is not set; skipping."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install tools
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          command -v ffmpeg >/dev/null || (sudo apt-get update -q && sudo apt-get install -yq ffmpeg)
+          pip install --quiet requests
+
+      - name: Transcribe and summarize
+        if: steps.config.outputs.ready == 'true'
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          LECTURE_AI_TOKEN: ${{ secrets.LECTURE_AI_TOKEN }}
+          LECTURE_AI_API: ${{ vars.LECTURE_AI_API }}
+          GROQ_SUMMARY_MODEL: ${{ vars.GROQ_SUMMARY_MODEL }}
+        run: python tools/lecture-ai/process.py
