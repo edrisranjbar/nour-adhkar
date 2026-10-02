@@ -59,10 +59,11 @@
         .actions { display: flex; gap: 6px; flex-wrap: wrap; }
         .actions form { margin: 0; }
         label { display: block; font-weight: 600; margin-bottom: 6px; }
-        input[type=text], input[type=email], input[type=password], input[type=search], textarea, select { width: 100%; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+        input[type=text], input[type=email], input[type=password], input[type=search], input[type=number], input[type=date], textarea, select { width: 100%; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
         textarea { min-height: 200px; resize: vertical; }
         input:focus, textarea:focus, select:focus, .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
         .field { margin-bottom: 16px; }
+        .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0 14px; }
         .check { display: flex; align-items: center; gap: 8px; font-weight: 400; }
         .alert { padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; background: var(--primary-soft); color: var(--primary); }
         .alert.err { background: var(--danger-soft); color: var(--danger); }
@@ -138,6 +139,7 @@
             <a href="{{ route('panel.notices.index') }}" @class(['active' => request()->routeIs('panel.notices.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>پیام‌ها</span></a>
             <a href="{{ route('panel.scholars.index') }}" @class(['active' => request()->routeIs('panel.scholars.*', 'panel.lectures.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg><span>علما و سخنرانی‌ها</span></a>
             <a href="{{ route('panel.feedback.index') }}" @class(['active' => request()->routeIs('panel.feedback.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>بازخوردها</span></a>
+            <a href="{{ route('panel.versions.index') }}" @class(['active' => request()->routeIs('panel.versions.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/><path d="m9 9 3-3 3 3"/><path d="M12 6v7"/></svg><span>نسخه‌های برنامه</span></a>
             <a href="{{ route('panel.users.index') }}" @class(['active' => request()->routeIs('panel.users.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>کاربران</span></a>
             <a href="{{ route('panel.profile') }}" @class(['active' => request()->routeIs('panel.profile*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>پروفایل</span></a>
         </nav>

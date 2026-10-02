@@ -33,6 +33,23 @@ class PanelFormat
         return self::digits($date->format('Y/m/d – H:i'));
     }
 
+    // Solar Hijri calendar date (no time) for a plain Y-m-d value such as a release date.
+    public static function calendarDate($value): string
+    {
+        if (!$value) {
+            return '—';
+        }
+        $date = Carbon::parse($value, 'Asia/Tehran');
+        if (class_exists(\IntlDateFormatter::class)) {
+            $formatter = new \IntlDateFormatter('fa_IR@calendar=persian', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, 'Asia/Tehran', \IntlDateFormatter::TRADITIONAL, 'yyyy/MM/dd');
+            $formatted = $formatter->format($date);
+            if ($formatted !== false) {
+                return self::digits($formatted);
+            }
+        }
+        return self::digits($date->format('Y/m/d'));
+    }
+
     // Short Solar Hijri day label (e.g. ۰۷/۰۵) for a Tehran Y-m-d key.
     public static function day(string $ymd): string
     {
