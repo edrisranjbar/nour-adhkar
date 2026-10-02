@@ -61,7 +61,7 @@ class LectureController extends Controller
         return back()->with('status', $lecture->published ? 'سخنرانی از برنامه پنهان شد.' : 'سخنرانی در برنامه نمایش داده می‌شود.');
     }
 
-    /** Queues the lecture for a fresh transcript on the next lecture-ai run. */
+    /** Queues the lecture for a fresh transcript and summary on the next lecture-ai run. */
     public function reprocess(int $scholarId, int $id)
     {
         $this->lecture($scholarId, $id);
@@ -102,6 +102,7 @@ class LectureController extends Controller
             'audio_url' => 'nullable|string|max:500|url:https',
             'duration_min' => 'nullable|integer|min:0|max:1440',
             'duration_sec_part' => 'nullable|integer|min:0|max:59',
+            'summary' => 'nullable|string|max:20000',
             'transcript' => 'nullable|string|max:1000000',
         ], [
             'audio_file.mimes' => 'فایل صوتی باید mp3، m4a، aac، ogg یا wav باشد.',
@@ -109,7 +110,7 @@ class LectureController extends Controller
             'audio_url.url' => 'لینک صوت باید با https:// شروع شود.',
         ], [
             'title' => 'عنوان', 'description' => 'توضیح', 'audio_file' => 'فایل صوتی', 'audio_url' => 'لینک صوت',
-            'transcript' => 'متن سخنرانی',
+            'summary' => 'خلاصه', 'transcript' => 'متن سخنرانی',
         ]);
 
         $row = [
@@ -118,7 +119,8 @@ class LectureController extends Controller
             'published' => $request->boolean('published'),
         ];
 
-        // The transcript is only on the edit form, after the workflow has produced them.
+        // Summary and transcript are only on the edit form, after the workflow has produced them.
+            $row['summary'] = isset($data['summary']) ? trim($data['summary']) : null;
         if ($existing) {
             $row['transcript'] = isset($data['transcript']) ? trim($data['transcript']) : null;
             $row['text_published'] = $request->boolean('text_published') && !empty($row['transcript']);

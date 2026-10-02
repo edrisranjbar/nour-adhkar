@@ -44,8 +44,8 @@ class ScholarController extends Controller
     }
 
     /**
-     * The lecture's description, followed by its transcript once an admin has reviewed it. Every
-     * app version already shows this field, so older installs get the transcript too.
+     * Once an admin has reviewed the generated text: the summary, the lecture's own description, then
+     * the full transcript. Every app version already shows this field, so older installs get it too.
      */
     private static function description(object $lecture): string
     {
@@ -53,7 +53,15 @@ class ScholarController extends Controller
         if (!$lecture->text_published || !$lecture->transcript) {
             return $description;
         }
-        return $description === '' ? $lecture->transcript : $description . "\n\n" . $lecture->transcript;
+        $parts = [];
+        if (trim((string) $lecture->summary) !== '') {
+            $parts[] = "خلاصه\n" . trim($lecture->summary);
+        }
+        if ($description !== '') {
+            $parts[] = $description;
+        }
+        $parts[] = "متن کامل سخنرانی\n" . trim($lecture->transcript);
+        return implode("\n\n", $parts);
     }
 
     /** GET /api/lectures/{id}/transcript: the reviewed transcript of a published lecture. */
