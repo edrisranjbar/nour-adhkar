@@ -34,7 +34,7 @@
         <textarea id="content" name="content" required style="min-height:420px;line-height:2">{{ old('content', $article->content ?? '') }}</textarea>
     </div>
     <div class="field">
-        <label for="publish_at">زمان انتشار به وقت تهران (اختیاری؛ زمان آینده یعنی انتشار زمان‌بندی‌شده)</label>
+        <label for="publish_at">زمان انتشار (اختیاری؛ زمان آینده یعنی انتشار زمان‌بندی‌شده)</label>
         <input id="publish_at" type="datetime-local" name="publish_at" dir="ltr" style="max-width:260px"
             value="{{ old('publish_at', !empty($article?->published_at) ? \Illuminate\Support\Carbon::parse($article->published_at, 'UTC')->setTimezone('Asia/Tehran')->format('Y-m-d\TH:i') : '') }}">
     </div>
