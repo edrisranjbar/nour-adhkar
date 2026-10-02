@@ -33,8 +33,6 @@
                         در حال تبدیل صوت به متن و خلاصه‌نویسی… چند دقیقه طول می‌کشد.
                     @elseif ($lecture->ai_status === 'failed')
                         ساخت توضیح ناموفق بود: <span dir="auto">{{ $lecture->ai_error }}</span>
-                    @else
-                        صوت به متن تبدیل و خلاصه می‌شود و جایگزین توضیح فعلی می‌شود.
                     @endif
                 </span>
             </div>
@@ -43,9 +41,6 @@
 
     <fieldset class="field" style="border:1px solid var(--border, #e5e0d5);border-radius:12px;padding:12px 14px">
         <legend>فایل صوتی</legend>
-        @if ($lecture && ($lecture->audio_path || $lecture->audio_url))
-            <p class="muted">صوت فعلی: {{ $lecture->audio_path ? 'فایل بارگذاری‌شده' : 'لینک خارجی' }}. برای جایگزینی، فایل تازه بارگذاری کنید یا لینک تازه وارد کنید؛ در غیر این صورت همان صوت می‌ماند.</p>
-        @endif
         <label for="audio_file">بارگذاری فایل (mp3، m4a، aac، ogg، wav؛ حداکثر ۱۰۰ مگابایت)</label>
         <input id="audio_file" type="file" name="audio_file" accept=".mp3,.m4a,.aac,.ogg,.oga,.wav,audio/*">
         <div class="muted" style="margin:10px 0">یا</div>
@@ -53,15 +48,6 @@
         <input id="audio_url" type="url" name="audio_url" maxlength="500" dir="ltr" placeholder="https://example.com/lecture.mp3" value="{{ old('audio_url', $lecture->audio_url ?? '') }}">
     </fieldset>
 
-    <div class="field">
-        <label>مدت (اختیاری؛ برنامه مدت واقعی را خودش هم تشخیص می‌دهد)</label>
-        @php($dur = $lecture->duration_sec ?? null)
-        <div style="display:flex;gap:8px;align-items:center;max-width:280px">
-            <input type="number" name="duration_min" min="0" max="1440" placeholder="دقیقه" value="{{ old('duration_min', $dur ? intdiv($dur, 60) : '') }}" aria-label="دقیقه">
-            <span>:</span>
-            <input type="number" name="duration_sec_part" min="0" max="59" placeholder="ثانیه" value="{{ old('duration_sec_part', $dur ? $dur % 60 : '') }}" aria-label="ثانیه">
-        </div>
-    </div>
     <div class="field">
         <label class="check">
             <input type="checkbox" name="published" value="1" @checked(old('published', $lecture->published ?? true))>
