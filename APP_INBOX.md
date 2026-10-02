@@ -6,6 +6,8 @@ Run the Laravel migrations before enabling the Android client. The Android app s
 
 Administrators create, edit, publish/unpublish, or delete notices at `/admin/notices`. Only published notices are returned by `GET /api/app-notices?installation_id=<uuid>`. The Android app stores a random installation UUID locally and calls `POST /api/app-notices/{id}/read` with that UUID when a notice is tapped. Read state is per installation; reinstalling or clearing app data creates a new inbox identity. The API is read on demand when opening the app inbox and needs an internet connection. This is an in-app inbox, not a push notification service.
 
+The dashboard's published-notices card shows the total recorded read count (`app_notice_reads`) instead of the draft count, labelled «بار خوانده‌شدن». Each notice/installation pair counts once, including reads of notices subsequently unpublished; repeated read requests do not increase the count.
+
 ## Android app email verification
 
 - Requests with header `X-Nour-Client: android` must verify the email once before receiving a JWT. Web requests (no header) are unchanged.

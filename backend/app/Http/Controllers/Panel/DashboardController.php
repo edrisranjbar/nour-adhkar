@@ -20,7 +20,7 @@ class DashboardController extends Controller
                 'feedback' => DB::table('app_feedback')->count(),
                 'feedbackWeek' => DB::table('app_feedback')->where('created_at', '>=', $weekAgo)->count(),
                 'notices' => DB::table('app_notices')->where('published', true)->count(),
-                'drafts' => DB::table('app_notices')->where('published', false)->count(),
+                'reads' => DB::table('app_notice_reads')->count(),
             ],
             'latestFeedback' => DB::table('app_feedback')->orderByDesc('created_at')->limit(5)->get(),
         ]);
