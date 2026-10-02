@@ -3,12 +3,27 @@
 @php use App\Support\PanelFormat as F; @endphp
 
 @section('content')
-<div class="head"><h1>بازخوردهای برنامه</h1></div>
+<div class="head"><h1>بازخوردها</h1></div>
+<div class="tabs" aria-label="منبع بازخورد">
+    <a href="{{ route('panel.feedback.index') }}" @class(['active' => $source === 'all'])>همهٔ منابع</a>
+    <a href="{{ route('panel.feedback.index', ['source' => 'app']) }}" @class(['active' => $source === 'app'])>درون برنامه</a>
+    <a href="{{ route('panel.feedback.index', ['source' => 'bazaar']) }}" @class(['active' => $source === 'bazaar'])>کافه‌بازار</a>
+</div>
+
+@if ($source !== 'app')
+    <section class="card" style="margin-bottom:18px">
+        @include('panel.feedback._bazaar')
+        @include('panel.pager', ['items' => $bazaarItems])
+    </section>
+@endif
+
+@if ($source !== 'bazaar')
+<h2 style="font-size:17px">بازخوردهای درون برنامه</h2>
 
 <div class="tabs">
-    <a href="{{ route('panel.feedback.index') }}" @class(['active' => !isset($types[$type ?? ''])])>همه</a>
+    <a href="{{ route('panel.feedback.index', ['source' => $source]) }}" @class(['active' => !isset($types[$type ?? ''])])>همهٔ انواع</a>
     @foreach ($types as $key => $label)
-        <a href="{{ route('panel.feedback.index', ['type' => $key]) }}" @class(['active' => $type === $key])>{{ $label }}</a>
+        <a href="{{ route('panel.feedback.index', ['source' => $source, 'type' => $key]) }}" @class(['active' => $type === $key])>{{ $label }}</a>
     @endforeach
 </div>
 
@@ -36,4 +51,5 @@
 </div>
 
 @include('panel.pager', ['items' => $items])
+@endif
 @endsection

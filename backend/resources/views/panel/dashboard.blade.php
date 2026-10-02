@@ -176,7 +176,7 @@
 
 <div class="card">
     <div class="head" style="margin-bottom:6px">
-        <h2 style="font-size:17px;margin:0">آخرین بازخوردها</h2>
+        <h2 style="font-size:17px;margin:0">آخرین بازخوردهای درون برنامه</h2>
         <a href="{{ route('panel.feedback.index') }}">همه</a>
     </div>
     @forelse ($latestFeedback as $item)
@@ -189,4 +189,7 @@
         <div class="empty">هنوز بازخوردی نرسیده است.</div>
     @endforelse
 </div>
+<section class="card" id="bazaar-reviews" style="margin-top:18px">
+    @include('panel.feedback._bazaar', ['compact' => true])
+</section>
 @endsection

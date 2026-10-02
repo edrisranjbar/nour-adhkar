@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\StoreStats\BazaarReviews;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function __invoke()
+    public function __invoke(BazaarReviews $reviews)
     {
         $weekAgo = now()->subWeek();
 
@@ -22,6 +23,8 @@ class DashboardController extends Controller
                 'reads' => DB::table('app_notice_reads')->count(),
             ],
             'latestFeedback' => DB::table('app_feedback')->orderByDesc('created_at')->limit(5)->get(),
+            'bazaarStatus' => $reviews->current(),
+            'bazaarItems' => $reviews->query()->limit(5)->get(),
             'recentUsers' => User::orderByDesc('created_at')->limit(6)->get(['name', 'email', 'email_verified_at', 'created_at']),
             'ai' => $this->lectureAi(),
         ]);

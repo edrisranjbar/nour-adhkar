@@ -13,9 +13,9 @@ uses(RefreshDatabase::class);
 function bazaarPage(string $installs): string
 {
     return '<table class="InfoCubes"><tbody class="InfoCubes__table">'
-        . '<tr class="InfoCube"><td class="InfoCube__title fs-12">نصب</td><td class="InfoCube__content fs-14"><!--[-->' . $installs . ' <!--]--></td></tr>'
-        . '<!----><tr class="InfoCube InfoCube--link"><td class="InfoCube__title fs-12">از ۲۱ رأی</td><td class="InfoCube__content fs-14"><!--[--><div>۵</div><!--]--></td></tr>'
-        . '</tbody></table>';
+        .'<tr class="InfoCube"><td class="InfoCube__title fs-12">نصب</td><td class="InfoCube__content fs-14"><!--[-->'.$installs.' <!--]--></td></tr>'
+        .'<!----><tr class="InfoCube InfoCube--link"><td class="InfoCube__title fs-12">از ۲۱ رأی</td><td class="InfoCube__content fs-14"><!--[--><div>۵</div><!--]--></td></tr>'
+        .'</tbody></table>';
 }
 
 function installAdmin(): User
@@ -23,7 +23,12 @@ function installAdmin(): User
     return User::factory()->create(['role' => 'admin', 'active' => true]);
 }
 
-beforeEach(fn () => Cache::flush());
+beforeEach(function () {
+    Cache::flush();
+    Http::fake(['api.cafebazaar.ir/*' => Http::response([
+        'properties' => ['statusCode' => 200], 'singleReply' => ['reviewReply' => ['reviews' => []]],
+    ])]);
+});
 
 it('reads the install count in Persian, Arabic and Latin digits and with store suffixes', function (string $text, int $expected) {
     expect(BazaarInstallProvider::parseCount($text))->toBe($expected);
@@ -67,7 +72,7 @@ it('serves the count and chart to an admin, calling Bazaar once per cache window
 
     $this->actingAs($admin, 'admin')->getJson('/admin/installs')->assertOk()->assertJsonPath('stores.bazaar.installs', 550);
 
-    Http::assertSentCount(1);
+    Http::assertSentCount(2);
     expect(DB::table('store_install_snapshots')->count())->toBe(1);
 });
 
@@ -166,8 +171,8 @@ it('shows an icon beside every sidebar item and the logout button', function () 
     $html = $this->actingAs(installAdmin(), 'admin')->get('/admin')->assertOk()->getContent();
 
     preg_match('~<nav>(.*?)</nav>~s', $html, $nav);
-    expect(substr_count($nav[1], '<a '))->toBe(8)
-        ->and(substr_count($nav[1], 'class="ic"'))->toBe(8)
+    expect(substr_count($nav[1], '<a '))->toBe(9)
+        ->and(substr_count($nav[1], 'class="ic"'))->toBe(9)
         ->and($html)->toMatch('~<button class="btn sm" type="submit"><svg class="ic"~');
 });
 
@@ -189,16 +194,18 @@ it('refreshes all listing metrics after ten minutes and updates the in-app feedb
     $this->travel(9)->minutes();
     DB::table('app_feedback')->insert(['type' => 'suggestion', 'message' => 'Hello', 'created_at' => now(), 'updated_at' => now()]);
     $this->getJson('/admin/installs')->assertJsonPath('feedback', 1);
-    Http::assertSentCount(1);
+    Http::assertSentCount(2);
     $this->travel(1)->minutes();
     $this->getJson('/admin/installs')->assertOk();
-    Http::assertSentCount(2);
+    Http::assertSentCount(4);
     expect(DB::table('store_rating_snapshots')->count())->toBe(2);
 });
 
 it('preserves rating and votes independently when only installs can still be read', function () {
     $page = bazaarPage('۵۵۰');
-    Http::fake(['cafebazaar.ir/*' => function () use (&$page) { return Http::response($page); }]);
+    Http::fake(['cafebazaar.ir/*' => function () use (&$page) {
+        return Http::response($page);
+    }]);
     $this->actingAs(installAdmin(), 'admin')->getJson('/admin/installs')->assertOk();
     Cache::flush();
     $page = str_replace('از ۲۱ رأی', 'changed layout', bazaarPage('۶۰۰'));

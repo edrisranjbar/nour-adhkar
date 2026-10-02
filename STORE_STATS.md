@@ -47,6 +47,16 @@ on fetch or parse failure. A changed install count can still update when the rat
   is that click, and after a page reload with sound saved as on, the first click anywhere re-enables it.
   The sound setting is stored in the browser (`localStorage`, key `installSound`).
 
+## Written Bazaar reviews
+
+`BazaarReviews` reads the public unauthenticated `https://api.cafebazaar.ir/rest-v1/process/ReviewRequest` feed used by the Bazaar website. It sends only package name, language and paging information, without a developer token or user credentials. Up to three pages of 24 reviews are requested per 600-second cache window, stopping on a shorter page. The public feed can place featured reviews first, so imported reviews are sorted by their supplied Solar Hijri date, newest first. This is a bounded collection of published reviews, not an assertion that all store reviews have been imported.
+
+Written reviews are upserted into `store_reviews` using store + package + review ID. Edited text and stars update the same row; first-seen time stays unchanged. Empty rating-only entries and developer entries are excluded, and account identifiers/avatars are not stored. Missing dates/stars remain unavailable. A successful empty response does not erase earlier collected reviews; failed requests or invalid response structures preserve data and show a stale/last-received status. Cache keys and displayed records are scoped to `STORE_PACKAGE`.
+
+Reviews refresh on the dashboard, its existing `/admin/installs` poll, and the feedback page (unless filtered to in-app feedback). There is no background schedule. Dashboard previews are capped at five; the feedback page offers source filters and independent Bazaar pagination. Text is escaped with Blade and reviews are display-only. Imported written-review counts remain distinct from public rating/vote counts and in-app feedback counts.
+
+Deploy by running the migration creating `store_reviews`. Tests: `BazaarReviewsTest` and `StoreInstallStatsTest`.
+
 ## Adding Myket or Google Play later
 
 Write a class that implements `StoreInstallProvider` (`key()`, `label()`, `installs()`, `metrics()`) and add it to

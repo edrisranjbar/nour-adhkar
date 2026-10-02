@@ -8,6 +8,12 @@ Administrators create, edit, publish/unpublish, or delete notices at `/admin/not
 
 The dashboard's published-notices card shows the total recorded read count (`app_notice_reads`) instead of the draft count, labelled «بار خوانده‌شدن». Each notice/installation pair counts once, including reads of notices subsequently unpublished; repeated read requests do not increase the count.
 
+## Bazaar feedback (display only)
+
+`/admin/feedback` shows both sources in separate sections, with «همهٔ منابع», «درون برنامه» and «کافه‌بازار» filters. Existing type filters and delete actions apply only to in-app feedback. Bazaar reviews are read-only: author, supplied Solar Hijri date, stars and full text, with a link to the public listing. They have their own pagination (`bazaar_page`) and no reply, edit or delete route. The dashboard shows the five most recent collected Bazaar reviews alongside the five recent in-app feedback messages; its existing 10-minute poll refreshes the Bazaar section too.
+
+Run migrations to create `store_reviews` before deploying. See `STORE_STATS.md` for scraping, cache and failure behavior. Nothing changes in the Android feedback API, and no Android build is required.
+
 ## Android app email verification
 
 - Requests with header `X-Nour-Client: android` must verify the email once before receiving a JWT. Web requests (no header) are unchanged.
