@@ -25,7 +25,7 @@ class DashboardController extends Controller
             'latestFeedback' => DB::table('app_feedback')->orderByDesc('created_at')->limit(5)->get(),
             'bazaarStatus' => $reviews->current(),
             'bazaarItems' => $reviews->query()->limit(5)->get(),
-            'recentUsers' => User::orderByDesc('created_at')->limit(6)->get(['name', 'email', 'email_verified_at', 'created_at']),
+            'recentUsers' => User::orderByDesc('created_at')->limit(6)->get(['name', 'email_verified_at', 'created_at']),
             'ai' => $this->lectureAi(),
         ]);
     }

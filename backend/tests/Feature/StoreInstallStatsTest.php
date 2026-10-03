@@ -2,6 +2,8 @@
 
 use App\Models\User;
 use App\Services\StoreStats\BazaarInstallProvider;
+use App\Services\StoreStats\StoreStats;
+use App\Support\PanelFormat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +30,51 @@ beforeEach(function () {
     Http::fake(['api.cafebazaar.ir/*' => Http::response([
         'properties' => ['statusCode' => 200], 'singleReply' => ['reviewReply' => ['reviews' => []]],
     ])]);
+});
+
+it('charts overall totals using Tehran days and preserves corrections and carried totals', function () {
+    $this->travelTo(\Carbon\Carbon::parse('2026-10-03 12:00:00', 'Asia/Tehran'));
+    foreach ([
+        ['2026-09-29 12:00:00', 500], // Seed predates the three-day window.
+        ['2026-10-01 10:00:00', 550],
+        ['2026-10-01 20:45:00', 570], // October 2 in Tehran.
+        ['2026-10-01 20:45:00', 575], // Later ID wins at the same timestamp.
+        ['2026-10-01 21:00:00', 560], // Preserve a store correction.
+        ['2026-10-03 21:00:00', 999], // Tomorrow in Tehran: outside the window.
+    ] as [$at, $total]) {
+        DB::table('store_install_snapshots')->insert(['store' => 'bazaar', 'installs' => $total, 'recorded_at' => $at]);
+    }
+
+    expect(app(StoreStats::class)->daily(3))->toBe([
+        'days' => ['2026-10-01', '2026-10-02', '2026-10-03'],
+        'stores' => ['bazaar' => [550, 560, 560]],
+    ]);
+    expect(app(StoreStats::class)->daily(4)['stores']['bazaar'])->toBe([500, 550, 560, 560]);
+});
+
+it('keeps days before the first recorded total unavailable', function () {
+    $this->travelTo(\Carbon\Carbon::parse('2026-10-03 12:00:00', 'Asia/Tehran'));
+    DB::table('store_install_snapshots')->insert([
+        'store' => 'bazaar', 'installs' => 550, 'recorded_at' => '2026-10-02 09:00:00',
+    ]);
+    expect(app(StoreStats::class)->daily(3)['stores']['bazaar'])->toBe([null, 550, 550]);
+});
+
+it('shows recent users by name and Tehran date without email or time', function () {
+    $admin = installAdmin();
+    $user = User::factory()->create([
+        'name' => 'کاربر آزمایشی', 'email' => 'recent-only@example.com',
+        'created_at' => '2026-10-02 22:15:00',
+    ]);
+    $html = $this->actingAs($admin, 'admin')->get('/admin')->assertOk()->getContent();
+    $start = strpos($html, '<h2>کاربران تازه</h2>');
+    $end = strpos($html, '<h2>توضیح سخنرانی‌ها', $start);
+    $recent = substr($html, $start, $end - $start);
+    expect($recent)->toContain('کاربر آزمایشی')
+        ->toContain(PanelFormat::calendarDate($user->created_at->copy()->setTimezone('Asia/Tehran')))
+        ->not->toContain('recent-only@example.com')
+        ->not->toContain('۰۱:۴۵')
+        ->not->toContain(' – ');
 });
 
 it('reads the install count in Persian, Arabic and Latin digits and with store suffixes', function (string $text, int $expected) {
@@ -68,7 +115,8 @@ it('serves the count and chart to an admin, calling Bazaar once per cache window
         ->assertJsonPath('stores.bazaar.rating_stale', false)
         ->assertJsonPath('feedback', 0)
         ->assertJsonPath('interval', 600)
-        ->assertJsonCount(1, 'series.bazaar');
+        ->assertJsonCount(14, 'daily.stores.bazaar')
+        ->assertJsonPath('daily.stores.bazaar.13', 550);
 
     $this->actingAs($admin, 'admin')->getJson('/admin/installs')->assertOk()->assertJsonPath('stores.bazaar.installs', 550);
 
@@ -106,8 +154,8 @@ it('records a new snapshot only when the number changes or the heartbeat passes'
     $this->travel(16)->minutes();
     $response = $this->actingAs($admin, 'admin')->getJson('/admin/installs')->assertOk();
     expect(DB::table('store_install_snapshots')->count())->toBe(3);
-    expect($response->json('series.bazaar'))->toHaveCount(3)
-        ->and(array_column($response->json('series.bazaar'), 1))->toBe([550, 553, 553]);
+    expect($response->json('daily.stores.bazaar'))->toHaveCount(14)
+        ->and($response->json('daily.stores.bazaar.13'))->toBe(553);
 });
 
 it('falls back to the last known number and marks it stale when Bazaar cannot be read', function () {
@@ -145,7 +193,7 @@ it('shows no number and no history before the first successful read', function (
         ->assertJsonPath('stores.bazaar.rating', null)
         ->assertJsonPath('stores.bazaar.rating_count', null)
         ->assertJsonPath('stores.bazaar.rating_stale', true)
-        ->assertJsonCount(0, 'series.bazaar');
+        ->assertJsonPath('daily.stores.bazaar', array_fill(0, 14, null));
 });
 
 it('does not hit the network for guests and keeps the feed admin-only', function () {

@@ -106,10 +106,9 @@
         </div>
         @forelse ($recentUsers as $user)
             <div class="list-row">
-                <span class="avatar" aria-hidden="true">{{ mb_substr(trim($user->name ?: $user->email), 0, 1) }}</span>
+                <span class="avatar" aria-hidden="true">{{ mb_substr(trim($user->name ?: '—'), 0, 1) }}</span>
                 <div class="grow">
                     <div><strong>{{ $user->name ?: '—' }}</strong></div>
-                    <div class="muted" dir="ltr" style="text-align:start">{{ $user->email }}</div>
                 </div>
                 <div style="text-align:end;flex:none">
                     @if ($user->email_verified_at)
@@ -117,7 +116,7 @@
                     @else
                         <span class="badge draft">تأییدنشده</span>
                     @endif
-                    <div class="muted">{{ F::date($user->created_at) }}</div>
+                    <div class="muted">{{ F::calendarDate($user->created_at->copy()->setTimezone('Asia/Tehran')) }}</div>
                 </div>
             </div>
         @empty
