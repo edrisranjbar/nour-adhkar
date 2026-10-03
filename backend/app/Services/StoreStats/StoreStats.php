@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\DB;
  */
 class StoreStats
 {
-    private const CHART_POINTS = 300;
-
     /** @return array<string, StoreInstallProvider> keyed by provider key, in configured order */
     public function providers(): array
     {
@@ -82,36 +80,49 @@ class StoreStats
     }
 
     /**
-     * Chart points per store, oldest first, as [unix time, installs] pairs.
-     *
-     * @return array<string, list<array{0: int, 1: int}>>
+     * New installs per Tehran calendar day for the last [$days] days, oldest first:
+     * ['days' => ['2026-10-01', …], 'stores' => ['bazaar' => [12, null, …], …]].
+     * A day's count is its last total minus the previous day's last total; null where there is not
+     * enough history yet. Store corrections that lower a total count as 0, not negative installs.
      */
-    public function series(int $days = 7): array
+    public function daily(int $days = 14): array
     {
-        $series = [];
+        $zone = 'Asia/Tehran';
+        $today = now($zone)->startOfDay();
+        $labels = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $labels[] = $today->copy()->subDays($i)->toDateString();
+        }
+        $from = $today->copy()->subDays($days)->utc(); // one extra day as the baseline
 
+        $stores = [];
         foreach (array_keys($this->providers()) as $key) {
-            $rows = DB::table('store_install_snapshots')
-                ->where('store', $key)
-                ->where('recorded_at', '>=', now()->subDays($days))
+            $endOfDay = [];
+            DB::table('store_install_snapshots')
+                ->where('store', $key)->where('recorded_at', '>=', $from)
                 ->orderBy('recorded_at')->orderBy('id')
-                ->get(['installs', 'recorded_at']);
+                ->get(['installs', 'recorded_at'])
+                ->each(function ($row) use (&$endOfDay, $zone) {
+                    $day = \Carbon\Carbon::parse($row->recorded_at, 'UTC')->setTimezone($zone)->toDateString();
+                    $endOfDay[$day] = (int) $row->installs; // rows are ordered, so the last one wins
+                });
+            // The latest snapshot before the window seeds the first day's baseline.
+            $before = DB::table('store_install_snapshots')->where('store', $key)->where('recorded_at', '<', $from)
+                ->orderByDesc('recorded_at')->orderByDesc('id')->value('installs');
 
-            $points = $rows->map(fn ($row) => [\Carbon\Carbon::parse($row->recorded_at)->timestamp, (int) $row->installs])->all();
-
-            if (count($points) > self::CHART_POINTS) {
-                $step = (int) ceil(count($points) / self::CHART_POINTS);
-                $last = end($points);
-                $points = array_values(array_filter($points, fn ($point, $i) => $i % $step === 0, ARRAY_FILTER_USE_BOTH));
-                if (end($points) !== $last) {
-                    $points[] = $last;
+            $previous = $before !== null ? (int) $before : ($endOfDay[$today->copy()->subDays($days)->toDateString()] ?? null);
+            $counts = [];
+            foreach ($labels as $day) {
+                $total = $endOfDay[$day] ?? $previous; // no snapshot that day: unchanged total
+                $counts[] = ($total !== null && $previous !== null) ? max(0, $total - $previous) : null;
+                if ($total !== null) {
+                    $previous = $total;
                 }
             }
-
-            $series[$key] = $points;
+            $stores[$key] = $counts;
         }
 
-        return $series;
+        return ['days' => $labels, 'stores' => $stores];
     }
 
     /** Stores a snapshot when the number changed or the last one is older than the heartbeat. */

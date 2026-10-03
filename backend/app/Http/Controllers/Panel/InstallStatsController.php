@@ -23,7 +23,7 @@ class InstallStatsController extends Controller
                     'bazaarStatus' => $bazaarStatus, 'bazaarItems' => $reviews->query()->limit(5)->get(), 'compact' => true,
                 ])->render(),
                 'stores' => $stats->current(),
-                'series' => $stats->series(7),
+                'daily' => $stats->daily(14),
             ])
             ->header('Cache-Control', 'no-store');
     }
