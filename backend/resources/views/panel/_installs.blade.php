@@ -15,14 +15,17 @@
     .inst-store small { color: var(--muted); font-size: 12px; min-height: 18px; }
     .inst-store.up b { color: #2f9e6b; }
     .inst-store.stale b { opacity: .6; }
-    .inst-chart { position: relative; height: 190px; margin-top: 6px; border-radius: 10px; background: var(--bg); overflow: hidden; }
+    .inst-chart { position: relative; height: 210px; margin-top: 8px; border-radius: 14px; background: var(--bg); overflow: hidden; touch-action: pan-y; }
     .inst-chart svg { width: 100%; height: 100%; display: block; }
-    .inst-chart .grid { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
-    .inst-chart .line { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-    .inst-chart .area { stroke: none; opacity: .14; }
-    .inst-chart .y { position: absolute; inset-inline-start: 8px; font-size: 11px; color: var(--muted); direction: ltr; }
-    .inst-chart .y.max { top: 6px; }
-    .inst-chart .y.min { bottom: 6px; }
+    .inst-chart .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 5; }
+    .inst-chart .line { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+    .inst-chart .dot { stroke: var(--surface); stroke-width: 2; }
+    .inst-chart .guide { stroke: var(--muted); stroke-width: 1; opacity: .35; }
+    .inst-chart .ylab, .inst-chart .xlab { font-size: 11px; fill: var(--muted); font-family: inherit; }
+    .inst-tip { position: absolute; top: 8px; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 6px 10px; font-size: 12px; line-height: 1.7; box-shadow: 0 6px 18px -10px rgba(0,0,0,.35); white-space: nowrap; direction: rtl; }
+    .inst-tip[hidden] { display: none; }
+    .inst-tip i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 6px; }
     .inst-chart .empty { position: absolute; inset: 0; display: grid; place-items: center; padding: 0; }
     .inst-chart .empty[hidden], .inst-hint[hidden] { display: none; }
     .inst-hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
@@ -35,10 +38,10 @@
         <button type="button" class="btn" id="inst-sound" aria-pressed="false">🔕 صدا: خاموش</button>
     </div>
     <div class="inst-totals" id="inst-totals" aria-live="polite"></div>
-    <div class="inst-chart" dir="ltr">
-        <svg id="inst-svg" viewBox="0 0 600 190" preserveAspectRatio="none" role="img" aria-label="نمودار تعداد نصب در ۷ روز اخیر"></svg>
-        <span class="y max" id="inst-ymax"></span>
-        <span class="y min" id="inst-ymin"></span>
+    <div class="inst-meta" style="margin-top:4px">نصب روزانه در ۱۴ روز اخیر</div>
+    <div class="inst-chart" id="inst-chart" dir="ltr">
+        <svg id="inst-svg" role="img" aria-label="نمودار نصب روزانه در ۱۴ روز اخیر"></svg>
+        <div class="inst-tip" id="inst-tip" hidden></div>
         <div class="empty" id="inst-empty" hidden>داده‌ای برای نمودار نیست.</div>
     </div>
     <div class="inst-hint" id="inst-hint" hidden>برای شنیدن صدا، یک بار روی صفحه کلیک کنید (مرورگر پخش خودکار صدا را مسدود می‌کند).</div>
@@ -58,12 +61,12 @@
     var soundBtn = document.getElementById('inst-sound');
     var hint = document.getElementById('inst-hint');
     var emptyEl = document.getElementById('inst-empty');
-    var yMax = document.getElementById('inst-ymax');
-    var yMin = document.getElementById('inst-ymin');
-    var W = 600, H = 190, PAD = 14;
+    var chartBox = document.getElementById('inst-chart');
+    var tip = document.getElementById('inst-tip');
+    var lastDaily = null;
+    var dayFormat = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { day: 'numeric', month: 'short', timeZone: 'Asia/Tehran' });
 
     var previous = {};   // last count seen per store, to detect increases
-    var baseline = {};   // count when the page was opened, for the "+N since opening" note
     var audio = null;
     var soundOn = false;
     try { soundOn = localStorage.getItem('installSound') === '1'; } catch (e) {}
@@ -133,67 +136,167 @@
             name.appendChild(document.createTextNode(store.label));
             box.appendChild(name);
             box.appendChild(el('b', '', store.installs === null ? '—' : nf.format(store.installs)));
-            var gained = (store.installs !== null && baseline[key] !== undefined) ? store.installs - baseline[key] : 0;
-            var note = gained > 0 ? '+' + nf.format(gained) + ' از زمان باز کردن صفحه' : (store.stale ? 'آخرین مقدار معتبر' : '');
+            var todayCounts = lastDaily && lastDaily.stores && lastDaily.stores[key];
+            var today = todayCounts ? todayCounts[todayCounts.length - 1] : null;
+            var note = store.stale ? 'آخرین مقدار معتبر' : (today !== null && today !== undefined ? 'امروز: ' + nf.format(today) + ' نصب' : '');
             box.appendChild(el('small', '', note));
             totals.appendChild(box);
         });
     }
 
-    function renderChart(series) {
+    // Rounds the axis maximum up to 1, 2, 2.5 or 5 × 10ⁿ so gridlines land on readable numbers.
+    function niceMax(value) {
+        if (value <= 0) return 4;
+        var magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+        var steps = [1, 2, 2.5, 5, 10];
+        for (var i = 0; i < steps.length; i++) if (steps[i] * magnitude >= value) return steps[i] * magnitude;
+        return 10 * magnitude;
+    }
+
+    // Monotone cubic (Fritsch–Carlson) path: smooth, never overshoots, never dips below zero.
+    function smoothPath(pts) {
+        var n = pts.length;
+        if (n === 1) return 'M' + pts[0][0] + ' ' + pts[0][1];
+        var dx = [], slope = [], tangent = [];
+        for (var i = 0; i < n - 1; i++) {
+            dx[i] = pts[i + 1][0] - pts[i][0];
+            slope[i] = (pts[i + 1][1] - pts[i][1]) / dx[i];
+        }
+        tangent[0] = slope[0];
+        tangent[n - 1] = slope[n - 2];
+        for (i = 1; i < n - 1; i++) {
+            tangent[i] = slope[i - 1] * slope[i] <= 0 ? 0 : (slope[i - 1] + slope[i]) / 2;
+        }
+        for (i = 0; i < n - 1; i++) {
+            if (slope[i] === 0) { tangent[i] = tangent[i + 1] = 0; continue; }
+            var a = tangent[i] / slope[i], b = tangent[i + 1] / slope[i], h = a * a + b * b;
+            if (h > 9) { var t = 3 / Math.sqrt(h); tangent[i] = t * a * slope[i]; tangent[i + 1] = t * b * slope[i]; }
+        }
+        var d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+        for (i = 0; i < n - 1; i++) {
+            var third = dx[i] / 3;
+            d += ' C' + (pts[i][0] + third).toFixed(1) + ' ' + (pts[i][1] + tangent[i] * third).toFixed(1) +
+                ' ' + (pts[i + 1][0] - third).toFixed(1) + ' ' + (pts[i + 1][1] - tangent[i + 1] * third).toFixed(1) +
+                ' ' + pts[i + 1][0].toFixed(1) + ' ' + pts[i + 1][1].toFixed(1);
+        }
+        return d;
+    }
+
+    function dayLabel(day) { return dayFormat.format(new Date(day + 'T12:00:00Z')); }
+
+    // Daily new installs per store as smooth lines over the last 14 Tehran days.
+    function renderChart(daily) {
+        lastDaily = daily;
         svg.textContent = '';
-        var keys = Object.keys(series);
-        var all = [];
-        keys.forEach(function (key) { all = all.concat(series[key]); });
-        emptyEl.hidden = all.length > 0;
-        yMax.textContent = yMin.textContent = '';
-        if (!all.length) return;
+        tip.hidden = true;
+        var days = (daily && daily.days) || [];
+        var stores = (daily && daily.stores) || {};
+        var keys = Object.keys(stores);
+        var values = [];
+        keys.forEach(function (key) { stores[key].forEach(function (v) { if (v !== null) values.push(v); }); });
+        emptyEl.hidden = values.length > 0;
+        if (!values.length || !days.length) return;
 
-        var t0 = Math.min.apply(null, all.map(function (p) { return p[0]; }));
-        var t1 = Math.max.apply(null, all.map(function (p) { return p[0]; }));
-        var lo = Math.min.apply(null, all.map(function (p) { return p[1]; }));
-        var hi = Math.max.apply(null, all.map(function (p) { return p[1]; }));
-        if (hi === lo) { hi += 1; lo = Math.max(0, lo - 1); }
-        var spread = hi - lo;
-        lo = Math.max(0, lo - spread * 0.1);
-        hi = hi + spread * 0.1;
-        var x = function (t) { return t1 === t0 ? W / 2 : PAD + (t - t0) / (t1 - t0) * (W - 2 * PAD); };
-        var y = function (v) { return H - PAD - (v - lo) / (hi - lo) * (H - 2 * PAD); };
+        var W = chartBox.clientWidth || 600, H = chartBox.clientHeight || 210;
+        var L = 40, R = 16, T = 18, B = 28; // room for value labels (left) and day labels (bottom)
+        svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+        var top = niceMax(Math.max.apply(null, values));
+        var x = function (i) { return days.length === 1 ? (L + W - R) / 2 : L + i * (W - L - R) / (days.length - 1); };
+        var y = function (v) { return T + (1 - v / top) * (H - T - B); };
         var ns = 'http://www.w3.org/2000/svg';
+        function add(tag, attrs, text) {
+            var node = document.createElementNS(ns, tag);
+            Object.keys(attrs).forEach(function (k) { node.setAttribute(k, attrs[k]); });
+            if (text !== undefined) node.textContent = text;
+            svg.appendChild(node);
+            return node;
+        }
 
-        [0.25, 0.5, 0.75].forEach(function (f) {
-            var line = document.createElementNS(ns, 'line');
-            line.setAttribute('class', 'grid');
-            line.setAttribute('x1', 0); line.setAttribute('x2', W);
-            line.setAttribute('y1', H * f); line.setAttribute('y2', H * f);
-            svg.appendChild(line);
+        [0, 0.5, 1].forEach(function (f) {
+            var v = top * f, yy = y(v);
+            add('line', { 'class': 'grid', x1: L, x2: W - R, y1: yy, y2: yy });
+            add('text', { 'class': 'ylab', x: L - 8, y: yy + 4, 'text-anchor': 'end' }, nf.format(Math.round(v)));
+        });
+        var labelEvery = W < 520 ? 3 : 2;
+        days.forEach(function (day, i) {
+            if ((days.length - 1 - i) % labelEvery !== 0) return;
+            add('text', { 'class': 'xlab', x: x(i), y: H - 8, 'text-anchor': 'middle' }, i === days.length - 1 ? 'امروز' : dayLabel(day));
         });
 
         keys.forEach(function (key, index) {
-            var points = series[key];
-            if (!points.length) return;
             var color = COLORS[index % COLORS.length];
-            // A single point is drawn as a short flat line so it is still visible.
-            var coords = points.length === 1 ? [[PAD, points[0][1]], [W - PAD, points[0][1]]] : points.map(function (p) { return [p[0], p[1]]; });
-            var px = coords.map(function (p) { return points.length === 1 ? p[0] : x(p[0]); });
-            var d = coords.map(function (p, i) { return (i ? 'L' : 'M') + px[i].toFixed(1) + ' ' + y(p[1]).toFixed(1); }).join(' ');
-            if (index === 0) {
-                var area = document.createElementNS(ns, 'path');
-                area.setAttribute('class', 'area');
-                area.setAttribute('fill', color);
-                area.setAttribute('d', d + ' L' + px[px.length - 1].toFixed(1) + ' ' + (H - PAD) + ' L' + px[0].toFixed(1) + ' ' + (H - PAD) + ' Z');
-                svg.appendChild(area);
-            }
-            var path = document.createElementNS(ns, 'path');
-            path.setAttribute('class', 'line');
-            path.setAttribute('stroke', color);
-            path.setAttribute('d', d);
-            svg.appendChild(path);
+            // Days without enough history (null) split the line instead of being drawn as zero.
+            var segments = [], current = [];
+            stores[key].forEach(function (v, i) {
+                if (v === null) { if (current.length) segments.push(current); current = []; }
+                else current.push([x(i), y(v)]);
+            });
+            if (current.length) segments.push(current);
+            segments.forEach(function (pts) {
+                var line = smoothPath(pts);
+                if (index === 0 && pts.length > 1) {
+                    var gradientId = 'inst-fill-' + key;
+                    var defs = add('defs', {});
+                    var gradient = document.createElementNS(ns, 'linearGradient');
+                    gradient.setAttribute('id', gradientId);
+                    gradient.setAttribute('x1', 0); gradient.setAttribute('x2', 0); gradient.setAttribute('y1', 0); gradient.setAttribute('y2', 1);
+                    [[0, 0.22], [1, 0]].forEach(function (stop) {
+                        var s = document.createElementNS(ns, 'stop');
+                        s.setAttribute('offset', stop[0]); s.setAttribute('stop-color', color); s.setAttribute('stop-opacity', stop[1]);
+                        gradient.appendChild(s);
+                    });
+                    defs.appendChild(gradient);
+                    add('path', { d: line + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + y(0) + ' L' + pts[0][0].toFixed(1) + ' ' + y(0) + ' Z', fill: 'url(#' + gradientId + ')' });
+                }
+                add('path', { 'class': 'line', d: line, stroke: color });
+            });
+            // Only today's point gets a marker; hovering shows the rest.
+            var lastIndex = stores[key].length - 1, last = stores[key][lastIndex];
+            if (last !== null) add('circle', { 'class': 'dot', cx: x(lastIndex), cy: y(last), r: 4.5, fill: color });
         });
 
-        yMax.textContent = nf.format(Math.round(hi));
-        yMin.textContent = nf.format(Math.round(lo));
+        svg.setAttribute('aria-label', 'نمودار نصب روزانه در ۱۴ روز اخیر؛ امروز: ' + keys.map(function (key) {
+            var v = stores[key][stores[key].length - 1];
+            return (window.__instLabels && window.__instLabels[key] || key) + ' ' + (v === null ? '—' : nf.format(v));
+        }).join('، '));
+
+        chartBox.onpointermove = function (event) {
+            var rect = chartBox.getBoundingClientRect();
+            var px = (event.clientX - rect.left) * (W / rect.width);
+            var i = Math.round((px - L) / ((W - L - R) / Math.max(1, days.length - 1)));
+            i = Math.max(0, Math.min(days.length - 1, i));
+            var old = svg.querySelector('.guide');
+            if (old) old.remove();
+            var guide = document.createElementNS(ns, 'line');
+            guide.setAttribute('class', 'guide');
+            guide.setAttribute('x1', x(i)); guide.setAttribute('x2', x(i)); guide.setAttribute('y1', T); guide.setAttribute('y2', H - B);
+            svg.insertBefore(guide, svg.firstChild);
+            tip.textContent = '';
+            var title = document.createElement('div');
+            title.style.fontWeight = '700';
+            title.textContent = i === days.length - 1 ? 'امروز' : dayLabel(days[i]);
+            tip.appendChild(title);
+            keys.forEach(function (key, index) {
+                var row = document.createElement('div');
+                var dot = document.createElement('i');
+                dot.style.background = COLORS[index % COLORS.length];
+                row.appendChild(dot);
+                var v = stores[key][i];
+                row.appendChild(document.createTextNode((window.__instLabels && window.__instLabels[key] || key) + ': ' + (v === null ? '—' : nf.format(v) + ' نصب')));
+                tip.appendChild(row);
+            });
+            tip.hidden = false;
+            var left = (x(i) / W) * rect.width;
+            tip.style.left = Math.max(4, Math.min(rect.width - tip.offsetWidth - 4, left - tip.offsetWidth / 2)) + 'px';
+        };
+        chartBox.onpointerleave = function () {
+            tip.hidden = true;
+            var old = svg.querySelector('.guide');
+            if (old) old.remove();
+        };
     }
+
+    window.addEventListener('resize', function () { if (lastDaily) renderChart(lastDaily); });
 
     function handle(data) {
         var bazaarReviews = document.getElementById('bazaar-reviews');
@@ -220,12 +323,14 @@
         Object.keys(data.stores).forEach(function (key) {
             var value = data.stores[key].installs;
             if (value === null) return;
-            if (baseline[key] === undefined) baseline[key] = value;
             if (previous[key] !== undefined && value > previous[key]) increased.push(key);
             previous[key] = value;
         });
+        lastDaily = data.daily || null;
         renderTotals(data.stores, increased);
-        renderChart(data.series || {});
+        window.__instLabels = {};
+        Object.keys(data.stores).forEach(function (key) { window.__instLabels[key] = data.stores[key].label; });
+        renderChart(data.daily || null);
         if (increased.length && soundOn) chime();
         statusEl.textContent = 'به‌روزرسانی: ' + new Date().toLocaleTimeString('fa-IR');
         paintSound();
