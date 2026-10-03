@@ -38,9 +38,9 @@
         <button type="button" class="btn" id="inst-sound" aria-pressed="false">🔕 صدا: خاموش</button>
     </div>
     <div class="inst-totals" id="inst-totals" aria-live="polite"></div>
-    <div class="inst-meta" style="margin-top:4px">نصب روزانه در ۱۴ روز اخیر</div>
+    <div class="inst-meta" style="margin-top:4px">مجموع نصب‌ها در هر روز · ۱۴ روز اخیر</div>
     <div class="inst-chart" id="inst-chart" dir="ltr">
-        <svg id="inst-svg" role="img" aria-label="نمودار نصب روزانه در ۱۴ روز اخیر"></svg>
+        <svg id="inst-svg" role="img" aria-label="نمودار مجموع نصب‌ها در هر روز از ۱۴ روز اخیر"></svg>
         <div class="inst-tip" id="inst-tip" hidden></div>
         <div class="empty" id="inst-empty" hidden>داده‌ای برای نمودار نیست.</div>
     </div>
@@ -136,9 +136,7 @@
             name.appendChild(document.createTextNode(store.label));
             box.appendChild(name);
             box.appendChild(el('b', '', store.installs === null ? '—' : nf.format(store.installs)));
-            var todayCounts = lastDaily && lastDaily.stores && lastDaily.stores[key];
-            var today = todayCounts ? todayCounts[todayCounts.length - 1] : null;
-            var note = store.stale ? 'آخرین مقدار معتبر' : (today !== null && today !== undefined ? 'امروز: ' + nf.format(today) + ' نصب' : '');
+            var note = store.stale ? 'آخرین مقدار معتبر' : '';
             box.appendChild(el('small', '', note));
             totals.appendChild(box);
         });
@@ -255,7 +253,7 @@
             if (last !== null) add('circle', { 'class': 'dot', cx: x(lastIndex), cy: y(last), r: 4.5, fill: color });
         });
 
-        svg.setAttribute('aria-label', 'نمودار نصب روزانه در ۱۴ روز اخیر؛ امروز: ' + keys.map(function (key) {
+        svg.setAttribute('aria-label', 'نمودار مجموع نصب‌ها در هر روز از ۱۴ روز اخیر؛ امروز: ' + keys.map(function (key) {
             var v = stores[key][stores[key].length - 1];
             return (window.__instLabels && window.__instLabels[key] || key) + ' ' + (v === null ? '—' : nf.format(v));
         }).join('، '));

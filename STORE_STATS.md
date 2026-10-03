@@ -1,7 +1,11 @@
 # Store installs, votes and rating (admin dashboard)
 
 The dashboard (`/admin`) starts with a live card showing the app's install count and a chart of the last
-7 days. It refreshes every 10 minutes and, once the **🔔 صدا** button is switched on, plays a short
+14 days. Each day's point is the latest recorded overall install total, not that day's new installs.
+An earlier observation seeds the displayed window; days without observations carry the last known
+total, and days before the first observation remain unavailable. Store corrections, including decreases,
+are preserved. These are public rounded store totals, not private exact install statistics.
+It refreshes every 10 minutes and, once the **🔔 صدا** button is switched on, plays a short
 chime whenever a count goes up.
 
 The feedback card shows three separate figures: in-app feedback, Bazaar's public vote count («رأی بازار»),
@@ -29,6 +33,9 @@ on fetch or parse failure. A changed install count can still update when the rat
   (greyed, «آخرین مقدار معتبر») and the log gets a warning «install count was not found on the page».
 
 ## How it works
+
+The dashboard's recent-user list displays names without email addresses and Tehran calendar dates
+without times (Solar Hijri when ext-intl is available).
 
 | Piece | File |
 |---|---|

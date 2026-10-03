@@ -80,10 +80,9 @@ class StoreStats
     }
 
     /**
-     * New installs per Tehran calendar day for the last [$days] days, oldest first:
-     * ['days' => ['2026-10-01', …], 'stores' => ['bazaar' => [12, null, …], …]].
-     * A day's count is its last total minus the previous day's last total; null where there is not
-     * enough history yet. Store corrections that lower a total count as 0, not negative installs.
+     * Overall install totals per Tehran calendar day, oldest first.
+     * Each point uses the day's latest observation, carrying the last known total on unobserved
+     * days. Days before the first observation remain null; store corrections are preserved.
      */
     public function daily(int $days = 14): array
     {
@@ -93,28 +92,29 @@ class StoreStats
         for ($i = $days - 1; $i >= 0; $i--) {
             $labels[] = $today->copy()->subDays($i)->toDateString();
         }
-        $from = $today->copy()->subDays($days)->utc(); // one extra day as the baseline
+        $from = $today->copy()->subDays($days - 1)->utc();
+        $until = $today->copy()->addDay()->utc();
 
         $stores = [];
         foreach (array_keys($this->providers()) as $key) {
             $endOfDay = [];
             DB::table('store_install_snapshots')
-                ->where('store', $key)->where('recorded_at', '>=', $from)
+                ->where('store', $key)->where('recorded_at', '>=', $from)->where('recorded_at', '<', $until)
                 ->orderBy('recorded_at')->orderBy('id')
                 ->get(['installs', 'recorded_at'])
                 ->each(function ($row) use (&$endOfDay, $zone) {
                     $day = \Carbon\Carbon::parse($row->recorded_at, 'UTC')->setTimezone($zone)->toDateString();
                     $endOfDay[$day] = (int) $row->installs; // rows are ordered, so the last one wins
                 });
-            // The latest snapshot before the window seeds the first day's baseline.
+            // Include totals recorded before the displayed window.
             $before = DB::table('store_install_snapshots')->where('store', $key)->where('recorded_at', '<', $from)
                 ->orderByDesc('recorded_at')->orderByDesc('id')->value('installs');
 
-            $previous = $before !== null ? (int) $before : ($endOfDay[$today->copy()->subDays($days)->toDateString()] ?? null);
+            $previous = $before !== null ? (int) $before : null;
             $counts = [];
             foreach ($labels as $day) {
                 $total = $endOfDay[$day] ?? $previous; // no snapshot that day: unchanged total
-                $counts[] = ($total !== null && $previous !== null) ? max(0, $total - $previous) : null;
+                $counts[] = $total;
                 if ($total !== null) {
                     $previous = $total;
                 }
