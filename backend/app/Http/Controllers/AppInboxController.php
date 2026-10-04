@@ -13,7 +13,16 @@ class AppInboxController extends Controller
             'type' => 'required|in:suggestion,criticism,other',
             'message' => 'required|string|min:3|max:3000',
         ]);
-        DB::table('app_feedback')->insert($data + ['created_at' => now(), 'updated_at' => now()]);
+        // Signed-in app users send their JWT so the panel can show who wrote. Older app versions send no
+        // token and stay anonymous; a token that is present but invalid or expired asks the app to sign in again.
+        $user = null;
+        if ($request->bearerToken()) {
+            $user = rescue(fn () => auth('api')->user(), null, false);
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
+        }
+        DB::table('app_feedback')->insert($data + ['user_id' => $user?->id, 'created_at' => now(), 'updated_at' => now()]);
         return response()->json(['message' => 'Feedback received'], 201);
     }
 

@@ -22,7 +22,9 @@ class DashboardController extends Controller
                 'notices' => DB::table('app_notices')->where('published', true)->count(),
                 'reads' => DB::table('app_notice_reads')->count(),
             ],
-            'latestFeedback' => DB::table('app_feedback')->orderByDesc('created_at')->limit(5)->get(),
+            'latestFeedback' => DB::table('app_feedback as f')->leftJoin('users as u', 'u.id', '=', 'f.user_id')
+                ->select('f.*', 'u.name as user_name', 'u.email as user_email')
+                ->orderByDesc('f.created_at')->limit(5)->get(),
             'bazaarStatus' => $reviews->current(),
             'bazaarItems' => $reviews->query()->limit(5)->get(),
             'recentUsers' => User::orderByDesc('created_at')->limit(6)->get(['name', 'email_verified_at', 'created_at']),
