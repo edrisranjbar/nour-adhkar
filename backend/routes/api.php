@@ -26,6 +26,7 @@ use App\Http\Controllers\LectureAiController;
 // Public routes
 require __DIR__.'/progress.php';
 Route::post('app-feedback', [AppInboxController::class, 'sendFeedback'])->middleware('throttle:5,1');
+Route::get('app-feedback/mine', [AppInboxController::class, 'myFeedback'])->middleware(['auth:api', 'throttle:60,1']);
 Route::get('app-notices', [AppInboxController::class, 'notices'])->middleware('throttle:60,1');
 Route::get('app-version', [AppVersionController::class, 'latest'])->middleware('throttle:60,1');
 Route::get('app-articles', [AppArticlesController::class, 'index'])->middleware('throttle:60,1');

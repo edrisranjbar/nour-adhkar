@@ -26,6 +26,25 @@ class AppInboxController extends Controller
         return response()->json(['message' => 'Feedback received'], 201);
     }
 
+    /** GET /api/app-feedback/mine: the signed-in user's messages with the team's like and reply. */
+    public function myFeedback(Request $request)
+    {
+        $items = DB::table('app_feedback')
+            ->where('user_id', $request->user()->id)
+            ->orderByDesc('created_at')->limit(100)
+            ->get(['id', 'type', 'message', 'reply', 'replied_at', 'liked_at', 'created_at'])
+            ->map(fn ($f) => [
+                'id' => (int) $f->id,
+                'type' => $f->type,
+                'message' => $f->message,
+                'reply' => $f->reply,
+                'repliedAt' => $f->replied_at,
+                'liked' => $f->liked_at !== null,
+                'createdAt' => $f->created_at,
+            ]);
+        return response()->json(['data' => $items]);
+    }
+
     public function notices(Request $request)
     {
         $data = $request->validate(['installation_id' => 'required|uuid']);
