@@ -29,6 +29,29 @@ class FeedbackController extends Controller
             'source' => $source, 'bazaarStatus' => $bazaarStatus, 'bazaarItems' => $bazaarItems]);
     }
 
+    /** «پسندیدن»: toggles the like the sender sees in the app. */
+    public function like(int $id)
+    {
+        $item = DB::table('app_feedback')->find($id);
+        abort_unless($item, 404);
+        DB::table('app_feedback')->where('id', $id)->update(['liked_at' => $item->liked_at ? null : now(), 'updated_at' => now()]);
+        return back()->with('status', $item->liked_at ? 'پسند برداشته شد.' : 'پیام پسندیده شد.');
+    }
+
+    /** Saves (or, when empty, removes) the team's reply shown to the sender in «پیام‌های من». */
+    public function reply(Request $request, int $id)
+    {
+        abort_unless(DB::table('app_feedback')->where('id', $id)->exists(), 404);
+        $data = $request->validate(['reply' => 'nullable|string|max:3000'], [], ['reply' => 'پاسخ']);
+        $reply = trim((string) ($data['reply'] ?? ''));
+        DB::table('app_feedback')->where('id', $id)->update([
+            'reply' => $reply === '' ? null : $reply,
+            'replied_at' => $reply === '' ? null : now(),
+            'updated_at' => now(),
+        ]);
+        return back()->with('status', $reply === '' ? 'پاسخ حذف شد.' : 'پاسخ ثبت شد؛ فرستنده آن را در برنامه می‌بیند.');
+    }
+
     public function destroy(int $id)
     {
         DB::table('app_feedback')->where('id', $id)->delete();

@@ -21,6 +21,8 @@ Route::prefix('admin')->name('panel.')->group(function () {
 
         Route::get('feedback', [Panel\FeedbackController::class, 'index'])->name('feedback.index');
         Route::delete('feedback/{id}', [Panel\FeedbackController::class, 'destroy'])->name('feedback.destroy');
+        Route::patch('feedback/{id}/like', [Panel\FeedbackController::class, 'like'])->name('feedback.like');
+        Route::put('feedback/{id}/reply', [Panel\FeedbackController::class, 'reply'])->name('feedback.reply');
 
         Route::get('notices', [Panel\NoticeController::class, 'index'])->name('notices.index');
         Route::get('notices/create', [Panel\NoticeController::class, 'create'])->name('notices.create');
