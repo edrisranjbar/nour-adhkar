@@ -17,9 +17,11 @@ class FeedbackController extends Controller
         $bazaarStatus = $source !== 'app' ? $reviews->current() : null;
         $bazaarItems = $source !== 'app' ? $reviews->query()->paginate(30, ['*'], 'bazaar_page')->withQueryString() : null;
         $type = $request->query('type');
-        $items = DB::table('app_feedback')
-            ->when(array_key_exists((string) $type, self::TYPES), fn ($q) => $q->where('type', $type))
-            ->orderByDesc('created_at')
+        $items = DB::table('app_feedback as f')
+            ->leftJoin('users as u', 'u.id', '=', 'f.user_id')
+            ->select('f.*', 'u.name as user_name', 'u.email as user_email')
+            ->when(array_key_exists((string) $type, self::TYPES), fn ($q) => $q->where('f.type', $type))
+            ->orderByDesc('f.created_at')
             ->paginate(30)
             ->withQueryString();
 

@@ -181,6 +181,7 @@
     @forelse ($latestFeedback as $item)
         <div style="padding:10px 0;border-top:1px solid var(--line)">
             <span class="badge">{{ FeedbackController::TYPES[$item->type] ?? $item->type }}</span>
+            <span class="muted">{{ $item->user_name ?: ($item->user_id ? 'کاربر حذف‌شده' : 'ناشناس') }}</span>
             <span class="muted">{{ F::date($item->created_at) }}</span>
             <div class="msg">{{ \Illuminate\Support\Str::limit($item->message, 220) }}</div>
         </div>

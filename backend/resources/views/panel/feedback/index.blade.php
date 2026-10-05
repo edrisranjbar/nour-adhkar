@@ -29,10 +29,11 @@
 
 <div class="card table-wrap">
     <table>
-        <thead><tr><th>نوع</th><th>متن</th><th>زمان</th><th></th></tr></thead>
+        <thead><tr><th>فرستنده</th><th>نوع</th><th>متن</th><th>زمان</th><th></th></tr></thead>
         <tbody>
         @forelse ($items as $item)
             <tr>
+                <td style="white-space:nowrap">@include('panel.feedback._sender', ['item' => $item])</td>
                 <td><span class="badge">{{ $types[$item->type] ?? $item->type }}</span></td>
                 <td><div class="msg">{{ $item->message }}</div></td>
                 <td class="muted" style="white-space:nowrap">{{ F::date($item->created_at) }}</td>
@@ -44,7 +45,7 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="4" class="empty">بازخوردی یافت نشد.</td></tr>
+            <tr><td colspan="5" class="empty">بازخوردی یافت نشد.</td></tr>
         @endforelse
         </tbody>
     </table>
