@@ -16,20 +16,6 @@ Route::prefix('admin')->name('panel.')->group(function () {
     Route::middleware(PanelAdmin::class)->group(function () {
         Route::post('logout', [Panel\AuthController::class, 'logout'])->name('logout');
         Route::get('/', Panel\DashboardController::class)->name('dashboard');
-        Route::get('instagram-queue', Panel\InstagramController::class)->name('instagram');
-        Route::prefix('instagram-api')->group(function () {
-            Route::post('instagram-queue/{id}/schedule', [\App\Http\Controllers\InstagramScheduleController::class, 'store']);
-            Route::post('instagram-queue/{id}/reconcile', [\App\Http\Controllers\InstagramScheduleController::class, 'reconcile']);
-            Route::delete('instagram-queue/{id}/schedule', [\App\Http\Controllers\InstagramScheduleController::class, 'destroy']);
-            Route::get('instagram-queue', [\App\Http\Controllers\InstagramQueueController::class, 'index']);
-            Route::post('instagram-queue', [\App\Http\Controllers\InstagramQueueController::class, 'store']);
-            Route::put('instagram-queue/order', [\App\Http\Controllers\InstagramQueueController::class, 'reorder']);
-            Route::put('instagram-queue/{id}', [\App\Http\Controllers\InstagramQueueController::class, 'update']);
-            Route::delete('instagram-queue/{id}', [\App\Http\Controllers\InstagramQueueController::class, 'destroy']);
-            Route::post('instagram-templates', [\App\Http\Controllers\InstagramTemplateController::class, 'store']);
-            Route::put('instagram-templates/{id}', [\App\Http\Controllers\InstagramTemplateController::class, 'update']);
-            Route::delete('instagram-templates/{id}', [\App\Http\Controllers\InstagramTemplateController::class, 'destroy']);
-        });
         Route::get('analytics', Panel\AnalyticsController::class)->name('analytics');
         Route::get('installs', Panel\InstallStatsController::class)->middleware('throttle:60,1')->name('installs');
 

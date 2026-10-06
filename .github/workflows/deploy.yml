@@ -44,7 +44,6 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run build
-          npm run build:instagram-panel
           tar czf ../web-dist.tgz -C dist .
 
       - name: Deploy over SSH

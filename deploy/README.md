@@ -2,13 +2,12 @@
 
 Merging `develop` into `main` runs `.github/workflows/deploy.yml`:
 
-1. GitHub builds the backend `vendor/` (Composer, PHP 8.3), the website (`npm run build`), and the Laravel admin's shared Instagram UI (`npm run build:instagram-panel`), because the server cannot reach GitHub's download hosts, Packagist or npm reliably. The panel build is included as `instagram-panel/` inside the website archive.
+1. GitHub builds the backend `vendor/` (Composer, PHP 8.3) and the website (`npm run build`), because the server cannot reach GitHub's download hosts, Packagist or npm reliably.
 2. It uploads `backend-vendor.tgz` and `web-dist.tgz` to the directory **above** the checkout (`$DEPLOY_APP_DIR/..`).
 3. Over SSH it resets the checkout to the merged commit and runs `deploy/deploy.sh`, which:
    - unpacks `vendor/`, puts the API in maintenance mode, runs `php artisan migrate --force`, rebuilds caches (`optimize:clear` + `optimize`) and brings it back up;
    - reloads PHP-FPM (new code, OPcache and DNS settings take effect);
    - swaps in the new website build in one move.
-   - copies the compiled Instagram panel bundle to `backend/public/instagram` so `api.adhkar.ir/admin/instagram-queue` uses the existing Laravel admin login and sidebar. The bundle includes its fonts and hashed JavaScript/CSS; a missing bundle displays an honest deployment-pending state.
 
 It only runs when `backend/`, `Nour Adhkar/`, `deploy/` or the workflow change, or manually from Actions → Deploy → Run workflow.
 
@@ -62,3 +61,5 @@ Admins can upload lecture audio up to **100 MB** per file. The web server and PH
 Files are stored in `backend/storage/app/public/lectures` and served from `/storage/...`; the deploy script creates the `public/storage` link when it is missing. Audio links in `GET /api/scholars` are built from the request host, so they stay correct even if `APP_URL` is not set.
 
 Lecture ▲/▼ controls save via AJAX without reloading the page. All move and column-sort buttons are locked during the request; confirmed server order updates the rows, position numbers, and first/last button states. Reordering is available in ascending `#` order. Failed requests show an inline error and unlock the controls for retry. Normal form submission remains available without JavaScript.
+
+The Instagram queue feature has been retired. Deployment moves its old generated public assets into private `backend/storage/app/retired-instagram-assets/`; historical database rows, migration files and uploaded images are retained. No Instagram publishing workflow or endpoints remain.

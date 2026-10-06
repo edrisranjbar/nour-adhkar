@@ -23,8 +23,6 @@ use App\Http\Controllers\AppVersionController;
 use App\Http\Controllers\AppArticlesController;
 use App\Http\Controllers\LectureAiController;
 
-Route::post('internal/instagram/claim', [\App\Http\Controllers\InstagramWorkerController::class, 'claim'])->middleware('throttle:60,1');
-Route::post('internal/instagram/{id}/report', [\App\Http\Controllers\InstagramWorkerController::class, 'report'])->middleware('throttle:60,1');
 
 // Public routes
 require __DIR__.'/progress.php';
@@ -111,17 +109,6 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware(['auth:api', AdminMiddleware::class])
     ->prefix('admin')
     ->group(function () {
-        Route::post('instagram-queue/{id}/schedule', [\App\Http\Controllers\InstagramScheduleController::class, 'store']);
-        Route::post('instagram-queue/{id}/reconcile', [\App\Http\Controllers\InstagramScheduleController::class, 'reconcile']);
-        Route::delete('instagram-queue/{id}/schedule', [\App\Http\Controllers\InstagramScheduleController::class, 'destroy']);
-        Route::get('instagram-queue', [\App\Http\Controllers\InstagramQueueController::class, 'index']);
-        Route::post('instagram-templates', [\App\Http\Controllers\InstagramTemplateController::class, 'store']);
-        Route::put('instagram-templates/{id}', [\App\Http\Controllers\InstagramTemplateController::class, 'update']);
-        Route::delete('instagram-templates/{id}', [\App\Http\Controllers\InstagramTemplateController::class, 'destroy']);
-        Route::post('instagram-queue', [\App\Http\Controllers\InstagramQueueController::class, 'store']);
-        Route::put('instagram-queue/order', [\App\Http\Controllers\InstagramQueueController::class, 'reorder']);
-        Route::put('instagram-queue/{id}', [\App\Http\Controllers\InstagramQueueController::class, 'update']);
-        Route::delete('instagram-queue/{id}', [\App\Http\Controllers\InstagramQueueController::class, 'destroy']);
         Route::get('app-feedback', [AppInboxController::class, 'adminFeedback']);
         Route::get('app-notices', [AppInboxController::class, 'adminNotices']);
         Route::post('app-notices', [AppInboxController::class, 'createNotice']);
