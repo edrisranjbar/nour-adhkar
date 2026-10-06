@@ -1,0 +1,10 @@
+#instagram-queue-app {
+  --admin-bg: var(--bg);
+  --admin-surface: var(--surface);
+  --admin-text: var(--text);
+  --admin-muted: var(--muted);
+  --admin-border: var(--line);
+  --admin-accent: var(--primary);
+}
+#instagram-queue-app .social { padding: 0; }
+#instagram-queue-app input, #instagram-queue-app textarea, #instagram-queue-app select { font-weight: 400; }

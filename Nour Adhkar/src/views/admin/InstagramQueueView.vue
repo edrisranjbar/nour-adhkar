@@ -60,7 +60,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import axios from 'axios';
+import { instagramApi as axios } from '@/services/instagramApi';
 import { renderInstagramImage, fontChoices, defaultDesign, normalizeDesign } from '@/services/instagramImage';
 
 const labels = { draft: 'پیش‌نویس', queued: 'آماده انتشار', published: 'منتشرشده' };

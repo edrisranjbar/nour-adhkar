@@ -1,6 +1,6 @@
 # Instagram verse queue
 
-Admin route: `/admin/instagram-queue`. Requires the existing admin login. Android source, version, and release artifacts are unchanged.
+Primary admin route: `https://api.adhkar.ir/admin/instagram-queue`, accessible from `صف اینستاگرام` in the Laravel panel's sidebar. Uses the existing panel session; no second login or JWT is needed. The website's Vue admin retains its `/admin/instagram-queue` route. Both clients share the same source catalog, queue, templates, and controllers. Android source, version, and release artifacts are unchanged.
 
 ## Workflow
 
@@ -32,6 +32,10 @@ All endpoints are within existing `auth:api` + `AdminMiddleware` protection:
 - `DELETE /api/admin/instagram-queue/{id}`: draft/queued only.
 - `POST /api/admin/instagram-templates`, `PUT /api/admin/instagram-templates/{id}`, `DELETE /api/admin/instagram-templates/{id}`: manage named designs. All are protected by the same admin middleware.
 
+The Laravel panel exposes the same operations under `/admin/instagram-api/` (without the API client's extra `admin/` path segment), guarded by `PanelAdmin`. Writes use normal web CSRF protection. The shared component selects a session/CSRF Axios client only when mounted inside this panel; the Vue website continues using its existing JWT client. The Laravel route renders a Blade wrapper and reads hashed JavaScript/CSS filenames from `backend/public/instagram/.vite/manifest.json`.
+
+Build the panel bundle from `Nour Adhkar` with `npm run build:instagram-panel`. Its output is `dist/instagram-panel`, packaged inside the existing `web-dist.tgz` after the main website build. Deployment copies it atomically to the API host's `backend/public/instagram`. Generated panel assets are ignored by Git. No external website iframe or authentication bypass is used.
+
 Migrations add the queue and templates tables plus a saved design and template reference on each post; they do not change Android app data or reminders. Run focused `php artisan test --filter=InstagramQueue` against the test database. Source syntax checks do not establish deployment or browser/runtime success. Fonts, clipboard, downloads, and preview need browser verification on the deployed admin.
 
 ## Page settings and templates
@@ -54,3 +58,5 @@ The templates migration copies the original paper/white/night designs into exist
 The follow-up local run uses Vite at `http://localhost:5173` and the Laravel API at `http://localhost:8000`. The ignored backend `.env` points to an isolated `storage/app/instagram-local.sqlite`; migration completed against that database. A local-only admin was created for preview. Browser checks verified login, source catalog loading, draft creation, approval into the queue, image preview, and JPEG download with no JavaScript runtime errors. One sample post (94:5) is ready in the local queue. Production data and Instagram were not accessed.
 
 Template update verification: the second migration completed against the local database; focused backend tests passed all 51 assertions (5 tests, exit 0, existing PHP 8.5 dependency deprecations). Vue script/template compilation and PHP syntax checks passed. Live browser checks verified custom colors, Noto Naskh font, framed layout, template creation and persistence, post design persistence after reload, JPEG download, switching templates, and template deletion, with no JavaScript runtime errors. The test template was deleted and the sample post restored to paper. The customized JPEG and settings screen were visually inspected. Reference digits are rendered explicitly in Persian for every font.
+
+Laravel-panel integration verification: 7 focused tests passed all 74 assertions, including panel session authorization and the shared queue/template endpoints (existing PHP 8.5 dependency deprecations remain). The standalone production panel bundle built successfully; PHP syntax and Blade view compilation passed. The actual compiled bundle was served locally from Laravel, and browser checks verified session login, colors/font/layout changes, save/reload, template switching/deletion, and JPEG download without JavaScript runtime errors. The session-panel settings page was visually inspected.
