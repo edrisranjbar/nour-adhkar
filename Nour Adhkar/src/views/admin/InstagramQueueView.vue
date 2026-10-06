@@ -1,6 +1,6 @@
 <template>
   <section class="social" dir="rtl">
-    <div class="page-heading"><div><span class="eyebrow">اذکار نور · محتوای اجتماعی</span><h1>صف اینستاگرام</h1><p>یک آیه، یک یادآوری آرام. تصویر و کپشن را آماده کنید و پس از انتشار، لینک پست را ثبت کنید.</p></div><div class="actions"><button :disabled="loading || loadFailed" :aria-expanded="settingsOpen" @click="settingsOpen = !settingsOpen">تنظیمات قالب‌ها</button><button :disabled="busy || loading" @click="load">تازه‌سازی</button></div></div>
+    <div class="page-heading"><div><span class="eyebrow">اذکار نور · محتوای اجتماعی</span><h1>صف اینستاگرام</h1><p>تصویر و کپشن را آماده کنید؛ سپس انتشار دستی یا ارسال زمان‌بندی‌شده را انتخاب کنید.</p></div><div class="actions"><button :disabled="loading || loadFailed" :aria-expanded="settingsOpen" @click="settingsOpen = !settingsOpen">تنظیمات قالب‌ها</button><button :disabled="busy || loading" @click="load">تازه‌سازی</button></div></div>
     <p v-if="error" class="notice error" role="alert">{{ error }}</p>
     <p v-if="message" class="notice" role="status">{{ message }}</p>
     <div class="stats"><div v-for="(label, key) in labels" :key="key"><strong>{{ digits(posts.filter(p => p.status === key).length) }}</strong><span>{{ label }}</span></div></div>
@@ -35,25 +35,40 @@
         <div class="panel editor">
           <template v-if="selected">
             <div class="preview"><img v-if="previewUrl" :src="previewUrl" :alt="verseFor(selected).translation" /><div v-else class="preview-loading" role="status">{{ previewError ? 'ساخت پیش‌نمایش ناموفق بود' : 'در حال ساخت تصویر…' }}<button v-if="previewError" @click="preview">تلاش دوباره</button></div></div>
-            <div class="editor-body"><p class="spec">۱۰۸۰ × ۱۳۵۰ · متن کامل آیه · ترجمه فارسی</p>
-              <label>قالب پست<select aria-label="قالب پست" v-model="form.template_id" :disabled="busy || selected.status === 'published'"><option value="">طراحی ذخیره‌شده این پست</option><option v-for="template in templates" :key="template.id" :value="template.id">{{ template.name }}{{ template.is_default ? ' · پیش‌فرض' : '' }}</option></select></label>
+            <div class="editor-body"><p class="spec">۱۰۸۰ × ۱۳۵۰ · ترجمه فارسی · متن قابل ویرایش</p>
+              <label>قالب پست<select aria-label="قالب پست" v-model="form.template_id" :disabled="busy || locked"><option value="">طراحی ذخیره‌شده این پست</option><option v-for="template in templates" :key="template.id" :value="template.id">{{ template.name }}{{ template.is_default ? ' · پیش‌فرض' : '' }}</option></select></label>
               <p v-if="form.template_id" class="spec">برای ثبت این قالب روی پست، تغییرات را ذخیره کنید.</p>
-              <label>کپشن<textarea v-model="form.caption" maxlength="2200" rows="6" :disabled="busy || selected.status === 'published'" /></label>
-              <a :href="verseFor(selected).source_url" target="_blank" rel="noopener noreferrer">بررسی ترجمه و متن آیه ↗</a>
+              <label>منبع ترجمه<select v-model="form.translator_key" :disabled="busy || locked" @change="resetImageText"><option value="khorramdel">تفسیر نور · دکتر مصطفی خرمدل</option><option value="rowwad">مرکز ترجمه رواد</option></select></label>
+              <label>متن روی تصویر<textarea v-model="form.image_text" maxlength="1200" rows="5" :disabled="busy || locked" /></label>
+              <button :disabled="busy || locked" @click="resetImageText">بازگردانی متن منبع</button>
+              <p class="spec">متن ویرایش‌شده با عبارت «برگرفته از» نمایش داده می‌شود. کپشن را نیز با متن تصویر هماهنگ کنید.</p>
+              <label>کپشن<textarea v-model="form.caption" maxlength="2200" rows="6" :disabled="busy || locked" /></label>
+              <a :href="imageVerse.source_url" target="_blank" rel="noopener noreferrer">بررسی ترجمه و متن آیه ↗</a>
               <div class="actions"><button :disabled="busy || !previewUrl || previewing" @click="download">دریافت تصویر</button><button :disabled="busy" @click="copyCaption">کپی کپشن</button></div>
-              <template v-if="selected.status !== 'published'">
+              <template v-if="!locked">
                 <div class="actions"><button :disabled="busy || !form.caption.trim()" @click="save()">ذخیره تغییرات</button><button :disabled="busy || !form.caption.trim()" @click="save(selected.status === 'draft' ? 'queued' : 'draft')">{{ selected.status === 'draft' ? 'تأیید و افزودن به صف' : 'بازگشت به پیش‌نویس' }}</button></div>
                 <form v-if="selected.status === 'queued'" class="publish" @submit.prevent="save('published')"><label>لینک پست منتشرشده<input v-model.trim="form.instagram_url" type="url" placeholder="https://www.instagram.com/p/…/" required /></label><button :disabled="busy || !form.instagram_url">ثبت انتشار دستی</button></form>
+                <form v-if="selected.status === 'queued'" class="publish" @submit.prevent="schedule">
+                  <label>زمان ارسال · به وقت تهران<input v-model="form.scheduled_local" type="datetime-local" required :disabled="busy || !publishing.configured" /></label>
+                  <p v-if="!publishing.configured" class="spec">ابتدا دسترسی انتشار حساب اینستاگرام را تنظیم کنید؛ ساخت حساب به‌تنهایی اتصال انتشار نیست.</p>
+                  <p class="spec">ارسال پس از زمان انتخابی، در اجرای بعدی سرویس انجام می‌شود و ممکن است تأخیر داشته باشد.</p>
+                  <button :disabled="busy || !publishing.configured || !form.scheduled_local || !previewUrl || previewing">زمان‌بندی ارسال به اینستاگرام</button>
+                </form>
                 <button class="remove" :disabled="busy" @click="remove">حذف از صف</button>
               </template>
-              <a v-else :href="selected.instagram_url" target="_blank" rel="noopener noreferrer">مشاهده پست منتشرشده ↗</a>
+              <a v-else-if="selected.status === 'published'" :href="selected.instagram_url" target="_blank" rel="noopener noreferrer">مشاهده پست منتشرشده ↗</a>
+              <p v-if="selected.scheduled_at" class="spec">زمان ارسال: {{ scheduleTime(selected.scheduled_at) }} · تهران</p>
+              <p v-if="selected.publish_error" class="notice error">{{ selected.publish_error }}</p>
+              <button v-if="['scheduled', 'failed'].includes(selected.status)" :disabled="busy" @click="cancelSchedule">لغو زمان‌بندی و بازگشت به صف</button>
+              <form v-if="selected.status === 'publishing' && selected.publish_started_at && selected.publish_error" class="publish" @submit.prevent="reconcile"><label>لینک پست پس از بررسی انتشار در اینستاگرام<input v-model.trim="form.instagram_url" type="url" required /></label><button :disabled="busy || !form.instagram_url">تأیید انتشار و ثبت لینک</button></form>
+              <p v-if="selected.status === 'publishing'" class="spec">برای جلوگیری از انتشار تکراری، این پست قفل است. در صورت خطا، نتیجه ارسال باید در اینستاگرام بررسی شود.</p>
             </div>
           </template>
           <div v-else class="empty"><h2>پیش‌نمایش پست</h2><p>یک پست را برای دیدن تصویر و آماده‌سازی کپشن انتخاب کنید.</p></div>
         </div>
       </div>
       <section class="library"><h2>آیه‌های پیشنهادی</h2><p>گزیده‌ای درباره امید، صبر و یاد الله؛ انتخاب تحریریه، بدون رتبه‌بندی آماری اشتراک‌گذاری.</p><div class="library-grid"><article v-for="verse in catalog" :key="verse.key" class="panel"><span class="tag">{{ verse.topic }}</span><p>{{ verse.translation }}</p><small>{{ verse.reference }}</small><button :disabled="busy || posts.some(p => p.verse_key === verse.key)" @click="add(verse)">{{ posts.some(p => p.verse_key === verse.key) ? 'در فهرست موجود است' : 'ساخت پیش‌نویس' }}</button></article></div></section>
-      <p class="footnote">این بخش انتشار خودکار ندارد. تصویر را در اینستاگرام منتشر کنید، سپس لینک آن را در صف ثبت کنید.</p>
+      <p class="footnote">ارسال زمان‌بندی‌شده به دسترسی انتشار حساب حرفه‌ای نیاز دارد. انتشار دستی و ثبت لینک نیز در دسترس است.</p>
     </template>
   </section>
 </template>
@@ -63,18 +78,29 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { instagramApi as axios } from '@/services/instagramApi';
 import { renderInstagramImage, fontChoices, defaultDesign, normalizeDesign } from '@/services/instagramImage';
 
-const labels = { draft: 'پیش‌نویس', queued: 'آماده انتشار', published: 'منتشرشده' };
+const labels = { draft: 'پیش‌نویس', queued: 'آماده انتشار', scheduled: 'زمان‌بندی‌شده', publishing: 'در حال ارسال', failed: 'ارسال ناموفق', published: 'منتشرشده' };
 const posts = ref([]), catalog = ref([]), tab = ref('queued'), selectedId = ref(null);
 const loading = ref(true), loadFailed = ref(false), busy = ref(false), error = ref(''), message = ref('');
 const previewUrl = ref(''), previewError = ref(false), previewing = ref(false);
 const form = ref({ template_id: '', caption: '', instagram_url: '' });
+const publishing = ref({ configured: false });
+const locked = computed(() => selected.value && !['draft', 'queued'].includes(selected.value.status));
 const templates = ref([]), settingsOpen = ref(false), editingTemplateId = ref(null);
 const templateForm = ref({ name: 'قالب جدید', is_default: false, design: { ...defaultDesign } });
 const templatePreviewUrl = ref(''), templatePreviewError = ref(false);
 const selected = computed(() => posts.value.find(p => p.id === selectedId.value));
 const visible = computed(() => posts.value.filter(p => p.status === tab.value));
 const digits = value => new Intl.NumberFormat('fa-IR').format(value);
-const verseFor = post => catalog.value.find(v => v.key === post.verse_key);
+const sourceVerse = post => catalog.value.find(v => v.key === post.verse_key);
+const verseFor = post => {
+  const verse = sourceVerse(post);
+  const source = verse.translations[post.translator_key || 'rowwad'];
+  return { ...verse, ...source, translation: post.image_text || source.translation,
+    credit: post.image_text && post.image_text !== source.translation ? `برگرفته از ${source.translator}` : `ترجمه: ${source.translator}` };
+};
+const imageVerse = computed(() => selected.value ? verseFor({ ...selected.value, image_text: form.value.image_text, translator_key: form.value.translator_key }) : null);
+function resetImageText() { form.value.image_text = sourceVerse(selected.value).translations[form.value.translator_key].translation; }
+const scheduleTime = value => value ? new Intl.DateTimeFormat('fa-IR', { timeZone: 'Asia/Tehran', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value.includes('T') ? value : value.replace(' ', 'T') + 'Z')) : '';
 let previewGeneration = 0;
 let templateGeneration = 0;
 const postDesign = computed(() => form.value.template_id
@@ -102,7 +128,7 @@ const lowContrast = computed(() => {
 function clearPreview() { if (previewUrl.value) URL.revokeObjectURL(previewUrl.value); previewUrl.value = ''; }
 function select(post) {
   selectedId.value = post.id;
-  form.value = { template_id: '', caption: post.caption, instagram_url: post.instagram_url || '' };
+  form.value = { template_id: '', caption: post.caption, instagram_url: post.instagram_url || '', image_text: post.image_text, translator_key: post.translator_key, scheduled_local: '' };
 }
 async function preview() {
   const generation = ++previewGeneration;
@@ -111,19 +137,19 @@ async function preview() {
   if (!selected.value) return;
   previewing.value = true;
   try {
-    const blob = await renderInstagramImage(verseFor(selected.value), postDesign.value);
+    const blob = await renderInstagramImage(imageVerse.value, postDesign.value);
     if (generation === previewGeneration) previewUrl.value = URL.createObjectURL(blob);
   } catch {
     if (generation === previewGeneration) previewError.value = true;
   } finally { if (generation === previewGeneration) previewing.value = false; }
 }
-watch([selectedId, postDesign], preview, { deep: true });
+watch([selectedId, postDesign, imageVerse], preview, { deep: true });
 watch(tab, () => { if (selected.value?.status !== tab.value) { if (visible.value.length) select(visible.value[0]); else selectedId.value = null; } });
 async function load() {
   loading.value = true; error.value = '';
   try {
     const { data } = await axios.get('admin/instagram-queue');
-    posts.value = data.data; catalog.value = data.catalog; templates.value = data.templates; loadFailed.value = false;
+    posts.value = data.data; catalog.value = data.catalog; templates.value = data.templates; publishing.value = data.publishing; loadFailed.value = false;
     if (!editingTemplateId.value && templates.value.length && !settingsOpen.value) editTemplate(templates.value.find(t => t.is_default) || templates.value[0]);
     if (!selected.value && visible.value.length) select(visible.value[0]);
   } catch { loadFailed.value = true; error.value = 'دریافت صف ناموفق بود.'; }
@@ -140,13 +166,33 @@ async function add(verse) {
 }
 async function save(status) {
   await mutate(async () => {
-    const payload = { caption: form.value.caption };
+    const payload = { caption: form.value.caption, image_text: form.value.image_text, translator_key: form.value.translator_key };
     if (form.value.template_id) payload.template_id = Number(form.value.template_id);
     if (status) payload.status = status;
     if (status === 'published') payload.instagram_url = form.value.instagram_url;
     const { data } = await axios.put(`admin/instagram-queue/${selectedId.value}`, payload);
     await load(); tab.value = data.data.status; select(data.data); message.value = 'تغییرات ذخیره شد.';
   });
+}
+async function schedule() {
+  await mutate(async () => {
+    const payload = { caption: form.value.caption, image_text: form.value.image_text, translator_key: form.value.translator_key };
+    if (form.value.template_id) payload.template_id = Number(form.value.template_id);
+    const { data } = await axios.put(`admin/instagram-queue/${selectedId.value}`, payload);
+    const body = new FormData();
+    body.append('scheduled_local', form.value.scheduled_local);
+    body.append('render_token', data.data.render_token);
+    body.append('image', await renderInstagramImage(verseFor(data.data), data.data.design), 'post.jpg');
+    await axios.post(`admin/instagram-queue/${selectedId.value}/schedule`, body);
+    tab.value = 'scheduled'; await load(); select(posts.value.find(p => p.id === data.data.id));
+    message.value = 'زمان‌بندی ثبت شد؛ ارسال در اجرای بعدی سرویس پس از زمان انتخابی انجام می‌شود.';
+  });
+}
+async function reconcile() {
+  await mutate(async () => { const id = selectedId.value; await axios.post(`admin/instagram-queue/${id}/reconcile`, { instagram_url: form.value.instagram_url }); tab.value = 'published'; await load(); select(posts.value.find(p => p.id === id)); });
+}
+async function cancelSchedule() {
+  await mutate(async () => { const id = selectedId.value; await axios.delete(`admin/instagram-queue/${id}/schedule`); tab.value = 'queued'; await load(); select(posts.value.find(p => p.id === id)); });
 }
 async function move(index, delta) {
   const ids = visible.value.map(p => p.id);
@@ -208,7 +254,7 @@ async function previewTemplate() {
   templatePreviewUrl.value = ''; templatePreviewError.value = false;
   if (!settingsOpen.value) return;
   if (!validTemplateDesign.value) { templatePreviewError.value = true; return; }
-  const verse = selected.value ? verseFor(selected.value) : catalog.value[0];
+  const verse = selected.value ? imageVerse.value : catalog.value[0];
   if (!verse) return;
   try {
     const blob = await renderInstagramImage(verse, { ...templateForm.value.design });

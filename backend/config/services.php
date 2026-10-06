@@ -55,4 +55,11 @@ return [
         'token' => env('LECTURE_AI_TOKEN', ''),
     ],
 
+    'instagram' => [
+        'enabled' => env('INSTAGRAM_SCHEDULING_ENABLED', false),
+        'worker_token' => env('INSTAGRAM_PUBLISH_TOKEN', ''),
+        'account_id' => env('INSTAGRAM_ACCOUNT_ID', ''),
+        'username' => env('INSTAGRAM_USERNAME', ''),
+    ],
+
 ];
