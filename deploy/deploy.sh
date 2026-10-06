@@ -44,4 +44,15 @@ if [ -f "$UPLOADS/web-dist.tgz" ]; then
   rm -rf "$WEB_ROOT.old"
 fi
 
+# The API host serves the session-based Laravel admin, including its shared Instagram UI.
+if [ -d "$WEB_ROOT/instagram-panel" ]; then
+  PANEL_ROOT="$APP_DIR/backend/public/instagram"
+  rm -rf "$PANEL_ROOT.new" && mkdir -p "$PANEL_ROOT.new"
+  cp -a "$WEB_ROOT/instagram-panel/." "$PANEL_ROOT.new/"
+  rm -rf "$PANEL_ROOT.old"
+  if [ -d "$PANEL_ROOT" ]; then mv "$PANEL_ROOT" "$PANEL_ROOT.old"; fi
+  mv "$PANEL_ROOT.new" "$PANEL_ROOT"
+  rm -rf "$PANEL_ROOT.old"
+fi
+
 echo "Deployed $(git rev-parse --short HEAD)"

@@ -12,7 +12,8 @@
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "build:instagram-panel": "vite build --config vite.panel.config.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
