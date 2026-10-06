@@ -108,6 +108,14 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware(['auth:api', AdminMiddleware::class])
     ->prefix('admin')
     ->group(function () {
+        Route::get('instagram-queue', [\App\Http\Controllers\InstagramQueueController::class, 'index']);
+        Route::post('instagram-templates', [\App\Http\Controllers\InstagramTemplateController::class, 'store']);
+        Route::put('instagram-templates/{id}', [\App\Http\Controllers\InstagramTemplateController::class, 'update']);
+        Route::delete('instagram-templates/{id}', [\App\Http\Controllers\InstagramTemplateController::class, 'destroy']);
+        Route::post('instagram-queue', [\App\Http\Controllers\InstagramQueueController::class, 'store']);
+        Route::put('instagram-queue/order', [\App\Http\Controllers\InstagramQueueController::class, 'reorder']);
+        Route::put('instagram-queue/{id}', [\App\Http\Controllers\InstagramQueueController::class, 'update']);
+        Route::delete('instagram-queue/{id}', [\App\Http\Controllers\InstagramQueueController::class, 'destroy']);
         Route::get('app-feedback', [AppInboxController::class, 'adminFeedback']);
         Route::get('app-notices', [AppInboxController::class, 'adminNotices']);
         Route::post('app-notices', [AppInboxController::class, 'createNotice']);

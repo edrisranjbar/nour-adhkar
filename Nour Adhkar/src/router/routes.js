@@ -185,6 +185,7 @@ export const adminRoutes = [
         component: () => import('@/views/admin/CommentsManageView.vue'),
         meta: { title: 'مدیریت نظرات' }
       },
+      { path: 'instagram-queue', name: 'admin-instagram-queue', component: () => import('@/views/admin/InstagramQueueView.vue'), meta: { title: 'صف اینستاگرام | اذکار نور' } },
       { path: 'app-inbox', name: 'admin-app-inbox', component: () => import('@/views/admin/AppInboxView.vue'), meta: { title: 'پیام‌های برنامه' } }
     ]
   }
