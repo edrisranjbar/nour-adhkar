@@ -18,6 +18,9 @@ Route::prefix('admin')->name('panel.')->group(function () {
         Route::get('/', Panel\DashboardController::class)->name('dashboard');
         Route::get('instagram-queue', Panel\InstagramController::class)->name('instagram');
         Route::prefix('instagram-api')->group(function () {
+            Route::post('instagram-queue/{id}/schedule', [\App\Http\Controllers\InstagramScheduleController::class, 'store']);
+            Route::post('instagram-queue/{id}/reconcile', [\App\Http\Controllers\InstagramScheduleController::class, 'reconcile']);
+            Route::delete('instagram-queue/{id}/schedule', [\App\Http\Controllers\InstagramScheduleController::class, 'destroy']);
             Route::get('instagram-queue', [\App\Http\Controllers\InstagramQueueController::class, 'index']);
             Route::post('instagram-queue', [\App\Http\Controllers\InstagramQueueController::class, 'store']);
             Route::put('instagram-queue/order', [\App\Http\Controllers\InstagramQueueController::class, 'reorder']);

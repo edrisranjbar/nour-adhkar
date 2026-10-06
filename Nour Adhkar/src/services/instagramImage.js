@@ -98,7 +98,7 @@ export async function renderInstagramImage(verse, design = 'paper') {
   ctx.font = `28px ${family}`;
   ctx.fillText(verse.reference.replace(/\d/g, digit => '۰۱۲۳۴۵۶۷۸۹'[digit]), 540, top + (lines.length - 1) * lineHeight + 100);
   ctx.font = `20px ${family}`;
-  ctx.fillText(`ترجمه: ${verse.translator}`, 540, 1190);
+  ctx.fillText(verse.credit || `ترجمه: ${verse.translator}`, 540, 1190);
   const ratio = logo.naturalWidth / logo.naturalHeight;
   const width = ratio >= 1 ? settings.logo_size : settings.logo_size * ratio;
   const height = ratio >= 1 ? settings.logo_size / ratio : settings.logo_size;

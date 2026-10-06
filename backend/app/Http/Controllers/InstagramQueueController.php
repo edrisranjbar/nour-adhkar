@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Services\InstagramPublishing;
 
 class InstagramQueueController extends Controller
 {
@@ -20,11 +21,12 @@ class InstagramQueueController extends Controller
             $template->is_default = (bool) $template->is_default;
             return $template;
         });
-        return response()->json(['catalog' => $this->catalog(), 'templates' => $templates, 'data' => DB::table('instagram_posts')->orderBy('position')->orderBy('id')->get()->map(fn ($post) => $this->decodePost($post))]);
+        return response()->json(['catalog' => $this->catalog(), 'templates' => $templates, 'publishing' => ['configured' => InstagramPublishing::configured(), 'username' => config('services.instagram.username')], 'data' => DB::table('instagram_posts')->orderBy('position')->orderBy('id')->get()->map(fn ($post) => $this->decodePost($post))]);
     }
 
     private function decodePost(object $post): object
     {
+        $post->render_token = InstagramPublishing::renderToken($post);
         $post->design = $post->design ? json_decode($post->design, true) : null;
         return $post;
     }
@@ -37,7 +39,8 @@ class InstagramQueueController extends Controller
         $template = DB::table('instagram_templates')->where('is_default', true)->first();
         // Duplicate clicks and simultaneous requests must not create duplicate posts.
         $created = DB::table('instagram_posts')->insertOrIgnore([
-            'verse_key' => $verse['key'], 'caption' => $verse['translation']."\n\n".$verse['reference']."\nترجمه: مرکز ترجمه رواد / اسلام‌هاوس\n".$verse['source_url']."\n\nاذکار نور · adhkar.ir\n#قرآن #اذکار_نور",
+            'verse_key' => $verse['key'], 'caption' => $verse['translation']."\n\n".$verse['reference']."\n".$verse['translator']."\n".$verse['source_url']."\n\nاذکار نور · adhkar.ir\n#قرآن #اذکار_نور",
+            'image_text' => $verse['translation'], 'translator_key' => 'khorramdel',
             'theme' => 'paper', 'status' => 'draft', 'position' => 0,
             'template_id' => $template?->id, 'design' => $template?->design,
             'created_at' => now(), 'updated_at' => now(),
@@ -49,6 +52,8 @@ class InstagramQueueController extends Controller
     {
         $data = $request->validate([
             'caption' => 'sometimes|required|string|max:2200',
+            'image_text' => 'sometimes|required|string|max:1200',
+            'translator_key' => 'sometimes|required|in:rowwad,khorramdel',
             'theme' => 'sometimes|required|in:paper,white,night',
             'template_id' => 'sometimes|required|integer|exists:instagram_templates,id',
             'status' => 'sometimes|required|in:draft,queued,published',
@@ -57,7 +62,7 @@ class InstagramQueueController extends Controller
         return DB::transaction(function () use ($id, $data) {
             $post = DB::table('instagram_posts')->where('id', $id)->lockForUpdate()->first();
             abort_unless($post, 404);
-            abort_if($post->status === 'published', 422, 'Published posts are read-only.');
+            abort_if(!in_array($post->status, ['draft', 'queued']), 422, 'Cancel the schedule before editing this post.');
             if (isset($data['template_id'])) {
                 $template = DB::table('instagram_templates')->where('id', $data['template_id'])->lockForUpdate()->first();
                 abort_unless($template, 422, 'Template no longer exists.');
@@ -100,7 +105,7 @@ class InstagramQueueController extends Controller
         return DB::transaction(function () use ($id) {
             $post = DB::table('instagram_posts')->where('id', $id)->lockForUpdate()->first();
             abort_unless($post, 404);
-            abort_if($post->status === 'published', 422, 'Published posts cannot be deleted from the archive.');
+            abort_if(!in_array($post->status, ['draft', 'queued']), 422, 'Cancel the schedule before deleting this post.');
             DB::table('instagram_posts')->where('id', $id)->delete();
             return response()->noContent();
         });
