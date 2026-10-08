@@ -39,14 +39,7 @@
         @endif
     </div>
 
-    <fieldset class="field" style="border:1px solid var(--border, #e5e0d5);border-radius:12px;padding:12px 14px">
-        <legend>فایل صوتی</legend>
-        <label for="audio_file">بارگذاری فایل (mp3، m4a، aac، ogg، wav؛ حداکثر ۱۰۰ مگابایت)</label>
-        <input id="audio_file" type="file" name="audio_file" accept=".mp3,.m4a,.aac,.ogg,.oga,.wav,audio/*">
-        <div class="muted" style="margin:10px 0">یا</div>
-        <label for="audio_url">لینک مستقیم صوت (https)</label>
-        <input id="audio_url" type="url" name="audio_url" maxlength="500" dir="ltr" placeholder="https://example.com/lecture.mp3" value="{{ old('audio_url', $lecture->audio_url ?? '') }}">
-    </fieldset>
+    @include('panel.lectures._audio', ['audio' => $audio ?? null, 'lecture' => $lecture])
 
     <div class="field">
         <label class="check">

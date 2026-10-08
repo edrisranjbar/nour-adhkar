@@ -28,7 +28,7 @@ class LectureController extends Controller
 
     public function create(int $scholarId)
     {
-        return view('panel.lectures.form', ['scholar' => $this->scholar($scholarId), 'lecture' => null]);
+        return view('panel.lectures.form', ['scholar' => $this->scholar($scholarId), 'lecture' => null, 'audio' => null]);
     }
 
     public function store(Request $request, int $scholarId)
@@ -44,7 +44,19 @@ class LectureController extends Controller
 
     public function edit(int $scholarId, int $id)
     {
-        return view('panel.lectures.form', ['scholar' => $this->scholar($scholarId), 'lecture' => $this->lecture($scholarId, $id)]);
+        $lecture = $this->lecture($scholarId, $id);
+        // Shown in the edit form's «صوت فعلی» card: playable and copyable URL, file name and size.
+        $audio = null;
+        if ($url = ApiScholarController::audioUrl($lecture)) {
+            $size = $lecture->audio_path ? rescue(fn () => Storage::disk('public')->size($lecture->audio_path), null, false) : null;
+            $audio = [
+                'url' => $url,
+                'uploaded' => (bool) $lecture->audio_path,
+                'name' => $lecture->audio_path ? basename($lecture->audio_path) : (basename(parse_url($url, PHP_URL_PATH) ?: '') ?: $url),
+                'size' => $size,
+            ];
+        }
+        return view('panel.lectures.form', ['scholar' => $this->scholar($scholarId), 'lecture' => $lecture, 'audio' => $audio]);
     }
 
     public function update(Request $request, int $scholarId, int $id)
