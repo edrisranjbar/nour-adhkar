@@ -11,6 +11,7 @@
         <ul class="links">
           <li><a href="#features">{{ t.navFeatures }}</a></li>
           <li><a href="#privacy">{{ t.navPrivacy }}</a></li>
+          <li><a href="#support">{{ t.navSupport }}</a></li>
           <li><a href="#download">{{ t.navDownload }}</a></li>
         </ul>
         <div class="ctrl">
@@ -18,6 +19,7 @@
             <button type="button" :aria-pressed="lang === 'fa'" @click="setLang('fa')" lang="fa">فا</button>
             <button type="button" :aria-pressed="lang === 'ar'" @click="setLang('ar')" lang="ar">ع</button>
           </div>
+          <a class="nav-donate" :href="donateUrl" target="_blank" rel="noopener noreferrer" @click="track('donate_click', 'nav')">{{ t.support }}</a>
           <button type="button" class="icon-btn" @click="toggleTheme" :aria-label="t.themeLabel">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
           </button>
@@ -153,6 +155,26 @@
           </ul>
         </section>
 
+        <!-- Support -->
+        <section id="support" class="wrap support reveal">
+          <div class="support-card">
+            <div class="support-copy">
+              <h2>{{ t.supportTitle }}</h2>
+              <p>{{ t.supportText }}</p>
+              <ul>
+                <li v-for="p in t.supportPoints" :key="p">{{ p }}</li>
+              </ul>
+            </div>
+            <div class="support-act">
+              <a class="lbtn primary big" :href="donateUrl" target="_blank" rel="noopener noreferrer" @click="track('donate_click', 'section')">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.7 4.5c2 0 3.5 1 5.3 3 1.8-2 3.3-3 5.3-3 3.7 0 5.8 3.7 4.3 7.2C19.5 16.4 12 21 12 21z" /></svg>
+                {{ t.supportCta }}
+              </a>
+              <p class="support-note">{{ t.supportNote }}</p>
+            </div>
+          </div>
+        </section>
+
         <!-- Download -->
         <section id="download" class="download">
           <div class="wrap download-inner reveal">
@@ -163,7 +185,7 @@
             </div>
             <div class="cta">
               <a class="lbtn light" :href="storeUrl" target="_blank" rel="noopener noreferrer" @click="track('store_click', 'footer')">{{ t.download }}</a>
-              <a class="lbtn outline" href="https://edrisranjbar.ir/donation" target="_blank" rel="noopener noreferrer" @click="track('donate_click')">{{ t.support }}</a>
+              <a class="lbtn outline" :href="donateUrl" target="_blank" rel="noopener noreferrer" @click="track('donate_click', 'footer')">{{ t.support }}</a>
             </div>
           </div>
         </section>
@@ -174,6 +196,7 @@
       <span>{{ t.footer }}</span>
       <nav :aria-label="t.footLabel">
         <router-link to="/privacy">{{ t.navPrivacy }}</router-link>
+        <a :href="donateUrl" target="_blank" rel="noopener noreferrer" @click="track('donate_click', 'foot')">{{ t.support }}</a>
         <a href="https://github.com/edrisranjbar/Nour-Adhkar-App" target="_blank" rel="noopener noreferrer" @click="track('github_click')">GitHub</a>
       </nav>
     </footer>
@@ -196,7 +219,7 @@ const T = {
   fa: {
     skip: 'رفتن به محتوا', navLabel: 'منوی اصلی', footLabel: 'پیوندها', factsLabel: 'مشخصات',
     langLabel: 'زبان', themeLabel: 'تغییر حالت روشن و تاریک',
-    name: 'اذکار نور', navFeatures: 'امکانات', navPrivacy: 'حریم خصوصی', navDownload: 'دریافت',
+    name: 'اذکار نور', navFeatures: 'امکانات', navPrivacy: 'حریم خصوصی', navDownload: 'دریافت', navSupport: 'حمایت',
     nameA: 'اذکار', nameB: 'نور',
     videoLabel: 'ویدیوی معرفی اذکار نور', play: 'پخش ویدیو', pause: 'توقف ویدیو', unmute: 'پخش صدا', mute: 'بی‌صدا',
     tagline: 'اپلیکیشن جامع اذکار و ادعیه اهل سنت',
@@ -225,12 +248,17 @@ const T = {
     privSub: 'پیشرفت، تنظیمات، ذکرهای دلخواه و تاریخچه فقط روی دستگاه ذخیره می‌شوند.',
     priv: ['بدون تبلیغات و ابزار ردیابی', 'محتوای اصلی و محاسبهٔ اوقات بدون اینترنت', 'موقعیت فقط با اجازهٔ صریح شما', 'اینترنت فقط برای دریافت صوت و بررسی نسخهٔ جدید'],
     finalTitle: 'اذکار نور را نصب کنید', finalSub: 'رایگان و سبک، برای اندروید.', support: 'حمایت از پروژه',
+    supportTitle: 'اذکار نور را همراهی کنید',
+    supportText: 'این برنامه بدون تبلیغ و بدون جمع‌آوری اطلاعات شخصی شما ساخته شده؛ ادامهٔ توسعه و نگهداری‌اش به حمایت کاربران بستگی دارد.',
+    supportPoints: ['نگهداری و رفع اشکال برنامه', 'افزودن محتوا و بهبود طراحی', 'هزینهٔ سرور و انتشار در فروشگاه‌ها'],
+    supportCta: 'حمایت مالی از اذکار نور',
+    supportNote: 'هر مبلغی ارزشمند است. دعای خیر شما هم کمک بزرگی است.',
     footer: '© اذکار نور'
   },
   ar: {
     skip: 'انتقل إلى المحتوى', navLabel: 'القائمة الرئيسية', footLabel: 'روابط', factsLabel: 'مواصفات',
     langLabel: 'اللغة', themeLabel: 'تبديل الوضع الفاتح والداكن',
-    name: 'أذكار نور', navFeatures: 'المزايا', navPrivacy: 'الخصوصية', navDownload: 'التحميل',
+    name: 'أذكار نور', navFeatures: 'المزايا', navPrivacy: 'الخصوصية', navDownload: 'التحميل', navSupport: 'الدعم',
     nameA: 'أذكار', nameB: 'نور',
     videoLabel: 'فيديو تعريفي بأذكار نور', play: 'تشغيل الفيديو', pause: 'إيقاف الفيديو', unmute: 'تشغيل الصوت', mute: 'كتم الصوت',
     tagline: 'التطبيق الشامل لأذكار وأدعية أهل السنة',
@@ -259,6 +287,11 @@ const T = {
     privSub: 'التقدم والإعدادات والأذكار المخصصة والسجل محفوظة على الجهاز فقط.',
     priv: ['بلا إعلانات ولا أدوات تتبع', 'المحتوى الأساسي وحساب المواقيت دون إنترنت', 'الموقع بموافقتك الصريحة فقط', 'الإنترنت فقط لتحميل الصوت والتحقق من التحديثات'],
     finalTitle: 'ثبّت أذكار نور', finalSub: 'مجاني وخفيف، لأندرويد.', support: 'ادعم المشروع',
+    supportTitle: 'كونوا معنا في أذكار نور',
+    supportText: 'بُني التطبيق دون إعلانات ودون جمع بياناتك الشخصية، واستمرار تطويره وصيانته يعتمد على دعم المستخدمين.',
+    supportPoints: ['صيانة التطبيق وإصلاح الأخطاء', 'إضافة المحتوى وتحسين التصميم', 'تكلفة الخادم والنشر في المتاجر'],
+    supportCta: 'ادعم أذكار نور',
+    supportNote: 'كل مبلغ له قيمته، ودعاؤكم عون كبير.',
     footer: '© أذكار نور'
   }
 }
@@ -283,7 +316,8 @@ export default {
       tracked: new Set(),
       muted: true,
       sizes,
-      storeUrl: 'https://cafebazaar.ir/app/ir.adhkar.app'
+      storeUrl: 'https://cafebazaar.ir/app/ir.adhkar.app',
+      donateUrl: 'https://edrisranjbar.ir/donation'
     }
   },
   computed: {
@@ -430,6 +464,13 @@ p { margin: 0; }
 .icon-btn svg { transition: transform 0.3s var(--ease); }
 @media (max-width: 760px) { .links { display: none; } .ctrl { margin-inline-start: auto; } }
 
+.nav-donate { display: inline-flex; align-items: center; height: 42px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 0.9rem; text-decoration: none; white-space: nowrap; transition: background-color 0.2s, transform 0.2s var(--ease); }
+.nav-donate:hover { background: color-mix(in srgb, var(--accent) 88%, #000); }
+.nav-donate:active { transform: scale(0.97); }
+@media (max-width: 420px) { .nav-donate { padding: 0 12px; font-size: 0.82rem; } .brand span { display: none; } }
+section[id] { scroll-margin-top: 80px; }
+html:has(.landing) { scroll-behavior: smooth; }
+
 /* Buttons */
 .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .lbtn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: transform 0.2s var(--ease), background-color 0.2s, box-shadow 0.2s; }
@@ -449,9 +490,6 @@ p { margin: 0; }
 .shot img { display: block; width: 100%; height: auto; }
 
 /* Hero */
-@media (prefers-color-scheme: dark) {
-  .landing:not([data-theme="light"])   .landing:not([data-theme="light"]) .for-light { display: none !important; }
-}
 .hero { position: relative; isolation: isolate; overflow: hidden; padding-top: 72px; text-align: center; }
 .hero-pattern { position: absolute; inset: 0; z-index: -1; color: var(--line); opacity: 0.7;
   -webkit-mask-image: radial-gradient(ellipse 60% 55% at 50% 30%, #000 20%, transparent 75%);
@@ -491,9 +529,6 @@ h1 .w2::after { content: ""; position: absolute; inset-inline: 10%; bottom: -0.1
 .rise { animation: rise 0.9s var(--ease) calc(var(--d) * 0.08s + 0.05s) both; }
 @media (max-width: 700px) {
   .hero { padding-top: 48px; }
-  .phone { border-width: 4px; }
-  .p-start { transform: translateX(calc(52% + var(--s, 0) * 30px)) rotate(calc(6deg + var(--s, 0) * 3deg)); }
-  .p-end { transform: translateX(calc(-52% - var(--s, 0) * 30px)) rotate(calc(-6deg - var(--s, 0) * 3deg)); }
 }
 
 /* Verse */
@@ -556,6 +591,21 @@ h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.3; }
 .priv-list li:first-child { border-top: 1px solid var(--line); }
 .priv-list li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); transform: translateY(-2px); }
 @media (max-width: 800px) { .privacy { grid-template-columns: 1fr; gap: 24px; padding-block: 48px 72px; } }
+
+/* Support */
+.support { padding-block: 0 96px; }
+.support-card { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: center; padding: 48px; border: 1px solid var(--line); border-radius: 28px; background: var(--surface); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+.support-card::before { content: ""; position: absolute; inset-inline-end: -80px; top: -80px; width: 260px; height: 260px; border-radius: 50%; background: color-mix(in srgb, var(--sand) 18%, transparent); }
+.support-copy, .support-act { position: relative; }
+.support-copy h2 { margin-bottom: 12px; }
+.support-copy p { color: var(--muted); max-width: 34em; }
+.support-copy ul { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 8px; }
+.support-copy li { position: relative; padding-inline-start: 22px; }
+.support-copy li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.75em; width: 10px; height: 2px; background: var(--accent); border-radius: 2px; }
+.support-act { display: grid; gap: 14px; justify-items: center; text-align: center; }
+.lbtn.big { min-height: 56px; padding: 0 30px; font-size: 1.05rem; width: 100%; justify-content: center; }
+.support-note { color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 800px) { .support-card { grid-template-columns: 1fr; padding: 28px 22px; gap: 28px; } .support { padding-bottom: 64px; } }
 
 /* Download */
 .download { background: var(--band); color: var(--band-ink); }
