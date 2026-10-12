@@ -5,9 +5,12 @@ Allow: /
 # Disallow admin and auth pages
 Disallow: /login
 Disallow: /register
+Disallow: /admin
+Disallow: /forgot-password
+Disallow: /reset-password
 Disallow: /dashboard
 Disallow: /donation/success
 Disallow: /donation/failed
 
 # Sitemap
-Sitemap: https://nour-adhkar.ir/sitemap.xml 
+Sitemap: https://adhkar.ir/sitemap.xml 

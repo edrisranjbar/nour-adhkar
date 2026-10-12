@@ -1,0 +1,35 @@
+# Example nginx server blocks for the website (Vue SPA in "Nour Adhkar/dist").
+# Fixes Search Console "Soft 404" / "Not found (404)" noise: unknown paths must
+# return a real 404 status instead of 200 with the landing page.
+# Adjust root, ssl and the API proxy to match the server; keep the existing API config.
+
+# www -> apex (one canonical host)
+server {
+    listen 80;
+    listen 443 ssl;
+    server_name www.adhkar.ir;
+    # ssl_certificate ...; ssl_certificate_key ...;
+    return 301 https://adhkar.ir$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name adhkar.ir;
+    root /path/to/nour-adhkar/Nour\ Adhkar/dist;
+    index index.html;
+
+    # Static files and the real SPA routes serve the app shell with 200.
+    location = / { try_files /index.html =404; }
+    location ~ ^/(privacy|login|forgot-password|reset-password)/?$ { try_files /index.html =404; }
+    location ^~ /admin { try_files $uri /index.html; }
+
+    # Everything else: real file, or a genuine 404 that still renders the SPA's
+    # "not found" page (status stays 404, noindex is set by the app).
+    location / {
+        try_files $uri =404;
+    }
+    error_page 404 /index.html;
+
+    # Retired URLs reported by Search Console: tell Google they are gone.
+    location ~ ^/(blog|collections)(/|$) { return 410; }
+}
