@@ -63,3 +63,8 @@ Files are stored in `backend/storage/app/public/lectures` and served from `/stor
 Lecture ▲/▼ controls save via AJAX without reloading the page. All move and column-sort buttons are locked during the request; confirmed server order updates the rows, position numbers, and first/last button states. Reordering is available in ascending `#` order. Failed requests show an inline error and unlock the controls for retry. Normal form submission remains available without JavaScript.
 
 The Instagram queue feature has been retired. Deployment moves its old generated public assets into private `backend/storage/app/retired-instagram-assets/`; historical database rows, migration files and uploaded images are retained. No Instagram publishing workflow or endpoints remain.
+
+
+## Website 404s and www redirect
+
+`deploy/nginx-web.conf.example` makes unknown website paths return a real 404 (old `/blog/...` and `/collections/...` URLs return 410) and redirects `www.adhkar.ir` to `adhkar.ir`. Merge it into the live nginx config, run `nginx -t`, reload, then check `curl -I https://adhkar.ir/zzz-nope` returns 404.

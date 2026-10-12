@@ -12,13 +12,13 @@ export default {
   methods: {
     ...mapActions(['refreshUserData']),
     updateMetaTags(route) {
-      if (route.meta && (route.meta.title || route.meta.description)) {
-        this.$setMeta({
-          title: route.meta.title,
-          description: route.meta.description,
-          url: `https://adhkar.ir${route.path}`
-        });
-      }
+      const meta = route.meta || {};
+      this.$setMeta({
+        title: meta.title,
+        description: meta.description,
+        noindex: !!meta.noindex,
+        url: route.path === '/' ? 'https://adhkar.ir/' : `https://adhkar.ir${route.path}`
+      });
     }
   },
   watch: {

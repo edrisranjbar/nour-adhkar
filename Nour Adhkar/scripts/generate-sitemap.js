@@ -19,6 +19,11 @@ const routes = [
     path: '/',
     changefreq: 'monthly',
     priority: '1.0'
+  },
+  {
+    path: '/privacy',
+    changefreq: 'yearly',
+    priority: '0.3'
   }
 ];
 

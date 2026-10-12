@@ -1,11 +1,22 @@
+// Keep a single canonical link in sync with the current route
+function setCanonical(url) {
+  let link = document.querySelector('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    document.head.appendChild(link);
+  }
+  link.setAttribute('href', url);
+}
+
 // Meta plugin for SEO
 
 // Default meta values
 const defaultMeta = {
   title: 'اذکار نور | مجموعه کامل اذکار و ادعیه',
   description: 'دسترسی آسان به اذکار صبحگاهی، شامگاهی و ادعیه مختلف در یک اپلیکیشن سبک و کاربرپسند',
-  image: '/images/logo.png',
-  url: 'https://nour-adhkar.ir',
+  image: 'https://adhkar.ir/images/logo.png',
+  url: 'https://adhkar.ir/',
   type: 'website',
   locale: 'fa_IR'
 };
@@ -32,19 +43,33 @@ function setMetaTag(name, content) {
   meta.setAttribute('content', content);
 }
 
+// Keep a single canonical link in sync with the current route
+function setCanonical(url) {
+  let link = document.querySelector('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    document.head.appendChild(link);
+  }
+  link.setAttribute('href', url);
+}
+
 // Meta plugin
 export default {
   install: (app) => {
     // Create a reactive method to update meta tags
     app.config.globalProperties.$setMeta = (meta = {}) => {
       // Merge with default meta
-      const metaData = { ...defaultMeta, ...meta };
+      const defined = Object.fromEntries(Object.entries(meta).filter(([, v]) => v !== undefined));
+      const metaData = { ...defaultMeta, ...defined };
       
       // Set document title
       document.title = metaData.title;
       
       // Update meta tags
       setMetaTag('description', metaData.description);
+      setMetaTag('robots', metaData.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
+      setCanonical(metaData.url);
       
       // Open Graph meta tags
       setMetaTag('og:title', metaData.title);
