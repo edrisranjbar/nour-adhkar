@@ -1,21 +1,10 @@
-// Keep a single canonical link in sync with the current route
-function setCanonical(url) {
-  let link = document.querySelector('link[rel="canonical"]');
-  if (!link) {
-    link = document.createElement('link');
-    link.setAttribute('rel', 'canonical');
-    document.head.appendChild(link);
-  }
-  link.setAttribute('href', url);
-}
-
 // Meta plugin for SEO
 
 // Default meta values
 const defaultMeta = {
   title: 'اذکار نور | مجموعه کامل اذکار و ادعیه',
   description: 'دسترسی آسان به اذکار صبحگاهی، شامگاهی و ادعیه مختلف در یک اپلیکیشن سبک و کاربرپسند',
-  image: 'https://adhkar.ir/images/logo.png',
+  image: 'https://adhkar.ir/icons/logo.png',
   url: 'https://adhkar.ir/',
   type: 'website',
   locale: 'fa_IR'
