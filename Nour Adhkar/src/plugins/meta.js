@@ -4,7 +4,7 @@
 const defaultMeta = {
   title: 'اذکار نور | مجموعه کامل اذکار و ادعیه',
   description: 'دسترسی آسان به اذکار صبحگاهی، شامگاهی و ادعیه مختلف در یک اپلیکیشن سبک و کاربرپسند',
-  image: 'https://adhkar.ir/icons/logo.png',
+  image: 'https://adhkar.ir/images/og-cover.jpg',
   url: 'https://adhkar.ir/',
   type: 'website',
   locale: 'fa_IR'
