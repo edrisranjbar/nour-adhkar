@@ -110,10 +110,10 @@
 
         <!-- Features -->
         <section id="features" class="wrap features">
-          <header class="section-head reveal">
+          <div class="section-head reveal">
             <h2>{{ t.featTitle }}</h2>
             <p>{{ t.featSub }}</p>
-          </header>
+          </div>
 
           <article v-for="(f, i) in t.feats" :key="f.key" class="feature" :class="{ flip: i % 2 }">
             <div class="feature-copy reveal">
