@@ -110,22 +110,33 @@
 
         <!-- Features -->
         <section id="features" class="wrap features">
-          <div class="section-head reveal">
+          <header class="section-head reveal">
             <h2>{{ t.featTitle }}</h2>
-          </div>
+            <p>{{ t.featSub }}</p>
+          </header>
 
           <article v-for="(f, i) in t.feats" :key="f.key" class="feature" :class="{ flip: i % 2 }">
             <div class="feature-copy reveal">
-              <span class="index">{{ num(String(i + 1).padStart(2, '0')) }}</span>
+              <div class="feature-meta">
+                <span class="chip" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path :d="icons[f.key]" /></svg>
+                </span>
+                <span class="index">{{ num(String(i + 1).padStart(2, '0')) }} <i>/</i> {{ num(String(t.feats.length).padStart(2, '0')) }}</span>
+              </div>
               <h3>{{ f.title }}</h3>
               <p>{{ f.text }}</p>
               <ul>
-                <li v-for="p in f.points" :key="p">{{ p }}</li>
+                <li v-for="(p, j) in f.points" :key="p" :style="{ '--j': j }">
+                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" pathLength="1" /></svg>
+                  <span>{{ p }}</span>
+                </li>
               </ul>
             </div>
-            <figure class="shot feature-shot reveal" :class="{ card: f.key === 'prayer' }">
-              <img :src="shots[f.key]" :alt="f.alt" loading="lazy" decoding="async" :width="sizes[f.key][0]" :height="sizes[f.key][1]" />
-            </figure>
+            <div class="stage-panel reveal" :class="f.key === 'prayer' ? 'is-card' : 'is-phone'">
+              <figure class="shot">
+                <img :src="shots[f.key]" :alt="f.alt" loading="lazy" decoding="async" :width="sizes[f.key][0]" :height="sizes[f.key][1]" />
+              </figure>
+            </div>
           </article>
         </section>
 
@@ -214,6 +225,12 @@ import prayer from '@/assets/images/landing/prayer.webp'
 import adhkar from '@/assets/images/landing/adhkar.webp'
 
 const shots = { adhkar, prayer, checklist, tasbih }
+const icons = {
+  adhkar: 'M12 3v2m0 14v2M5.6 5.6l1.4 1.4m10 10 1.4 1.4M3 12h2m14 0h2M5.6 18.4 7 17m10-10 1.4-1.4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z',
+  prayer: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
+  checklist: 'M9 11l2.5 2.5L16 9M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z',
+  tasbih: 'M12 3.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM18 7a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM18 14a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM12 17.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM6 14a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM6 7a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z'
+}
 const sizes = { adhkar: [576, 1280], prayer: [532, 402], checklist: [576, 1280], tasbih: [576, 1280] }
 
 const T = {
@@ -229,6 +246,7 @@ const T = {
     download: 'دریافت از کافه‌بازار', explore: 'دیدن امکانات',
     verseRef: 'سورهٔ رعد، آیهٔ ۲۸',
     featTitle: 'آنچه در برنامه پیدا می‌کنید',
+    featSub: 'چهار ابزار اصلی برای همراهی روزانه با ذکر و عبادت؛ ساده، آرام و بدون حواس‌پرتی.',
     feats: [
       { key: 'adhkar', title: 'اذکار صبح و شام', text: 'هر ذکر با متن عربی خوانا، ترجمهٔ فارسی و شمارندهٔ تکرار نمایش داده می‌شود.', points: ['پخش صوتی با صدای مشاری راشد العفاسی', 'افزودن به علاقه‌مندی‌ها و اشتراک‌گذاری ذکر', 'اذکار خواب، روزانه، ادعیهٔ قرآنی و دعاهای سنت'], alt: 'صفحهٔ اذکار صبحگاه با پخش صوتی، متن عربی آیةالکرسی و ترجمهٔ فارسی' },
       { key: 'prayer', title: 'اوقات شرعی', text: 'نماز بعدی و زمان باقی‌مانده تا آن، همراه با شش وقت روز، در صفحهٔ اصلی.', points: ['محاسبهٔ آفلاین بر اساس موقعیت شما', 'روش‌های محاسبهٔ شناخته‌شدهٔ بین‌المللی', 'پخش اذان با انتخاب مؤذن'], alt: 'کارت اوقات شرعی با نماز بعدی، شمارش معکوس و شش وقت روز' },
@@ -268,6 +286,7 @@ const T = {
     download: 'حمّل من كافه بازار', explore: 'استعرض المزايا',
     verseRef: 'سورة الرعد، الآية ٢٨',
     featTitle: 'ما ستجده في التطبيق',
+    featSub: 'أربع أدوات أساسية ترافقك يوميًا في الذكر والعبادة؛ بسيطة وهادئة وبلا تشتيت.',
     feats: [
       { key: 'adhkar', title: 'أذكار الصباح والمساء', text: 'كل ذكر بنصه العربي الواضح وعدّاد للتكرار.', points: ['تشغيل صوتي بصوت مشاري راشد العفاسي', 'الإضافة إلى المفضلة ومشاركة الذكر', 'أذكار النوم واليوم والأدعية القرآنية والنبوية'], alt: 'شاشة أذكار الصباح مع التشغيل الصوتي ونص آية الكرسي' },
       { key: 'prayer', title: 'مواقيت الصلاة', text: 'الصلاة القادمة والوقت المتبقي لها مع مواقيت اليوم الستة في الشاشة الرئيسية.', points: ['حساب دون اتصال بحسب موقعك', 'طرق حساب دولية معروفة', 'رفع الأذان مع اختيار المؤذن'], alt: 'بطاقة مواقيت الصلاة مع الصلاة القادمة والعد التنازلي' },
@@ -307,6 +326,7 @@ const T = {
     download: 'دابەزاندن لە کافە بازار', explore: 'بینینی تایبەتمەندییەکان',
     verseRef: 'سوورەتی ڕەعد، ئایەتی ۲۸',
     featTitle: 'ئەوەی لە بەرنامەکەدا دەیدۆزیتەوە',
+    featSub: 'چوار ئامرازی سەرەکی بۆ هاوڕێیەتیی ڕۆژانە لەگەڵ زیکر و پەرستش؛ سادە، ئارام و بێ سەرقاڵی.',
     feats: [
       { key: 'adhkar', title: 'ئەزکاری بەیانی و ئێوارە', text: 'هەر زیکرێک بە دەقی عەرەبیی ڕوون و ژمێرەری دووبارەبوونەوە پیشان دەدرێت.', points: ['پەخشی دەنگی بە دەنگی مشاری ڕاشد العفاسی', 'زیادکردن بۆ دڵخوازەکان و هاوبەشکردنی زیکر', 'ئەزکاری خەو و ڕۆژانە، دوعا قورئانییەکان و دوعاکانی سوننەت'], alt: 'لاپەڕەی ئەزکاری بەیانی لەگەڵ پەخشی دەنگی و دەقی ئایەتولکورسی' },
       { key: 'prayer', title: 'کاتەکانی نوێژ', text: 'نوێژی داهاتوو و کاتی ماوە تا ئەو، لەگەڵ شەش کاتەکەی ڕۆژ، لە لاپەڕەی سەرەکی.', points: ['ژمێردرانی بێ ئینتەرنێت بەپێی شوێنی تۆ', 'شێوازە ناسراوە نێودەوڵەتییەکانی ژمێردن', 'لێدانی بانگ لەگەڵ هەڵبژاردنی بانگبێژ'], alt: 'کارتی کاتەکانی نوێژ لەگەڵ نوێژی داهاتوو، ژمێرەری پاشەوە و شەش کاتەکەی ڕۆژ' },
@@ -365,6 +385,7 @@ export default {
       tracked: new Set(),
       muted: true,
       sizes,
+      icons,
       storeUrl: 'https://cafebazaar.ir/app/ir.adhkar.app',
       donateUrl: 'https://edrisranjbar.ir/donation'
     }
@@ -586,28 +607,54 @@ h1 .w2::after { content: ""; position: absolute; inset-inline: 10%; bottom: -0.1
 .verse-ref { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
 
 /* Features */
-.features { padding-block: 96px 40px; }
-.section-head { max-width: 36em; margin-bottom: 64px; }
+.features { padding-block: 112px 48px; }
+.section-head { max-width: 34em; margin-bottom: 40px; }
 h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.3; }
-.section-head p { color: var(--muted); margin-top: 10px; }
-.feature { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; padding-block: 48px; }
-.feature + .feature { border-top: 1px solid var(--line); }
+.section-head p { color: var(--muted); margin-top: 12px; font-size: 1.05rem; text-wrap: pretty; }
+.feature { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(32px, 6vw, 88px); align-items: center; padding-block: 56px;
+  content-visibility: auto; contain-intrinsic-size: auto 560px; }
+.feature.flip { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); }
 .feature.flip .feature-copy { order: 2; }
-.feature-copy { max-width: 28em; }
-.index { display: block; font-size: 0.85rem; font-weight: 700; color: var(--sand); letter-spacing: 0.1em; margin-bottom: 10px; }
-.feature h3 { font-size: 1.6rem; margin-bottom: 12px; }
-.feature p { color: var(--muted); }
-.feature ul { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; }
-.feature li { position: relative; padding-inline-start: 22px; }
-.feature li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.75em; width: 10px; height: 2px; background: var(--accent); border-radius: 2px; }
-.feature-shot { width: 260px; justify-self: center; transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease); }
-.feature-shot.card { width: min(440px, 100%); border: 0; background: none; box-shadow: none; border-radius: 26px; }
-.feature-shot.card img { filter: drop-shadow(0 12px 24px rgba(27, 31, 26, 0.12)); }
-.feature .feature-shot.reveal.in:hover { transform: translateY(-6px) rotate(-0.6deg); }
+.feature-copy { max-width: 27em; }
+.feature-meta { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.chip { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); }
+.chip svg { transition: transform 0.6s var(--ease); }
+.feature:hover .chip svg { transform: rotate(-12deg) scale(1.06); }
+.index { font-size: 0.82rem; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
+.index i { font-style: normal; color: var(--line); margin-inline: 2px; }
+.feature h3 { font-size: clamp(1.5rem, 2.4vw, 1.85rem); line-height: 1.35; margin-bottom: 12px; }
+.feature p { color: var(--muted); font-size: 1.02rem; text-wrap: pretty; }
+.feature ul { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 12px; }
+.feature li { display: flex; align-items: flex-start; gap: 12px; font-weight: 500; }
+.feature li svg { flex: none; margin-top: 0.3em; padding: 3px; width: 22px; height: 22px; border-radius: 50%; color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.feature li svg path { stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+/* Showcase panel: the screenshot rises out of a tinted, dotted stage. */
+.stage-panel { position: relative; isolation: isolate; overflow: hidden; border-radius: 32px; aspect-ratio: 5 / 4.4;
+  background:
+    radial-gradient(120% 90% at 50% 100%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%),
+    linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, var(--surface)), var(--surface));
+  border: 1px solid var(--line); box-shadow: var(--shadow); }
+.stage-panel::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0.6;
+  background-image: radial-gradient(circle at 1px 1px, var(--line) 1px, transparent 0); background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 30%, #000, transparent); mask-image: radial-gradient(70% 60% at 50% 30%, #000, transparent); }
+.stage-panel .shot { position: absolute; margin: 0; overflow: hidden; background: var(--surface); transition: transform 0.7s var(--ease); }
+.stage-panel img { display: block; width: 100%; height: auto; }
+.is-phone .shot { width: 48%; inset-inline-start: 26%; top: 11%; border-radius: 28px 28px 0 0;
+  border: 6px solid #1c211b; border-bottom: 0;
+  box-shadow: 0 30px 60px -20px rgba(20, 40, 18, 0.45); }
+.is-card .shot { width: 82%; inset-inline-start: 9%; top: 50%; translate: 0 -50%; border-radius: 22px; border: 1px solid var(--line);
+  box-shadow: 0 30px 60px -24px rgba(20, 40, 18, 0.4); }
+.feature:hover .is-phone .shot { transform: translateY(-10px); }
+.feature:hover .is-card .shot { transform: translateY(-6px) scale(1.01); }
 @media (max-width: 800px) {
-  .feature { grid-template-columns: 1fr; gap: 32px; padding-block: 40px; }
+  .features { padding-block: 72px 24px; }
+  .feature, .feature.flip { grid-template-columns: 1fr; gap: 28px; padding-block: 36px; }
   .feature.flip .feature-copy { order: 0; }
-  .feature-shot { width: min(260px, 72vw); }
+  .stage-panel { border-radius: 24px; }
+  .is-phone .shot { width: 56%; inset-inline-start: 22%; border-width: 5px; border-radius: 22px 22px 0 0; }
 }
 
 /* More */
@@ -672,8 +719,14 @@ h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.3; }
 /* Motion */
 .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
 .reveal.in { opacity: 1; transform: none; }
-.feature .feature-shot.reveal { transform: translateY(28px) scale(0.98); transition-delay: 0.08s; }
-.feature .feature-shot.reveal.in { transform: none; }
+.stage-panel.reveal { transform: translateY(32px) scale(0.98); transition-duration: 0.9s; transition-delay: 0.06s; }
+.stage-panel.reveal.in { transform: none; }
+.stage-panel.is-phone.reveal .shot { translate: 0 18%; transition: translate 1.1s var(--ease) 0.2s, transform 0.7s var(--ease); }
+.stage-panel.is-phone.reveal.in .shot { translate: 0 0; }
+.feature-copy.reveal li { opacity: 0; transform: translateX(-10px); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); transition-delay: calc(0.25s + var(--j) * 0.09s); }
+.feature-copy.reveal.in li { opacity: 1; transform: none; }
+.feature-copy.reveal li svg path { stroke-dashoffset: 1; transition: stroke-dashoffset 0.6s var(--ease) calc(0.4s + var(--j) * 0.09s); }
+.feature-copy.reveal.in li svg path { stroke-dashoffset: 0; }
 .more-list .reveal:nth-child(3n + 2) { transition-delay: 0.06s; }
 .more-list .reveal:nth-child(3n + 3) { transition-delay: 0.12s; }
 .swap { animation: swap 0.35s var(--ease); }
