@@ -21,6 +21,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AppInboxController;
 use App\Http\Controllers\AppVersionController;
 use App\Http\Controllers\AppArticlesController;
+use App\Http\Controllers\AppAdhkarController;
 use App\Http\Controllers\LectureAiController;
 
 
@@ -31,6 +32,7 @@ Route::get('app-feedback/mine', [AppInboxController::class, 'myFeedback'])->midd
 Route::get('app-notices', [AppInboxController::class, 'notices'])->middleware('throttle:60,1');
 Route::get('app-version', [AppVersionController::class, 'latest'])->middleware('throttle:60,1');
 Route::get('app-articles', [AppArticlesController::class, 'index'])->middleware('throttle:60,1');
+Route::get('app-adhkar', [AppAdhkarController::class, 'index'])->middleware('throttle:60,1');
 Route::post('app-notices/{id}/read', [AppInboxController::class, 'markRead'])->middleware('throttle:60,1');
 // Google sign-in keys pushed by the Nour-Adhkar-App GitHub workflow (server cannot reach Google).
 Route::post('internal/google-jwks', [GoogleJwksController::class, 'store'])->middleware('throttle:10,1');
