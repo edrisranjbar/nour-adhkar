@@ -59,6 +59,22 @@ Route::prefix('admin')->name('panel.')->group(function () {
         Route::get('scholars/{scholar}/lectures/{id}/ai-status', [Panel\LectureController::class, 'aiStatus'])->name('lectures.ai-status');
         Route::patch('scholars/{scholar}/lectures/{id}/move/{direction}', [Panel\LectureController::class, 'move'])->name('lectures.move');
         Route::delete('scholars/{scholar}/lectures/{id}', [Panel\LectureController::class, 'destroy'])->name('lectures.destroy');
+        Route::get('app-adhkar', [Panel\AppDhikrCollectionController::class, 'index'])->name('app-adhkar.index');
+        Route::get('app-adhkar/create', [Panel\AppDhikrCollectionController::class, 'create'])->name('app-adhkar.create');
+        Route::post('app-adhkar', [Panel\AppDhikrCollectionController::class, 'store'])->name('app-adhkar.store');
+        Route::get('app-adhkar/{id}/edit', [Panel\AppDhikrCollectionController::class, 'edit'])->name('app-adhkar.edit');
+        Route::put('app-adhkar/{id}', [Panel\AppDhikrCollectionController::class, 'update'])->name('app-adhkar.update');
+        Route::patch('app-adhkar/{id}/toggle', [Panel\AppDhikrCollectionController::class, 'toggle'])->name('app-adhkar.toggle');
+        Route::patch('app-adhkar/{id}/move/{direction}', [Panel\AppDhikrCollectionController::class, 'move'])->name('app-adhkar.move');
+        Route::delete('app-adhkar/{id}', [Panel\AppDhikrCollectionController::class, 'destroy'])->name('app-adhkar.destroy');
+        Route::get('app-adhkar/{collection}/dhikrs', [Panel\AppDhikrController::class, 'index'])->name('app-dhikrs.index');
+        Route::get('app-adhkar/{collection}/dhikrs/create', [Panel\AppDhikrController::class, 'create'])->name('app-dhikrs.create');
+        Route::post('app-adhkar/{collection}/dhikrs', [Panel\AppDhikrController::class, 'store'])->name('app-dhikrs.store');
+        Route::get('app-adhkar/{collection}/dhikrs/{id}/edit', [Panel\AppDhikrController::class, 'edit'])->name('app-dhikrs.edit');
+        Route::put('app-adhkar/{collection}/dhikrs/{id}', [Panel\AppDhikrController::class, 'update'])->name('app-dhikrs.update');
+        Route::patch('app-adhkar/{collection}/dhikrs/{id}/toggle', [Panel\AppDhikrController::class, 'toggle'])->name('app-dhikrs.toggle');
+        Route::patch('app-adhkar/{collection}/dhikrs/{id}/move/{direction}', [Panel\AppDhikrController::class, 'move'])->name('app-dhikrs.move');
+        Route::delete('app-adhkar/{collection}/dhikrs/{id}', [Panel\AppDhikrController::class, 'destroy'])->name('app-dhikrs.destroy');
 
         Route::get('versions', [Panel\AppVersionController::class, 'index'])->name('versions.index');
         Route::get('versions/create', [Panel\AppVersionController::class, 'create'])->name('versions.create');
