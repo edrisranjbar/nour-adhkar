@@ -58,6 +58,7 @@
                 {{ t.download }}
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14" /></svg>
               </a>
+              <a class="lbtn ghost" :href="myketUrl" target="_blank" rel="noopener noreferrer" @click="track('store_click', 'hero_myket')">{{ t.downloadMyket }}</a>
               <a class="lbtn text" href="#features">{{ t.explore }}</a>
             </div>
           </div>
@@ -197,6 +198,7 @@
             </div>
             <div class="cta">
               <a class="lbtn light" :href="storeUrl" target="_blank" rel="noopener noreferrer" @click="track('store_click', 'footer')">{{ t.download }}</a>
+              <a class="lbtn light" :href="myketUrl" target="_blank" rel="noopener noreferrer" @click="track('store_click', 'footer_myket')">{{ t.downloadMyket }}</a>
               <a class="lbtn outline" :href="donateUrl" target="_blank" rel="noopener noreferrer" @click="track('donate_click', 'footer')">{{ t.support }}</a>
             </div>
           </div>
@@ -243,7 +245,7 @@ const T = {
     tagline: 'اپلیکیشن جامع اذکار و ادعیه اهل سنت',
     lead: 'اذکار صبح و شام، ادعیهٔ قرآنی و دعاهای سنت، اوقات شرعی و ذکرشمار؛ آفلاین و بدون تبلیغ.',
     ticker: ['اذکار صبحگاه', 'اذکار شامگاه', 'ادعیهٔ قرآنی', 'دعاهای سنت', 'اوقات شرعی', 'ذکرشمار', 'قبله‌نما', 'قرآن کریم', 'چک‌لیست روزانه', 'پخش صوتی'],
-    download: 'دریافت از کافه‌بازار', explore: 'دیدن امکانات',
+    download: 'دریافت از کافه‌بازار', downloadMyket: 'دریافت از مایکت', explore: 'دیدن امکانات',
     verseRef: 'سورهٔ رعد، آیهٔ ۲۸',
     featTitle: 'آنچه در برنامه پیدا می‌کنید',
     featSub: 'چهار ابزار اصلی برای همراهی روزانه با ذکر و عبادت؛ ساده، آرام و بدون حواس‌پرتی.',
@@ -283,7 +285,7 @@ const T = {
     tagline: 'التطبيق الشامل لأذكار وأدعية أهل السنة',
     lead: 'أذكار الصباح والمساء، والأدعية القرآنية والنبوية، ومواقيت الصلاة، وعدّاد الذكر؛ دون اتصال وبلا إعلانات.',
     ticker: ['أذكار الصباح', 'أذكار المساء', 'أدعية قرآنية', 'أدعية نبوية', 'مواقيت الصلاة', 'عدّاد الذكر', 'اتجاه القبلة', 'القرآن الكريم', 'المهام اليومية', 'التشغيل الصوتي'],
-    download: 'حمّل من كافه بازار', explore: 'استعرض المزايا',
+    download: 'حمّل من كافه بازار', downloadMyket: 'حمّل من مايكت', explore: 'استعرض المزايا',
     verseRef: 'سورة الرعد، الآية ٢٨',
     featTitle: 'ما ستجده في التطبيق',
     featSub: 'أربع أدوات أساسية ترافقك يوميًا في الذكر والعبادة؛ بسيطة وهادئة وبلا تشتيت.',
@@ -323,7 +325,7 @@ const T = {
     tagline: 'بەرنامەی گشتگیری ئەزکار و دوعاکانی ئەهلی سوننە',
     lead: 'ئەزکاری بەیانی و ئێوارە، دوعا قورئانییەکان و دوعاکانی سوننەت، کاتەکانی نوێژ و تەسبیحژمێر؛ بێ ئینتەرنێت و بێ ڕیکلام.',
     ticker: ['ئەزکاری بەیانی', 'ئەزکاری ئێوارە', 'دوعا قورئانییەکان', 'دوعاکانی سوننەت', 'کاتەکانی نوێژ', 'تەسبیحژمێر', 'قیبلەنما', 'قورئانی پیرۆز', 'لیستی ڕۆژانە', 'پەخشی دەنگی'],
-    download: 'دابەزاندن لە کافە بازار', explore: 'بینینی تایبەتمەندییەکان',
+    download: 'دابەزاندن لە کافە بازار', downloadMyket: 'دابەزاندن لە مایکت', explore: 'بینینی تایبەتمەندییەکان',
     verseRef: 'سوورەتی ڕەعد، ئایەتی ۲۸',
     featTitle: 'ئەوەی لە بەرنامەکەدا دەیدۆزیتەوە',
     featSub: 'چوار ئامرازی سەرەکی بۆ هاوڕێیەتیی ڕۆژانە لەگەڵ زیکر و پەرستش؛ سادە، ئارام و بێ سەرقاڵی.',
@@ -387,6 +389,7 @@ export default {
       sizes,
       icons,
       storeUrl: 'https://cafebazaar.ir/app/ir.adhkar.app',
+      myketUrl: 'https://myket.ir/app/ir.adhkar.app',
       donateUrl: 'https://edrisranjbar.ir/donation'
     }
   },
@@ -551,6 +554,8 @@ html:has(.landing) { scroll-behavior: smooth; }
 .lbtn.primary:hover svg { transform: translateY(2px); }
 .lbtn.text { padding: 0 6px; color: var(--ink); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 6px; text-decoration-thickness: 2px; transition: text-decoration-color 0.2s; }
 .lbtn.text:hover { text-decoration-color: var(--accent); }
+.lbtn.ghost { border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.lbtn.ghost:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
 .lbtn.light { background: var(--band-ink); color: var(--band); }
 .lbtn.outline { border: 1px solid; border-color: color-mix(in srgb, var(--band-ink) 35%, transparent); color: var(--band-ink); }
 .lbtn.outline:hover { background: color-mix(in srgb, var(--band-ink) 10%, transparent); }
