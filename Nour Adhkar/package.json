@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run generate-sitemap && vite build --mode production",
+    "build": "npm run generate-sitemap && vite build --mode production && node scripts/generate-content-pages.mjs",
+    "content:refresh": "node scripts/generate-content-pages.mjs --refresh --dist dist",
+    "indexnow": "node scripts/indexnow.mjs",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
