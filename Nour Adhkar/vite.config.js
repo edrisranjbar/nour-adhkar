@@ -9,6 +9,10 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        // Static SEO pages are real files, not SPA routes: never fall back to index.html for them.
+        navigateFallbackDenylist: [/^\/adhkar/, /^\/blog/, /^\/app$/, /^\/about$/, /^\/sitemap\.xml$/, /^\/robots\.txt$/, /^\/[0-9a-f]{32}\.txt$/]
+      },
       includeAssets: [
         'icons/favicon.ico',
         'icons/apple-touch-icon.png',

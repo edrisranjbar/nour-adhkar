@@ -212,6 +212,8 @@
     <footer class="wrap foot">
       <span>{{ t.footer }}</span>
       <nav :aria-label="t.footLabel">
+        <a href="/adhkar">{{ t.navAdhkar }}</a>
+        <a href="/blog">{{ t.navBlog }}</a>
         <router-link to="/privacy">{{ t.navPrivacy }}</router-link>
         <a :href="donateUrl" target="_blank" rel="noopener noreferrer" @click="track('donate_click', 'foot')">{{ t.support }}</a>
         <a href="https://github.com/edrisranjbar/Nour-Adhkar-App" target="_blank" rel="noopener noreferrer" @click="track('github_click')">GitHub</a>
@@ -242,7 +244,7 @@ const T = {
   fa: {
     skip: 'رفتن به محتوا', navLabel: 'منوی اصلی', footLabel: 'پیوندها', factsLabel: 'مشخصات',
     langLabel: 'زبان', themeLabel: 'تغییر حالت روشن و تاریک',
-    name: 'اذکار نور', navFeatures: 'امکانات', navPrivacy: 'حریم خصوصی', navDownload: 'دریافت', navSupport: 'حمایت',
+    name: 'اذکار نور', navFeatures: 'امکانات', navPrivacy: 'حریم خصوصی', navDownload: 'دریافت', navSupport: 'حمایت', navAdhkar: 'اذکار و ادعیه', navBlog: 'مقالات',
     nameA: 'اذکار', nameB: 'نور',
     videoLabel: 'ویدیوی معرفی اذکار نور', play: 'پخش ویدیو', pause: 'توقف ویدیو', unmute: 'پخش صدا', mute: 'بی‌صدا',
     tagline: 'اپلیکیشن جامع اذکار و ادعیه اهل سنت',
@@ -282,7 +284,7 @@ const T = {
   ar: {
     skip: 'انتقل إلى المحتوى', navLabel: 'القائمة الرئيسية', footLabel: 'روابط', factsLabel: 'مواصفات',
     langLabel: 'اللغة', themeLabel: 'تبديل الوضع الفاتح والداكن',
-    name: 'أذكار نور', navFeatures: 'المزايا', navPrivacy: 'الخصوصية', navDownload: 'التحميل', navSupport: 'الدعم',
+    name: 'أذكار نور', navFeatures: 'المزايا', navPrivacy: 'الخصوصية', navDownload: 'التحميل', navSupport: 'الدعم', navAdhkar: 'الأذكار والأدعية', navBlog: 'المقالات',
     nameA: 'أذكار', nameB: 'نور',
     videoLabel: 'فيديو تعريفي بأذكار نور', play: 'تشغيل الفيديو', pause: 'إيقاف الفيديو', unmute: 'تشغيل الصوت', mute: 'كتم الصوت',
     tagline: 'التطبيق الشامل لأذكار وأدعية أهل السنة',
@@ -322,7 +324,7 @@ const T = {
   ckb: {
     skip: 'بازدان بۆ ناوەڕۆک', navLabel: 'مێنووی سەرەکی', footLabel: 'بەستەرەکان', factsLabel: 'تایبەتمەندییەکان',
     langLabel: 'زمان', themeLabel: 'گۆڕینی دۆخی ڕووناک و تاریک',
-    name: 'ئەزکاری نوور', navFeatures: 'تایبەتمەندییەکان', navPrivacy: 'نهێنیپارێزی', navDownload: 'دابەزاندن', navSupport: 'پشتگیری',
+    name: 'ئەزکاری نوور', navFeatures: 'تایبەتمەندییەکان', navPrivacy: 'نهێنیپارێزی', navDownload: 'دابەزاندن', navSupport: 'پشتگیری', navAdhkar: 'ئەزکار و دوعا', navBlog: 'وتارەکان',
     nameA: 'ئەزکاری', nameB: 'نوور',
     videoLabel: 'ڤیدیۆی ناساندنی ئەزکاری نوور', play: 'پەخشکردنی ڤیدیۆ', pause: 'ڕاگرتنی ڤیدیۆ', unmute: 'کردنەوەی دەنگ', mute: 'بێدەنگکردن',
     tagline: 'بەرنامەی گشتگیری ئەزکار و دوعاکانی ئەهلی سوننە',

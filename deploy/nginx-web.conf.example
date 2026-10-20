@@ -1,6 +1,7 @@
-# Example nginx server blocks for the website (Vue SPA in "Nour Adhkar/dist").
-# Fixes Search Console "Soft 404" / "Not found (404)" noise: unknown paths must
-# return a real 404 status instead of 200 with the landing page.
+# Example nginx server blocks for the website ("Nour Adhkar/dist").
+# dist/ contains the Vue SPA (home, privacy, admin) plus static, crawlable pages generated at build
+# time by scripts/generate-content-pages.mjs: /adhkar/*, /app, /about, /blog/*, sitemap.xml.
+# Unknown paths must return a real 404 instead of 200 with the landing page.
 # Adjust root, ssl and the API proxy to match the server; keep the existing API config.
 
 # www -> apex (one canonical host)
@@ -18,18 +19,18 @@ server {
     root /path/to/nour-adhkar/Nour\ Adhkar/dist;
     index index.html;
 
-    # Static files and the real SPA routes serve the app shell with 200.
+    # SPA routes serve the app shell with 200.
     location = / { try_files /index.html =404; }
     location ~ ^/(privacy|login|forgot-password|reset-password)/?$ { try_files /index.html =404; }
     location ^~ /admin { try_files $uri /index.html; }
 
-    # Everything else: real file, or a genuine 404 that still renders the SPA's
-    # "not found" page (status stays 404, noindex is set by the app).
+    # Retired pre-2026 URLs reported by Search Console: gone. (/blog is live again, so it is NOT here.)
+    location ~ ^/collections(/|$) { return 410; }
+
+    # Everything else: a real file, a static page (/adhkar/sobhgahi -> /adhkar/sobhgahi/index.html),
+    # or a genuine 404 that still renders the SPA's "not found" page (status stays 404, noindex set by the app).
     location / {
-        try_files $uri =404;
+        try_files $uri $uri/index.html =404;
     }
     error_page 404 /index.html;
-
-    # Retired URLs reported by Search Console: tell Google they are gone.
-    location ~ ^/(blog|collections)(/|$) { return 410; }
 }
