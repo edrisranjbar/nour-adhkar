@@ -127,7 +127,7 @@ const CSS = `
 :root{--bg:#f7faf3;--fg:#1d2a1f;--mut:#58665a;--pri:#2f6b3a;--card:#fff;--line:#dfe8da}
 @media (prefers-color-scheme:dark){:root{--bg:#141c16;--fg:#e8efe6;--mut:#9fb0a2;--pri:#7cc58a;--card:#1c261e;--line:#2b392e}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.9 "Vazirmatn FD",Vazirmatn,Tahoma,system-ui,sans-serif}
-a{color:var(--pri)}.wrap{max-width:46rem;margin:0 auto;padding:0 1rem}
+a{color:var(--pri);text-decoration:none}a:hover{opacity:.8}a:focus-visible{outline:2px solid var(--pri);outline-offset:2px;border-radius:4px}.wrap{max-width:46rem;margin:0 auto;padding:0 1rem}
 header.top{border-bottom:1px solid var(--line);background:var(--card)}
 header.top .wrap{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:.6rem 1rem}
 .brand{display:flex;align-items:center;gap:.5rem;font-weight:700;text-decoration:none;color:var(--fg)}
