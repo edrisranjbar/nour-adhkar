@@ -120,9 +120,13 @@ function formatArticle(content) {
 // ---------- layout ----------
 
 const CSS = `
+@font-face{font-family:"Vazirmatn FD";src:url(/fonts/vazir/Vazirmatn-FD-Regular.woff2) format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Vazirmatn FD";src:url(/fonts/vazir/Vazirmatn-FD-Medium.woff2) format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Vazirmatn FD";src:url(/fonts/vazir/Vazirmatn-FD-Bold.woff2) format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Othman Taha";src:url(/fonts/othman-taha.ttf) format("truetype");font-weight:400 700;font-style:normal;font-display:swap}
 :root{--bg:#f7faf3;--fg:#1d2a1f;--mut:#58665a;--pri:#2f6b3a;--card:#fff;--line:#dfe8da}
 @media (prefers-color-scheme:dark){:root{--bg:#141c16;--fg:#e8efe6;--mut:#9fb0a2;--pri:#7cc58a;--card:#1c261e;--line:#2b392e}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.9 Vazirmatn,Vazir,Tahoma,system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.9 "Vazirmatn FD",Vazirmatn,Tahoma,system-ui,sans-serif}
 a{color:var(--pri)}.wrap{max-width:46rem;margin:0 auto;padding:0 1rem}
 header.top{border-bottom:1px solid var(--line);background:var(--card)}
 header.top .wrap{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:.6rem 1rem}
@@ -132,7 +136,7 @@ nav.main a{text-decoration:none;color:var(--mut)}nav.main a:hover{color:var(--pr
 main{padding:1.5rem 0 3rem}h1{font-size:1.7rem;line-height:1.5;margin:.3rem 0 .6rem}h2{font-size:1.25rem;margin:1.8rem 0 .5rem}
 .crumbs{font-size:.85rem;color:var(--mut)}.crumbs a{color:var(--mut)}.lead{color:var(--mut)}
 .item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem;margin:.9rem 0}
-.item h3{margin:0 0 .3rem;font-size:1.05rem}.ar{font:1.55rem/2.3 "Amiri","Scheherazade New","Traditional Arabic",serif;margin:.4rem 0}
+.item h3{margin:0 0 .3rem;font-size:1.05rem}.ar{font:1.55rem/2.3 "Othman Taha","Amiri","Scheherazade New","Traditional Arabic",serif;margin:.4rem 0}
 .item p{margin:.3rem 0}.badge{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:0 .7rem;font-size:.85rem;color:var(--mut)}
 blockquote.ar{border-inline-start:3px solid var(--pri);padding:.2rem 1rem;margin:1rem 0;background:var(--card);border-radius:8px}
 .cta{background:var(--pri);color:#fff;border-radius:16px;padding:1.2rem;margin:2rem 0;text-align:center}
@@ -160,6 +164,7 @@ function layout({ title, description, path: urlPath, body, schema = [], ogType =
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
 <meta name="theme-color" content="#2f6b3a">
+<link rel="preload" href="/fonts/vazir/Vazirmatn-FD-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <meta property="og:type" content="${ogType}">
 <meta property="og:site_name" content="اذکار نور">
 <meta property="og:locale" content="fa_IR">

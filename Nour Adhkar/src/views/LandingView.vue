@@ -10,6 +10,8 @@
         </a>
         <ul class="links">
           <li><a href="#features">{{ t.navFeatures }}</a></li>
+          <li><a href="/adhkar">{{ t.navAdhkar }}</a></li>
+          <li><a href="/blog">{{ t.navBlog }}</a></li>
           <li><a href="#privacy">{{ t.navPrivacy }}</a></li>
           <li><a href="#support">{{ t.navSupport }}</a></li>
           <li><a href="#download">{{ t.navDownload }}</a></li>
