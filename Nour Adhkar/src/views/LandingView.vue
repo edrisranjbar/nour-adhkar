@@ -10,8 +10,8 @@
         </a>
         <ul class="links">
           <li><a href="#features">{{ t.navFeatures }}</a></li>
-          <li><a href="/adhkar">{{ t.navAdhkar }}</a></li>
-          <li><a href="/blog">{{ t.navBlog }}</a></li>
+          <li><a :href="link('/adhkar')">{{ t.navAdhkar }}</a></li>
+          <li><a :href="link('/blog')">{{ t.navBlog }}</a></li>
           <li><a href="#privacy">{{ t.navPrivacy }}</a></li>
           <li><a href="#support">{{ t.navSupport }}</a></li>
           <li><a href="#download">{{ t.navDownload }}</a></li>
@@ -217,8 +217,8 @@
     <footer class="wrap foot">
       <span>{{ t.footer }}</span>
       <nav :aria-label="t.footLabel">
-        <a href="/adhkar">{{ t.navAdhkar }}</a>
-        <a href="/blog">{{ t.navBlog }}</a>
+        <a :href="link('/adhkar')">{{ t.navAdhkar }}</a>
+        <a :href="link('/blog')">{{ t.navBlog }}</a>
         <router-link to="/privacy">{{ t.navPrivacy }}</router-link>
         <a :href="donateUrl" target="_blank" rel="noopener noreferrer" @click="track('donate_click', 'foot')">{{ t.support }}</a>
         <a href="https://github.com/edrisranjbar/Nour-Adhkar-App" target="_blank" rel="noopener noreferrer" @click="track('github_click')">GitHub</a>
@@ -385,10 +385,9 @@ function initialLang(nav) {
 export default {
   name: 'LandingView',
   data() {
-    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
     return {
-      lang: initialLang(nav),
-      theme: store.get('nour-theme') || '',
+      lang: 'fa',
+      theme: '',
       motion: true,
       shots,
       videoSrc: null,
@@ -408,9 +407,11 @@ export default {
     t() { return T[this.lang] }
   },
   mounted() {
+    this.lang = initialLang(navigator.language || '')
+    this.theme = store.get('nour-theme') || ''
     this.motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    this.observe()
-    this.watchSections()
+    // The content block is keyed by language: observe it after a language change re-renders it.
+    this.$nextTick(() => { this.observe(); this.watchSections() })
   },
   beforeUnmount() {
     if (this.vio) this.vio.disconnect()
@@ -418,6 +419,10 @@ export default {
     if (this.io) this.io.disconnect()
   },
   methods: {
+    /** A static page in the current language: Persian at the root, others under /ar and /ckb. */
+    link(path) {
+      return this.lang === 'fa' ? path : `/${this.lang}${path}`
+    },
     num(n) {
       const d = this.lang === 'ar' ? '٠١٢٣٤٥٦٧٨٩' : '۰۱۲۳۴۵۶۷۸۹'
       return String(n).replace(/\d/g, (c) => d[c])

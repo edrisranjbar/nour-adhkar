@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // Generates the crawlable static pages (adhkar, app, about, blog) into dist/ after `vite build`,
+// in Persian (root), Arabic (/ar) and Kurdish (/ckb); page text is in content-i18n.mjs,
 // plus the full sitemap. Content comes from the live API; if it is unreachable the committed
 // snapshot in content-snapshot/ is used, so a network problem can never break a deploy.
 //
@@ -10,6 +11,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { LANGS, LOCALE, T, COLLECTION_TEXT, num, fmtDate, isPersianSpelling } from './content-i18n.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -133,6 +135,7 @@ header.top .wrap{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding
 .brand{display:flex;align-items:center;gap:.5rem;font-weight:700;text-decoration:none;color:var(--fg)}
 .brand img{border-radius:8px}nav.main{display:flex;gap:1rem;flex-wrap:wrap;margin-inline-start:auto}
 nav.main a{text-decoration:none;color:var(--mut)}nav.main a:hover{color:var(--pri)}
+.langs{display:flex;gap:2px;border:1px solid var(--line);border-radius:999px;padding:2px}.langs a{color:var(--mut);padding:0 .6rem;border-radius:999px;font-size:.9rem;line-height:1.9}.langs a[aria-current]{background:var(--pri);color:var(--card)}
 main{padding:1.5rem 0 3rem}h1{font-size:1.7rem;line-height:1.5;margin:.3rem 0 .6rem}h2{font-size:1.25rem;margin:1.8rem 0 .5rem}
 .crumbs{font-size:.85rem;color:var(--mut)}.crumbs a{color:var(--mut)}.lead{color:var(--mut)}
 .item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem;margin:.9rem 0}
@@ -149,11 +152,31 @@ footer.foot .wrap{display:flex;gap:1rem;flex-wrap:wrap}footer.foot a{color:var(-
 .meta{color:var(--mut);font-size:.88rem}ul{padding-inline-start:1.3rem}
 `
 
-function layout({ title, description, path: urlPath, body, schema = [], ogType = 'website', noindex = false }) {
+// Path of a page in a language: Persian at the root, Arabic under /ar, Kurdish under /ckb.
+// The home page is the landing page for every language (it switches language itself).
+const lp = (lang, p) => (lang === 'fa' || p === '/' ? p : `/${lang}${p}`)
+const allLangs = p => Object.fromEntries(LANGS.map(l => [l, lp(l, p)]))
+
+function layout({ lang = 'fa', title, description, path: urlPath, alts = { fa: urlPath }, missing = '/adhkar', body, schema = [], ogType = 'website', noindex = false }) {
+  const t = T[lang]
   const url = SITE + urlPath
   const ld = schema.map(s => `<script type="application/ld+json">${JSON.stringify(s)}</script>`).join('\n')
+  const altLinks = Object.keys(alts).length > 1
+    ? Object.entries(alts).map(([l, p]) => `<link rel="alternate" hreflang="${l}" href="${SITE + p}">`).join('\n') +
+      (alts.fa ? `\n<link rel="alternate" hreflang="x-default" href="${SITE + alts.fa}">` : '')
+    : ''
+  const names = { fa: 'فا', ar: 'ع', ckb: 'کو' }
+  const titles = { fa: 'فارسی', ar: 'العربية', ckb: 'کوردی' }
+  // Languages without this page link to the nearest page they do have (`missing`).
+  const fallback = { fa: '/', ar: lp('ar', missing), ckb: lp('ckb', missing) }
+  const switcher = LANGS.map(l => {
+    const href = alts[l] || fallback[l]
+    return l === lang
+      ? `<a href="${href}" lang="${l}" title="${titles[l]}" aria-current="true" data-lang="${l}">${names[l]}</a>`
+      : `<a href="${href}" lang="${l}" hreflang="${l}" title="${titles[l]}" data-lang="${l}">${names[l]}</a>`
+  }).join('')
   return `<!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="${lang}" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -161,13 +184,14 @@ function layout({ title, description, path: urlPath, body, schema = [], ogType =
 <meta name="description" content="${esc(description)}">
 <meta name="robots" content="${noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'}">
 <link rel="canonical" href="${url}">
+${altLinks}
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
 <meta name="theme-color" content="#2f6b3a">
 <link rel="preload" href="/fonts/vazir/Vazirmatn-FD-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <meta property="og:type" content="${ogType}">
-<meta property="og:site_name" content="اذکار نور">
-<meta property="og:locale" content="fa_IR">
+<meta property="og:site_name" content="${esc(t.siteName)}">
+<meta property="og:locale" content="${LOCALE[lang]}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${url}">
@@ -183,15 +207,17 @@ ${ld}
 </head>
 <body>
 <header class="top"><div class="wrap">
-<a class="brand" href="/"><img src="/icons/logo.png" alt="" width="32" height="32"><span>اذکار نور</span></a>
-<nav class="main" aria-label="منوی اصلی"><a href="/adhkar">اذکار و ادعیه</a><a href="/blog">مقالات</a><a href="/app">اپلیکیشن</a></nav>
+<a class="brand" href="/" data-lang="${lang}"><img src="/icons/logo.png" alt="" width="32" height="32"><span>${esc(t.siteName)}</span></a>
+<nav class="main" aria-label="${esc(t.mainNav)}"><a href="${lp(lang, '/adhkar')}">${esc(t.adhkar)}</a><a href="${lp(lang, '/blog')}">${esc(t.blog)}</a><a href="${lp(lang, '/app')}">${esc(t.app)}</a></nav>
+<nav class="langs" aria-label="${esc(t.langLabel)}">${switcher}</nav>
 </div></header>
 <main><div class="wrap">
 ${body}
 </div></main>
 <footer class="foot"><div class="wrap">
-<span>© اذکار نور</span><a href="/about">دربارهٔ ما</a><a href="/privacy">حریم خصوصی</a><a href="${GITHUB}" rel="noopener">GitHub</a>
+<span>© ${esc(t.siteName)}</span><a href="${lp(lang, '/about')}">${esc(t.about)}</a><a href="/privacy">${esc(t.privacy)}</a><a href="${GITHUB}" rel="noopener">GitHub</a>
 </div></footer>
+<script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[data-lang]");if(a)try{localStorage.setItem("nour-lang",a.getAttribute("data-lang"))}catch(_){}})</script>
 </body>
 </html>
 `
@@ -202,13 +228,14 @@ const crumbs = items => ({
   '@type': 'BreadcrumbList',
   itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it[0], item: SITE + it[1] }))
 })
-const crumbsHtml = items =>
-  `<nav class="crumbs" aria-label="مسیر">${items.map((it, i) => (i < items.length - 1 ? `<a href="${it[1]}">${esc(it[0])}</a>` : esc(it[0]))).join(' › ')}</nav>`
+const crumbsHtml = (lang, items) =>
+  `<nav class="crumbs" aria-label="${esc(T[lang].crumbsLabel)}">${items.map((it, i) => (i < items.length - 1 ? `<a href="${it[1]}">${esc(it[0])}</a>` : esc(it[0]))).join(' › ')}</nav>`
 
-const ctaBlock = (text = 'همین اذکار را با پخش صوتی، شمارنده و یادآور در گوشی خود داشته باشید.') =>
-  `<div class="cta"><p>${esc(text)}</p><a class="btn" href="${BAZAAR}" rel="noopener">دریافت از کافه‌بازار</a><a class="btn" href="${MYKET}" rel="noopener">دریافت از مایکت</a></div>`
+const ctaBlock = (lang, text = T[lang].cta) =>
+  `<div class="cta"><p>${esc(text)}</p><a class="btn" href="${BAZAAR}" rel="noopener">${esc(T[lang].bazaar)}</a><a class="btn" href="${MYKET}" rel="noopener">${esc(T[lang].myket)}</a></div>`
 
-const publisher = { '@type': 'Organization', name: 'اذکار نور', url: SITE + '/', logo: { '@type': 'ImageObject', url: SITE + '/icons/android-chrome-192x192.png' } }
+const publisher = lang => ({ '@type': 'Organization', name: T[lang].siteName, url: SITE + '/', logo: { '@type': 'ImageObject', url: SITE + '/icons/android-chrome-192x192.png' } })
+const website = lang => ({ '@type': 'WebSite', name: T[lang].siteName, url: SITE + '/' })
 
 // ---------- page definitions ----------
 
@@ -251,6 +278,13 @@ const COLLECTION_PAGES = [
   }
 ]
 
+// A collection's text in a language: the Persian page copy above, or COLLECTION_TEXT.
+function collectionText(def, lang) {
+  if (lang === 'fa') return def
+  const x = COLLECTION_TEXT[def.slug][lang]
+  return { ...def, name: x.name, h1: x.h1, intro: x.intro, title: `${x.name} | ${T[lang].siteName}` }
+}
+
 const written = [] // { path, lastmod, priority, changefreq }
 
 function writePage(urlPath, html, meta = {}) {
@@ -260,47 +294,57 @@ function writePage(urlPath, html, meta = {}) {
   written.push({ path: urlPath, lastmod: meta.lastmod || isoDay(), priority: meta.priority || '0.6', changefreq: meta.changefreq || 'monthly' })
 }
 
-function adhkarItems(list) {
+// Persian pages show each dhikr's title and Persian meaning. Arabic and Kurdish pages show the
+// Arabic text only (as the app does): there are no sourced meanings in those languages, and a
+// title in Persian spelling is left out.
+function adhkarItems(list, lang = 'fa') {
+  const t = T[lang]
   return list.map((a, i) => {
-    const count = Number(a.count) > 1 ? `<span class="badge">تکرار: ${toFa(a.count)} بار</span>` : ''
+    const count = Number(a.count) > 1 ? `<span class="badge">${esc(t.repeat(a.count))}</span>` : ''
+    const title = a.title && (lang === 'fa' || !isPersianSpelling(a.title)) ? `<h3>${esc(a.title)}</h3>` : ''
     return `<article class="item" id="dhikr-${i + 1}">
-${a.title ? `<h3>${esc(a.title)}</h3>` : ''}
-${a.prefix ? `<p class="meta">${esc(a.prefix)}</p>` : ''}
+${title}
+${a.prefix ? `<p class="meta" lang="ar">${esc(a.prefix)}</p>` : ''}
 <p class="ar" lang="ar" dir="rtl">${esc(a.arabic_text)}</p>
-${a.translation ? `<p>${esc(a.translation)}</p>` : ''}
+${lang === 'fa' && a.translation ? `<p>${esc(a.translation)}</p>` : ''}
 ${count}
 </article>`
   }).join('\n')
 }
 
-function buildCollectionPage(def, col, siblings) {
+function buildCollectionPage(base, col, siblings, lang) {
+  const t = T[lang]
+  const def = collectionText(base, lang)
+  const p = lp(lang, def.path)
   const list = col.adhkar || []
   const updated = maxDate(list) || col.updated_at
-  const desc = clip(`متن کامل ${def.name} اهل سنت به عربی با ترجمهٔ فارسی و تعداد تکرار هر ذکر (${toFa(list.length)} ذکر)؛ نسخهٔ صوتی، شمارنده و یادآور رایگان و آفلاین در اپلیکیشن اذکار نور.`, 155)
-  const trail = [['خانه', '/'], ['اذکار و ادعیه', '/adhkar'], [def.name, def.path]]
-  const others = siblings.filter(s => s.path !== def.path)
-  const body = `${crumbsHtml(trail)}
+  const desc = clip(lang === 'fa' ? t.collectionDesc(def.name, toFa(list.length)) : t.collectionDesc(def.name, num(lang, list.length)), 155)
+  const trail = [[t.home, '/'], [t.adhkar, lp(lang, '/adhkar')], [def.name, p]]
+  const others = siblings.filter(s => s.path !== base.path).map(s => collectionText(s, lang))
+  const body = `${crumbsHtml(lang, trail)}
 <h1>${esc(def.h1)}</h1>
 <p class="lead">${esc(def.intro)}</p>
-<p class="meta">${toFa(list.length)} ذکر · آخرین به‌روزرسانی: ${esc(faDate(updated))}</p>
-${adhkarItems(list)}
-${ctaBlock()}
-<h2>مجموعه‌های دیگر</h2>
-<div class="cards">${others.map(o => `<a href="${o.path}"><strong>${esc(o.name)}</strong><span>مشاهدهٔ متن و ترجمه</span></a>`).join('')}<a href="/blog"><strong>مقالات</strong><span>فضیلت و شیوهٔ خواندن اذکار</span></a></div>`
+<p class="meta">${esc(t.dhikrCount(list.length))} · ${esc(t.updated(fmtDate(lang, updated)))}</p>
+${adhkarItems(list, lang)}
+${ctaBlock(lang)}
+<h2>${esc(t.otherCollections)}</h2>
+<div class="cards">${others.map(o => `<a href="${lp(lang, o.path)}"><strong>${esc(o.name)}</strong><span>${esc(t.viewText)}</span></a>`).join('')}<a href="${lp(lang, '/blog')}"><strong>${esc(t.blog)}</strong><span>${esc(t.blogCardSub)}</span></a></div>`
   const schema = [
     crumbs(trail),
-    { '@context': 'https://schema.org', '@type': 'WebPage', name: def.title.replace(/ \| اذکار نور$/, ''), url: SITE + def.path, inLanguage: 'fa', description: desc, dateModified: updated, isPartOf: { '@type': 'WebSite', name: 'اذکار نور', url: SITE + '/' }, publisher }
+    { '@context': 'https://schema.org', '@type': 'WebPage', name: def.title.replace(/ \| [^|]+$/, ''), url: SITE + p, inLanguage: lang, description: desc, dateModified: updated, isPartOf: website(lang), publisher: publisher(lang) }
   ]
-  writePage(def.path, layout({ title: def.title, description: desc, path: def.path, body, schema }), { lastmod: isoDay(updated), priority: def.slug === 'morning' || def.slug === 'night' ? '0.9' : '0.7' })
+  writePage(p, layout({ lang, title: def.title, description: desc, path: p, alts: allLangs(base.path), body, schema }), { lastmod: isoDay(updated), priority: base.slug === 'morning' || base.slug === 'night' ? (lang === 'fa' ? '0.9' : '0.7') : (lang === 'fa' ? '0.7' : '0.5') })
 }
 
+// Persian-only SEO page (Persian meanings are its point).
 function buildOverviewPage(morning, night) {
+  const lang = 'fa'
   const p = '/adhkar/sobh-o-sham-ahl-sunnat'
   const title = 'اذکار صبح و شام اهل سنت (صوتی) | اذکار نور'
   const desc = 'اذکار صبح و شام اهل سنت با متن عربی و ترجمهٔ فارسی؛ پخش صوتی با صدای مشاری راشد العفاسی، شمارندهٔ تکرار و یادآور در اپلیکیشن اذکار نور.'
   const trail = [['خانه', '/'], ['اذکار و ادعیه', '/adhkar'], ['اذکار صبح و شام اهل سنت', p]]
   const preview = (list, n) => adhkarItems(list.filter(a => a.arabic_text).slice(0, n))
-  const body = `${crumbsHtml(trail)}
+  const body = `${crumbsHtml(lang, trail)}
 <h1>اذکار صبح و شام اهل سنت؛ متن، ترجمه و نسخهٔ صوتی</h1>
 <p class="lead">اذکار نور اپلیکیشن جامع اذکار و ادعیهٔ اهل سنت است. اذکار صبح و شام در آن با متن عربی، ترجمهٔ فارسی، شمارندهٔ تکرار، یادآور و پخش صوتی با صدای مشاری راشد العفاسی ارائه می‌شود و بدون اینترنت و بدون تبلیغ کار می‌کند.</p>
 <h2>اذکار صبحگاهی</h2>
@@ -313,87 +357,74 @@ ${preview(night.adhkar || [], 2)}
 <p><a href="/adhkar/shamgahi">مشاهدهٔ همهٔ اذکار شامگاهی ←</a></p>
 <h2>در اپلیکیشن چه می‌بینید؟</h2>
 <ul><li>متن عربی خوانا با ترجمهٔ فارسی و شمارندهٔ تکرار</li><li>پخش صوتی اذکار با صدای مشاری راشد العفاسی</li><li>یادآور صبح و شام با انتخاب روزهای هفته</li><li>اوقات شرعی، قبله‌نما و ذکرشمار</li><li>رابط راست‌به‌چپ به فارسی، عربی و کوردی</li></ul>
-${ctaBlock('اذکار نور رایگان است و برای اندروید عرضه می‌شود.')}`
-  const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'WebPage', name: 'اذکار صبح و شام اهل سنت', url: SITE + p, inLanguage: 'fa', description: desc, isPartOf: { '@type': 'WebSite', name: 'اذکار نور', url: SITE + '/' }, publisher }]
-  writePage(p, layout({ title, description: desc, path: p, body, schema }), { lastmod: isoDay(maxDate([morning, night])), priority: '0.9' })
+${ctaBlock(lang, 'اذکار نور رایگان است و برای اندروید عرضه می‌شود.')}`
+  const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'WebPage', name: 'اذکار صبح و شام اهل سنت', url: SITE + p, inLanguage: 'fa', description: desc, isPartOf: website(lang), publisher: publisher(lang) }]
+  writePage(p, layout({ lang, title, description: desc, path: p, body, schema }), { lastmod: isoDay(maxDate([morning, night])), priority: '0.9' })
 }
 
-function buildHub(defs, collections) {
-  const p = '/adhkar'
-  const title = 'اذکار و ادعیه اهل سنت با متن و ترجمه فارسی | اذکار نور'
-  const desc = 'مجموعهٔ اذکار صبحگاهی و شامگاهی، اذکار قبل از خواب، دعای استخاره و اذکار رمضان با متن عربی و ترجمهٔ فارسی؛ نسخهٔ صوتی در اپلیکیشن اذکار نور.'
-  const trail = [['خانه', '/'], ['اذکار و ادعیه', p]]
+function buildHub(defs, collections, lang) {
+  const t = T[lang]
+  const p = lp(lang, '/adhkar')
+  const trail = [[t.home, '/'], [t.adhkar, p]]
   const count = d => { const c = collections.find(x => x.slug === d.slug); return c ? (c.adhkar || []).length : 0 }
-  const body = `${crumbsHtml(trail)}
-<h1>اذکار و ادعیه اهل سنت</h1>
-<p class="lead">متن عربی، ترجمهٔ فارسی و تعداد تکرار اذکار و دعاهای روزانه. هر مجموعه صفحهٔ جداگانه دارد.</p>
+  const overview = t.overviewCard ? `\n<a href="/adhkar/sobh-o-sham-ahl-sunnat"><strong>${esc(t.overviewCard[0])}</strong><span>${esc(t.overviewCard[1])}</span></a>` : ''
+  const body = `${crumbsHtml(lang, trail)}
+<h1>${esc(t.hubH1)}</h1>
+<p class="lead">${esc(t.hubLead)}</p>
 <div class="cards">
-${defs.map(d => `<a href="${d.path}"><strong>${esc(d.name)}</strong><span>${toFa(count(d))} ذکر</span></a>`).join('\n')}
-<a href="/adhkar/sobh-o-sham-ahl-sunnat"><strong>اذکار صبح و شام اهل سنت</strong><span>مرور سریع و نسخهٔ صوتی</span></a>
+${defs.map(d => collectionText(d, lang)).map(d => `<a href="${lp(lang, d.path)}"><strong>${esc(d.name)}</strong><span>${esc(t.dhikrCount(count(d)))}</span></a>`).join('\n')}${overview}
 </div>
-<h2>مقالات</h2>
-<p>فضیلت ذکر، شیوهٔ خواندن و توضیح دعاهای مهم در <a href="/blog">بخش مقالات</a> آمده است.</p>
-${ctaBlock()}`
-  const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'اذکار و ادعیه', url: SITE + p, inLanguage: 'fa', description: desc, isPartOf: { '@type': 'WebSite', name: 'اذکار نور', url: SITE + '/' } }]
-  writePage(p, layout({ title, description: desc, path: p, body, schema }), { lastmod: isoDay(maxDate(collections)), priority: '0.8' })
+<h2>${esc(t.blog)}</h2>
+<p>${t.hubBlog.replace('{blog}', lp(lang, '/blog'))}</p>
+${ctaBlock(lang)}`
+  const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'CollectionPage', name: t.adhkar, url: SITE + p, inLanguage: lang, description: t.hubDesc, isPartOf: website(lang) }]
+  writePage(p, layout({ lang, title: t.hubTitle, description: t.hubDesc, path: p, alts: allLangs('/adhkar'), body, schema }), { lastmod: isoDay(maxDate(collections)), priority: lang === 'fa' ? '0.8' : '0.6' })
 }
 
-function buildAppPage() {
-  const p = '/app'
-  const title = 'اپلیکیشن اهل سنت؛ دانلود اذکار نور برای اندروید'
-  const desc = 'اذکار نور؛ اپلیکیشن رایگان اذکار و ادعیه اهل سنت برای اندروید: اذکار صبحگاهی و شامگاهی صوتی، اوقات شرعی، قبله‌نما، ذکرشمار؛ آفلاین و بدون تبلیغ.'
-  const trail = [['خانه', '/'], ['اپلیکیشن', p]]
-  const body = `${crumbsHtml(trail)}
-<h1>اذکار نور؛ اپلیکیشن جامع اذکار و ادعیه اهل سنت</h1>
-<p class="lead">اذکار صبح و شام، ادعیهٔ قرآنی و دعاهای سنت، اوقات شرعی و ذکرشمار؛ آفلاین و بدون تبلیغ، برای اندروید.</p>
-${ctaBlock('اذکار نور رایگان است. از فروشگاه دلخواه خود دریافت کنید.')}
-<h2>امکانات</h2>
+function buildAppPage(lang) {
+  const t = T[lang]
+  const p = lp(lang, '/app')
+  const trail = [[t.home, '/'], [t.app, p]]
+  const morning = collectionText(COLLECTION_PAGES[0], lang)
+  const night = collectionText(COLLECTION_PAGES[1], lang)
+  const body = `${crumbsHtml(lang, trail)}
+<h1>${esc(t.appH1)}</h1>
+<p class="lead">${esc(t.appLead)}</p>
+${ctaBlock(lang, t.appCta)}
+<h2>${esc(t.features)}</h2>
 <ul>
-<li><strong>اذکار صبح و شام:</strong> متن عربی خوانا، ترجمهٔ فارسی و شمارندهٔ تکرار؛ پخش صوتی با صدای مشاری راشد العفاسی؛ افزودن به علاقه‌مندی‌ها و اشتراک‌گذاری.</li>
-<li><strong>اوقات شرعی:</strong> نماز بعدی و زمان باقی‌مانده، شش وقت روز، محاسبهٔ آفلاین بر اساس موقعیت شما و پخش اذان با انتخاب مؤذن.</li>
-<li><strong>چک‌لیست روزانه:</strong> نمازهای پنج‌گانه و اعمال مستحب، نوار پیشرفت و تقویم استمرار عبادت.</li>
-<li><strong>ذکرشمار:</strong> ذکرهای آماده و دلخواه، شمارش لمسی و صوتی و تاریخچه.</li>
-<li><strong>قرآن کریم، قبله‌نما و یادآورها</strong> و مقالات کوتاه.</li>
-<li><strong>سه زبان:</strong> رابط کامل راست‌به‌چپ به فارسی، عربی و کوردی؛ حالت روشن و تاریک.</li>
+${t.appFeatures.map(([k, v]) => `<li><strong>${esc(k)}</strong> ${esc(v)}</li>`).join('\n')}
 </ul>
-<h2>حریم خصوصی</h2>
-<p>پیشرفت و تنظیمات روی گوشی شما می‌ماند، برنامه تبلیغات و ردیاب ندارد و موقعیت فقط با اجازهٔ صریح شما استفاده می‌شود. جزئیات در <a href="/privacy">سیاست حریم خصوصی</a> آمده است.</p>
-<h2>بخش‌های وب‌سایت</h2>
-<div class="cards"><a href="/adhkar/sobhgahi"><strong>اذکار صبحگاهی</strong><span>متن و ترجمه</span></a><a href="/adhkar/shamgahi"><strong>اذکار شامگاهی</strong><span>متن و ترجمه</span></a><a href="/blog"><strong>مقالات</strong><span>فضیلت و شیوهٔ خواندن</span></a></div>`
+<h2>${esc(t.privacy)}</h2>
+<p>${t.appPrivacy}</p>
+<h2>${esc(t.siteSections)}</h2>
+<div class="cards"><a href="${lp(lang, morning.path)}"><strong>${esc(morning.name)}</strong><span>${esc(t.textAndMeaning)}</span></a><a href="${lp(lang, night.path)}"><strong>${esc(night.name)}</strong><span>${esc(t.textAndMeaning)}</span></a><a href="${lp(lang, '/blog')}"><strong>${esc(t.blog)}</strong><span>${esc(t.readingVirtue)}</span></a></div>`
   const schema = [
     crumbs(trail),
     {
-      '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'اذکار نور', alternateName: 'Nour Adhkar', url: SITE + p, image: OG_IMAGE,
-      description: desc, applicationCategory: 'LifestyleApplication', operatingSystem: 'Android', inLanguage: ['fa', 'ar', 'ckb'], downloadUrl: BAZAAR,
+      '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: t.siteName, alternateName: 'Nour Adhkar', url: SITE + p, image: OG_IMAGE,
+      description: t.appDesc, applicationCategory: 'LifestyleApplication', operatingSystem: 'Android', inLanguage: ['fa', 'ar', 'ckb'], downloadUrl: BAZAAR,
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'IRR' }, author: { '@type': 'Person', name: 'ادریس رنجبر' }
     }
   ]
-  writePage(p, layout({ title, description: desc, path: p, body, schema }), { priority: '0.9' })
+  writePage(p, layout({ lang, title: t.appTitle, description: t.appDesc, path: p, alts: allLangs('/app'), body, schema }), { priority: lang === 'fa' ? '0.9' : '0.7' })
 }
 
-function buildAboutPage() {
-  const p = '/about'
-  const title = 'دربارهٔ اذکار نور | سازنده و نحوهٔ تهیهٔ محتوا'
-  const desc = 'دربارهٔ اذکار نور، پروژهٔ متن‌باز و رایگان اذکار و ادعیهٔ اهل سنت: سازنده، نحوهٔ تهیه و به‌روزرسانی محتوا و راه گزارش خطا در متن و ترجمه.'
-  const trail = [['خانه', '/'], ['دربارهٔ ما', p]]
-  const body = `${crumbsHtml(trail)}
-<h1>دربارهٔ اذکار نور</h1>
-<p class="lead">اذکار نور یک پروژهٔ متن‌باز و غیرانتفاعی برای دسترسی آسان به اذکار و ادعیهٔ اهل سنت به زبان فارسی است.</p>
-<h2>سازنده</h2>
-<p>طراحی و توسعه: ادریس رنجبر. کد برنامه در <a href="${GITHUB}" rel="noopener">GitHub</a> در دسترس است.</p>
-<h2>محتوا چگونه تهیه و به‌روز می‌شود؟</h2>
-<p>متن عربی، ترجمهٔ فارسی و تعداد تکرار هر ذکر از یک پایگاه‌داده می‌آید که هم برنامهٔ اندروید و هم این وب‌سایت از آن می‌خوانند؛ بنابراین متن‌ها در هر دو یکسان است. تاریخ آخرین به‌روزرسانی در بالای هر صفحهٔ اذکار نوشته شده است.</p>
-<h2>گزارش خطا و پیشنهاد</h2>
-<p>اگر اشتباهی در متن، ترجمه یا تعداد تکرار دیدید، از بخش «ارسال بازخورد» در برنامه یا از طریق <a href="${GITHUB}/issues" rel="noopener">GitHub</a> گزارش دهید تا بررسی و اصلاح شود.</p>
-<h2>حریم خصوصی</h2>
-<p>برنامه تبلیغات و ابزار ردیابی ندارد. جزئیات در <a href="/privacy">سیاست حریم خصوصی</a>.</p>
-${ctaBlock()}`
-  const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'AboutPage', name: 'دربارهٔ اذکار نور', url: SITE + p, inLanguage: 'fa', description: desc, isPartOf: { '@type': 'WebSite', name: 'اذکار نور', url: SITE + '/' }, publisher }]
-  writePage(p, layout({ title, description: desc, path: p, body, schema }), { priority: '0.4', changefreq: 'yearly' })
+function buildAboutPage(lang) {
+  const t = T[lang]
+  const p = lp(lang, '/about')
+  const trail = [[t.home, '/'], [t.about, p]]
+  const body = `${crumbsHtml(lang, trail)}
+<h1>${esc(t.aboutH1)}</h1>
+<p class="lead">${esc(t.aboutLead)}</p>
+${t.aboutSections.map(([h, html]) => `<h2>${esc(h)}</h2>\n<p>${html.replace(/\{github\}/g, GITHUB)}</p>`).join('\n')}
+${ctaBlock(lang)}`
+  const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'AboutPage', name: t.aboutH1, url: SITE + p, inLanguage: lang, description: t.aboutDesc, isPartOf: website(lang), publisher: publisher(lang) }]
+  writePage(p, layout({ lang, title: t.aboutTitle, description: t.aboutDesc, path: p, alts: allLangs('/about'), body, schema }), { priority: '0.4', changefreq: 'yearly' })
 }
 
 // The privacy policy text lives in the Vue view; read it here so /privacy has real static HTML
-// (own title, canonical and content) without keeping a second copy of the policy.
+// (own title, canonical and content) without keeping a second copy of the policy. Persian only.
 function buildPrivacyPage() {
   const src = fs.readFileSync(path.join(ROOT, 'src/views/PrivacyView.vue'), 'utf8')
   const article = (src.match(/<article class="card">([\s\S]*?)<\/article>/) || [])[1]
@@ -404,53 +435,72 @@ function buildPrivacyPage() {
   const title = 'سیاست حریم خصوصی | اذکار نور'
   const desc = 'سیاست حریم خصوصی اذکار نور: چه اطلاعاتی، چرا و کجا پردازش می‌شود؛ تقریباً همه‌چیز روی گوشی شما می‌ماند و برنامه تبلیغات و ردیاب ندارد.'
   const trail = [['خانه', '/'], ['حریم خصوصی', p]]
-  const body = `${crumbsHtml(trail)}
+  const body = `${crumbsHtml('fa', trail)}
 <h1>سیاست حریم خصوصی</h1>
 <p class="meta">${updated}</p>
 ${content}`
-  const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'WebPage', name: 'سیاست حریم خصوصی اذکار نور', url: SITE + p, inLanguage: 'fa', description: desc, isPartOf: { '@type': 'WebSite', name: 'اذکار نور', url: SITE + '/' } }]
+  const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'WebPage', name: 'سیاست حریم خصوصی اذکار نور', url: SITE + p, inLanguage: 'fa', description: desc, isPartOf: website('fa') }]
   writePage(p, layout({ title, description: desc, path: p, body, schema }), { lastmod: '2026-09-28', priority: '0.3', changefreq: 'yearly' })
 }
 
-function buildBlog(posts) {
-  const sorted = [...posts].sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)))
-  const trailIdx = [['خانه', '/'], ['مقالات', '/blog']]
-  const idxTitle = 'مقالات اذکار نور | فضیلت و شیوهٔ خواندن اذکار و دعاها'
-  const idxDesc = 'مقالات کوتاه دربارهٔ فضیلت ذکر، شیوهٔ خواندن اذکار صبح و شام و توضیح دعاهای مهم اهل سنت، همراه با متن عربی، ترجمهٔ فارسی و منبع حدیث، از اذکار نور.'
-  const idxBody = `${crumbsHtml(trailIdx)}
-<h1>مقالات</h1>
-<p class="lead">نوشته‌های کوتاه دربارهٔ ذکر، دعا و شیوهٔ خواندن آن‌ها.</p>
-${sorted.length ? sorted.map(p => `<article class="item"><h3><a href="/blog/${esc(p.slug)}">${esc(p.title)}</a></h3><p>${esc(clip(p.excerpt || p.meta_description || '', 200))}</p><p class="meta">${esc(faDate(p.published_at))}</p></article>`).join('\n') : '<p>به‌زودی مقاله‌ها در این بخش منتشر می‌شود.</p>'}
-${ctaBlock()}`
-  writePage('/blog', layout({
-    title: idxTitle, description: idxDesc, path: '/blog', body: idxBody,
-    schema: [crumbs(trailIdx), { '@context': 'https://schema.org', '@type': 'Blog', name: 'مقالات اذکار نور', url: SITE + '/blog', inLanguage: 'fa', publisher }]
-  }), { lastmod: isoDay(maxDate(posts)), priority: '0.7', changefreq: 'weekly' })
+// Articles exist in Persian (API) and, for some, in Arabic (content-snapshot/posts-ar.json, the
+// same translations the app shows). A language gets an article page only if it has the text;
+// the blog index lists the rest as Persian articles.
+function postIn(post, lang) {
+  if (lang === 'fa') return post
+  const x = lang === 'ar' && POSTS_AR[post.slug]
+  return x ? { ...post, title: x.title, excerpt: x.excerpt, meta_title: null, meta_description: x.excerpt, content: x.content, user: null } : null
+}
 
-  for (const post of sorted) {
-    const p = `/blog/${post.slug}`
+function buildBlog(posts, lang) {
+  const t = T[lang]
+  const sorted = [...posts].sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)))
+  const own = sorted.map(p => postIn(p, lang)).filter(Boolean)
+  const persianOnly = lang === 'fa' ? [] : sorted.filter(p => !postIn(p, lang))
+  const idx = lp(lang, '/blog')
+  const trailIdx = [[t.home, '/'], [t.blog, idx]]
+  const card = (p, l) => `<article class="item"${l === 'fa' && lang !== 'fa' ? ' lang="fa"' : ''}><h3><a href="${lp(l, '/blog/' + p.slug)}">${esc(p.title)}</a></h3><p>${esc(clip(p.excerpt || p.meta_description || '', 200))}</p><p class="meta">${esc(fmtDate(l, p.published_at))}</p></article>`
+  const idxBody = `${crumbsHtml(lang, trailIdx)}
+<h1>${esc(t.blog)}</h1>
+<p class="lead">${esc(t.blogLead)}</p>
+${own.length ? own.map(p => card(p, lang)).join('\n') : persianOnly.length ? '' : `<p>${esc(t.blogEmpty)}</p>`}
+${persianOnly.length ? `<h2>${esc(t.blogOnlyFa)}</h2>\n${persianOnly.map(p => card(p, 'fa')).join('\n')}` : ''}
+${ctaBlock(lang)}`
+  writePage(idx, layout({
+    lang, title: t.blogTitle, description: t.blogDesc, path: idx, alts: allLangs('/blog'), body: idxBody,
+    schema: [crumbs(trailIdx), { '@context': 'https://schema.org', '@type': 'Blog', name: t.blogTitle.replace(/ \| .*$/, ''), url: SITE + idx, inLanguage: lang, publisher: publisher(lang) }]
+  }), { lastmod: isoDay(maxDate(posts)), priority: lang === 'fa' ? '0.7' : '0.5', changefreq: 'weekly' })
+
+  for (const post of own) {
+    const p = lp(lang, `/blog/${post.slug}`)
     const baseTitle = (post.meta_title && post.meta_title !== 'اذکار نور' ? post.meta_title : post.title).replace(/\s*\|\s*اذکار نور\s*$/, '')
-    const title = clip(baseTitle, 58) + ' | اذکار نور'
+    const title = clip(baseTitle, 58) + ` | ${t.siteName}`
     const desc = clip(post.meta_description || post.excerpt || post.title, 155)
-    const trail = [['خانه', '/'], ['مقالات', '/blog'], [post.title, p]]
-    const more = sorted.filter(x => x.slug !== post.slug).slice(0, 3)
-    const body = `${crumbsHtml(trail)}
+    const trail = [[t.home, '/'], [t.blog, idx], [post.title, p]]
+    const more = own.filter(x => x.slug !== post.slug).slice(0, 3)
+    const alts = Object.fromEntries(LANGS.filter(l => postIn(post, l)).map(l => [l, lp(l, `/blog/${post.slug}`)]))
+    const morning = collectionText(COLLECTION_PAGES[0], lang)
+    const night = collectionText(COLLECTION_PAGES[1], lang)
+    const meta = [t.published(fmtDate(lang, post.published_at))]
+    if (post.updated_at && fmtDate(lang, post.updated_at) !== fmtDate(lang, post.published_at)) meta.push(t.updatedOn(fmtDate(lang, post.updated_at)))
+    if (post.user && post.user.name) meta.push(t.author(post.user.name))
+    const body = `${crumbsHtml(lang, trail)}
 <article>
 <h1>${esc(post.title)}</h1>
-<p class="meta">منتشر شده: ${esc(faDate(post.published_at))}${post.updated_at && post.updated_at !== post.published_at ? ` · به‌روزرسانی: ${esc(faDate(post.updated_at))}` : ''}${post.user && post.user.name ? ` · نویسنده: ${esc(post.user.name)}` : ''}</p>
+<p class="meta">${esc(meta.join(' · '))}</p>
 ${formatArticle(post.content)}
 </article>
-${ctaBlock()}
-${more.length ? `<h2>مقالات دیگر</h2><div class="cards">${more.map(m => `<a href="/blog/${esc(m.slug)}"><strong>${esc(m.title)}</strong><span>${esc(faDate(m.published_at))}</span></a>`).join('')}</div>` : ''}
-<h2>اذکار</h2>
-<p><a href="/adhkar/sobhgahi">اذکار صبحگاهی</a> · <a href="/adhkar/shamgahi">اذکار شامگاهی</a> · <a href="/adhkar">همهٔ اذکار و ادعیه</a></p>`
+${ctaBlock(lang)}
+${more.length ? `<h2>${esc(t.moreArticles)}</h2><div class="cards">${more.map(m => `<a href="${lp(lang, '/blog/' + m.slug)}"><strong>${esc(m.title)}</strong><span>${esc(fmtDate(lang, m.published_at))}</span></a>`).join('')}</div>` : ''}
+<h2>${esc(t.adhkarLinksTitle)}</h2>
+<p><a href="${lp(lang, morning.path)}">${esc(morning.name)}</a> · <a href="${lp(lang, night.path)}">${esc(night.name)}</a> · <a href="${lp(lang, '/adhkar')}">${esc(t.allAdhkar)}</a></p>`
     const schema = [crumbs(trail), {
-      '@context': 'https://schema.org', '@type': 'Article', headline: clip(post.title, 110), description: desc, inLanguage: 'fa',
+      '@context': 'https://schema.org', '@type': 'Article', headline: clip(post.title, 110), description: desc, inLanguage: lang,
       datePublished: post.published_at, dateModified: post.updated_at || post.published_at,
-      author: { '@type': 'Person', name: (post.user && post.user.name) || 'ادریس رنجبر' }, publisher,
+      author: { '@type': 'Person', name: (post.user && post.user.name) || 'ادریس رنجبر' }, publisher: publisher(lang),
       mainEntityOfPage: { '@type': 'WebPage', '@id': SITE + p }, image: [OG_IMAGE]
     }]
-    writePage(p, layout({ title, description: desc, path: p, body, schema, ogType: 'article' }), { lastmod: isoDay(post.updated_at || post.published_at), priority: '0.6' })
+    writePage(p, layout({ lang, title, description: desc, path: p, alts, missing: '/blog', body, schema, ogType: 'article' }), { lastmod: isoDay(post.updated_at || post.published_at), priority: lang === 'fa' ? '0.6' : '0.5' })
   }
 }
 
@@ -475,16 +525,19 @@ ${all.map(u => `  <url>
 
 if (!fs.existsSync(DIST)) throw new Error(`dist directory not found: ${DIST} (run vite build first)`)
 const { collections, posts } = await loadContent()
+const POSTS_AR = readSnapshot('posts-ar.json') || {}
 const bySlug = Object.fromEntries(collections.map(c => [c.slug, c]))
 const defs = COLLECTION_PAGES.filter(d => bySlug[d.slug] && (bySlug[d.slug].adhkar || []).length)
 if (!bySlug.morning || !bySlug.night) throw new Error('morning/night collections missing')
 
-for (const d of defs) buildCollectionPage(d, bySlug[d.slug], defs)
+for (const lang of LANGS) {
+  for (const d of defs) buildCollectionPage(d, bySlug[d.slug], defs, lang)
+  buildHub(defs, collections, lang)
+  buildAppPage(lang)
+  buildAboutPage(lang)
+  buildBlog(posts, lang)
+}
 buildOverviewPage(bySlug.morning, bySlug.night)
-buildHub(defs, collections)
-buildAppPage()
-buildAboutPage()
 buildPrivacyPage()
-buildBlog(posts)
 const total = writeSitemap()
-console.log(`Content pages generated: ${written.length} pages (${posts.length} articles); sitemap has ${total} URLs`)
+console.log(`Content pages generated: ${written.length} pages in ${LANGS.length} languages (${posts.length} articles); sitemap has ${total} URLs`)
