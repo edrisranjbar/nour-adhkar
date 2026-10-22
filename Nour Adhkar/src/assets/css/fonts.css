@@ -28,7 +28,7 @@
     src: url('../fonts/vazir/Vazirmatn-FD-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
-    font-display: swap;
+    font-display: optional; /* preloaded on the landing page; never re-flows the hero */
 }
 
 @font-face {
@@ -52,7 +52,7 @@
     src: url('../fonts/vazir/Vazirmatn-FD-Bold.woff2') format('woff2');
     font-weight: 700;
     font-style: normal;
-    font-display: swap;
+    font-display: optional; /* preloaded on the landing page; never re-flows the hero */
 }
 
 @font-face {
@@ -68,13 +68,14 @@
     src: url('../fonts/vazir/Vazirmatn-FD-Black.woff2') format('woff2');
     font-weight: 900;
     font-style: normal;
-    font-display: swap;
+    font-display: optional; /* preloaded on the landing page; never re-flows the hero */
 }
 
 /* Othman Taha Font Declarations */
 @font-face {
     font-family: 'Othman Taha';
-    src: url('../fonts/othman-taha/KFGQPC Uthman Taha Naskh Bold.ttf') format('truetype');
+    src: url('../fonts/othman-taha/KFGQPC Uthman Taha Naskh Bold.woff2') format('woff2'),
+         url('../fonts/othman-taha/KFGQPC Uthman Taha Naskh Bold.ttf') format('truetype');
     font-weight: 700;
     font-style: normal;
     font-display: swap;

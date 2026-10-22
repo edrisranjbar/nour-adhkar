@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, createSSRApp, defineAsyncComponent } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
@@ -6,9 +6,7 @@ import store from './store'
 import { BASE_API_URL } from './config'
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
-import FontAwesomeIcon from './plugins/fontawesome'
 import metaPlugin from './plugins/meta'
-import validationPlugin from './plugins/validation'
 import axios from 'axios';
 import { registerSW } from 'virtual:pwa-register'
 import { useSettingsStore } from './stores/settings'
@@ -22,13 +20,17 @@ import './assets/css/fonts.css'
 import './assets/css/style.css'
 import './assets/css/dark-mode.css'
 
-const app = createApp(App)
+// "/" is prerendered into index.html at build time (scripts/prerender-landing.mjs): hydrate it
+// instead of rebuilding it. Every other route mounts normally.
+const prerendered = document.getElementById('app')?.dataset.ssr === 'landing' && location.pathname === '/'
+const app = prerendered ? createSSRApp(App) : createApp(App)
 
 app.use(createPinia())
 
 app.use(router)
 app.use(store)
-app.use(validationPlugin)
+// Validation rules register themselves when the module loads; the forms that use them load later.
+import('./plugins/validation')
 app.use(Toast, {
     position: "top-center",
     timeout: 3000,
@@ -47,7 +49,7 @@ app.config.globalProperties.$BASE_API_URL = BASE_API_URL
 app.provide('BASE_API_URL', BASE_API_URL)
 
 // Register Font Awesome component globally
-app.component('font-awesome-icon', FontAwesomeIcon);
+app.component('font-awesome-icon', defineAsyncComponent(() => import('./plugins/fontawesome')));
 
 // Initialize settings store
 const settingsStore = useSettingsStore()
@@ -103,7 +105,8 @@ axios.interceptors.response.use(
 );
 
 
-app.mount('#app')
+// Hydration needs the route component resolved first, so mount once the router is ready.
+router.isReady().then(() => app.mount('#app'))
 
 // Register PWA Service Worker (shows Persian messages)
 const updateSW = registerSW({
