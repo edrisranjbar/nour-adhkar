@@ -276,7 +276,7 @@ ${count}
 function buildCollectionPage(def, col, siblings) {
   const list = col.adhkar || []
   const updated = maxDate(list) || col.updated_at
-  const desc = clip(`${def.name} با متن عربی، ترجمهٔ فارسی و تعداد تکرار؛ ${toFa(list.length)} ذکر. نسخهٔ صوتی و آفلاین در اپلیکیشن اذکار نور.`, 155)
+  const desc = clip(`متن کامل ${def.name} اهل سنت به عربی با ترجمهٔ فارسی و تعداد تکرار هر ذکر (${toFa(list.length)} ذکر)؛ نسخهٔ صوتی، شمارنده و یادآور رایگان و آفلاین در اپلیکیشن اذکار نور.`, 155)
   const trail = [['خانه', '/'], ['اذکار و ادعیه', '/adhkar'], [def.name, def.path]]
   const others = siblings.filter(s => s.path !== def.path)
   const body = `${crumbsHtml(trail)}
@@ -374,7 +374,7 @@ ${ctaBlock('اذکار نور رایگان است. از فروشگاه دلخو�
 function buildAboutPage() {
   const p = '/about'
   const title = 'دربارهٔ اذکار نور | سازنده و نحوهٔ تهیهٔ محتوا'
-  const desc = 'اذکار نور را چه کسی می‌سازد، محتوا چگونه تهیه و به‌روز می‌شود و چگونه می‌توانید خطا را گزارش دهید.'
+  const desc = 'دربارهٔ اذکار نور، پروژهٔ متن‌باز و رایگان اذکار و ادعیهٔ اهل سنت: سازنده، نحوهٔ تهیه و به‌روزرسانی محتوا و راه گزارش خطا در متن و ترجمه.'
   const trail = [['خانه', '/'], ['دربارهٔ ما', p]]
   const body = `${crumbsHtml(trail)}
 <h1>دربارهٔ اذکار نور</h1>
@@ -392,11 +392,31 @@ ${ctaBlock()}`
   writePage(p, layout({ title, description: desc, path: p, body, schema }), { priority: '0.4', changefreq: 'yearly' })
 }
 
+// The privacy policy text lives in the Vue view; read it here so /privacy has real static HTML
+// (own title, canonical and content) without keeping a second copy of the policy.
+function buildPrivacyPage() {
+  const src = fs.readFileSync(path.join(ROOT, 'src/views/PrivacyView.vue'), 'utf8')
+  const article = (src.match(/<article class="card">([\s\S]*?)<\/article>/) || [])[1]
+  if (!article) throw new Error('PrivacyView.vue: <article class="card"> not found')
+  const updated = (article.match(/<p class="updated">([^<]*)<\/p>/) || [])[1] || ''
+  const content = article.replace(/<div class="head">[\s\S]*?<\/div>/, '').trim()
+  const p = '/privacy'
+  const title = 'سیاست حریم خصوصی | اذکار نور'
+  const desc = 'سیاست حریم خصوصی اذکار نور: چه اطلاعاتی، چرا و کجا پردازش می‌شود؛ تقریباً همه‌چیز روی گوشی شما می‌ماند و برنامه تبلیغات و ردیاب ندارد.'
+  const trail = [['خانه', '/'], ['حریم خصوصی', p]]
+  const body = `${crumbsHtml(trail)}
+<h1>سیاست حریم خصوصی</h1>
+<p class="meta">${updated}</p>
+${content}`
+  const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'WebPage', name: 'سیاست حریم خصوصی اذکار نور', url: SITE + p, inLanguage: 'fa', description: desc, isPartOf: { '@type': 'WebSite', name: 'اذکار نور', url: SITE + '/' } }]
+  writePage(p, layout({ title, description: desc, path: p, body, schema }), { lastmod: '2026-09-28', priority: '0.3', changefreq: 'yearly' })
+}
+
 function buildBlog(posts) {
   const sorted = [...posts].sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)))
   const trailIdx = [['خانه', '/'], ['مقالات', '/blog']]
   const idxTitle = 'مقالات اذکار نور | فضیلت و شیوهٔ خواندن اذکار و دعاها'
-  const idxDesc = 'مقالات کوتاه دربارهٔ فضیلت ذکر، شیوهٔ خواندن اذکار صبح و شام و توضیح دعاهای مهم، از اذکار نور.'
+  const idxDesc = 'مقالات کوتاه دربارهٔ فضیلت ذکر، شیوهٔ خواندن اذکار صبح و شام و توضیح دعاهای مهم اهل سنت، همراه با متن عربی، ترجمهٔ فارسی و منبع حدیث، از اذکار نور.'
   const idxBody = `${crumbsHtml(trailIdx)}
 <h1>مقالات</h1>
 <p class="lead">نوشته‌های کوتاه دربارهٔ ذکر، دعا و شیوهٔ خواندن آن‌ها.</p>
@@ -435,10 +455,7 @@ ${more.length ? `<h2>مقالات دیگر</h2><div class="cards">${more.map(m =
 }
 
 function writeSitemap() {
-  const fixed = [
-    { path: '/', lastmod: isoDay(), priority: '1.0', changefreq: 'monthly' },
-    { path: '/privacy', lastmod: isoDay('2026-09-28'), priority: '0.3', changefreq: 'yearly' }
-  ]
+  const fixed = [{ path: '/', lastmod: isoDay(), priority: '1.0', changefreq: 'monthly' }]
   const all = [...fixed, ...written].sort((a, b) => parseFloat(b.priority) - parseFloat(a.priority))
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -467,6 +484,7 @@ buildOverviewPage(bySlug.morning, bySlug.night)
 buildHub(defs, collections)
 buildAppPage()
 buildAboutPage()
+buildPrivacyPage()
 buildBlog(posts)
 const total = writeSitemap()
 console.log(`Content pages generated: ${written.length} pages (${posts.length} articles); sitemap has ${total} URLs`)
