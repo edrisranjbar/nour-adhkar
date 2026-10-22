@@ -72,7 +72,7 @@
             <div class="video-frame">
               <video
                 ref="intro"
-                :src="introVideo"
+                :src="videoSrc"
                 :poster="introPoster"
                 :aria-label="t.videoLabel"
                 width="1280"
@@ -80,11 +80,14 @@
                 muted
                 loop
                 playsinline
-                preload="metadata"
+                preload="none"
                 @play="onPlay"
                 @pause="playing = false"
               ></video>
-              <div class="video-ctrl">
+              <button v-if="!started" type="button" class="video-start" @click="startVideo" :aria-label="t.play">
+                <svg viewBox="0 0 24 24" width="34" height="34" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
+              </button>
+              <div v-else class="video-ctrl">
                 <button type="button" @click="togglePlay" :aria-label="playing ? t.pause : t.play">
                   <svg v-if="playing" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
                   <svg v-else viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
@@ -227,7 +230,7 @@
 <script>
 import { trackEvent } from '@/services/analytics'
 import introVideo from '@/assets/videos/nour-intro.mp4'
-import introPoster from '@/assets/videos/nour-intro-poster.jpg'
+import introPoster from '@/assets/videos/nour-intro-poster.webp'
 import checklist from '@/assets/images/landing/checklist.webp'
 import tasbih from '@/assets/images/landing/tasbih.webp'
 import prayer from '@/assets/images/landing/prayer.webp'
@@ -388,7 +391,8 @@ export default {
       theme: store.get('nour-theme') || '',
       motion: true,
       shots,
-      introVideo,
+      videoSrc: null,
+      started: false,
       introPoster,
       playing: false,
       tracked: new Set(),
@@ -406,7 +410,6 @@ export default {
   mounted() {
     this.motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     this.observe()
-    this.setupVideo()
     this.watchSections()
   },
   beforeUnmount() {
@@ -432,15 +435,32 @@ export default {
       store.set('nour-theme', this.theme)
       this.track('theme_toggle', this.theme)
     },
-    setupVideo() {
-      const v = this.$refs.intro
-      if (!v || !this.motion) return
-      // Autoplay only while visible, so the loop never runs off-screen.
-      this.vio = new IntersectionObserver(([e]) => {
-        if (e.isIntersecting && !this.userPaused) v.play().catch(() => {})
-        else if (!e.isIntersecting) v.pause()
-      }, { threshold: 0.25 })
-      this.vio.observe(v)
+    /**
+     * The 3 MB intro never autoplays: it is attached and downloaded only when the visitor plays it,
+     * and it pauses when scrolled out of view (without resuming on its own).
+     */
+    ensureVideo(then) {
+      if (this.videoSrc) return then(this.$refs.intro)
+      this.videoSrc = introVideo
+      this.$nextTick(() => {
+        const v = this.$refs.intro
+        if (!v) return
+        if ('IntersectionObserver' in window) {
+          this.vio = new IntersectionObserver(([e]) => { if (!e.isIntersecting) v.pause() }, { threshold: 0.25 })
+          this.vio.observe(v)
+        }
+        then(v)
+      })
+    },
+    /** The large play button: plays muted; the sound button beside the controls turns sound on. */
+    startVideo() {
+      this.started = true
+      this.ensureVideo((v) => {
+        v.muted = true
+        this.muted = true
+        this.userPaused = false
+        v.play().catch(() => {})
+      })
     },
     track(name, label = null) {
       trackEvent(name, label)
@@ -454,7 +474,7 @@ export default {
     },
     onPlay() {
       this.playing = true
-      this.trackOnce('video_play', this.userPaused === false ? 'manual' : 'auto')
+      this.trackOnce('video_play', 'manual')
     },
     watchSections() {
       if (!('IntersectionObserver' in window)) return
@@ -467,15 +487,17 @@ export default {
       })
     },
     togglePlay() {
-      const v = this.$refs.intro
-      if (v.paused) { this.userPaused = false; v.play().catch(() => {}) } else { this.userPaused = true; v.pause() }
+      this.ensureVideo((v) => {
+        if (v.paused) { this.userPaused = false; v.play().catch(() => {}) } else { this.userPaused = true; v.pause() }
+      })
     },
     toggleSound() {
-      const v = this.$refs.intro
-      v.muted = !v.muted
-      this.muted = v.muted
-      if (!v.muted) this.trackOnce('video_unmute')
-      if (!v.muted && v.paused) { this.userPaused = false; v.play().catch(() => {}) }
+      this.ensureVideo((v) => {
+        v.muted = !v.muted
+        this.muted = v.muted
+        if (!v.muted) this.trackOnce('video_unmute')
+        if (!v.muted && v.paused) { this.userPaused = false; v.play().catch(() => {}) }
+      })
     },
     observe() {
       const els = this.$el.querySelectorAll('.reveal:not(.in)')
@@ -589,6 +611,10 @@ h1 .w2::after { content: ""; position: absolute; inset-inline: 10%; bottom: -0.1
   box-shadow: 0 0 0 1px var(--line), 0 2px 4px rgba(0, 0, 0, 0.06), 0 40px 80px -30px rgba(20, 40, 18, 0.45);
   animation: videoIn 1.1s var(--ease) 0.35s both; }
 .video-frame video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.video-start { position: absolute; inset: 0; margin: auto; width: 84px; height: 84px; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; color: #fff; background: rgba(10, 20, 9, 0.55); backdrop-filter: blur(8px); cursor: pointer; transition: transform 0.25s var(--ease), background-color 0.2s; }
+.video-start svg { margin-left: 4px; } /* optical centre of the play triangle, in any direction */
+.video-start:hover { background: rgba(10, 20, 9, 0.72); transform: scale(1.06); }
+.video-start:active { transform: scale(0.96); }
 .video-ctrl { position: absolute; inset-inline-end: 16px; bottom: 16px; display: flex; gap: 8px; }
 .video-ctrl button { font: inherit; font-size: 0.875rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; height: 42px; min-width: 42px; justify-content: center; padding: 0 12px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 999px; color: #fff; background: rgba(10, 20, 9, 0.55); backdrop-filter: blur(8px); cursor: pointer; transition: background-color 0.2s, transform 0.2s var(--ease); }
 .video-ctrl button:hover { background: rgba(10, 20, 9, 0.75); }
@@ -612,6 +638,10 @@ h1 .w2::after { content: ""; position: absolute; inset-inline: 10%; bottom: -0.1
 @media (max-width: 700px) {
   .hero { padding-top: 48px; }
 }
+
+/* The verse renders only near the viewport, so the Quran face is not fetched before the first
+   paint. (Applying this to every section cost more in layout work than it saved.) */
+.verse-row { content-visibility: auto; contain-intrinsic-size: auto 260px; }
 
 /* Verse */
 .verse-row { text-align: center; padding-block: 64px 48px; border-bottom: 1px solid var(--line); max-width: 1080px; }
@@ -742,8 +772,8 @@ h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.3; }
 .more-list .reveal:nth-child(3n + 2) { transition-delay: 0.06s; }
 .more-list .reveal:nth-child(3n + 3) { transition-delay: 0.12s; }
 .swap { animation: swap 0.35s var(--ease); }
-@keyframes videoIn { from { opacity: 0; translate: 0 60px; scale: 0.96; } }
-@keyframes rise { from { opacity: 0; translate: 0 18px; filter: blur(6px); } }
+@keyframes videoIn { from { translate: 0 40px; scale: 0.97; } }
+@keyframes rise { from { translate: 0 14px; } }
 @keyframes draw { from { transform: scaleX(0); } }
 @keyframes ticker { to { transform: translateX(50%); } }
 @keyframes swap { from { opacity: 0.2; } }

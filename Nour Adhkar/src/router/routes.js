@@ -1,10 +1,10 @@
 import LandingView from '../views/LandingView.vue'
-import Login from '../views/LoginView.vue';
-import NotFoundView from '../views/NotFoundView.vue'
+const Login = () => import('../views/LoginView.vue');
+const NotFoundView = () => import('../views/NotFoundView.vue')
 import { adminGuard } from './guards';
-import ForgotPasswordView from '../views/ForgotPasswordView.vue'
-import ResetPasswordView from '../views/ResetPasswordView.vue'
-import PrivacyView from '../views/PrivacyView.vue'
+const ForgotPasswordView = () => import('../views/ForgotPasswordView.vue')
+const ResetPasswordView = () => import('../views/ResetPasswordView.vue')
+const PrivacyView = () => import('../views/PrivacyView.vue')
 
 // Lazy loading for admin components
 const AdminLayout = () => import('../views/admin/AdminLayout.vue');
@@ -16,8 +16,8 @@ const UsersManageView = () => import('../views/admin/UsersManageView.vue');
 const MediaManageView = () => import('../views/admin/MediaManageView.vue');
 const SettingsManageView = () => import('../views/admin/SettingsManageView.vue');
 const LogsManageView = () => import('../views/admin/LogsManageView.vue');
-import AdminAdhkarView from '@/views/admin/AdminAdhkarView.vue';
-import AdminCollectionsView from '@/views/admin/AdminCollectionsView.vue';
+const AdminAdhkarView = () => import('@/views/admin/AdminAdhkarView.vue');
+const AdminCollectionsView = () => import('@/views/admin/AdminCollectionsView.vue');
 const AdminAnalyticsView = () => import('../views/admin/AdminAnalyticsView.vue');
 
 // Public routes: the landing page plus the auth pages the admin panel needs
