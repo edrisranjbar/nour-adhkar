@@ -1,6 +1,6 @@
 # Example nginx server blocks for the website ("Nour Adhkar/dist").
-# dist/ contains the Vue SPA (home, privacy, admin) plus static, crawlable pages generated at build
-# time by scripts/generate-content-pages.mjs: /adhkar/*, /app, /about, /blog/*, sitemap.xml.
+# dist/ contains the Vue SPA (home, auth, admin) plus static, crawlable pages generated at build
+# time by scripts/generate-content-pages.mjs: /adhkar/*, /app, /about, /privacy, /blog/*, sitemap.xml.
 # Unknown paths must return a real 404 instead of 200 with the landing page.
 # Adjust root, ssl and the API proxy to match the server; keep the existing API config.
 
@@ -19,13 +19,46 @@ server {
     root /path/to/nour-adhkar/Nour\ Adhkar/dist;
     index index.html;
 
-    # SPA routes serve the app shell with 200.
+    # --- security headers (add_header in a location block replaces these, so re-add there if needed) ---
+    add_header Strict-Transport-Security "max-age=63072000" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), camera=(), microphone=()" always;
+
+    # Trailing slash -> canonical no-slash URL (static pages are canonical without it).
+    rewrite ^/(.+)/$ /$1 permanent;
+
+    # SPA routes serve the app shell with 200. (/privacy is now a static page, so it is NOT listed here.)
     location = / { try_files /index.html =404; }
-    location ~ ^/(privacy|login|forgot-password|reset-password)/?$ { try_files /index.html =404; }
+    location ~ ^/(login|forgot-password|reset-password)$ { try_files /index.html =404; }
     location ^~ /admin { try_files $uri /index.html; }
 
     # Retired pre-2026 URLs reported by Search Console: gone. (/blog is live again, so it is NOT here.)
     location ~ ^/collections(/|$) { return 410; }
+
+    # Hashed build output never changes: cache for a year.
+    location ^~ /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options nosniff always;
+        try_files $uri =404;
+    }
+
+    # Fonts and images: long cache (URLs are not hashed, so a month is a safe middle ground).
+    location ~* \.(woff2|ttf|jpg|jpeg|png|webp|svg|ico)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+        add_header X-Content-Type-Options nosniff always;
+        try_files $uri =404;
+    }
+
+    # Service worker and manifest must be revalidated every time.
+    location ~ ^/(sw\.js|workbox-.*\.js|manifest\.webmanifest)$ {
+        add_header Cache-Control "no-cache";
+        add_header X-Content-Type-Options nosniff always;
+        try_files $uri =404;
+    }
 
     # Everything else: a real file, a static page (/adhkar/sobhgahi -> /adhkar/sobhgahi/index.html),
     # or a genuine 404 that still renders the SPA's "not found" page (status stays 404, noindex set by the app).
