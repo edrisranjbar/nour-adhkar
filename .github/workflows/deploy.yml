@@ -138,14 +138,19 @@ jobs:
           SSH_USER: ${{ secrets.DEPLOY_USER }}
           SSH_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
           KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
         run: |
           mkdir -p ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519
-          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'bash -s' <<'REMOTE'
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' bash -s" <<'REMOTE'
           set -eu
           id
           sudo -n -l
-          sudo -n nginx -T 2>&1 | grep -E '^# configuration file|server_name|listen |root |fastcgi_pass|try_files|location |include .*snippets|ssl_certificate '
+          command -v node || true
+          command -v php
+          stat -c '%U %G %a %n' "$APP_DIR" "$APP_DIR/Nour Adhkar/dist" "$APP_DIR/backend/storage"
+          crontab -l || true
+          grep -RE 'server_name|listen |root |fastcgi_pass|try_files|location ' /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null || true
           REMOTE
