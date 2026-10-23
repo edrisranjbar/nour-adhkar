@@ -6,7 +6,7 @@ The shared renderer in `Nour Adhkar/scripts/generate-content-pages.mjs` serves b
 
 ## Runtime and failure behavior
 
-- `deploy/refresh-articles.sh` runs under the deploy user's crontab every minute. It requires Node 18+ (20 recommended), `flock` and outbound access to the articles API, with no npm dependencies.
+- `deploy/refresh-articles.sh` runs under the deploy user's crontab every minute. CI ships its official Node 22 runtime into private project storage; the host's system Node is untouched. It also requires `flock`, `crontab` and outbound API access, with no npm dependencies.
 - `CONTENT_API_URL` defaults to `https://api.adhkar.ir/api`. The updater fetches every page and rejects failed/malformed responses instead of substituting an old snapshot or empty list.
 - The revision hashes render-relevant content and renderer/translation sources, so same-second edits work. View counters do not trigger public writes. Unchanged pages keep their file timestamps and HTTP validators.
 - Files are rendered/validated before publication, then each is replaced using an atomic same-directory rename. Detail pages precede indexes. Stale managed article HTML is removed, while unrelated website files and sitemap entries are retained. This is atomic per file, not a transaction across all languages/files.
@@ -16,7 +16,7 @@ The shared renderer in `Nour Adhkar/scripts/generate-content-pages.mjs` serves b
 
 ## Deployment and verification
 
-`DEPLOY_WEB_ROOT` must match the active nginx root, not merely a local build directory. On this host it is `/home/edris/nour-adhkar/NourAdhkar`. `deploy/install-article-timer.sh` preserves other cron entries and replaces only the entry ending in `# nour-adhkar-articles`.
+`DEPLOY_WEB_ROOT` must match the active nginx root. On this host nginx uses `/home/edris/nour-adhkar/NourAdhkar`, a symlink to `/home/edris/nour-adhkar/Nour Adhkar/dist`. Configure the resolved target so deployment preserves the symlink. `deploy/install-article-timer.sh` preserves other cron entries and replaces only the entry ending in `# nour-adhkar-articles`.
 
 The deploy workflow tests regeneration, builds the website, publishes it, checks all current article links/detail HTML/canonicals/sitemap and a genuine 404, then waits for a successful timer heartbeat independent of deployment. CI and local checks:
 
@@ -30,7 +30,7 @@ node scripts/verify-live-articles.mjs
 For a manual server refresh (uses the same lock):
 
 ```sh
-APP_DIR=/home/edris/nour-adhkar WEB_ROOT=/home/edris/nour-adhkar/NourAdhkar bash deploy/refresh-articles.sh --force
+APP_DIR=/home/edris/nour-adhkar WEB_ROOT='/home/edris/nour-adhkar/Nour Adhkar/dist' bash deploy/refresh-articles.sh --force
 ```
 
 To disable automatic publication, remove only the marked cron entry. Existing HTML remains available. Check the private status timestamp and refresh log when articles lag behind the API; a deployment is no longer required to publish content.

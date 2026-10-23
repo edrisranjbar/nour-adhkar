@@ -9,7 +9,7 @@ if [[ "$APP_DIR$WEB_ROOT" == *%* || "$APP_DIR$WEB_ROOT" == *$'\n'* ]]; then
 fi
 command -v crontab >/dev/null
 command -v flock >/dev/null
-command -v node >/dev/null
+test -x "$APP_DIR/backend/storage/app/website/runtime/node"
 printf -v RUNNER 'APP_DIR=%q WEB_ROOT=%q /bin/bash %q >> %q 2>&1' "$APP_DIR" "$WEB_ROOT" "$APP_DIR/deploy/refresh-articles.sh" "$APP_DIR/backend/storage/logs/website-articles.log"
 EXISTING=$(crontab -l 2>/dev/null || true)
 { printf '%s\n' "$EXISTING" | sed '/# nour-adhkar-articles$/d'; printf '* * * * * %s # nour-adhkar-articles\n' "$RUNNER"; } | crontab -

@@ -54,7 +54,7 @@ sudo -u deploy git -C /path/to/nour-adhkar fetch origin main
 | `DEPLOY_APP_DIR` | variable | absolute path of the checkout, e.g. `/var/www/nour-adhkar` |
 | `DEPLOY_WEB_ROOT` | variable | directory the web server serves for adhkar.ir (optional; default `<checkout>/Nour Adhkar/dist`) |
 
-Set `DEPLOY_WEB_ROOT` to the actual nginx root. The production host currently serves `/home/edris/nour-adhkar/NourAdhkar`; deploying only to the default `dist/` directory would not update that website. Node 18+ (20 recommended), `crontab` and `flock` must be available to the deploy user for automatic article publishing; no additional root permissions are required.
+Set `DEPLOY_WEB_ROOT` to the resolved nginx root. Production's `/home/edris/nour-adhkar/NourAdhkar` is a symlink to `/home/edris/nour-adhkar/Nour Adhkar/dist`; deploy to the latter to preserve the symlink. CI also uploads `website-runtime.tgz` from official `actions/setup-node` Node 22, extracted into private project storage; the server's old system Node is not changed. `crontab` and `flock` must be available to the deploy user; no additional root permissions are required.
 
 ## Lecture audio uploads (admin «علما و سخنرانی‌ها»)
 
