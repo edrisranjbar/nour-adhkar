@@ -26,8 +26,8 @@ Avoid paid or automated link schemes.
 ## 5. After each deploy
 - Check `https://adhkar.ir/sitemap.xml` lists the new URLs.
 - In Search Console: URL Inspection > Request indexing for new pages.
-- Content comes from `https://api.adhkar.ir/api` at build time; if it is unreachable the committed `Nour Adhkar/content-snapshot/` is used. Refresh the snapshot with `npm run content:refresh` and commit it after editing adhkar or articles in the admin panel.
+- Adhkar content comes from `https://api.adhkar.ir/api` at build time, with the committed snapshot as a fallback. Articles are refreshed automatically on the server every minute; no commit or deployment is needed after changing them in the panel. See [dynamic article publishing](DYNAMIC-ARTICLES.md) for freshness, outage behavior and diagnostics.
 
 ## 6. Content still needed from you
 - A named reviewer for the adhkar text and hadith references per dhikr (the data has no `source` field yet; the pages do not invent sources).
-- More articles in the admin panel (they appear automatically under `/blog` on the next deploy).
+- More articles in the admin panel (published articles appear automatically under `/blog`, normally within one minute).

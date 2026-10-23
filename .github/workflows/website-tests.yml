@@ -1,0 +1,25 @@
+name: Website checks
+on:
+  push:
+    branches: [develop]
+    paths: ["Nour Adhkar/**", "deploy/**", ".github/workflows/website-tests.yml"]
+  pull_request:
+    paths: ["Nour Adhkar/**", "deploy/**", ".github/workflows/website-tests.yml"]
+jobs:
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test article regeneration
+        working-directory: Nour Adhkar
+        run: node --test scripts/__tests__/refresh-articles.test.mjs
+      - name: Check deployment scripts
+        run: bash -n deploy/deploy.sh deploy/refresh-articles.sh deploy/install-article-timer.sh
+      - name: Build website
+        working-directory: Nour Adhkar
+        run: |
+          npm install --no-audit --no-fund
+          npm run build

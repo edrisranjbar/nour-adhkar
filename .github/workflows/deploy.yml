@@ -9,6 +9,10 @@ on:
     paths: ["backend/**", "Nour Adhkar/**", "deploy/**", ".github/workflows/deploy.yml"]
   workflow_dispatch:
     inputs:
+      website_preflight_only:
+        description: "Inspect website routing and deployment permissions without changing the server"
+        type: boolean
+        default: false
       progress_sync_only:
         description: "Deploy only Android progress sync without resetting the checkout"
         type: boolean
@@ -18,7 +22,7 @@ concurrency: deploy
 
 jobs:
   deploy:
-    if: ${{ !inputs.progress_sync_only }}
+    if: ${{ !inputs.progress_sync_only && !inputs.website_preflight_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,11 +41,15 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
+
+      - name: Package private website runtime
+        run: tar czf website-runtime.tgz -C "$(dirname "$(command -v node)")" node
 
       - name: Build website
         working-directory: Nour Adhkar
         run: |
+          node --test scripts/__tests__/refresh-articles.test.mjs
           npm install --no-audit --no-fund
           npm run build
           tar czf ../web-dist.tgz -C dist .
@@ -61,13 +69,39 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/id_ed25519
           echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519
-          scp -P "$SSH_PORT" backend-vendor.tgz web-dist.tgz "$SSH_USER@$SSH_HOST:$APP_DIR/../"
+          scp -P "$SSH_PORT" backend-vendor.tgz web-dist.tgz website-runtime.tgz "$SSH_USER@$SSH_HOST:$APP_DIR/../"
           # Update the checkout first so the deploy script itself is always current.
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
             "cd '$APP_DIR' && git fetch --quiet origin main && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
 
+      - name: Verify live articles and automatic refresh
+        env:
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
+        run: |
+          node 'Nour Adhkar/scripts/verify-live-articles.mjs'
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' bash -s" <<'REMOTE'
+          set -eu
+          crontab -l | grep '# nour-adhkar-articles$'
+          STATUS="$APP_DIR/backend/storage/app/website/articles.json.status"
+          BEFORE=$(stat -c %Y "$STATUS")
+          # Wait at most 90 seconds to observe a real cron tick, not only the deploy invocation.
+          for attempt in $(seq 1 18); do
+            sleep 5
+            if [ "$(stat -c %Y "$STATUS")" -gt "$BEFORE" ]; then
+              cat "$STATUS"
+              echo 'Automatic article refresh heartbeat verified.'
+              exit 0
+            fi
+          done
+          echo 'Article refresh timer did not run within 90 seconds.' >&2
+          exit 1
+          REMOTE
+
   progress-sync:
-    if: ${{ inputs.progress_sync_only }}
+    if: ${{ inputs.progress_sync_only && !inputs.website_preflight_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -122,3 +156,36 @@ jobs:
         run: |
           status=$(curl -sS -o /tmp/progress-response.json -w '%{http_code}' -X POST https://api.adhkar.ir/api/progress/sync -H 'Accept: application/json' -H 'Content-Type: application/json' --data '{"version":1,"records":[]}')
           test "$status" = 401
+
+  website-preflight:
+    if: ${{ inputs.website_preflight_only }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect website routing
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' bash -s" <<'REMOTE'
+          set -eu
+          id
+          sudo -n -l
+          node --version
+          command -v php
+          command -v crontab
+          command -v flock
+          stat -c '%U %G %a %n' "$APP_DIR" "$APP_DIR/Nour Adhkar/dist" "$APP_DIR/backend/storage"
+          readlink -f "$APP_DIR/NourAdhkar"
+          stat -c '%U %G %a %n' "$APP_DIR/NourAdhkar"
+          test -w "$APP_DIR/NourAdhkar"
+          crontab -l || true
+          grep -E 'server_name|listen |root |try_files|location ' /etc/nginx/sites-enabled/adhkar.ir
+          REMOTE
