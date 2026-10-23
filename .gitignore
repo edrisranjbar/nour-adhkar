@@ -31,3 +31,5 @@ pnpm-lock.yaml
 
 coverage
 mobile_app/android/build/reports
+# Private deployment runtime archive (uploaded over SSH).
+/website-runtime.tgz

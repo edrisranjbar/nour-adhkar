@@ -14,9 +14,9 @@ flock 9
 # The host's system Node can be old. Use the official setup-node runtime shipped by CI,
 # scoped to this project; never replace the system runtime used by other applications.
 RUNTIME_DIR="$APP_DIR/backend/storage/app/website/runtime"
-if [ -f "$UPLOADS/website-runtime.tgz" ]; then
+if [ -f "$APP_DIR/website-runtime.tgz" ]; then
   mkdir -p "$RUNTIME_DIR"
-  tar xzf "$UPLOADS/website-runtime.tgz" -C "$RUNTIME_DIR"
+  tar xzf "$APP_DIR/website-runtime.tgz" -C "$RUNTIME_DIR"
 fi
 NODE_BIN="$RUNTIME_DIR/node"
 "$NODE_BIN" --version
