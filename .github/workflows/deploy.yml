@@ -69,7 +69,8 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/id_ed25519
           echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519
-          scp -P "$SSH_PORT" backend-vendor.tgz web-dist.tgz website-runtime.tgz "$SSH_USER@$SSH_HOST:$APP_DIR/../"
+          scp -P "$SSH_PORT" backend-vendor.tgz web-dist.tgz "$SSH_USER@$SSH_HOST:$APP_DIR/../"
+          scp -P "$SSH_PORT" website-runtime.tgz "$SSH_USER@$SSH_HOST:$APP_DIR/website-runtime.tgz"
           # Update the checkout first so the deploy script itself is always current.
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
             "cd '$APP_DIR' && git fetch --quiet origin main && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
