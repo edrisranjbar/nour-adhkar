@@ -9,6 +9,10 @@ on:
     paths: ["backend/**", "Nour Adhkar/**", "deploy/**", ".github/workflows/deploy.yml"]
   workflow_dispatch:
     inputs:
+      website_preflight_only:
+        description: "Inspect website routing and deployment permissions without changing the server"
+        type: boolean
+        default: false
       progress_sync_only:
         description: "Deploy only Android progress sync without resetting the checkout"
         type: boolean
@@ -18,7 +22,7 @@ concurrency: deploy
 
 jobs:
   deploy:
-    if: ${{ !inputs.progress_sync_only }}
+    if: ${{ !inputs.progress_sync_only && !inputs.website_preflight_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +71,7 @@ jobs:
             "cd '$APP_DIR' && git fetch --quiet origin main && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
 
   progress-sync:
-    if: ${{ inputs.progress_sync_only }}
+    if: ${{ inputs.progress_sync_only && !inputs.website_preflight_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -122,3 +126,26 @@ jobs:
         run: |
           status=$(curl -sS -o /tmp/progress-response.json -w '%{http_code}' -X POST https://api.adhkar.ir/api/progress/sync -H 'Accept: application/json' -H 'Content-Type: application/json' --data '{"version":1,"records":[]}')
           test "$status" = 401
+
+  website-preflight:
+    if: ${{ inputs.website_preflight_only }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect website routing
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -eu
+          id
+          sudo -n -l
+          sudo -n nginx -T 2>&1 | grep -E '^# configuration file|server_name|listen |root |fastcgi_pass|try_files|location |include .*snippets|ssl_certificate '
+          REMOTE
