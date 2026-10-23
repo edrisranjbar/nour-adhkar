@@ -10,7 +10,7 @@
 
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
+import { fileURLToPath, pathToFileURL } from 'url'
 import { LANGS, LOCALE, T, COLLECTION_TEXT, num, fmtDate, isPersianSpelling } from './content-i18n.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -160,7 +160,7 @@ const allLangs = p => Object.fromEntries(LANGS.map(l => [l, lp(l, p)]))
 function layout({ lang = 'fa', title, description, path: urlPath, alts = { fa: urlPath }, missing = '/adhkar', body, schema = [], ogType = 'website', noindex = false }) {
   const t = T[lang]
   const url = SITE + urlPath
-  const ld = schema.map(s => `<script type="application/ld+json">${JSON.stringify(s)}</script>`).join('\n')
+  const ld = schema.map(s => `<script type="application/ld+json">${JSON.stringify(s).replace(/</g, '\\u003c')}</script>`).join('\n')
   const altLinks = Object.keys(alts).length > 1
     ? Object.entries(alts).map(([l, p]) => `<link rel="alternate" hreflang="${l}" href="${SITE + p}">`).join('\n') +
       (alts.fa ? `\n<link rel="alternate" hreflang="x-default" href="${SITE + alts.fa}">` : '')
@@ -452,7 +452,7 @@ function postIn(post, lang) {
   return x ? { ...post, title: x.title, excerpt: x.excerpt, meta_title: null, meta_description: x.excerpt, content: x.content, user: null } : null
 }
 
-function buildBlog(posts, lang) {
+function buildBlog(posts, lang, emit = writePage) {
   const t = T[lang]
   const sorted = [...posts].sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)))
   const own = sorted.map(p => postIn(p, lang)).filter(Boolean)
@@ -466,7 +466,7 @@ function buildBlog(posts, lang) {
 ${own.length ? own.map(p => card(p, lang)).join('\n') : persianOnly.length ? '' : `<p>${esc(t.blogEmpty)}</p>`}
 ${persianOnly.length ? `<h2>${esc(t.blogOnlyFa)}</h2>\n${persianOnly.map(p => card(p, 'fa')).join('\n')}` : ''}
 ${ctaBlock(lang)}`
-  writePage(idx, layout({
+  emit(idx, layout({
     lang, title: t.blogTitle, description: t.blogDesc, path: idx, alts: allLangs('/blog'), body: idxBody,
     schema: [crumbs(trailIdx), { '@context': 'https://schema.org', '@type': 'Blog', name: t.blogTitle.replace(/ \| .*$/, ''), url: SITE + idx, inLanguage: lang, publisher: publisher(lang) }]
   }), { lastmod: isoDay(maxDate(posts)), priority: lang === 'fa' ? '0.7' : '0.5', changefreq: 'weekly' })
@@ -500,7 +500,7 @@ ${more.length ? `<h2>${esc(t.moreArticles)}</h2><div class="cards">${more.map(m 
       author: { '@type': 'Person', name: (post.user && post.user.name) || 'ادریس رنجبر' }, publisher: publisher(lang),
       mainEntityOfPage: { '@type': 'WebPage', '@id': SITE + p }, image: [OG_IMAGE]
     }]
-    writePage(p, layout({ lang, title, description: desc, path: p, alts, missing: '/blog', body, schema, ogType: 'article' }), { lastmod: isoDay(post.updated_at || post.published_at), priority: lang === 'fa' ? '0.6' : '0.5' })
+    emit(p, layout({ lang, title, description: desc, path: p, alts, missing: '/blog', body, schema, ogType: 'article' }), { lastmod: isoDay(post.updated_at || post.published_at), priority: lang === 'fa' ? '0.6' : '0.5' })
   }
 }
 
@@ -521,11 +521,21 @@ ${all.map(u => `  <url>
   return all.length
 }
 
-// ---------- run ----------
+// The background publisher uses the same renderer as the initial build, including translations.
+const POSTS_AR = readSnapshot('posts-ar.json') || {}
+
+export function renderBlogPages(posts) {
+  const pages = []
+  for (const lang of LANGS) buildBlog(posts, lang, (urlPath, html, meta) => pages.push({ path: urlPath, html, ...meta }))
+  return pages
+}
+
+// ---------- build entry point (importing the renderer never writes files or calls the API) ----------
+
+async function main() {
 
 if (!fs.existsSync(DIST)) throw new Error(`dist directory not found: ${DIST} (run vite build first)`)
 const { collections, posts } = await loadContent()
-const POSTS_AR = readSnapshot('posts-ar.json') || {}
 const bySlug = Object.fromEntries(collections.map(c => [c.slug, c]))
 const defs = COLLECTION_PAGES.filter(d => bySlug[d.slug] && (bySlug[d.slug].adhkar || []).length)
 if (!bySlug.morning || !bySlug.night) throw new Error('morning/night collections missing')
@@ -541,3 +551,6 @@ buildOverviewPage(bySlug.morning, bySlug.night)
 buildPrivacyPage()
 const total = writeSitemap()
 console.log(`Content pages generated: ${written.length} pages in ${LANGS.length} languages (${posts.length} articles); sitemap has ${total} URLs`)
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) await main()

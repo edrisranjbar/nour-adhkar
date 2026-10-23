@@ -8,6 +8,9 @@ Merging `develop` into `main` runs `.github/workflows/deploy.yml`:
    - unpacks `vendor/`, puts the API in maintenance mode, runs `php artisan migrate --force`, rebuilds caches (`optimize:clear` + `optimize`) and brings it back up;
    - reloads PHP-FPM (new code, OPcache and DNS settings take effect);
    - swaps in the new website build in one move.
+   - forces a live article refresh and installs the deploy user's automatic article timer (one-minute interval).
+
+Article changes no longer require a website deployment. The server regenerates the blog HTML and sitemap when published content changes, retaining static delivery speed. Failed API requests keep the last successful output. Deployment verification checks live pages and waits for a real timer heartbeat. See [dynamic articles](../docs/DYNAMIC-ARTICLES.md).
 
 It only runs when `backend/`, `Nour Adhkar/`, `deploy/` or the workflow change, or manually from Actions → Deploy → Run workflow.
 
@@ -50,6 +53,8 @@ sudo -u deploy git -C /path/to/nour-adhkar fetch origin main
 | `DEPLOY_KNOWN_HOSTS` | secret | output of `ssh-keyscan -p <port> <host>` run from your own machine |
 | `DEPLOY_APP_DIR` | variable | absolute path of the checkout, e.g. `/var/www/nour-adhkar` |
 | `DEPLOY_WEB_ROOT` | variable | directory the web server serves for adhkar.ir (optional; default `<checkout>/Nour Adhkar/dist`) |
+
+Set `DEPLOY_WEB_ROOT` to the actual nginx root. The production host currently serves `/home/edris/nour-adhkar/NourAdhkar`; deploying only to the default `dist/` directory would not update that website. Node 18+ (20 recommended), `crontab` and `flock` must be available to the deploy user for automatic article publishing; no additional root permissions are required.
 
 ## Lecture audio uploads (admin «علما و سخنرانی‌ها»)
 

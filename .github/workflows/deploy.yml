@@ -46,6 +46,7 @@ jobs:
       - name: Build website
         working-directory: Nour Adhkar
         run: |
+          node --test scripts/__tests__/refresh-articles.test.mjs
           npm install --no-audit --no-fund
           npm run build
           tar czf ../web-dist.tgz -C dist .
@@ -69,6 +70,32 @@ jobs:
           # Update the checkout first so the deploy script itself is always current.
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
             "cd '$APP_DIR' && git fetch --quiet origin main && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
+
+      - name: Verify live articles and automatic refresh
+        env:
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
+        run: |
+          node 'Nour Adhkar/scripts/verify-live-articles.mjs'
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' bash -s" <<'REMOTE'
+          set -eu
+          crontab -l | grep '# nour-adhkar-articles$'
+          STATUS="$APP_DIR/backend/storage/app/website/articles.json.status"
+          BEFORE=$(stat -c %Y "$STATUS")
+          # Wait at most 90 seconds to observe a real cron tick, not only the deploy invocation.
+          for attempt in $(seq 1 18); do
+            sleep 5
+            if [ "$(stat -c %Y "$STATUS")" -gt "$BEFORE" ]; then
+              cat "$STATUS"
+              echo 'Automatic article refresh heartbeat verified.'
+              exit 0
+            fi
+          done
+          echo 'Article refresh timer did not run within 90 seconds.' >&2
+          exit 1
+          REMOTE
 
   progress-sync:
     if: ${{ inputs.progress_sync_only && !inputs.website_preflight_only }}
@@ -148,9 +175,14 @@ jobs:
           set -eu
           id
           sudo -n -l
-          command -v node || true
+          node --version
           command -v php
+          command -v crontab
+          command -v flock
           stat -c '%U %G %a %n' "$APP_DIR" "$APP_DIR/Nour Adhkar/dist" "$APP_DIR/backend/storage"
+          readlink -f "$APP_DIR/NourAdhkar"
+          stat -c '%U %G %a %n' "$APP_DIR/NourAdhkar"
+          test -w "$APP_DIR/NourAdhkar"
           crontab -l || true
-          grep -RE 'server_name|listen |root |fastcgi_pass|try_files|location ' /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null || true
+          grep -E 'server_name|listen |root |try_files|location ' /etc/nginx/sites-enabled/adhkar.ir
           REMOTE
