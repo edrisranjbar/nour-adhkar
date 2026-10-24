@@ -14,7 +14,7 @@ it('hides a scheduled article on its direct API URL until publication time', fun
     ]);
     $this->getJson('/api/posts/future-article')->assertNotFound();
     $this->getJson('/api/posts')->assertJsonCount(0, 'data');
-    $this->getJson('/api/app-articles')->assertJsonCount(0, 'data');
+    $this->getJson('/api/app-articles')->assertOk()->assertJsonCount(0, 'data');
     expect(DB::table('posts')->where('id', $id)->value('views'))->toBe(0);
     $this->travel(2)->days();
     $this->getJson('/api/posts/future-article')->assertOk()->assertJsonPath('id', $id);

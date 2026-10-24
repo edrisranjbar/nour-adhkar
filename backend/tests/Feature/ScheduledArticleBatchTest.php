@@ -26,7 +26,7 @@ it('schedules both articles in UTC and safely accepts the same batch again', fun
     expect(ScheduledArticleBatch::import($this->batch))->toBe($rows);
     expect(DB::table('posts')->count())->toBe(3);
     $this->getJson('/api/posts/batch-one')->assertNotFound();
-    $this->getJson('/api/app-articles')->assertJsonCount(1, 'data');
+    $this->getJson('/api/app-articles')->assertOk()->assertJsonCount(1, 'data');
 });
 
 it('rolls back the entire batch on a conflicting slug', function () {
