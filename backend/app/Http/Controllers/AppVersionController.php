@@ -6,6 +6,17 @@ use Illuminate\Support\Facades\DB;
 
 class AppVersionController extends Controller
 {
+    public function index()
+    {
+        $versions = DB::table('app_versions')
+            ->where('published', true)
+            ->orderByDesc('version_code')
+            ->select(['version_name as versionName', 'version_code as versionCode', 'changelog', 'release_date as releaseDate'])
+            ->paginate(20);
+
+        return response()->json($versions);
+    }
+
     /**
      * Latest published app version for the Android update check. Same keys as the old
      * version.json; minRequiredVersionCode is the newest published version marked required.

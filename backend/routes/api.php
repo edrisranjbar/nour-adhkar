@@ -31,6 +31,7 @@ Route::post('app-feedback', [AppInboxController::class, 'sendFeedback'])->middle
 Route::get('app-feedback/mine', [AppInboxController::class, 'myFeedback'])->middleware(['auth:api', 'throttle:60,1']);
 Route::get('app-notices', [AppInboxController::class, 'notices'])->middleware('throttle:60,1');
 Route::get('app-version', [AppVersionController::class, 'latest'])->middleware('throttle:60,1');
+Route::get('app-versions', [AppVersionController::class, 'index'])->middleware('throttle:60,1');
 Route::get('app-articles', [AppArticlesController::class, 'index'])->middleware('throttle:60,1');
 Route::get('app-adhkar', [AppAdhkarController::class, 'index'])->middleware('throttle:60,1');
 Route::post('app-notices/{id}/read', [AppInboxController::class, 'markRead'])->middleware('throttle:60,1');
