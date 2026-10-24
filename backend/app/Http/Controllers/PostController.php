@@ -126,7 +126,7 @@ class PostController extends Controller
     public function show($slug)
     {
         $post = Post::where('slug', $slug)
-            ->where('status', 'published')
+            ->published()
             ->with(['user', 'categories'])
             ->firstOrFail();
 
@@ -324,4 +324,4 @@ class PostController extends Controller
             ], 500);
         }
     }
-} 
+}
