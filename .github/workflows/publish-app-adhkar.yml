@@ -1,0 +1,83 @@
+name: Publish reviewed app adhkar
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish the reviewed 2026-10-24 batch (3 collections, 8 adhkar)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reviewed-app-adhkar-import
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: ${{ inputs.publish }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, intl, pdo_sqlite
+          tools: composer
+      - name: Test additive import and app API
+        working-directory: backend
+        run: |
+          composer install --no-interaction --prefer-dist
+          cp .env.example .env
+          php artisan key:generate --force
+          php artisan jwt:secret --force >/dev/null
+          php artisan test --filter='AppAdhkarBatchTest|AppAdhkarTest'
+      - name: Import reviewed content only
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
+        run: |
+          set -euo pipefail
+          test -n "$APP_DIR"
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+          REMOTE_DIR="$APP_DIR/backend/storage/app/adhkar-imports/$GITHUB_RUN_ID"
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$REMOTE_DIR' && chmod 700 '$REMOTE_DIR'"
+          scp -P "$SSH_PORT" deploy/import-app-adhkar.php deploy/content/app-adhkar-2026-10-24.json "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "cd '$APP_DIR/backend' && NOUR_BACKEND_ROOT='$APP_DIR/backend' php '$REMOTE_DIR/import-app-adhkar.php' '$REMOTE_DIR/app-adhkar-2026-10-24.json'"
+      - name: Verify all published text and source fields through the live app API
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, urllib.request
+          expected = json.loads(pathlib.Path('deploy/content/app-adhkar-2026-10-24.json').read_text())
+          request = urllib.request.Request('https://api.adhkar.ir/api/app-adhkar', headers={'Accept': 'application/json', 'Cache-Control': 'no-cache'})
+          response = urllib.request.urlopen(request, timeout=30)
+          actual = json.load(response)['data']
+          count = 0
+          for collection in expected['collections']:
+              matches = [row for row in actual if row['title'] == collection['title']]
+              assert len(matches) == 1, collection['title']
+              saved = matches[0]
+              assert saved['key'] is None
+              assert saved['description'] == collection['description']
+              assert saved['icon'] == collection['icon']
+              for item in collection['items']:
+                  matches = [row for row in saved['items'] if row['arabic'] == item['arabic_text']]
+                  assert len(matches) == 1, item['source']
+                  row = matches[0]
+                  assert row['translation'] == item['translation']
+                  assert row['source'] == item['source']
+                  assert row['count'] == item['target_count']
+                  count += 1
+          assert count == 8
+          assert response.headers.get('ETag')
+          print('Verified live: 3 reviewed collections, all 8 Arabic texts, Persian meanings, source references and counters.')
+          PY
