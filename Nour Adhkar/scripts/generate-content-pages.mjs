@@ -505,7 +505,10 @@ ${more.length ? `<h2>${esc(t.moreArticles)}</h2><div class="cards">${more.map(m 
 }
 
 function writeSitemap() {
-  const fixed = [{ path: '/', lastmod: isoDay(), priority: '1.0', changefreq: 'monthly' }]
+  const fixed = [
+    { path: '/', lastmod: isoDay(), priority: '1.0', changefreq: 'monthly' },
+    { path: '/updates', lastmod: isoDay(), priority: '0.6', changefreq: 'weekly' }
+  ]
   const all = [...fixed, ...written].sort((a, b) => parseFloat(b.priority) - parseFloat(a.priority))
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -549,6 +552,8 @@ for (const lang of LANGS) {
 }
 buildOverviewPage(bySlug.morning, bySlug.night)
 buildPrivacyPage()
+fs.mkdirSync(path.join(DIST, 'updates'), { recursive: true })
+fs.copyFileSync(path.join(DIST, 'index.html'), path.join(DIST, 'updates', 'index.html'))
 const total = writeSitemap()
 console.log(`Content pages generated: ${written.length} pages in ${LANGS.length} languages (${posts.length} articles); sitemap has ${total} URLs`)
 }

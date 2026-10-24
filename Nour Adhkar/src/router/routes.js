@@ -23,6 +23,17 @@ const AdminAnalyticsView = () => import('../views/admin/AdminAnalyticsView.vue')
 // Public routes: the landing page plus the auth pages the admin panel needs
 export const publicRoutes = [
   {
+    path: '/updates',
+    name: 'updates',
+    component: () => import('../views/UpdatesView.vue'),
+    meta: {
+      title: 'تازه‌ها و تاریخچهٔ به‌روزرسانی‌ها | اذکار نور',
+      description: 'تغییرات، بهبودها و رفع اشکال‌های نسخه‌های منتشرشدهٔ اذکار نور.',
+      changefreq: 'weekly',
+      priority: '0.6'
+    }
+  },
+  {
     path: '/',
     name: 'home',
     component: LandingView,

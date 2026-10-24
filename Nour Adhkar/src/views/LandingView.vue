@@ -219,6 +219,7 @@
       <nav :aria-label="t.footLabel">
         <a :href="link('/adhkar')">{{ t.navAdhkar }}</a>
         <a :href="link('/blog')">{{ t.navBlog }}</a>
+        <router-link to="/updates">{{ lang === 'ar' ? 'التحديثات' : lang === 'ckb' ? 'نوێکارییەکان' : 'تازه‌ها و به‌روزرسانی‌ها' }}</router-link>
         <router-link to="/privacy">{{ t.navPrivacy }}</router-link>
         <a :href="donateUrl" target="_blank" rel="noopener noreferrer" @click="track('donate_click', 'foot')">{{ t.support }}</a>
         <a href="https://github.com/edrisranjbar/Nour-Adhkar-App" target="_blank" rel="noopener noreferrer" @click="track('github_click')">GitHub</a>

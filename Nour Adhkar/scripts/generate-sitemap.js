@@ -16,6 +16,11 @@ const siteUrl = 'https://adhkar.ir';
 // Define routes manually
 const routes = [
   {
+    path: '/updates',
+    changefreq: 'weekly',
+    priority: '0.6'
+  },
+  {
     path: '/',
     changefreq: 'monthly',
     priority: '1.0'
@@ -74,4 +79,4 @@ function generateSitemap() {
 }
 
 // Execute the function
-generateSitemap(); 
+generateSitemap();

@@ -81,7 +81,7 @@ jobs:
           fi
           # Update the checkout first so the deploy script itself is always current.
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "cd '$APP_DIR' && git fetch --quiet origin main && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
+            "cd '$APP_DIR' && git fetch --quiet origin ${{ github.sha }} && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
 
       - name: Verify live articles and automatic refresh
         env:
@@ -91,6 +91,7 @@ jobs:
           APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
         run: |
           node 'Nour Adhkar/scripts/verify-live-articles.mjs'
+          node 'Nour Adhkar/scripts/verify-live-updates.mjs'
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' bash -s" <<'REMOTE'
           set -eu
           crontab -l | grep '# nour-adhkar-articles$'
@@ -186,6 +187,8 @@ jobs:
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' bash -s" <<'REMOTE'
           set -eu
           id
+          git -C "$APP_DIR" status --short
+          df -h "$APP_DIR"
           sudo -n -l
           node --version
           command -v php
