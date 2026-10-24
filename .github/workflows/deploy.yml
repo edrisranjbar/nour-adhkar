@@ -213,6 +213,8 @@ jobs:
         working-directory: backend
         run: |
           composer install --no-interaction --prefer-dist
+          cp .env.example .env
+          php artisan key:generate --force
           php artisan test --filter='PostShowScheduleTest|ScheduledArticleBatchTest|PanelArticleScheduleTest'
       - name: Prepare approved private batch
         env:
