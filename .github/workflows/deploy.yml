@@ -9,6 +9,10 @@ on:
     paths: ["backend/**", "Nour Adhkar/**", "deploy/**", ".github/workflows/deploy.yml"]
   workflow_dispatch:
     inputs:
+      schedule_articles_only:
+        description: "Import the approved private two-article batch without deploying application code"
+        type: boolean
+        default: false
       website_preflight_only:
         description: "Inspect website routing and deployment permissions without changing the server"
         type: boolean
@@ -22,7 +26,7 @@ concurrency: deploy
 
 jobs:
   deploy:
-    if: ${{ !inputs.progress_sync_only && !inputs.website_preflight_only }}
+    if: ${{ !inputs.progress_sync_only && !inputs.website_preflight_only && !inputs.schedule_articles_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +74,11 @@ jobs:
           echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519
           scp -P "$SSH_PORT" backend-vendor.tgz web-dist.tgz "$SSH_USER@$SSH_HOST:$APP_DIR/../"
-          scp -P "$SSH_PORT" website-runtime.tgz "$SSH_USER@$SSH_HOST:$APP_DIR/website-runtime.tgz"
+          LOCAL_NODE_SHA=$(sha256sum "$(command -v node)" | cut -d ' ' -f 1)
+          REMOTE_NODE_SHA=$(ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "sha256sum '$APP_DIR/backend/storage/app/website/runtime/node' 2>/dev/null" | cut -d ' ' -f 1) || REMOTE_NODE_SHA=''
+          if [ "$LOCAL_NODE_SHA" != "$REMOTE_NODE_SHA" ]; then
+            scp -P "$SSH_PORT" website-runtime.tgz "$SSH_USER@$SSH_HOST:$APP_DIR/website-runtime.tgz"
+          fi
           # Update the checkout first so the deploy script itself is always current.
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
             "cd '$APP_DIR' && git fetch --quiet origin main && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
@@ -102,7 +110,7 @@ jobs:
           REMOTE
 
   progress-sync:
-    if: ${{ inputs.progress_sync_only && !inputs.website_preflight_only }}
+    if: ${{ inputs.progress_sync_only && !inputs.website_preflight_only && !inputs.schedule_articles_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -159,7 +167,7 @@ jobs:
           test "$status" = 401
 
   website-preflight:
-    if: ${{ inputs.website_preflight_only }}
+    if: ${{ inputs.website_preflight_only && !inputs.schedule_articles_only }}
     runs-on: ubuntu-latest
     steps:
       - name: Inspect website routing
@@ -190,3 +198,65 @@ jobs:
           crontab -l || true
           grep -E 'server_name|listen |root |try_files|location ' /etc/nginx/sites-enabled/adhkar.ir
           REMOTE
+
+  schedule-articles:
+    if: ${{ inputs.schedule_articles_only && !inputs.website_preflight_only && !inputs.progress_sync_only }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, intl, pdo_sqlite
+          tools: composer
+      - name: Test scheduling and public visibility
+        working-directory: backend
+        run: |
+          composer install --no-interaction --prefer-dist
+          php artisan test --filter='PostShowScheduleTest|ScheduledArticleBatchTest|PanelArticleScheduleTest'
+      - name: Prepare approved private batch
+        env:
+          ARTICLE_BATCH: ${{ secrets.ARTICLE_BATCH_20261024 }}
+        run: |
+          python3 - <<'PY'
+          import base64, json, os, pathlib
+          payload = base64.b64decode(os.environ['ARTICLE_BATCH'], validate=True)
+          batch = json.loads(payload)
+          assert len(batch['articles']) == 2
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'article-batch.json').write_bytes(payload)
+          PY
+      - name: Schedule and read back the articles
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+          REMOTE_DIR="$APP_DIR/backend/storage/app/article-imports/$GITHUB_RUN_ID"
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$REMOTE_DIR' && chmod 700 '$REMOTE_DIR'"
+          scp -P "$SSH_PORT" "$RUNNER_TEMP/article-batch.json" deploy/schedule-articles.php "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "cd '$APP_DIR/backend' && NOUR_BACKEND_ROOT='$APP_DIR/backend' php '$REMOTE_DIR/schedule-articles.php' '$REMOTE_DIR/article-batch.json'"
+      - name: Verify articles are not public before their scheduled dates
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request, urllib.error
+          batch = json.loads(pathlib.Path(os.environ['RUNNER_TEMP'], 'article-batch.json').read_text())
+          slugs = {a['slug'] for a in batch['articles']}
+          for endpoint in ('https://api.adhkar.ir/api/posts', 'https://api.adhkar.ir/api/app-articles'):
+              data = json.load(urllib.request.urlopen(endpoint))['data']
+              assert not slugs.intersection(a['slug'] for a in data)
+          for slug in slugs:
+              try:
+                  urllib.request.urlopen('https://api.adhkar.ir/api/posts/' + slug)
+              except urllib.error.HTTPError as error:
+                  assert error.code == 404
+              else:
+                  raise AssertionError('Scheduled article is already public')
+          print('Both articles are scheduled and hidden from public API lists and direct URLs.')
+          PY

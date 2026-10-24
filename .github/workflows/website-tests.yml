@@ -2,10 +2,24 @@ name: Website checks
 on:
   push:
     branches: [develop]
-    paths: ["Nour Adhkar/**", "deploy/**", ".github/workflows/website-tests.yml"]
+    paths: ["Nour Adhkar/**", "backend/**", "deploy/**", ".github/workflows/website-tests.yml", ".github/workflows/deploy.yml"]
   pull_request:
-    paths: ["Nour Adhkar/**", "deploy/**", ".github/workflows/website-tests.yml"]
+    paths: ["Nour Adhkar/**", "backend/**", "deploy/**", ".github/workflows/website-tests.yml", ".github/workflows/deploy.yml"]
 jobs:
+  article-scheduling:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, intl, pdo_sqlite
+          tools: composer
+      - name: Test scheduling and direct article visibility
+        working-directory: backend
+        run: |
+          composer install --no-interaction --prefer-dist
+          php artisan test --filter='PostShowScheduleTest|ScheduledArticleBatchTest|PanelArticleScheduleTest'
   website:
     runs-on: ubuntu-latest
     steps:
