@@ -220,7 +220,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import base64, json, os, pathlib
-          payload = base64.b64decode(os.environ['ARTICLE_BATCH'], validate=True)
+          payload = base64.b64decode(os.environ['ARTICLE_BATCH'].strip(), validate=True)
           batch = json.loads(payload)
           assert len(batch['articles']) == 2
           pathlib.Path(os.environ['RUNNER_TEMP'], 'article-batch.json').write_bytes(payload)
@@ -249,11 +249,11 @@ jobs:
           batch = json.loads(pathlib.Path(os.environ['RUNNER_TEMP'], 'article-batch.json').read_text())
           slugs = {a['slug'] for a in batch['articles']}
           for endpoint in ('https://api.adhkar.ir/api/posts', 'https://api.adhkar.ir/api/app-articles'):
-              data = json.load(urllib.request.urlopen(endpoint))['data']
+              data = json.load(urllib.request.urlopen(endpoint, timeout=20))['data']
               assert not slugs.intersection(a['slug'] for a in data)
           for slug in slugs:
               try:
-                  urllib.request.urlopen('https://api.adhkar.ir/api/posts/' + slug)
+                  urllib.request.urlopen('https://api.adhkar.ir/api/posts/' + slug, timeout=20)
               except urllib.error.HTTPError as error:
                   assert error.code == 404
               else:
