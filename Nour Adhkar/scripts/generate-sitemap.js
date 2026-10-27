@@ -32,12 +32,6 @@ const routes = [
   }
 ];
 
-// Generate current date for lastmod
-const getFormattedDate = () => {
-  const date = new Date();
-  return date.toISOString().split('T')[0];
-};
-
 /**
  * Generate XML sitemap
  */
@@ -57,7 +51,6 @@ function generateSitemap() {
     pages.forEach(page => {
       xml += `  <url>
     <loc>${siteUrl}${page.path}</loc>
-    <lastmod>${getFormattedDate()}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>

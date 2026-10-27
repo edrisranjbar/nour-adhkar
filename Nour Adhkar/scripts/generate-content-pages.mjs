@@ -242,14 +242,14 @@ const website = lang => ({ '@type': 'WebSite', name: T[lang].siteName, url: SITE
 const COLLECTION_PAGES = [
   {
     slug: 'morning', path: '/adhkar/sobhgahi', name: 'اذکار صبحگاهی',
-    title: 'اذکار صبحگاهی با متن عربی و ترجمه فارسی | اذکار نور',
-    h1: 'اذکار صبحگاهی (اذکار صبح) با متن عربی و ترجمه فارسی',
+    title: 'اذکار صبحگاهی اهل سنت با متن و ترجمه فارسی | اذکار نور',
+    h1: 'اذکار صبحگاهی اهل سنت با متن عربی و ترجمه فارسی',
     intro: 'مجموعهٔ اذکار صبحگاهی اهل سنت با متن عربی، ترجمهٔ فارسی و تعداد تکرار هر ذکر. همین اذکار در اپلیکیشن اذکار نور هم با پخش صوتی، شمارنده و یادآور در دسترس است.'
   },
   {
     slug: 'night', path: '/adhkar/shamgahi', name: 'اذکار شامگاهی',
-    title: 'اذکار شامگاهی با متن عربی و ترجمه فارسی | اذکار نور',
-    h1: 'اذکار شامگاهی (اذکار شب و شام) با متن عربی و ترجمه فارسی',
+    title: 'اذکار شامگاهی اهل سنت با متن و ترجمه فارسی | اذکار نور',
+    h1: 'اذکار شامگاهی اهل سنت با متن عربی و ترجمه فارسی',
     intro: 'مجموعهٔ اذکار شامگاهی اهل سنت با متن عربی، ترجمهٔ فارسی و تعداد تکرار هر ذکر. همین اذکار در اپلیکیشن اذکار نور هم با پخش صوتی، شمارنده و یادآور در دسترس است.'
   },
   {
@@ -291,7 +291,7 @@ function writePage(urlPath, html, meta = {}) {
   const dir = path.join(DIST, urlPath)
   fs.mkdirSync(dir, { recursive: true })
   fs.writeFileSync(path.join(dir, 'index.html'), html)
-  written.push({ path: urlPath, lastmod: meta.lastmod || isoDay(), priority: meta.priority || '0.6', changefreq: meta.changefreq || 'monthly' })
+  written.push({ path: urlPath, lastmod: meta.lastmod, priority: meta.priority || '0.6', changefreq: meta.changefreq || 'monthly' })
 }
 
 // Persian pages show each dhikr's title and Persian meaning. Arabic and Kurdish pages show the
@@ -324,6 +324,7 @@ function buildCollectionPage(base, col, siblings, lang) {
   const body = `${crumbsHtml(lang, trail)}
 <h1>${esc(def.h1)}</h1>
 <p class="lead">${esc(def.intro)}</p>
+${(base.slug === 'morning' || base.slug === 'night') ? `<p><a href="${lp(lang, '/app')}">${esc(t.appCta)}</a></p>` : ''}
 <p class="meta">${esc(t.dhikrCount(list.length))} · ${esc(t.updated(fmtDate(lang, updated)))}</p>
 ${adhkarItems(list, lang)}
 ${ctaBlock(lang)}
@@ -506,15 +507,15 @@ ${more.length ? `<h2>${esc(t.moreArticles)}</h2><div class="cards">${more.map(m 
 
 function writeSitemap() {
   const fixed = [
-    { path: '/', lastmod: isoDay(), priority: '1.0', changefreq: 'monthly' },
-    { path: '/updates', lastmod: isoDay(), priority: '0.6', changefreq: 'weekly' }
+    { path: '/', priority: '1.0', changefreq: 'monthly' },
+    { path: '/updates', priority: '0.6', changefreq: 'weekly' }
   ]
   const all = [...fixed, ...written].sort((a, b) => parseFloat(b.priority) - parseFloat(a.priority))
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${all.map(u => `  <url>
     <loc>${SITE}${u.path === '/' ? '/' : u.path}</loc>
-    <lastmod>${u.lastmod}</lastmod>
+    ${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
   </url>`).join('\n')}
@@ -553,7 +554,10 @@ for (const lang of LANGS) {
 buildOverviewPage(bySlug.morning, bySlug.night)
 buildPrivacyPage()
 fs.mkdirSync(path.join(DIST, 'updates'), { recursive: true })
-fs.copyFileSync(path.join(DIST, 'index.html'), path.join(DIST, 'updates', 'index.html'))
+// Build-only DOM dependency: the server's article renderer imports this module without npm.
+const { updatesDocument } = await import('./updates-document.mjs')
+const versions = await fetchJson(`${API}/app-versions`)
+fs.writeFileSync(path.join(DIST, 'updates', 'index.html'), updatesDocument(fs.readFileSync(path.join(DIST, 'index.html'), 'utf8'), Array.isArray(versions?.data) ? versions.data : []))
 const total = writeSitemap()
 console.log(`Content pages generated: ${written.length} pages in ${LANGS.length} languages (${posts.length} articles); sitemap has ${total} URLs`)
 }

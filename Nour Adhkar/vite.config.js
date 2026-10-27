@@ -12,7 +12,7 @@ export default defineConfig({
       workbox: {
         // Static SEO pages are real files, not SPA routes: never fall back to index.html for them.
         // Their Arabic and Kurdish versions live under /ar and /ckb.
-        navigateFallbackDenylist: [/^\/adhkar/, /^\/blog/, /^\/ar(\/|$)/, /^\/ckb(\/|$)/, /^\/app$/, /^\/about$/, /^\/privacy$/, /^\/sitemap\.xml$/, /^\/robots\.txt$/, /^\/[0-9a-f]{32}\.txt$/]
+        navigateFallbackDenylist: [/^\/adhkar/, /^\/blog/, /^\/ar(\/|$)/, /^\/ckb(\/|$)/, /^\/app$/, /^\/about$/, /^\/privacy$/, /^\/updates\/?$/, /^\/sitemap\.xml$/, /^\/robots\.txt$/, /^\/[0-9a-f]{32}\.txt$/]
       },
       includeAssets: [
         'icons/favicon.ico',
