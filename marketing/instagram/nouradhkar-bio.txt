@@ -1,6 +1,8 @@
-یادآوری‌های کوتاه برای آرامش دل 🌿
-آیات قرآن با ترجمهٔ تفسیر نور
-اذکار و دعا برای هر روز
-اپلیکیشن اذکار نور ↓
+اذکار و ادعیه اهل سنت 🌿
+متن عربی، ترجمه فارسی و صوت
+رایگان • آفلاین • بدون تبلیغ
+نصب برای اندروید از بازار و مایکت 👇
 
-Website field: https://adhkar.ir
+Website field: https://adhkar.ir/?utm_source=ig&utm_medium=social&utm_content=link_in_bio
+
+Status: prepared; not applied to Instagram until a successful UI save/read-back.
