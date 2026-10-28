@@ -117,6 +117,12 @@
           <p class="verse-ref">{{ t.verseRef }}</p>
         </section>
 
+        <nav class="wrap reading-nav" :aria-label="t.readingLabel">
+          <span>{{ t.readingLabel }}</span>
+          <a :href="link('/adhkar/sobhgahi')">{{ t.morningReading }}</a>
+          <a :href="link('/adhkar/shamgahi')">{{ t.eveningReading }}</a>
+        </nav>
+
         <!-- Features -->
         <section id="features" class="wrap features">
           <div class="section-head reveal">
@@ -248,6 +254,7 @@ const sizes = { adhkar: [576, 1280], prayer: [532, 402], checklist: [576, 1280],
 
 const T = {
   fa: {
+    readingLabel: 'خواندن اذکار در وب‌سایت', morningReading: 'اذکار صبحگاهی با ترجمهٔ فارسی', eveningReading: 'اذکار شامگاهی با ترجمهٔ فارسی',
     skip: 'رفتن به محتوا', navLabel: 'منوی اصلی', footLabel: 'پیوندها', factsLabel: 'مشخصات',
     langLabel: 'زبان', themeLabel: 'تغییر حالت روشن و تاریک',
     name: 'اذکار نور', navFeatures: 'امکانات', navPrivacy: 'حریم خصوصی', navDownload: 'دریافت', navSupport: 'حمایت', navAdhkar: 'اذکار و ادعیه', navBlog: 'مقالات',
@@ -288,6 +295,7 @@ const T = {
     footer: '© اذکار نور'
   },
   ar: {
+    readingLabel: 'قراءة الأذكار في الموقع', morningReading: 'نص أذكار الصباح', eveningReading: 'نص أذكار المساء',
     skip: 'انتقل إلى المحتوى', navLabel: 'القائمة الرئيسية', footLabel: 'روابط', factsLabel: 'مواصفات',
     langLabel: 'اللغة', themeLabel: 'تبديل الوضع الفاتح والداكن',
     name: 'أذكار نور', navFeatures: 'المزايا', navPrivacy: 'الخصوصية', navDownload: 'التحميل', navSupport: 'الدعم', navAdhkar: 'الأذكار والأدعية', navBlog: 'المقالات',
@@ -328,6 +336,7 @@ const T = {
     footer: '© أذكار نور'
   },
   ckb: {
+    readingLabel: 'خوێندنەوەی ئەزکار لە ماڵپەڕ', morningReading: 'دەقی ئەزکاری بەیانی', eveningReading: 'دەقی ئەزکاری ئێوارە',
     skip: 'بازدان بۆ ناوەڕۆک', navLabel: 'مێنووی سەرەکی', footLabel: 'بەستەرەکان', factsLabel: 'تایبەتمەندییەکان',
     langLabel: 'زمان', themeLabel: 'گۆڕینی دۆخی ڕووناک و تاریک',
     name: 'ئەزکاری نوور', navFeatures: 'تایبەتمەندییەکان', navPrivacy: 'نهێنیپارێزی', navDownload: 'دابەزاندن', navSupport: 'پشتگیری', navAdhkar: 'ئەزکار و دوعا', navBlog: 'وتارەکان',
@@ -655,6 +664,9 @@ h1 .w2::after { content: ""; position: absolute; inset-inline: 10%; bottom: -0.1
 .verse-ref { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
 
 /* Features */
+.reading-nav { display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px; padding-block:16px; }
+.reading-nav span { color:var(--muted); }
+.reading-nav a { color:inherit; text-decoration:underline; text-underline-offset:.25em; padding-block:8px; }
 .features { padding-block: 112px 48px; }
 .section-head { max-width: 34em; margin-bottom: 40px; }
 h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.3; }

@@ -8,10 +8,11 @@ The API returns a standard Laravel paginator with 20 entries per page, ordered b
 
 The Persian RTL page renders each nonempty changelog line as escaped text, formats release dates in the Persian calendar, and supports loading, empty, retry, and older-version states. No changelog HTML is executed. Route metadata and sitemap generation include `/updates`.
 
-The content generator copies the built SPA entry into `dist/updates/index.html`, so direct visits work with the existing nginx static-page routing without a server configuration change. The page still fetches current admin data at runtime.
+The content generator uses `scripts/updates-document.mjs` to give `dist/updates/index.html` its own title, description, canonical, structured data and the current first page of release notes in the initial response. It removes the homepage prerender/cleanup code while preserving Vue bootstrap and pagination. Direct visits work with existing nginx static routing. Vue still fetches current admin data at runtime; initial static release notes are refreshed by a website build, not the article timer.
 
 Validation:
 
 - Backend: `php artisan test --filter=AppVersionsTest` from `backend/`.
 - Frontend: `npx vitest run src/views/__tests__/UpdatesView.spec.js` from `Nour Adhkar/`.
+- Initial HTML: `node --test scripts/__tests__/updates-document.test.mjs`; after building, `node scripts/verify-built-seo.mjs`.
 - Deploy both the API route/controller and frontend bundle together. This source change alone does not deploy the public site.

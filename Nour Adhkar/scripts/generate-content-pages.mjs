@@ -12,6 +12,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
 import { LANGS, LOCALE, T, COLLECTION_TEXT, num, fmtDate, isPersianSpelling } from './content-i18n.mjs'
+import { reviewedDhikr } from './collection-editorial.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -92,12 +93,26 @@ const maxDate = list => list.map(x => x && x.updated_at).filter(Boolean).sort().
 const clip = (s, n) => (s.length <= n ? s : s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…')
 const hasHarakat = s => (s.match(/[ً-ْ]/g) || []).length >= 3
 
-const lines = (v) => v.split(/\n{2,}/)
+const lines = (v) => v.replace(/\r\n?/g, '\n').split(/\n[\t ]*\n+/)
 
-function formatArticle(content) {
+// Article content remains plain text. Linkify only web URLs after escaping every other byte;
+// neither imported HTML nor javascript:/data: links are interpreted as markup.
+function articleText(value) {
+  return String(value).split(/(https?:\/\/[^\s<>"'«»]+)/gu).map((part, i) => {
+    if (i % 2 === 0) return esc(part)
+    const url = part.replace(/[.,؛،؟!。)\]}]+$/u, '')
+    try {
+      const parsed = new URL(url)
+      if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) return esc(part)
+      return `<a href="${esc(parsed.href)}" rel="noopener noreferrer">${esc(url)}</a>${esc(part.slice(url.length))}`
+    } catch { return esc(part) }
+  }).join('')
+}
+
+export function formatArticle(content) {
   const out = []
   const clean = r => r.replace(/\p{Extended_Pictographic}️?/gu, '').trim()
-  const isHeading = r => r.length <= 60 && !/[.!؛:،«»”)]$/.test(r) && !r.startsWith('•')
+  const isHeading = r => r.length <= 60 && !/[.!؛:،«»”)]$/.test(r) && !r.startsWith('•') && !/https?:\/\//.test(r) && !r.startsWith('[')
   for (const block of lines(String(content || '').trim())) {
     const rows = block.split('\n').map(r => r.trim()).filter(Boolean)
     let i = 0
@@ -109,10 +124,10 @@ function formatArticle(content) {
     let bullets = []
     const flush = () => { if (bullets.length) { out.push('<ul>' + bullets.join('') + '</ul>'); bullets = [] } }
     for (const r of rows.slice(i)) {
-      if (r.startsWith('•')) { bullets.push(`<li>${esc(r.replace(/^•\s*/, ''))}</li>`); continue }
+      if (r.startsWith('•')) { bullets.push(`<li>${articleText(r.replace(/^•\s*/, ''))}</li>`); continue }
       flush()
       if (r.startsWith('«') && hasHarakat(r)) out.push(`<blockquote class="ar" lang="ar" dir="rtl">${esc(r)}</blockquote>`)
-      else out.push(`<p>${esc(r)}</p>`)
+      else out.push(`<p>${articleText(r)}</p>`)
     }
     flush()
   }
@@ -150,6 +165,7 @@ blockquote.ar{border-inline-start:3px solid var(--pri);padding:.2rem 1rem;margin
 footer.foot{border-top:1px solid var(--line);padding:1.2rem 0;color:var(--mut);font-size:.9rem}
 footer.foot .wrap{display:flex;gap:1rem;flex-wrap:wrap}footer.foot a{color:var(--mut)}
 .meta{color:var(--mut);font-size:.88rem}ul{padding-inline-start:1.3rem}
+.toc ul{display:flex;flex-wrap:wrap;gap:.35rem 1.1rem;list-style:none;padding:0}.toc a{display:inline-block;padding:.25rem 0}.item{scroll-margin-top:1rem}.item h2{margin:0 0 .3rem;font-size:1.05rem}.source a,article p a,article li a{overflow-wrap:anywhere;text-decoration:underline;text-underline-offset:.2em}.reading-links{display:flex;flex-wrap:wrap;gap:.5rem 1rem}html{scroll-behavior:smooth}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 `
 
 // Path of a page in a language: Persian at the root, Arabic under /ar, Kurdish under /ckb.
@@ -297,17 +313,28 @@ function writePage(urlPath, html, meta = {}) {
 // Persian pages show each dhikr's title and Persian meaning. Arabic and Kurdish pages show the
 // Arabic text only (as the app does): there are no sourced meanings in those languages, and a
 // title in Persian spelling is left out.
-function adhkarItems(list, lang = 'fa') {
+const dhikrTitle = (item, lang) => (lang === 'fa' && reviewedDhikr(item)?.title)
+  || (item.title && (lang === 'fa' || !isPersianSpelling(item.title)) ? item.title : '')
+  || clip(String(item.arabic_text || '').replace(/\s+/g, ' ').trim(), 64)
+
+function adhkarItems(list, lang = 'fa', collectionSlug = '', idPrefix = 'dhikr') {
   const t = T[lang]
   return list.map((a, i) => {
-    const count = Number(a.count) > 1 ? `<span class="badge">${esc(t.repeat(a.count))}</span>` : ''
-    const title = a.title && (lang === 'fa' || !isPersianSpelling(a.title)) ? `<h3>${esc(a.title)}</h3>` : ''
-    return `<article class="item" id="dhikr-${i + 1}">
+    const review = reviewedDhikr(a)
+    const verifiedCount = review?.count === Number(a.count) && (!review.contexts || review.contexts.includes(collectionSlug))
+    const countLabel = verifiedCount ? (review.daily ? t.dailyRepeat(a.count) : t.repeat(a.count)) : t.recordedCount(a.count)
+    const count = Number(a.count) > 1 ? `<span class="badge">${esc(countLabel)}</span>` : ''
+    const displayTitle = dhikrTitle(a, lang)
+    const title = displayTitle ? `<h2>${esc(displayTitle)}</h2>` : ''
+    const source = review ? `<p class="meta source">${esc(t.sourceLabel)} ${review.references.map(r => `<a href="${esc(r.url)}" rel="noopener noreferrer">${esc(lang === 'fa' ? r.label : r.nativeLabel)}</a>`).join(' · ')}</p>` : ''
+    return `<article class="item" id="${idPrefix}-${i + 1}">
 ${title}
 ${a.prefix ? `<p class="meta" lang="ar">${esc(a.prefix)}</p>` : ''}
 <p class="ar" lang="ar" dir="rtl">${esc(a.arabic_text)}</p>
-${lang === 'fa' && a.translation ? `<p>${esc(a.translation)}</p>` : ''}
+${lang === 'fa' && (review?.translation || a.translation) ? `<p>${esc(review?.translation || a.translation)}</p>` : ''}
 ${count}
+${source}
+${lang === 'fa' && review?.note ? `<p class="meta">${esc(review.note)}</p>` : ''}
 </article>`
   }).join('\n')
 }
@@ -317,16 +344,20 @@ function buildCollectionPage(base, col, siblings, lang) {
   const def = collectionText(base, lang)
   const p = lp(lang, def.path)
   const list = col.adhkar || []
-  const updated = maxDate(list) || col.updated_at
+  const updated = [maxDate(list) || col.updated_at, ...list.map(a => reviewedDhikr(a)?.reviewedOn)].filter(Boolean).sort().pop()
   const desc = clip(lang === 'fa' ? t.collectionDesc(def.name, toFa(list.length)) : t.collectionDesc(def.name, num(lang, list.length)), 155)
   const trail = [[t.home, '/'], [t.adhkar, lp(lang, '/adhkar')], [def.name, p]]
   const others = siblings.filter(s => s.path !== base.path).map(s => collectionText(s, lang))
+  const dailyCollection = base.slug === 'morning' || base.slug === 'night'
+  const itemLabel = (a, i) => dhikrTitle(a, lang) || `${t.dhikrLabel} ${num(lang, i + 1)}`
   const body = `${crumbsHtml(lang, trail)}
 <h1>${esc(def.h1)}</h1>
 <p class="lead">${esc(def.intro)}</p>
-${(base.slug === 'morning' || base.slug === 'night') ? `<p><a href="${lp(lang, '/app')}">${esc(t.appCta)}</a></p>` : ''}
+${dailyCollection ? `<p class="lead">${esc(t.audioLocation)}</p>${ctaBlock(lang, t.audioCta)}<p class="reading-links"><a href="${lp(lang, base.slug === 'morning' ? '/adhkar/shamgahi' : '/adhkar/sobhgahi')}">${esc(t.otherTime)}</a><a href="/blog/daily-adhkar-start"${lang !== 'fa' ? ' hreflang="fa" lang="fa"' : ''}>${esc(t.startReading)}</a></p>` : ''}
 <p class="meta">${esc(t.dhikrCount(list.length))} · ${esc(t.updated(fmtDate(lang, updated)))}</p>
-${adhkarItems(list, lang)}
+<details class="toc"><summary>${esc(t.contents)}</summary><nav aria-label="${esc(t.contents)}"><ul>${list.map((a, i) => `<li><a href="#dhikr-${i + 1}">${esc(itemLabel(a, i))}</a></li>`).join('')}</ul></nav></details>
+${dailyCollection ? `<p class="meta">${esc(t.sourceScope)}</p>` : ''}
+${adhkarItems(list, lang, base.slug)}
 ${ctaBlock(lang)}
 <h2>${esc(t.otherCollections)}</h2>
 <div class="cards">${others.map(o => `<a href="${lp(lang, o.path)}"><strong>${esc(o.name)}</strong><span>${esc(t.viewText)}</span></a>`).join('')}<a href="${lp(lang, '/blog')}"><strong>${esc(t.blog)}</strong><span>${esc(t.blogCardSub)}</span></a></div>`
@@ -344,17 +375,17 @@ function buildOverviewPage(morning, night) {
   const title = 'اذکار صبح و شام اهل سنت (صوتی) | اذکار نور'
   const desc = 'اذکار صبح و شام اهل سنت با متن عربی و ترجمهٔ فارسی؛ پخش صوتی با صدای مشاری راشد العفاسی، شمارندهٔ تکرار و یادآور در اپلیکیشن اذکار نور.'
   const trail = [['خانه', '/'], ['اذکار و ادعیه', '/adhkar'], ['اذکار صبح و شام اهل سنت', p]]
-  const preview = (list, n) => adhkarItems(list.filter(a => a.arabic_text).slice(0, n))
+  const preview = (list, n, slug) => adhkarItems(list.filter(a => a.arabic_text).slice(0, n), 'fa', slug, slug + '-dhikr')
   const body = `${crumbsHtml(lang, trail)}
 <h1>اذکار صبح و شام اهل سنت؛ متن، ترجمه و نسخهٔ صوتی</h1>
 <p class="lead">اذکار نور اپلیکیشن جامع اذکار و ادعیهٔ اهل سنت است. اذکار صبح و شام در آن با متن عربی، ترجمهٔ فارسی، شمارندهٔ تکرار، یادآور و پخش صوتی با صدای مشاری راشد العفاسی ارائه می‌شود و بدون اینترنت و بدون تبلیغ کار می‌کند.</p>
 <h2>اذکار صبحگاهی</h2>
 <p>${toFa((morning.adhkar || []).length)} ذکر با متن عربی و ترجمهٔ فارسی. چند نمونه:</p>
-${preview(morning.adhkar || [], 2)}
+${preview(morning.adhkar || [], 2, 'morning')}
 <p><a href="/adhkar/sobhgahi">مشاهدهٔ همهٔ اذکار صبحگاهی ←</a></p>
 <h2>اذکار شامگاهی</h2>
 <p>${toFa((night.adhkar || []).length)} ذکر با متن عربی و ترجمهٔ فارسی. چند نمونه:</p>
-${preview(night.adhkar || [], 2)}
+${preview(night.adhkar || [], 2, 'night')}
 <p><a href="/adhkar/shamgahi">مشاهدهٔ همهٔ اذکار شامگاهی ←</a></p>
 <h2>در اپلیکیشن چه می‌بینید؟</h2>
 <ul><li>متن عربی خوانا با ترجمهٔ فارسی و شمارندهٔ تکرار</li><li>پخش صوتی اذکار با صدای مشاری راشد العفاسی</li><li>یادآور صبح و شام با انتخاب روزهای هفته</li><li>اوقات شرعی، قبله‌نما و ذکرشمار</li><li>رابط راست‌به‌چپ به فارسی، عربی و کوردی</li></ul>
@@ -418,7 +449,7 @@ function buildAboutPage(lang) {
   const body = `${crumbsHtml(lang, trail)}
 <h1>${esc(t.aboutH1)}</h1>
 <p class="lead">${esc(t.aboutLead)}</p>
-${t.aboutSections.map(([h, html]) => `<h2>${esc(h)}</h2>\n<p>${html.replace(/\{github\}/g, GITHUB)}</p>`).join('\n')}
+${t.aboutSections.map(([h, html], i) => `<h2${i === 0 ? ' id="author"' : ''}>${esc(h)}</h2>\n<p>${html.replace(/\{github\}/g, GITHUB)}</p>`).join('\n')}
 ${ctaBlock(lang)}`
   const schema = [crumbs(trail), { '@context': 'https://schema.org', '@type': 'AboutPage', name: t.aboutH1, url: SITE + p, inLanguage: lang, description: t.aboutDesc, isPartOf: website(lang), publisher: publisher(lang) }]
   writePage(p, layout({ lang, title: t.aboutTitle, description: t.aboutDesc, path: p, alts: allLangs('/about'), body, schema }), { priority: '0.4', changefreq: 'yearly' })
@@ -461,9 +492,11 @@ function buildBlog(posts, lang, emit = writePage) {
   const idx = lp(lang, '/blog')
   const trailIdx = [[t.home, '/'], [t.blog, idx]]
   const card = (p, l) => `<article class="item"${l === 'fa' && lang !== 'fa' ? ' lang="fa"' : ''}><h3><a href="${lp(l, '/blog/' + p.slug)}">${esc(p.title)}</a></h3><p>${esc(clip(p.excerpt || p.meta_description || '', 200))}</p><p class="meta">${esc(fmtDate(l, p.published_at))}</p></article>`
+  const guide = own.find(p => p.slug === 'daily-adhkar-start')
   const idxBody = `${crumbsHtml(lang, trailIdx)}
 <h1>${esc(t.blog)}</h1>
 <p class="lead">${esc(t.blogLead)}</p>
+${lang === 'fa' ? `<nav class="reading-links" aria-label="شروع مطالعه"><a href="/adhkar/sobhgahi">متن اذکار صبحگاهی</a><a href="/adhkar/shamgahi">متن اذکار شامگاهی</a>${guide ? `<a href="/blog/${esc(guide.slug)}">از کجا شروع کنیم؟</a>` : ''}</nav>` : ''}
 ${own.length ? own.map(p => card(p, lang)).join('\n') : persianOnly.length ? '' : `<p>${esc(t.blogEmpty)}</p>`}
 ${persianOnly.length ? `<h2>${esc(t.blogOnlyFa)}</h2>\n${persianOnly.map(p => card(p, 'fa')).join('\n')}` : ''}
 ${ctaBlock(lang)}`
@@ -484,11 +517,14 @@ ${ctaBlock(lang)}`
     const night = collectionText(COLLECTION_PAGES[1], lang)
     const meta = [t.published(fmtDate(lang, post.published_at))]
     if (post.updated_at && fmtDate(lang, post.updated_at) !== fmtDate(lang, post.published_at)) meta.push(t.updatedOn(fmtDate(lang, post.updated_at)))
-    if (post.user && post.user.name) meta.push(t.author(post.user.name))
+    const authorName = post.user?.name || 'ادریس رنجبر'
+    const knownAuthor = /^(?:ادریس(?: رنجبر)?|edris(?: ranjbar)?)$/i.test(authorName.trim())
+    const authorUrl = knownAuthor ? SITE + lp(lang, '/about') + '#author' : null
+    const authorMeta = post.user?.name ? ` · ${knownAuthor ? `<a href="${lp(lang, '/about')}#author" rel="author">${esc(t.author(authorName))}</a>` : esc(t.author(authorName))}` : ''
     const body = `${crumbsHtml(lang, trail)}
 <article>
 <h1>${esc(post.title)}</h1>
-<p class="meta">${esc(meta.join(' · '))}</p>
+<p class="meta">${esc(meta.join(' · '))}${authorMeta}</p>
 ${formatArticle(post.content)}
 </article>
 ${ctaBlock(lang)}
@@ -498,7 +534,7 @@ ${more.length ? `<h2>${esc(t.moreArticles)}</h2><div class="cards">${more.map(m 
     const schema = [crumbs(trail), {
       '@context': 'https://schema.org', '@type': 'Article', headline: clip(post.title, 110), description: desc, inLanguage: lang,
       datePublished: post.published_at, dateModified: post.updated_at || post.published_at,
-      author: { '@type': 'Person', name: (post.user && post.user.name) || 'ادریس رنجبر' }, publisher: publisher(lang),
+      author: { '@type': 'Person', name: authorName, ...(authorUrl ? { url: authorUrl } : {}) }, publisher: publisher(lang),
       mainEntityOfPage: { '@type': 'WebPage', '@id': SITE + p }, image: [OG_IMAGE]
     }]
     emit(p, layout({ lang, title, description: desc, path: p, alts, missing: '/blog', body, schema, ogType: 'article' }), { lastmod: isoDay(post.updated_at || post.published_at), priority: lang === 'fa' ? '0.6' : '0.5' })
