@@ -16,6 +16,11 @@ const siteUrl = 'https://adhkar.ir';
 // Define routes manually
 const routes = [
   {
+    path: '/updates',
+    changefreq: 'weekly',
+    priority: '0.6'
+  },
+  {
     path: '/',
     changefreq: 'monthly',
     priority: '1.0'
@@ -26,12 +31,6 @@ const routes = [
     priority: '0.3'
   }
 ];
-
-// Generate current date for lastmod
-const getFormattedDate = () => {
-  const date = new Date();
-  return date.toISOString().split('T')[0];
-};
 
 /**
  * Generate XML sitemap
@@ -52,7 +51,6 @@ function generateSitemap() {
     pages.forEach(page => {
       xml += `  <url>
     <loc>${siteUrl}${page.path}</loc>
-    <lastmod>${getFormattedDate()}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>
@@ -74,4 +72,4 @@ function generateSitemap() {
 }
 
 // Execute the function
-generateSitemap(); 
+generateSitemap();

@@ -39,4 +39,6 @@ jobs:
         working-directory: Nour Adhkar
         run: |
           npm install --no-audit --no-fund
+          node --test scripts/__tests__/content-reading.test.mjs scripts/__tests__/updates-document.test.mjs
           npm run build
+          node scripts/verify-built-seo.mjs

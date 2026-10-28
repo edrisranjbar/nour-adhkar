@@ -4,6 +4,8 @@ Articles use incremental server-side regeneration. The server checks the publish
 
 The shared renderer in `Nour Adhkar/scripts/generate-content-pages.mjs` serves both the initial build and `scripts/refresh-articles.mjs`. Persian, Arabic and Kurdish blog indexes, existing Arabic article translations, canonical URLs, structured data, related links and the sitemap are updated together. Untranslated articles remain Persian; translations are never invented. Other website pages remain build-time generated.
 
+Article bodies remain escaped plain text. The renderer normalizes Windows/Mac line endings before splitting blank-line paragraphs, recognizes existing short section headings, and turns HTTP(S) reference URLs into escaped links. Raw HTML and non-web schemes remain text. Known project-author bylines link to the about page; guest authors do not inherit that identity. Renderer dependencies, including the website's exact-text editorial ledger, are included in the refresh revision and must ship together. The editorial ledger changes collection output only at website build time; it does not edit admin/database or Android content.
+
 ## Runtime and failure behavior
 
 - `deploy/refresh-articles.sh` runs under the deploy user's crontab every minute. CI ships its official Node 22 runtime into private project storage; the host's system Node is untouched. It also requires `flock`, `crontab` and outbound API access, with no npm dependencies.

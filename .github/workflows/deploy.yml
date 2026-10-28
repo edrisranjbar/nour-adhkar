@@ -9,6 +9,10 @@ on:
     paths: ["backend/**", "Nour Adhkar/**", "deploy/**", ".github/workflows/deploy.yml"]
   workflow_dispatch:
     inputs:
+      publish_app_adhkar_only:
+        description: "Publish only the reviewed app adhkar content batch"
+        type: boolean
+        default: false
       schedule_articles_only:
         description: "Import the approved private two-article batch without deploying application code"
         type: boolean
@@ -25,8 +29,15 @@ on:
 concurrency: deploy
 
 jobs:
+  app-adhkar:
+    if: ${{ inputs.publish_app_adhkar_only }}
+    uses: ./.github/workflows/publish-app-adhkar.yml
+    with:
+      publish: true
+    secrets: inherit
+
   deploy:
-    if: ${{ !inputs.progress_sync_only && !inputs.website_preflight_only && !inputs.schedule_articles_only }}
+    if: ${{ !inputs.publish_app_adhkar_only && !inputs.progress_sync_only && !inputs.website_preflight_only && !inputs.schedule_articles_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +92,7 @@ jobs:
           fi
           # Update the checkout first so the deploy script itself is always current.
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "cd '$APP_DIR' && git fetch --quiet origin main && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
+            "cd '$APP_DIR' && git fetch --quiet origin ${{ github.sha }} && git reset --hard ${{ github.sha }} && APP_DIR='$APP_DIR' WEB_ROOT='$WEB_ROOT' bash deploy/deploy.sh ${{ github.sha }}"
 
       - name: Verify live articles and automatic refresh
         env:
@@ -91,6 +102,7 @@ jobs:
           APP_DIR: ${{ vars.DEPLOY_APP_DIR }}
         run: |
           node 'Nour Adhkar/scripts/verify-live-articles.mjs'
+          node 'Nour Adhkar/scripts/verify-live-updates.mjs'
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' bash -s" <<'REMOTE'
           set -eu
           crontab -l | grep '# nour-adhkar-articles$'
@@ -110,7 +122,7 @@ jobs:
           REMOTE
 
   progress-sync:
-    if: ${{ inputs.progress_sync_only && !inputs.website_preflight_only && !inputs.schedule_articles_only }}
+    if: ${{ !inputs.publish_app_adhkar_only && inputs.progress_sync_only && !inputs.website_preflight_only && !inputs.schedule_articles_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -167,7 +179,7 @@ jobs:
           test "$status" = 401
 
   website-preflight:
-    if: ${{ inputs.website_preflight_only && !inputs.schedule_articles_only }}
+    if: ${{ !inputs.publish_app_adhkar_only && inputs.website_preflight_only && !inputs.schedule_articles_only }}
     runs-on: ubuntu-latest
     steps:
       - name: Inspect website routing
@@ -186,6 +198,8 @@ jobs:
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' bash -s" <<'REMOTE'
           set -eu
           id
+          git -C "$APP_DIR" status --short
+          df -h "$APP_DIR"
           sudo -n -l
           node --version
           command -v php
@@ -200,7 +214,7 @@ jobs:
           REMOTE
 
   schedule-articles:
-    if: ${{ inputs.schedule_articles_only && !inputs.website_preflight_only && !inputs.progress_sync_only }}
+    if: ${{ !inputs.publish_app_adhkar_only && inputs.schedule_articles_only && !inputs.website_preflight_only && !inputs.progress_sync_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
