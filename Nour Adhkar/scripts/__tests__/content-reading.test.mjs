@@ -41,3 +41,41 @@ test('an author is linked to the actual about page only for the known project au
   assert.doesNotMatch(other, /rel="author"/)
   assert.doesNotMatch(other, /"name":"نویسندهٔ مهمان","url"/)
 })
+
+test('every morning and evening card has an exact-text review and identifiable sources', () => {
+  const cols = JSON.parse(fs.readFileSync(new URL('../../content-snapshot/collections.json', import.meta.url), 'utf8'))
+  const daily = cols.filter(c => ['morning', 'night'].includes(c.slug)).flatMap(c => c.adhkar)
+  assert.equal(daily.length, 45)
+  for (const item of daily) {
+    const review = reviewedDhikr(item)
+    assert.ok(review, `Missing exact-text review for card ${item.id}`)
+    assert.ok(review.references.length, `Missing source for card ${item.id}`)
+    assert.ok(review.note, `Missing source-scope explanation for card ${item.id}`)
+    for (const source of review.references) assert.equal(new URL(source.url).protocol, 'https:')
+    assert.equal(reviewedDhikr({...item, arabic_text: item.arabic_text + ' نص زائد'}), null)
+  }
+})
+
+test('review distinguishes weak reports, wording variants, and evening-only repetition', () => {
+  const items = JSON.parse(fs.readFileSync(new URL('../../content-snapshot/collections.json', import.meta.url), 'utf8')).flatMap(c => c.adhkar || [])
+  const review = id => reviewedDhikr(items.find(a => a.id === id))
+  for (const id of [14, 15, 24, 29, 31, 33, 42, 43]) {
+    assert.equal(review(id).reviewStatus, 'weak-report')
+    assert.equal(review(id).count, undefined, `Do not authenticate a weak report's repetition: ${id}`)
+    assert.ok(review(id).noteAr)
+  }
+  assert.equal(review(25).reviewStatus, 'wording-variant')
+  assert.equal(review(41), review(25))
+  assert.deepEqual(review(26).contexts, ['night'])
+  assert.equal(review(44), review(26))
+  for (const id of [5, 13, 16, 23, 27, 28, 30]) assert.equal(review(id).count, undefined)
+})
+
+test('Persian meaning covers the displayed excerpt and fixes the trust pronoun', () => {
+  const items = JSON.parse(fs.readFileSync(new URL('../../content-snapshot/collections.json', import.meta.url), 'utf8')).flatMap(c => c.adhkar || [])
+  const morning = reviewedDhikr(items.find(a => a.id === 11))
+  assert.doesNotMatch(morning.translation, /پیری|قبر|آتش|تنبلی/)
+  assert.match(morning.note, /بخشی از دعا/)
+  assert.match(reviewedDhikr(items.find(a => a.id === 16)).translation, /بر او توکل/)
+  assert.match(reviewedDhikr(items.find(a => a.id === 41)).translation, /به تو پناه می‌برم/)
+})

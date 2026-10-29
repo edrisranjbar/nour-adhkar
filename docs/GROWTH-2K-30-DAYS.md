@@ -6,9 +6,9 @@ Prepared 27 October 2026. Acquisition window: **28 October–26 November 2026**,
 
 Make relevant community partnerships the main growth experiment. Use Instagram to demonstrate the app, referrals to extend distribution, and SEO to improve discovery and the path to installation. Do not spend this month building new features or publishing large volumes of generic articles.
 
-The owner reports approximately **1,000 Bazaar + 50 Myket = 1,050**, leaving **about 950**, or **31.67 new installs/day**. These are approximate owner-supplied starting figures, not an independently verified private-panel baseline. Public store badges and our admin scraper are rounded; use private store reports for exact daily acquisition. A combined total is a sum of store counts, not a deduplicated count of people across stores. Do not count updates, reinstalls or website clicks as first-time installs.
+The original planning scenario used the owner's approximate **1,000 Bazaar + 50 Myket = 1,050**, leaving **about 950**, or **31.67 new installs/day**. That historical estimate is not a currently measured combined baseline. Public store badges and our admin scraper are rounded; use private store reports for exact daily acquisition. A combined total is a sum of store counts, not a deduplicated count of people across stores. Do not count updates, reinstalls or website clicks as first-time installs.
 
-Day 0: record exact first-time install totals and the previous 14 complete daily values from both store panels. If the reported figure instead means active installations, retain that definition for the 2K headline and track gross new installs and uninstalls separately; gross installs alone will not prove the active-install target was reached.
+Measurement setup was confirmed complete by the owner on 29 October, except Myket: the owner reports that its install figure is not visible until 100 installs. Keep Myket **unavailable / below the reporting threshold**; do not substitute zero, the earlier approximate 50, or website clicks. Keep the Bazaar metric's existing definition. When Myket becomes visible, record that first observed figure/date; it does not reconstruct the preceding daily history. Until then, the exact combined total and remaining daily requirement are unavailable. Bazaar-only totals may be shown as a clearly labelled confirmed lower bound, without claiming they equal the combined total.
 
 ## What the evidence says
 
@@ -39,17 +39,17 @@ Sensitivity: a conservative operating case (150 baseline + 150 partnerships + 50
 
 | Date | Checkpoint | New installs in interval | Combined total target |
 |---|---|---:|---:|
-| 27 Oct | Exact baseline captured | — | About 1,050 |
+| 27 Oct | Original approximate planning baseline; Myket now unavailable | — | About 1,050 (scenario only) |
 | 3 Nov | Day 7 | 210 | 1,260 |
 | 10 Nov | Day 14 | 230 | 1,490 |
 | 17 Nov | Day 21 | 240 | 1,730 |
 | 26 Nov | Day 30 | 270 | 2,000 |
 
-If the exact baseline differs, preserve the 2,000 endpoint and recalculate the gap and daily requirement. At each checkpoint calculate **(2,000 − actual combined total) / days remaining**. For example, 1,200 on Day 7 leaves 800/23 = 34.8/day.
+These checkpoints retain the original planning scenario. Calculate **(2,000 − actual combined total) / days remaining** only when both compatible store totals are available. While Myket is unavailable, report Bazaar progress separately and leave exact combined progress and its required daily rate unknown. For example, a measured combined 1,200 on Day 7 would leave 800/23 = 34.8/day.
 
 ## Daily operating routine (about 90 minutes)
 
-1. **10 minutes:** enter yesterday's new installs for each store, current headline totals and relevant store-page conversion figures if available. Use Tehran dates and complete days. Mark unavailable values blank, not zero.
+1. **10 minutes:** continue the existing tracking setup; enter yesterday's available Bazaar values and store-page conversion figures. Myket remains blank with status `unavailable_below_100` until its figure is displayed. Use Tehran dates and complete days. Never backfill unknown days with zero or spread the first visible Myket total across previous days.
 2. **25 minutes:** contact two carefully selected page/channel/community admins, using a personal opening and a prepared demo. Record accepted/declined/pending and actual placement date. Follow up once after 3–4 days. Do not send unsolicited bulk messages.
 3. **35 minutes:** create/publish the scheduled short demo or useful carousel; reuse real app footage and the existing Morabba brand typography. Share one story with the store link. Respect the already approved posting calendar; replace a planned item rather than duplicating it.
 4. **10 minutes:** answer actual questions/reviews and remove friction in the download instructions.

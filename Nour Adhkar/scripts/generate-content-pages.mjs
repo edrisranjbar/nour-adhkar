@@ -326,7 +326,8 @@ function adhkarItems(list, lang = 'fa', collectionSlug = '', idPrefix = 'dhikr')
     const count = Number(a.count) > 1 ? `<span class="badge">${esc(countLabel)}</span>` : ''
     const displayTitle = dhikrTitle(a, lang)
     const title = displayTitle ? `<h2>${esc(displayTitle)}</h2>` : ''
-    const source = review ? `<p class="meta source">${esc(t.sourceLabel)} ${review.references.map(r => `<a href="${esc(r.url)}" rel="noopener noreferrer">${esc(lang === 'fa' ? r.label : r.nativeLabel)}</a>`).join(' · ')}</p>` : ''
+    const source = review?.references?.length ? `<p class="meta source">${esc(t.sourceLabel)} ${review.references.map(r => `<a href="${esc(r.url)}" rel="noopener noreferrer">${esc(lang === 'fa' ? r.label : r.nativeLabel)}</a>`).join(' · ')}</p>` : ''
+    const editorialNote = lang === 'fa' ? review?.note : review?.noteAr
     return `<article class="item" id="${idPrefix}-${i + 1}">
 ${title}
 ${a.prefix ? `<p class="meta" lang="ar">${esc(a.prefix)}</p>` : ''}
@@ -334,7 +335,7 @@ ${a.prefix ? `<p class="meta" lang="ar">${esc(a.prefix)}</p>` : ''}
 ${lang === 'fa' && (review?.translation || a.translation) ? `<p>${esc(review?.translation || a.translation)}</p>` : ''}
 ${count}
 ${source}
-${lang === 'fa' && review?.note ? `<p class="meta">${esc(review.note)}</p>` : ''}
+${editorialNote ? `<p class="meta editorial-note" lang="${lang === 'fa' ? 'fa' : 'ar'}" dir="rtl">${esc(editorialNote)}</p>` : ''}
 </article>`
   }).join('\n')
 }
