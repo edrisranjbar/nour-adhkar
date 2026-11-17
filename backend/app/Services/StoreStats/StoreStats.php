@@ -33,7 +33,7 @@ class StoreStats
         $result = [];
 
         foreach ($this->providers() as $key => $provider) {
-            $fresh = Cache::remember("store-metrics:$key", config('stores.cache_seconds', 600), function () use ($provider, $key) {
+            $fresh = Cache::remember("store-metrics:v2:$key", config('stores.cache_seconds', 600), function () use ($provider, $key) {
                 $metrics = $provider->metrics();
                 $installs = $metrics['installs'];
                 if ($installs !== null) {
@@ -79,6 +79,11 @@ class StoreStats
         return $result;
     }
 
+    public static function completeTotal(array $counts): ?int
+    {
+        return $counts === [] || in_array(null, $counts, true) ? null : array_sum($counts);
+    }
+
     /**
      * Overall install totals per Tehran calendar day, oldest first.
      * Each point uses the day's latest observation, carrying the last known total on unobserved
@@ -122,7 +127,9 @@ class StoreStats
             $stores[$key] = $counts;
         }
 
-        return ['days' => $labels, 'stores' => $stores];
+        $total = array_map(fn (int $index) => self::completeTotal(array_column($stores, $index)), array_keys($labels));
+
+        return ['days' => $labels, 'stores' => $stores, 'total' => $total];
     }
 
     /** Stores a snapshot when the number changed or the last one is older than the heartbeat. */

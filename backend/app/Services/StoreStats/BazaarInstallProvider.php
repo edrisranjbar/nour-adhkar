@@ -84,11 +84,15 @@ class BazaarInstallProvider implements StoreInstallProvider
      */
     public static function parseInstalls(string $html): ?int
     {
+        if (preg_match('~<dt[^>]*>\s*نصب\s*</dt>\s*<dd[^>]*>(.*?)</dd>~su', $html, $match)) {
+            return self::parseCount(html_entity_decode(strip_tags($match[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        }
+
         if (!preg_match('~InfoCube__title[^>]*>\s*نصب\s*</td>\s*<td[^>]*>(.*?)</td>~su', $html, $match)) {
             return null;
         }
 
-        return self::parseCount(strip_tags(preg_replace('/<!--.*?-->/s', '', $match[1])));
+        return self::parseCount(html_entity_decode(strip_tags(preg_replace('/<!--.*?-->/s', '', $match[1])), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     /** Turns text such as «۵۵۰», «۱٬۲۵۰», «۱۲ هزار» or «۱٫۵ میلیون» into a whole number. */
@@ -100,6 +104,7 @@ class BazaarInstallProvider implements StoreInstallProvider
             '٬' => '', ',' => '', '،' => '', '٫' => '.', '+' => '',
         ]);
         $text = trim(preg_replace('/[\s\x{200c}\x{200e}\x{200f}]+/u', ' ', $text));
+        $text = preg_replace('/^(\d+) و (\d+)\s*دهم(?=\s|$)/u', '$1.$2', $text);
 
         if (!preg_match('/^(\d+(?:\.\d+)?)\s*(هزار|میلیون|k|m)?$/iu', $text, $match)) {
             return null;

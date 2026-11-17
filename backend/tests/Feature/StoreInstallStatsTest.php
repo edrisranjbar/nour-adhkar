@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Services\StoreStats\BazaarInstallProvider;
+use App\Services\StoreStats\MyketInstallProvider;
 use App\Services\StoreStats\StoreStats;
 use App\Support\PanelFormat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,6 +27,7 @@ function installAdmin(): User
 }
 
 beforeEach(function () {
+    config(['stores.providers' => ['bazaar' => BazaarInstallProvider::class]]);
     Cache::flush();
     Http::fake(['api.cafebazaar.ir/*' => Http::response([
         'properties' => ['statusCode' => 200], 'singleReply' => ['reviewReply' => ['reviews' => []]],
@@ -48,6 +50,7 @@ it('charts overall totals using Tehran days and preserves corrections and carrie
     expect(app(StoreStats::class)->daily(3))->toBe([
         'days' => ['2026-10-01', '2026-10-02', '2026-10-03'],
         'stores' => ['bazaar' => [550, 560, 560]],
+        'total' => [550, 560, 560],
     ]);
     expect(app(StoreStats::class)->daily(4)['stores']['bazaar'])->toBe([500, 550, 560, 560]);
 });
@@ -219,9 +222,12 @@ it('shows an icon beside every sidebar item and the logout button', function () 
     $html = $this->actingAs(installAdmin(), 'admin')->get('/admin')->assertOk()->getContent();
 
     preg_match('~<nav>(.*?)</nav>~s', $html, $nav);
-    expect(substr_count($nav[1], '<a '))->toBe(9)
-        ->and(substr_count($nav[1], 'class="ic"'))->toBe(9)
-        ->and($html)->toMatch('~<button class="btn sm" type="submit"><svg class="ic"~');
+    preg_match_all('~<a\b[^>]*>(.*?)</a>~s', $nav[1], $links);
+    expect($links[1])->not->toBeEmpty();
+    foreach ($links[1] as $link) {
+        expect($link)->toContain('<svg class="ic"');
+    }
+    expect($html)->toMatch('~<button class="btn sm" type="submit"><svg class="ic"~');
 });
 
 it('parses the public vote count and rating without mistaking them for installs', function () {
@@ -270,4 +276,27 @@ it('preserves rating and votes independently when only installs can still be rea
         ->assertJsonPath('stores.bazaar.stale', true)
         ->assertJsonPath('stores.bazaar.rating', 4.9)
         ->assertJsonPath('stores.bazaar.rating_stale', false);
+});
+
+it('reads the current Bazaar layout and includes Myket in the current and daily totals', function () {
+    config(['stores.providers.myket' => MyketInstallProvider::class]);
+    $this->travelTo(\Carbon\Carbon::parse('2026-11-17 12:00:00', 'Asia/Tehran'));
+    DB::table('store_install_snapshots')->insert(['store' => 'bazaar', 'installs' => 1200, 'recorded_at' => '2026-11-16 08:00:00']);
+    Http::fake([
+        'cafebazaar.ir/*' => Http::response('<dl><dt>نصب</dt><dd>۱.۳ هزار</dd></dl>'),
+        'myket.ir/*' => Http::response('<table><tr><td>تعداد دانلود</td><td>&#x6F2;۰۰</td></tr></table>'),
+    ]);
+
+    $this->actingAs(installAdmin(), 'admin')->getJson('/admin/installs')->assertOk()
+        ->assertJsonPath('stores.bazaar.installs', 1300)
+        ->assertJsonPath('stores.bazaar.stale', false)
+        ->assertJsonPath('stores.myket.installs', 200)
+        ->assertJsonPath('total', 1500)
+        ->assertJsonPath('daily.total.12', null)
+        ->assertJsonPath('daily.total.13', 1500);
+});
+
+it('does not convert a Myket upper bound to an install count', function () {
+    expect(MyketInstallProvider::parseInstalls('<tr><td>تعداد دانلود</td><td>کمتر از ۱۰۰</td></tr>'))->toBeNull()
+        ->and(BazaarInstallProvider::parseCount('۱ و ۳ دهم هزار'))->toBe(1300);
 });
