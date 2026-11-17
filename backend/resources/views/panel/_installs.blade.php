@@ -124,8 +124,14 @@
         return node;
     }
 
-    function renderTotals(stores, increasedKeys) {
+    function renderTotals(stores, increasedKeys, total) {
         totals.textContent = '';
+        var combined = el('div', 'inst-store');
+        combined.appendChild(el('span', 'name', 'مجموع فروشگاه‌ها'));
+        combined.appendChild(el('b', '', total == null ? '—' : nf.format(total)));
+        combined.appendChild(el('small', '', total == null ? 'آمار همهٔ فروشگاه‌ها در دسترس نیست' :
+            (Object.values(stores).some(function (store) { return store.stale; }) ? 'با آخرین آمار موجود' : 'بر پایهٔ آمار عمومی فروشگاه‌ها')));
+        totals.appendChild(combined);
         Object.keys(stores).forEach(function (key, index) {
             var store = stores[key];
             var box = el('div', 'inst-store' + (store.stale ? ' stale' : '') + (increasedKeys.indexOf(key) >= 0 ? ' up' : ''));
@@ -136,7 +142,7 @@
             name.appendChild(document.createTextNode(store.label));
             box.appendChild(name);
             box.appendChild(el('b', '', store.installs === null ? '—' : nf.format(store.installs)));
-            var note = store.stale ? 'آخرین مقدار معتبر' : '';
+            var note = store.installs === null ? 'عدد قابل جمع در دسترس نیست' : (store.stale ? 'آخرین مقدار معتبر' : '');
             box.appendChild(el('small', '', note));
             totals.appendChild(box);
         });
@@ -182,13 +188,14 @@
 
     function dayLabel(day) { return dayFormat.format(new Date(day + 'T12:00:00Z')); }
 
-    // Daily new installs per store as smooth lines over the last 14 Tehran days.
+    // End-of-day public counts per store and their combined total over the last 14 Tehran days.
     function renderChart(daily) {
         lastDaily = daily;
         svg.textContent = '';
         tip.hidden = true;
         var days = (daily && daily.days) || [];
-        var stores = (daily && daily.stores) || {};
+        var stores = Object.assign({}, (daily && daily.stores) || {});
+        if (daily && daily.total && Object.keys(stores).length > 1) stores.total = daily.total;
         var keys = Object.keys(stores);
         var values = [];
         keys.forEach(function (key) { stores[key].forEach(function (v) { if (v !== null) values.push(v); }); });
@@ -325,8 +332,8 @@
             previous[key] = value;
         });
         lastDaily = data.daily || null;
-        renderTotals(data.stores, increased);
-        window.__instLabels = {};
+        renderTotals(data.stores, increased, data.total);
+        window.__instLabels = {total: 'مجموع فروشگاه‌ها'};
         Object.keys(data.stores).forEach(function (key) { window.__instLabels[key] = data.stores[key].label; });
         renderChart(data.daily || null);
         if (increased.length && soundOn) chime();

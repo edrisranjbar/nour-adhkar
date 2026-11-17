@@ -13,6 +13,7 @@ class InstallStatsController extends Controller
     public function __invoke(StoreStats $stats, BazaarReviews $reviews)
     {
         $bazaarStatus = $reviews->current();
+        $stores = $stats->current();
 
         return response()
             ->json([
@@ -22,7 +23,8 @@ class InstallStatsController extends Controller
                 'bazaar_reviews_html' => view('panel.feedback._bazaar', [
                     'bazaarStatus' => $bazaarStatus, 'bazaarItems' => $reviews->query()->limit(5)->get(), 'compact' => true,
                 ])->render(),
-                'stores' => $stats->current(),
+                'stores' => $stores,
+                'total' => StoreStats::completeTotal(array_column($stores, 'installs')),
                 'daily' => $stats->daily(14),
             ])
             ->header('Cache-Control', 'no-store');

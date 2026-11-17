@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\StoreStats\BazaarInstallProvider;
+use App\Services\StoreStats\MyketInstallProvider;
 
 return [
     // Android package id shared by every store listing.
@@ -14,9 +15,9 @@ return [
     // chart has no gaps.
     'heartbeat_minutes' => 10,
 
-    // Stores shown on the dashboard, in order: key => provider class. Myket and Google Play are
-    // added here later by writing a class that implements StoreInstallProvider.
+    // Stores shown on the dashboard, in order: key => provider class.
     'providers' => [
         'bazaar' => BazaarInstallProvider::class,
+        'myket' => MyketInstallProvider::class,
     ],
 ];

@@ -5,6 +5,9 @@ The dashboard (`/admin`) starts with a live card showing the app's install count
 An earlier observation seeds the displayed window; days without observations carry the last known
 total, and days before the first observation remain unavailable. Store corrections, including decreases,
 are preserved. These are public rounded store totals, not private exact install statistics.
+The chart shows Bazaar and Myket separately, plus their combined total only for days with both counts.
+Myket uses the public «تعداد دانلود» field; a range such as «کمتر از ۱۰۰» is not recorded as a count.
+If a store cannot be read, its last numeric observation is retained and labelled as stale in the card.
 It refreshes every 10 minutes and, once the **🔔 صدا** button is switched on, plays a short
 chime whenever a count goes up.
 
