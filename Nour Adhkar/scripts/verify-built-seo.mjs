@@ -60,7 +60,7 @@ for (const [slug, route] of [['morning','sobhgahi'], ['night','shamgahi']]) {
     collection.adhkar.forEach((item,index) => {
       const card = doc.getElementById(`dhikr-${index+1}`)
       assert.ok(card.querySelector('.source a'), `${language} ${slug} ${item.id}: source visible`)
-      assert.ok(card.querySelector('.editorial-note'), `${language} ${slug} ${item.id}: qualification visible`)
+      assert.equal(card.querySelector('.editorial-note'), null, `${language} ${slug} ${item.id}: qualification note removed`)
       if ([14,15,24,29,31,33,42,43].includes(item.id)) {
         assert.match(card.querySelector('.source').textContent, language === 'fa' ? /ضعیف/ : /ضعيف/)
       }
