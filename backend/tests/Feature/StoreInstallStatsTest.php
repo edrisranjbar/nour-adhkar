@@ -29,7 +29,7 @@ function installAdmin(): User
 beforeEach(function () {
     config(['stores.providers' => ['bazaar' => BazaarInstallProvider::class]]);
     Cache::flush();
-    Http::fake(['api.cafebazaar.ir/*' => Http::response([
+    Http::fake(['myket.ir/*' => Http::response('<script type="application/ld+json">{"@type":"SoftwareApplication","review":[]}</script><tr><td>تعداد دانلود</td><td>۲۰۰</td></tr>'), 'api.cafebazaar.ir/*' => Http::response([
         'properties' => ['statusCode' => 200], 'singleReply' => ['reviewReply' => ['reviews' => []]],
     ])]);
 });
@@ -123,7 +123,7 @@ it('serves the count and chart to an admin, calling Bazaar once per cache window
 
     $this->actingAs($admin, 'admin')->getJson('/admin/installs')->assertOk()->assertJsonPath('stores.bazaar.installs', 550);
 
-    Http::assertSentCount(2);
+    Http::assertSentCount(3);
     expect(DB::table('store_install_snapshots')->count())->toBe(1);
 });
 
@@ -248,10 +248,10 @@ it('refreshes all listing metrics after ten minutes and updates the in-app feedb
     $this->travel(9)->minutes();
     DB::table('app_feedback')->insert(['type' => 'suggestion', 'message' => 'Hello', 'created_at' => now(), 'updated_at' => now()]);
     $this->getJson('/admin/installs')->assertJsonPath('feedback', 1);
-    Http::assertSentCount(2);
+    Http::assertSentCount(3);
     $this->travel(1)->minutes();
     $this->getJson('/admin/installs')->assertOk();
-    Http::assertSentCount(4);
+    Http::assertSentCount(6);
     expect(DB::table('store_rating_snapshots')->count())->toBe(2);
 });
 

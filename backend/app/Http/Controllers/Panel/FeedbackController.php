@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
 use App\Services\StoreStats\BazaarReviews;
+use App\Services\StoreStats\MyketReviews;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -11,11 +12,13 @@ class FeedbackController extends Controller
 {
     public const TYPES = ['suggestion' => 'پیشنهاد', 'criticism' => 'انتقاد', 'other' => 'سایر'];
 
-    public function index(Request $request, BazaarReviews $reviews)
+    public function index(Request $request, BazaarReviews $reviews, MyketReviews $myket)
     {
-        $source = in_array($request->query('source'), ['app', 'bazaar'], true) ? $request->query('source') : 'all';
-        $bazaarStatus = $source !== 'app' ? $reviews->current() : null;
-        $bazaarItems = $source !== 'app' ? $reviews->query()->paginate(30, ['*'], 'bazaar_page')->withQueryString() : null;
+        $source = in_array($request->query('source'), ['app', 'bazaar', 'myket'], true) ? $request->query('source') : 'all';
+        $bazaarStatus = in_array($source, ['all', 'bazaar']) ? $reviews->current() : null;
+        $bazaarItems = $bazaarStatus ? $reviews->query()->paginate(30, ['*'], 'bazaar_page')->withQueryString() : null;
+        $myketStatus = in_array($source, ['all', 'myket']) ? $myket->current() : null;
+        $myketItems = $myketStatus ? $myket->query()->paginate(30, ['*'], 'myket_page')->withQueryString() : null;
         $type = $request->query('type');
         $items = DB::table('app_feedback as f')
             ->leftJoin('users as u', 'u.id', '=', 'f.user_id')
@@ -26,7 +29,8 @@ class FeedbackController extends Controller
             ->withQueryString();
 
         return view('panel.feedback.index', ['items' => $items, 'type' => $type, 'types' => self::TYPES,
-            'source' => $source, 'bazaarStatus' => $bazaarStatus, 'bazaarItems' => $bazaarItems]);
+            'source' => $source, 'bazaarStatus' => $bazaarStatus, 'bazaarItems' => $bazaarItems,
+            'myketStatus' => $myketStatus, 'myketItems' => $myketItems]);
     }
 
     /** «پسندیدن»: toggles the like the sender sees in the app. */

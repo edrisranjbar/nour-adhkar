@@ -79,3 +79,18 @@ with no other change.
 
 Run the new migration (the deploy script already runs `php artisan migrate --force`). Nothing else needs
 configuring on the server.
+
+## Myket ratings and public comments
+
+Myket's public SoftwareApplication JSON-LD supplies aggregateRating.ratingValue and ratingCount.
+The compact feedback card sums Bazaar/Myket votes and shows their vote-weighted average (store
+averages are already rounded, so the combined result is approximate). Both stores must have valid
+rating and vote data; saved stale observations are explicitly labelled. The ten-minute refresh remains.
+
+Dashboard and feedback pages show Myket comments separately with a Myket source filter. The public
+listing provides a selection, not the full developer-panel feed; the UI states this limitation.
+Comments are escaped, read-only and persisted in store_reviews with store=myket. The listing has
+no stable review ID or publication dates: author+text fingerprints prevent duplicate unchanged
+comments, first-seen order is used and missing dates stay unknown. Edited text can create a new
+observation. Failed/malformed fetches preserve saved comments and mark them stale. Listing fetches
+are cached and shared by rating/install/comment retrieval; no credentials or schema changes are needed.

@@ -18,16 +18,23 @@
     <a href="{{ route('panel.feedback.index') }}" @class(['active' => $source === 'all'])>همهٔ منابع</a>
     <a href="{{ route('panel.feedback.index', ['source' => 'app']) }}" @class(['active' => $source === 'app'])>درون برنامه</a>
     <a href="{{ route('panel.feedback.index', ['source' => 'bazaar']) }}" @class(['active' => $source === 'bazaar'])>کافه‌بازار</a>
+    <a href="{{ route('panel.feedback.index', ['source' => 'myket']) }}" @class(['active' => $source === 'myket'])>مایکت</a>
 </div>
 
-@if ($source !== 'app')
+@if (in_array($source, ['all', 'bazaar']))
     <section class="card" style="margin-bottom:18px">
         @include('panel.feedback._bazaar')
         @include('panel.pager', ['items' => $bazaarItems])
     </section>
 @endif
 
-@if ($source !== 'bazaar')
+@if (in_array($source, ['all', 'myket']))
+<section class="card" style="margin-bottom:18px">
+    @include('panel.feedback._myket')
+    @include('panel.pager', ['items' => $myketItems])
+</section>
+@endif
+@if (in_array($source, ['all', 'app']))
 <h2 style="font-size:17px">بازخوردهای درون برنامه</h2>
 
 <div class="tabs">

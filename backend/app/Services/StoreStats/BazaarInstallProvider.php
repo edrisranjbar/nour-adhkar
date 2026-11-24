@@ -63,6 +63,16 @@ class BazaarInstallProvider implements StoreInstallProvider
     public static function parseRating(string $html): array
     {
         $empty = ['rating' => null, 'rating_count' => null];
+        preg_match_all('~<script\b[^>]*type=["\x27]application/ld\+json["\x27][^>]*>(.*?)</script>~si', $html, $scripts);
+        foreach ($scripts[1] as $json) {
+            $data = json_decode($json, true);
+            $aggregate = is_array($data) ? ($data['aggregateRating'] ?? []) : [];
+            $rating = $aggregate['ratingValue'] ?? null;
+            $count = $aggregate['ratingCount'] ?? null;
+            if (is_numeric($rating) && $rating >= 0 && $rating <= 5 && is_numeric($count) && $count >= 0 && floor((float)$count) == $count) {
+                return ['rating' => (float)$rating, 'rating_count' => (int)$count];
+            }
+        }
         if (!preg_match('~InfoCube__title[^>]*>\s*از\s+([^<]+?)\s+رأی\s*</td>\s*<td[^>]*>(.*?)</td>~su', $html, $match)) {
             return $empty;
         }

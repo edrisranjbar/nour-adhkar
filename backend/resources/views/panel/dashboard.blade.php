@@ -74,9 +74,9 @@
             <div class="kpi-l">بازخورد</div>
             <div class="kpi-n feedback-counts">
                 <span title="بازخورد درون‌برنامه"><span id="feedback-count">{{ F::number($stats['feedback']) }}</span> <small>برنامه</small></span>
-                <span title="رأی بازار"><span id="bazaar-votes">—</span> <small>بازار</small></span>
+                <span title="مجموع رأی بازار و مایکت"><span id="bazaar-votes">—</span> <small>رأی</small></span>
             </div>
-            <div class="kpi-s feedback-rating" id="bazaar-rating-status" role="img" aria-label="امتیاز بازار در حال دریافت" title="امتیاز بازار در حال دریافت">
+            <div class="kpi-s feedback-rating" id="bazaar-rating-status" role="img" aria-label="امتیاز بازار و مایکت در حال دریافت" title="امتیاز بازار و مایکت در حال دریافت">
                 <span class="rating-stars" id="bazaar-stars" aria-hidden="true">
                     <svg viewBox="0 0 120 24" xmlns="http://www.w3.org/2000/svg"><defs><path id="bazaar-star" d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2-6.2 3.2L7 14.2l-5-4.9 6.9-1z"/></defs><use href="#bazaar-star"/><use href="#bazaar-star" x="24"/><use href="#bazaar-star" x="48"/><use href="#bazaar-star" x="72"/><use href="#bazaar-star" x="96"/></svg>
 
@@ -97,6 +97,7 @@
 </div>
 
 @include('panel._installs')
+<div class="card" id="myket-reviews" style="margin-bottom:18px">@include('panel.feedback._myket', ['compact' => true])</div>
 
 <div class="dash-grid">
     <div class="card">

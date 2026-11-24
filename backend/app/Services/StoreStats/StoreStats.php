@@ -84,6 +84,24 @@ class StoreStats
         return $counts === [] || in_array(null, $counts, true) ? null : array_sum($counts);
     }
 
+    public static function ratingSummary(array $stores): array
+    {
+        $votes = 0;
+        $weighted = 0;
+        $stale = false;
+        foreach (['bazaar', 'myket'] as $key) {
+            $store = $stores[$key] ?? [];
+            if (($store['rating_count'] ?? null) === null || ($store['rating'] ?? null) === null) {
+                return ['rating' => null, 'rating_count' => null, 'rating_stale' => true];
+            }
+            $votes += $store['rating_count'];
+            $weighted += $store['rating'] * $store['rating_count'];
+            $stale = $stale || $store['rating_stale'];
+        }
+        return ['rating' => $votes > 0 ? round($weighted / $votes, 2) : null,
+            'rating_count' => $votes, 'rating_stale' => $stale];
+    }
+
     /**
      * Overall install totals per Tehran calendar day, oldest first.
      * Each point uses the day's latest observation, carrying the last known total on unobserved
