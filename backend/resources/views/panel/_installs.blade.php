@@ -308,7 +308,9 @@
         if (bazaarReviews && typeof data.bazaar_reviews_html === 'string') bazaarReviews.innerHTML = data.bazaar_reviews_html;
         var feedbackCount = document.getElementById('feedback-count');
         if (feedbackCount && data.feedback !== undefined) feedbackCount.textContent = nf.format(data.feedback);
-        var bazaar = data.stores.bazaar;
+        var myketReviews = document.getElementById('myket-reviews');
+        if (myketReviews && data.myket_reviews_html) myketReviews.innerHTML = data.myket_reviews_html;
+        var bazaar = data.rating_summary;
         var votesEl = document.getElementById('bazaar-votes');
         var ratingEl = document.getElementById('bazaar-rating');
         var ratingStatus = document.getElementById('bazaar-rating-status');
@@ -318,8 +320,8 @@
             var available = bazaar && bazaar.rating !== null;
             ratingEl.textContent = available ? nf.format(bazaar.rating) : '—';
             if (stars) stars.style.setProperty('--rating-fill', available ? Math.max(0, Math.min(100, bazaar.rating * 20)) + '%' : '0%');
-            var description = available ? 'امتیاز بازار: ' + nf.format(bazaar.rating) + ' از ۵' : 'آمار بازار در دسترس نیست';
-            if (available && bazaar.rating_stale) description += '؛ آخرین آمار معتبر بازار';
+            var description = available ? 'امتیاز وزنی بازار و مایکت: ' + nf.format(bazaar.rating) + ' از ۵' : 'امتیاز هر دو فروشگاه در دسترس نیست';
+            if (available && bazaar.rating_stale) description += '؛ شامل آخرین آمار ذخیره‌شده';
             ratingStatus.classList.toggle('stale', !!(bazaar && bazaar.rating_stale));
             ratingStatus.setAttribute('aria-label', description);
             ratingStatus.title = description + (bazaar && bazaar.rating_updated_at ? '؛ ' + new Date(bazaar.rating_updated_at * 1000).toLocaleString('fa-IR') : '');
@@ -351,7 +353,7 @@
                 if (ratingStatus) {
                     ratingStatus.classList.add('stale');
                     var rating = document.getElementById('bazaar-rating');
-                    ratingStatus.setAttribute('aria-label', (rating && rating.textContent !== '—' ? 'امتیاز بازار: ' + rating.textContent + ' از ۵؛ ' : '') + 'به‌روزرسانی ناموفق بود');
+                    ratingStatus.setAttribute('aria-label', (rating && rating.textContent !== '—' ? 'امتیاز وزنی بازار و مایکت: ' + rating.textContent + ' از ۵؛ ' : '') + 'به‌روزرسانی ناموفق بود');
                     ratingStatus.title = ratingStatus.getAttribute('aria-label');
                 }
             });

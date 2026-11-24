@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Panel;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\StoreStats\BazaarReviews;
+use App\Services\StoreStats\MyketReviews;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function __invoke(BazaarReviews $reviews)
+    public function __invoke(BazaarReviews $reviews, MyketReviews $myket)
     {
         $weekAgo = now()->subWeek();
 
@@ -27,6 +28,8 @@ class DashboardController extends Controller
                 ->orderByDesc('f.created_at')->limit(5)->get(),
             'bazaarStatus' => $reviews->current(),
             'bazaarItems' => $reviews->query()->limit(5)->get(),
+            'myketStatus' => $myket->current(),
+            'myketItems' => $myket->query()->limit(5)->get(),
             'recentUsers' => User::orderByDesc('created_at')->limit(6)->get(['name', 'email_verified_at', 'created_at']),
             'ai' => $this->lectureAi(),
         ]);
