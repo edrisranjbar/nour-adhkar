@@ -11,10 +11,21 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
+import { execSync } from 'child_process'
 import { LANGS, LOCALE, T, COLLECTION_TEXT, num, fmtDate, isPersianSpelling } from './content-i18n.mjs'
 import { reviewedDhikr } from './collection-editorial.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Get git last commit date for a file (ISO date string YYYY-MM-DD)
+function gitLastMod(filePath) {
+  try {
+    const rel = path.relative(ROOT, filePath)
+    const out = execSync(`git log -1 --format="%ci" -- "${rel}"`, { cwd: ROOT, encoding: 'utf8', timeout: 5000 }).trim()
+    if (out) return out.slice(0, 10)
+  } catch {}
+  return null
+}
 const ROOT = path.resolve(__dirname, '..')
 const args = process.argv.slice(2)
 const REFRESH = args.includes('--refresh')
@@ -513,7 +524,7 @@ ${ctaBlock(lang)}`
     const desc = clip(post.meta_description || post.excerpt || post.title, 155)
     const trail = [[t.home, '/'], [t.blog, idx], [post.title, p]]
     const more = own.filter(x => x.slug !== post.slug).slice(0, 3)
-    const alts = Object.fromEntries(LANGS.filter(l => postIn(post, l)).map(l => [l, lp(l, `/blog/${post.slug}`)]))
+    const alts = Object.fromEntries(LANGS.map(l => [l, postIn(post, l) ? lp(l, `/blog/${post.slug}`) : lp(l, '/blog')]))
     const morning = collectionText(COLLECTION_PAGES[0], lang)
     const night = collectionText(COLLECTION_PAGES[1], lang)
     const meta = [t.published(fmtDate(lang, post.published_at))]
@@ -542,12 +553,43 @@ ${more.length ? `<h2>${esc(t.moreArticles)}</h2><div class="cards">${more.map(m 
   }
 }
 
+// Map URL paths to source files for git lastmod
+const SOURCE_FILE_MAP = {
+  '/': 'index.html',
+  '/app': 'src/views/AppView.vue',
+  '/about': 'src/views/AboutView.vue',
+  '/privacy': 'src/views/PrivacyView.vue',
+  '/updates': 'scripts/updates-document.mjs',
+  '/adhkar': 'src/views/AdhkarView.vue',
+  '/blog': 'src/views/BlogView.vue',
+  // Generated pages use the generator script as source
+  '/ar/app': 'scripts/generate-content-pages.mjs',
+  '/ckb/app': 'scripts/generate-content-pages.mjs',
+  '/ar/about': 'scripts/generate-content-pages.mjs',
+  '/ckb/about': 'scripts/generate-content-pages.mjs',
+  '/ar/adhkar': 'scripts/generate-content-pages.mjs',
+  '/ckb/adhkar': 'scripts/generate-content-pages.mjs',
+  '/ar/blog': 'scripts/generate-content-pages.mjs',
+  '/ckb/blog': 'scripts/generate-content-pages.mjs',
+}
+
 function writeSitemap() {
   const fixed = [
     { path: '/', priority: '1.0', changefreq: 'monthly' },
     { path: '/updates', priority: '0.6', changefreq: 'weekly' }
   ]
   const all = [...fixed, ...written].sort((a, b) => parseFloat(b.priority) - parseFloat(a.priority))
+  
+  // Fill missing lastmod from git last commit of source file
+  for (const u of all) {
+    if (!u.lastmod) {
+      const sourceFile = SOURCE_FILE_MAP[u.path]
+      if (sourceFile) {
+        u.lastmod = gitLastMod(path.join(ROOT, sourceFile))
+      }
+    }
+  }
+  
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${all.map(u => `  <url>
