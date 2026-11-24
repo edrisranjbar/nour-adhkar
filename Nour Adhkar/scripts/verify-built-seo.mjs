@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { JSDOM } from 'jsdom'
 
@@ -73,8 +74,11 @@ for (const [slug, route] of [['morning','sobhgahi'], ['night','shamgahi']]) {
 const landing = new JSDOM(await fs.readFile(path.join(dist,'index.html'),'utf8')).window.document
 assert.ok(landing.querySelector('.reading-nav a[href="/adhkar/sobhgahi"]'), 'Homepage links directly to morning collection')
 assert.ok(landing.querySelector('.reading-nav a[href="/adhkar/shamgahi"]'), 'Homepage links directly to evening collection')
-for (const route of ['/','/updates','/app']) {
+for (const [route, source] of [['/', 'index.html'], ['/updates', 'scripts/updates-document.mjs'], ['/app', 'src/views/AppView.vue']]) {
   const entry=[...sitemap.querySelectorAll('url')].find(n=>n.querySelector('loc').textContent==='https://adhkar.ir'+route)
-  assert.equal(entry.querySelector('lastmod'),null,`${route}: do not invent a build-time content modification date`)
+  const sourceDate = execFileSync('git', ['log', '-1', '--format=%ci', '--', source], {
+    cwd: fileURLToPath(new URL('../', import.meta.url)), encoding: 'utf8'
+  }).trim().slice(0, 10)
+  assert.equal(entry.querySelector('lastmod')?.textContent ?? '', sourceDate, `${route}: modification date must match source history`)
 }
 console.log(`Verified ${locations.length} generated sitemap URLs, metadata, JSON-LD, release history, download links and truthful lastmod handling.`)
