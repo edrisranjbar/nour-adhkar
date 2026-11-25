@@ -42,7 +42,7 @@ function publishedPosts(posts, now) {
     seen.add(p.slug)
     if (!Number.isFinite(Date.parse(p.updated_at || p.published_at))) throw new Error('Invalid article date')
     // Only fields that affect the page: view counters must not trigger regeneration.
-    return Object.fromEntries(['id', 'slug', 'title', 'content', 'excerpt', 'meta_title', 'meta_description',
+    return Object.fromEntries(['id', 'slug', 'title', 'content', 'excerpt', 'meta_title', 'meta_description', 'locale', 'translation_group',
       'published_at', 'updated_at'].map(k => [k, p[k] ?? null]).concat([['user', p.user ? { name: p.user.name } : null]]))
   }).sort((a, b) => a.slug.localeCompare(b.slug))
 }

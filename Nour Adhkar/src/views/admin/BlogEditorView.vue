@@ -25,6 +25,21 @@
             class="form-control"
           >
         </div>
+
+        <div class="form-group">
+          <label for="locale">زبان نسخه</label>
+          <select id="locale" v-model="post.locale" class="form-control">
+            <option value="fa">فارسی</option>
+            <option value="ar">العربية</option>
+            <option value="ckb">کوردی (سورانی)</option>
+          </select>
+          <small class="form-text">برای ترجمهٔ یک مقاله، شناسهٔ گروه ترجمه را در نسخه‌های دیگر هم وارد کنید.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="translation_group">شناسهٔ گروه ترجمه</label>
+          <input id="translation_group" v-model="post.translation_group" class="form-control" dir="ltr" placeholder="برای اتصال ترجمه‌ها یک شناسهٔ مشترک وارد کنید">
+        </div>
         
         <div class="form-group">
           <label for="slug">نامک (slug)</label>
@@ -173,6 +188,8 @@ export default {
     return {
       post: {
         title: '',
+        locale: 'fa',
+        translation_group: '',
         slug: '',
         excerpt: '',
         content: '',
@@ -213,10 +230,29 @@ export default {
       this.isEditing = true;
       this.postId = postId;
       this.fetchPost(postId);
+    } else if (this.$route.query.translation_of) {
+      this.fetchTranslationSource(this.$route.query.translation_of);
     }
     this.fetchCategories();
   },
   methods: {
+    async fetchTranslationSource(id) {
+      try {
+        const token = this.$store.state.token;
+        const response = await axios.get(`${BASE_API_URL}/admin/posts/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.data.success) {
+          this.post.translation_group = response.data.post.translation_group || '';
+          const available = ['fa', 'ar', 'ckb'];
+          const used = (response.data.translations || []).map(item => item.locale);
+          this.post.locale = available.find(locale => !used.includes(locale)) || 'ar';
+          this.showToastMessage(`ترجمه برای «${response.data.post.title}» ساخته می‌شود`);
+        }
+      } catch (error) {
+        this.showToastMessage('مقالهٔ اصلی برای ترجمه پیدا نشد');
+      }
+    },
     async fetchPost(id) {
       try {
         const token = this.$store.state.token;
@@ -269,19 +305,24 @@ export default {
     async saveDraft() {
       try {
         const formData = new FormData();
+
+        if (!this.post.translation_group) {
+          this.post.translation_group = window.crypto?.randomUUID?.() || `article-${Date.now()}`;
+        }
         Object.keys(this.post).forEach(key => {
           if (key === 'featured_image' && this.post[key]) {
             formData.append('featured_image', this.post[key]);
-          } else if (key !== 'featured_image') {
+          } else if (key !== 'featured_image' && key !== 'categories' && this.post[key] !== null && this.post[key] !== undefined) {
             formData.append(key, this.post[key]);
           }
         });
+        formData.set('status', 'draft');
         
         // Add selected categories
-        formData.append('category_ids', JSON.stringify(this.selectedCategories));
+        this.selectedCategories.forEach(id => formData.append('category_ids[]', id));
         
         const token = this.$store.state.token;
-        const endpoint = `${BASE_API_URL}/admin/posts${this.isEditing ? `/${this.postId}/draft` : '/draft'}`;
+        const endpoint = `${BASE_API_URL}/admin/posts${this.isEditing ? `/${this.postId}` : ''}`;
         
         const response = await axios({
           method: this.isEditing ? 'put' : 'post',
@@ -313,6 +354,10 @@ export default {
     async publishPost() {
       try {
         const formData = new FormData();
+
+        if (!this.post.translation_group) {
+          this.post.translation_group = window.crypto?.randomUUID?.() || `article-${Date.now()}`;
+        }
         
         // Add basic post data
         formData.append('title', this.post.title);
@@ -320,6 +365,10 @@ export default {
         formData.append('excerpt', this.post.excerpt);
         formData.append('content', this.post.content);
         formData.append('status', 'published');
+        formData.append('locale', this.post.locale || 'fa');
+        formData.append('translation_group', this.post.translation_group);
+        formData.append('locale', this.post.locale || 'fa');
+        formData.append('translation_group', this.post.translation_group);
         
         // Add published_at if set
         if (this.post.published_at) {
@@ -332,9 +381,7 @@ export default {
         }
         
         // Add selected categories
-        if (this.selectedCategories.length > 0) {
-          formData.append('category_ids', JSON.stringify(this.selectedCategories));
-        }
+        this.selectedCategories.forEach(id => formData.append('category_ids[]', id));
         
         const token = this.$store.state.token;
         const endpoint = `${BASE_API_URL}/admin/posts${this.isEditing ? `/${this.postId}` : ''}`;
@@ -1188,4 +1235,4 @@ body.dark-mode .category-checkbox.has-parent::before {
 body.dark-mode .create-category-link {
   color: #C5B192;
 }
-</style> 
+</style>

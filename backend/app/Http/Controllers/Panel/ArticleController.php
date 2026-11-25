@@ -21,9 +21,12 @@ class ArticleController extends Controller
         return view('panel.articles.index', compact('items'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('panel.articles.form', ['article' => null]);
+        $source = $request->filled('translation_of') ? $this->article((int) $request->input('translation_of')) : null;
+        $group = $source?->translation_group ?: (string) Str::uuid();
+        $translations = DB::table('posts')->where('translation_group', $group)->get(['id', 'locale', 'title']);
+        return view('panel.articles.form', ['article' => null, 'locale' => $source ? 'ar' : 'fa', 'group' => $group, 'source' => $source, 'translations' => $translations]);
     }
 
     public function store(Request $request)
@@ -39,7 +42,10 @@ class ArticleController extends Controller
 
     public function edit(int $id)
     {
-        return view('panel.articles.form', ['article' => $this->article($id)]);
+        $article = $this->article($id);
+        $group = $article->translation_group ?: (string) Str::uuid();
+        $translations = DB::table('posts')->where('translation_group', $article->translation_group)->get(['id', 'locale', 'title']);
+        return view('panel.articles.form', ['article' => $article, 'locale' => $article->locale ?: 'fa', 'group' => $group, 'source' => null, 'translations' => $translations]);
     }
 
     public function update(Request $request, int $id)
@@ -72,10 +78,20 @@ class ArticleController extends Controller
     {
         $data = $request->validate([
             'title' => 'required|string|max:200',
+            'locale' => 'nullable|in:fa,ar,ckb',
+            'translation_group' => 'nullable|uuid',
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string|max:200000',
             'publish_at' => 'nullable|date_format:Y-m-d\TH:i',
         ], [], ['title' => 'عنوان', 'excerpt' => 'خلاصه', 'content' => 'متن مقاله', 'publish_at' => 'زمان انتشار']);
+
+        $locale = $data['locale'] ?? $existing?->locale ?? 'fa';
+        $group = $data['translation_group'] ?? $existing?->translation_group ?? (string) Str::uuid();
+        $duplicate = DB::table('posts')->where('translation_group', $group)->where('locale', $locale)
+            ->when($existing, fn ($query) => $query->where('id', '!=', $existing->id))->exists();
+        if ($duplicate) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['locale' => 'برای این مقاله، نسخه‌ای با این زبان وجود دارد. همان نسخه را ویرایش کنید.']);
+        }
 
         $publish = $request->boolean('published');
         // The form uses Tehran time; a future date schedules the article (the app API hides it until then).
@@ -84,6 +100,8 @@ class ArticleController extends Controller
             : null;
         return [
             'title' => trim($data['title']),
+            'locale' => $locale,
+            'translation_group' => $group,
             'excerpt' => isset($data['excerpt']) ? trim($data['excerpt']) : null,
             'content' => trim($data['content']),
             'status' => $publish ? 'published' : 'draft',

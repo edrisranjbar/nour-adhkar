@@ -17,6 +17,19 @@ class AppArticlesController extends Controller
         $published = DB::table('posts')
             ->where('status', 'published')->whereNotNull('published_at')->where('published_at', '<=', now());
 
+        // The app's article collection defaults to Persian and only includes translations
+        // when a client explicitly requests that language.
+        $locale = $request->query('locale', 'fa');
+        if (!in_array($locale, ['fa', 'ar', 'ckb'], true)) {
+            return response()->json(['message' => 'Unsupported article language.'], 422);
+        }
+        $published->where(function ($query) use ($locale) {
+            $query->where('locale', $locale);
+            // Older integrations and direct database fixtures may still create
+            // unlabelled records; treat those as Persian until they are tagged.
+            if ($locale === 'fa') $query->orWhereNull('locale');
+        });
+
         $stamp = (clone $published)->selectRaw('count(*) as n, max(updated_at) as u, max(published_at) as p')->first();
         $etag = '"' . sha1(($stamp->n ?? 0) . '|' . ($stamp->u ?? '') . '|' . ($stamp->p ?? '')) . '"';
         if (trim((string) $request->header('If-None-Match')) === $etag) {

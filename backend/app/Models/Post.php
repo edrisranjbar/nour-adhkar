@@ -16,6 +16,8 @@ class Post extends Model
         'meta_title',
         'meta_description',
         'slug',
+        'locale',
+        'translation_group',
         'content',
         'featured_image',
         'excerpt',
@@ -105,4 +107,4 @@ class Post extends Model
     {
         $this->increment('views');
     }
-} 
+}
