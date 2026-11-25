@@ -1,22 +1,30 @@
-# Nour Adhkar / اذکار نور
-Daily Islamic prayers (adhkar) for Sunni Muslims — Arabic text, Persian/Arabic/Sorani translation, audio, offline, ad-free.
+# Nour Adhkar
 
-## Persian lecture library
-- https://adhkar.ir/lectures — currently published audio lectures by Sheikh Ziaei, with listenable archive and individual pages.
-- https://adhkar.ir/lectures/ziaei — Sheikh Ziaei lecture index.
+Nour Adhkar is a Persian-first Islamic supplications website and Android app. It provides Arabic adhkar with Persian, Arabic, and Sorani translations, source references, audio, and informational articles.
+
+## Public lecture library
+
+- https://adhkar.ir/lectures — browse the currently published lecture catalog by scholar.
+- https://adhkar.ir/lectures/ziaei — published audio lectures by Sheikh Ziaei.
+- https://adhkar.ir/lectures/pordel — published audio lectures by Sheikh Mohammad Saleh Pordel.
+- https://adhkar.ir/lectures/khatibi — published audio lectures by Sheikh Abdulrahim Khatibi.
+
+Lecture pages contain catalog descriptions and audio players. Audio is served from Nour Adhkar's own API host at api.adhkar.ir. The public catalog can change; the website lists records currently published there and does not claim to represent private, unpublished, deleted, or historical archive files.
 
 ## Key URLs
-- https://adhkar.ir/ — Homepage (app features, download links)
-- https://adhkar.ir/adhkar/sobhgahi — Morning adhkar
-- https://adhkar.ir/adhkar/shamgahi — Evening adhkar
-- https://adhkar.ir/adhkar/istikhara — Istikhara prayer
+
+- https://adhkar.ir/ — homepage and app features
+- https://adhkar.ir/adhkar/sobhgahi — morning adhkar
+- https://adhkar.ir/adhkar/shamgahi — evening adhkar
+- https://adhkar.ir/adhkar/istikhara — istikhara prayer
 - https://adhkar.ir/adhkar/ramadan — Ramadan adhkar
-- https://adhkar.ir/blog — Articles (20+ posts on virtues, methods, specific duas)
-- https://adhkar.ir/app — Android app download (Cafe Bazaar, Myket, direct APK)
-- https://adhkar.ir/about — About & privacy
+- https://adhkar.ir/blog — Islamic supplication articles
+- https://adhkar.ir/app — Android app information and download links
+- https://adhkar.ir/about — about Nour Adhkar
 
 ## Entities
-- Organization: Nour Adhkar (ادریس رنجبر, developer)
+
+- Organization: Nour Adhkar
 - SoftwareApplication: Nour Adhkar Android App
 - WebSite: adhkar.ir
-- Blog: Articles on Islamic supplications
+- Blog: Persian articles about Islamic supplications
