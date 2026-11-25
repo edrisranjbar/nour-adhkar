@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
 import { fetchPosts } from './refresh-articles.mjs'
 
 const site = process.env.SITE_URL || 'https://adhkar.ir'
@@ -8,13 +9,29 @@ async function page(url, status = 200) {
   assert.equal(response.status, status, url)
   return response.text()
 }
-for (const lang of ['', '/ar', '/ckb']) {
-  const index = await page(`${lang}/blog`)
-  for (const post of posts) assert.ok(index.includes(`/blog/${post.slug}`), `${lang}/blog missing ${post.slug}`)
+const locales = [
+  { code: 'fa', prefix: '', label: 'Persian' },
+  { code: 'ar', prefix: '/ar', label: 'Arabic' },
+  { code: 'ckb', prefix: '/ckb', label: 'Sorani Kurdish' },
+]
+const localized = posts.map(post => ({ ...post, locale: post.locale || 'fa' }))
+const arabicSnapshot = JSON.parse(fs.readFileSync(new URL('../content-snapshot/posts-ar.json', import.meta.url), 'utf8'))
+for (const post of [...localized].filter(item => item.locale === 'fa')) {
+  const hasArabicVariant = localized.some(item => item.locale === 'ar' && item.translation_group && item.translation_group === post.translation_group)
+  if (arabicSnapshot[post.slug] && !hasArabicVariant) localized.push({ ...post, locale: 'ar' })
+}
+for (const { code, prefix, label } of locales) {
+  const index = await page(`${prefix}/blog`)
+  const expectedSlugs = new Set(localized.filter(post => post.locale === code).map(post => post.slug))
+  for (const post of localized) {
+    const expected = expectedSlugs.has(post.slug)
+    assert.equal(index.includes(`href="${prefix}/blog/${post.slug}"`), expected, `${prefix}/blog ${expected ? 'missing' : 'contains foreign'} ${label} article ${post.slug}`)
+  }
 }
 const sitemap = await page('/sitemap.xml')
-for (const post of posts) {
-  const url = `/blog/${post.slug}`
+for (const post of localized) {
+  const prefix = post.locale === 'fa' ? '' : `/${post.locale}`
+  const url = `${prefix}/blog/${post.slug}`
   const html = await page(url)
   assert.ok(html.includes(`rel="canonical" href="https://adhkar.ir${url}"`), `${url} canonical missing`)
   assert.ok(html.includes('<article>'), `${url} body must be server-rendered HTML`)
