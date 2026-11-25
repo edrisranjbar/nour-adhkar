@@ -19,6 +19,16 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
 const safeJson = value => JSON.stringify(value).replace(/</g, '\\u003c')
 const routeForScholar = scholar => '/lectures/' + scholar.id
 const routeForLecture = (scholar, lecture) => routeForScholar(scholar) + '/' + lecture.id
+const photoForScholar = scholar => {
+  try {
+    const photo = new URL(scholar.photoUrl)
+    return photo.origin === 'https://api.adhkar.ir' && photo.pathname.startsWith('/storage/scholars/')
+      ? photo.href
+      : null
+  } catch {
+    return null
+  }
+}
 
 async function loadCatalog() {
   try {
@@ -73,13 +83,16 @@ const CSS = '@font-face{font-family:Vazirmatn;src:url(/fonts/vazir/Vazirmatn-FD-
   ':root{color-scheme:light dark;--bg:#f7faf3;--fg:#1d2a1f;--mut:#58665a;--pri:#2f6b3a;--card:#fff;--line:#dfe8da}' +
   '@media(prefers-color-scheme:dark){:root{--bg:#141c16;--fg:#e8efe6;--mut:#9fb0a2;--pri:#7cc58a;--card:#1c261e;--line:#2b392e}}' +
   '*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.9 Vazirmatn,Tahoma,system-ui,sans-serif}' +
-  'a{color:var(--pri);text-decoration:none}a:hover{text-decoration:underline}a:focus-visible{outline:2px solid var(--pri);outline-offset:3px}' +
+  'a{color:var(--pri);text-decoration:none!important;text-decoration-line:none!important}a:hover{text-decoration:none!important}a:focus-visible{outline:2px solid var(--pri);outline-offset:3px}' +
   '.wrap{max-width:56rem;margin:0 auto;padding:0 1rem}header{border-bottom:1px solid var(--line);background:var(--card)}' +
   'header .wrap{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:.65rem 1rem}nav{display:flex;gap:1rem;flex-wrap:wrap;margin-inline-start:auto}' +
   'nav a{color:var(--mut)}.brand{display:flex;align-items:center;gap:.5rem;color:var(--fg);font-weight:700}.brand img{border-radius:8px}' +
   'main{padding:1.5rem 0 3rem}h1{font-size:1.75rem;line-height:1.5;margin:.3rem 0 .6rem}h2{font-size:1.25rem;line-height:1.6;margin:1.5rem 0 .5rem}' +
   '.crumbs{font-size:.9rem;color:var(--mut)}.crumbs a{color:var(--mut)}.lead{color:var(--mut)}' +
   '.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem;margin:.9rem 0;scroll-margin-top:1rem}' +
+  '.scholar-card{display:flex;align-items:center;gap:1rem;color:#fff;padding:1.1rem;background:linear-gradient(145deg,hsl(var(--hue) 55% 42%),hsl(var(--hue) 60% 25%));box-shadow:0 8px 22px hsl(var(--hue) 60% 20% / .18)}' +
+  '.scholar-cover{position:relative;display:grid;place-items:center;flex:0 0 5.5rem;aspect-ratio:1;border-radius:1.5rem;overflow:hidden;background:linear-gradient(145deg,hsl(var(--hue) 55% 55%),hsl(var(--hue) 60% 30%));color:#fff;font-size:2rem;font-weight:700}' +
+  '.scholar-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.scholar-info{min-width:0}.scholar-info h2{margin:0 0 .25rem;font-size:1.15rem}.scholar-info h2 a{color:#fff}.scholar-info p{margin:.2rem 0;color:rgb(255 255 255 / .82)}.scholar-info .meta{color:rgb(255 255 255 / .9)}' +
   '.item h2{margin:0 0 .3rem;font-size:1.1rem}.item p{margin:.35rem 0}.meta{color:var(--mut);font-size:.9rem}' +
   'audio{display:block;width:100%;margin:.75rem 0;min-height:44px}footer{border-top:1px solid var(--line);padding:1.2rem 0;color:var(--mut);font-size:.9rem}' +
   'footer .wrap{display:flex;gap:1rem;flex-wrap:wrap}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}'
@@ -134,9 +147,13 @@ async function main() {
     const route = routeForScholar(scholar)
     routes.push({ route, priority: '0.7' })
     const countLabel = lectures.length ? lectures.length + ' سخنرانی منتشرشده' : 'هنوز سخنرانی منتشرشده‌ای ندارد'
-    return '<article class="item"><h2><a href="' + route + '">' + esc(scholar.name) + '</a></h2>' +
+    const initial = esc(scholar.name.replace(/^شیخ\s+/, '').trim().slice(0, 1) || scholar.name.slice(0, 1))
+    const photo = photoForScholar(scholar)
+    const cover = '<div class="scholar-cover" aria-hidden="true" style="--hue:' + Number(scholar.hue) + '"><span>' + initial + '</span>' +
+      (photo ? '<img src="' + esc(photo) + '" alt="' + esc(scholar.name) + '" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</div>'
+    return '<article class="item scholar-card" style="--hue:' + Number(scholar.hue) + '">' + cover + '<div class="scholar-info"><h2><a href="' + route + '">' + esc(scholar.name) + '</a></h2>' +
       (scholar.tagline ? '<p>' + esc(scholar.tagline) + '</p>' : '') +
-      '<p>' + esc(scholar.bio || '') + '</p><p class="meta">' + countLabel + '</p></article>'
+      '<p>' + esc(scholar.bio || '') + '</p><p class="meta">' + countLabel + '</p></div></article>'
   }).join('\n')
   const archiveSchema = [breadcrumb([['خانه', SITE + '/'], ['سخنرانی‌ها', archiveUrl]]),
     { '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'آرشیو سخنرانی‌های استادان', url: archiveUrl,
@@ -149,8 +166,7 @@ async function main() {
     description: 'فهرست سخنرانی‌های صوتی استادان در اذکار نور؛ ' + scholars.length + ' استاد و ' + lectureCount + ' فایل صوتی منتشرشده با توضیحات فارسی و پخش مستقیم.',
     url: archiveUrl, schema: archiveSchema,
     body: '<nav class="crumbs" aria-label="مسیر صفحه"><a href="/">خانه</a> › سخنرانی‌ها</nav>' +
-      '<h1>آرشیو سخنرانی‌های استادان</h1><p class="lead">فهرست استادان و سخنرانی‌هایی که در کاتالوگ عمومی اذکار نور منتشر شده‌اند. در حال حاضر ' +
-      scholars.length + ' استاد و ' + lectureCount + ' سخنرانی در دسترس است.</p><section aria-label="استادان">' + scholarCards + '</section>'
+      '<h1>آرشیو سخنرانی‌های استادان</h1><section aria-label="استادان">' + scholarCards + '</section>'
   }))
 
   for (const scholar of scholars) {

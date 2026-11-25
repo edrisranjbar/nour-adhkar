@@ -105,4 +105,18 @@
   .input-with-button .form-input {
     @apply flex-1;
   }
-} 
+}
+
+/* Website links rely on their color and focus state instead of text decoration. */
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+a:not([class]) {
+  color: var(--brand-dark);
+}
