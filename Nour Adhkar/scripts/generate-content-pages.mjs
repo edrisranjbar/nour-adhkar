@@ -235,7 +235,7 @@ ${ld}
 <body>
 <header class="top"><div class="wrap">
 <a class="brand" href="/" data-lang="${lang}"><img src="/icons/logo.png" alt="" width="32" height="32"><span>${esc(t.siteName)}</span></a>
-<nav class="main" aria-label="${esc(t.mainNav)}"><a href="${lp(lang, '/adhkar')}">${esc(t.adhkar)}</a><a href="${lp(lang, '/blog')}">${esc(t.blog)}</a><a href="${lp(lang, '/app')}">${esc(t.app)}</a></nav>
+<nav class="main" aria-label="${esc(t.mainNav)}"><a href="${lp(lang, '/adhkar')}">${esc(t.adhkar)}</a><a href="${lp(lang, '/blog')}">${esc(t.blog)}</a>${lang === 'fa' ? '<a href="/lectures">سخنرانی‌ها</a>' : ''}<a href="${lp(lang, '/app')}">${esc(t.app)}</a></nav>
 <nav class="langs" aria-label="${esc(t.langLabel)}">${switcher}</nav>
 </div></header>
 <main><div class="wrap">

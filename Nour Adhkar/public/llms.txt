@@ -1,6 +1,10 @@
 # Nour Adhkar / اذکار نور
 Daily Islamic prayers (adhkar) for Sunni Muslims — Arabic text, Persian/Arabic/Sorani translation, audio, offline, ad-free.
 
+## Persian lecture library
+- https://adhkar.ir/lectures — currently published audio lectures by Sheikh Ziaei, with listenable archive and individual pages.
+- https://adhkar.ir/lectures/ziaei — Sheikh Ziaei lecture index.
+
 ## Key URLs
 - https://adhkar.ir/ — Homepage (app features, download links)
 - https://adhkar.ir/adhkar/sobhgahi — Morning adhkar
