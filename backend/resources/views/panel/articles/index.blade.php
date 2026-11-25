@@ -16,6 +16,7 @@
             <tr>
                 <td>
                     <strong>{{ $item->title }}</strong>
+                    <span class="badge">{{ ['fa' => 'فارسی', 'ar' => 'العربية', 'ckb' => 'کوردی'][($item->locale ?? 'fa')] ?? 'فارسی' }}</span>
                     <div class="muted msg">{{ \Illuminate\Support\Str::limit($item->excerpt ?: strip_tags($item->content), 140) }}</div>
                 </td>
                 <td>
@@ -32,6 +33,7 @@
                 <td>
                     <div class="actions">
                         <a class="btn sm" href="{{ route('panel.articles.edit', $item->id) }}">ویرایش</a>
+                        <a class="btn sm" href="{{ route('panel.articles.create', ['translation_of' => $item->id]) }}">افزودن ترجمه</a>
                         <form method="POST" action="{{ route('panel.articles.toggle', $item->id) }}">
                             @csrf @method('PATCH')
                             <button class="btn sm" type="submit">{{ $item->status === 'published' ? 'لغو انتشار' : 'انتشار' }}</button>

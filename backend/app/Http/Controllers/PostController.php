@@ -66,6 +66,8 @@ class PostController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:255',
             'slug' => 'nullable|string|max:255|unique:posts',
+            'locale' => 'nullable|in:fa,ar,ckb',
+            'translation_group' => 'nullable|string|max:36',
             'excerpt' => 'nullable|string',
             'content' => 'required|string',
             'image' => 'nullable|string',
@@ -83,6 +85,11 @@ class PostController extends Controller
         }
 
         $data = $validator->validated();
+        $data['locale'] = $data['locale'] ?? 'fa';
+        $data['translation_group'] = $data['translation_group'] ?? (string) Str::uuid();
+        if (Post::where('translation_group', $data['translation_group'])->where('locale', $data['locale'])->exists()) {
+            return response()->json(['success' => false, 'errors' => ['locale' => ['This article already has a translation in that language.']]], 422);
+        }
         
         // Generate slug if not provided
         if (empty($data['slug'])) {
@@ -136,6 +143,17 @@ class PostController extends Controller
         return response()->json($post);
     }
 
+    /** Return one post to the authenticated admin editor. */
+    public function adminShow(Post $post)
+    {
+        return response()->json([
+            'success' => true,
+            'post' => $post->load(['categories', 'user:id,name,avatar']),
+            'translations' => Post::where('translation_group', $post->translation_group)
+                ->get(['id', 'locale', 'title', 'slug', 'status']),
+        ]);
+    }
+
     public function getViews($id)
     {
         $post = Post::findOrFail($id);
@@ -161,6 +179,8 @@ class PostController extends Controller
                 'max:255',
                 Rule::unique('posts')->ignore($post->id),
             ],
+            'locale' => 'sometimes|in:fa,ar,ckb',
+            'translation_group' => 'sometimes|string|max:36',
             'excerpt' => 'nullable|string',
             'content' => 'required|string',
             'image' => 'nullable|string',
@@ -178,6 +198,13 @@ class PostController extends Controller
         }
 
         $data = $validator->validated();
+        $locale = $data['locale'] ?? $post->locale ?? 'fa';
+        $group = $data['translation_group'] ?? $post->translation_group ?? (string) Str::uuid();
+        if (Post::where('translation_group', $group)->where('locale', $locale)->where('id', '!=', $post->id)->exists()) {
+            return response()->json(['success' => false, 'errors' => ['locale' => ['This article already has a translation in that language.']]], 422);
+        }
+        $data['locale'] = $locale;
+        $data['translation_group'] = $group;
 
         // Update slug if title changed
         if ($post->isDirty('title') && empty($data['slug'])) {

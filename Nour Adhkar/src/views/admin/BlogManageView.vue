@@ -49,6 +49,7 @@
                 <RouterLink :to="`/admin/blog/edit/${post.id}`" class="action-button edit-button" title="ویرایش">
                   <font-awesome-icon icon="fa-solid fa-pen" />
                 </RouterLink>
+                <RouterLink :to="`/admin/blog/new?translation_of=${post.id}`" class="action-button edit-button" title="افزودن ترجمه">افزودن ترجمه</RouterLink>
                 <RouterLink :to="`/blog/${post.slug}`" target="_blank" class="action-button view-button" title="مشاهده">
                   <font-awesome-icon icon="fa-solid fa-eye" />
                 </RouterLink>
@@ -588,4 +589,4 @@ export default {
     gap: 0.5rem;
   }
 }
-</style> 
+</style>

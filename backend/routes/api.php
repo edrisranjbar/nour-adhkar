@@ -119,6 +119,7 @@ Route::middleware(['auth:api', AdminMiddleware::class])
         // Posts management
         Route::prefix('posts')->group(function () {
             Route::get('/', [PostController::class, 'adminIndex']);
+            Route::get('{post}', [PostController::class, 'adminShow']);
             Route::post('/', [PostController::class, 'store']);
             Route::put('{post}', [PostController::class, 'update']);
             Route::delete('{post}', [PostController::class, 'destroy']);

@@ -20,14 +20,14 @@ async function fixture(t) {
 }
 const read = (f, url = 'blog/index.html') => fs.readFile(path.join(f.root, url), 'utf8')
 
-test('newly published articles appear as complete HTML, all language indexes and sitemap update', async t => {
+test('newly published Persian articles appear only in the Persian index and sitemap updates', async t => {
   const f = await fixture(t)
   await refreshArticles({ ...f, posts: [post('first')] })
   await refreshArticles({ ...f, posts: [post('first'), post('second')] })
   assert.match(await read(f), /\/blog\/second/)
   assert.match(await read(f, 'blog/second/index.html'), /متن مقاله/)
-  assert.match(await read(f, 'ar/blog/index.html'), /\/blog\/second/)
-  assert.match(await read(f, 'ckb/blog/index.html'), /\/blog\/second/)
+  assert.doesNotMatch(await read(f, 'ar/blog/index.html'), /\/blog\/second/)
+  assert.doesNotMatch(await read(f, 'ckb/blog/index.html'), /\/blog\/second/)
   const sitemap = await read(f, 'sitemap.xml')
   assert.match(sitemap, /https:\/\/adhkar.ir\/adhkar</)
   assert.match(sitemap, /https:\/\/adhkar.ir\/blog\/second</)

@@ -194,10 +194,12 @@ function layout({ lang = 'fa', title, description, path: urlPath, alts = { fa: u
     : ''
   const names = { fa: 'فا', ar: 'ع', ckb: 'کو' }
   const titles = { fa: 'فارسی', ar: 'العربية', ckb: 'کوردی' }
-  // Languages without this page link to the nearest page they do have (`missing`).
+  // Use a nearest-language fallback only when a page's alternates were not supplied.
+  // Article pages supply only real translations, so language navigation stays truthful.
   const fallback = { fa: '/', ar: lp('ar', missing), ckb: lp('ckb', missing) }
   const switcher = LANGS.map(l => {
-    const href = alts[l] || fallback[l]
+    const isArticlePage = urlPath.includes('/blog/') && !urlPath.endsWith('/blog')
+    const href = alts[l] || (isArticlePage ? lp(l, '/blog') : fallback[l])
     return l === lang
       ? `<a href="${href}" lang="${l}" title="${titles[l]}" aria-current="true" data-lang="${l}">${names[l]}</a>`
       : `<a href="${href}" lang="${l}" hreflang="${l}" title="${titles[l]}" data-lang="${l}">${names[l]}</a>`
@@ -485,35 +487,65 @@ ${content}`
   writePage(p, layout({ title, description: desc, path: p, body, schema }), { lastmod: '2026-09-28', priority: '0.3', changefreq: 'yearly' })
 }
 
-// Articles exist in Persian (API) and, for some, in Arabic (content-snapshot/posts-ar.json, the
-// same translations the app shows). A language gets an article page only if it has the text;
-// the blog index lists the rest as Persian articles.
-function postIn(post, lang) {
-  if (lang === 'fa') return post
-  const x = lang === 'ar' && POSTS_AR[post.slug]
-  return x ? { ...post, title: x.title, excerpt: x.excerpt, meta_title: null, meta_description: x.excerpt, content: x.content, user: null } : null
+const VALID_POST_LOCALES = new Set(['fa', 'ar', 'ckb'])
+
+// Older records did not have structured language fields. Read the editorial metadata
+// or a locale suffix where available; keep unmarked legacy content Persian by default.
+function normalizeArticle(post) {
+  const body = String(post.content || '')
+  const localeNote = body.match(/(?:^|[\r\n])\s*locale\s*:\s*(fa|ar|ckb)\b/iu)?.[1]?.toLowerCase()
+  const groupNote = body.match(/(?:^|[\r\n])\s*translation_group\s*:\s*([a-z0-9._-]+)/iu)?.[1]?.toLowerCase()
+  const slugMatch = String(post.slug).match(/^(.*)-(fa|ar|ckb)(?:-draft-\d{8})?$/i)
+  const locale = VALID_POST_LOCALES.has(post.locale) ? post.locale : localeNote || slugMatch?.[2]?.toLowerCase() || 'fa'
+  const group = groupNote || (slugMatch ? slugMatch[1].toLowerCase() : post.translation_group || post.slug)
+  const editorialNote = /(?:^|\n)---\s*(?:article\s+metadata|seo\s+metadata)[\s\S]*$/i
+  return { ...post, content: body.replace(editorialNote, '').trim(), locale, translation_group: group }
 }
+
+function articleVariants(posts) {
+  const normalized = posts.map(normalizeArticle)
+  const byGroup = new Map()
+  for (const post of normalized) {
+    if (!byGroup.has(post.translation_group)) byGroup.set(post.translation_group, new Map())
+    byGroup.get(post.translation_group).set(post.locale, post)
+  }
+  // Preserve the existing Arabic snapshot until those translations are migrated into the
+  // structured CMS. It is keyed by the Persian slug, so it belongs to that article's group.
+  for (const post of [...normalized].filter(p => p.locale === 'fa')) {
+    const snapshot = POSTS_AR[post.slug]
+    const variants = byGroup.get(post.translation_group)
+    if (snapshot && !variants.has('ar')) {
+      const translation = {
+      ...post, slug: post.slug, locale: 'ar', title: snapshot.title, excerpt: snapshot.excerpt,
+      meta_title: null, meta_description: snapshot.excerpt, content: snapshot.content, user: null,
+      }
+      variants.set('ar', translation)
+      normalized.push(translation)
+    }
+  }
+  return { normalized, byGroup }
+}
+
+function articleUrl(lang, slug) { return lp(lang, `/blog/${slug}`) }
 
 function buildBlog(posts, lang, emit = writePage) {
   const t = T[lang]
-  const sorted = [...posts].sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)))
-  const own = sorted.map(p => postIn(p, lang)).filter(Boolean)
-  const persianOnly = lang === 'fa' ? [] : sorted.filter(p => !postIn(p, lang))
+  const { normalized, byGroup } = articleVariants(posts)
+  const own = normalized.filter(p => p.locale === lang).sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)))
   const idx = lp(lang, '/blog')
   const trailIdx = [[t.home, '/'], [t.blog, idx]]
-  const card = (p, l) => `<article class="item"${l === 'fa' && lang !== 'fa' ? ' lang="fa"' : ''}><h3><a href="${lp(l, '/blog/' + p.slug)}">${esc(p.title)}</a></h3><p>${esc(clip(p.excerpt || p.meta_description || '', 200))}</p><p class="meta">${esc(fmtDate(l, p.published_at))}</p></article>`
+  const card = p => `<article class="item"><h3><a href="${articleUrl(lang, p.slug)}">${esc(p.title)}</a></h3><p>${esc(clip(p.excerpt || p.meta_description || '', 200))}</p><p class="meta">${esc(fmtDate(lang, p.published_at))}</p></article>`
   const guide = own.find(p => p.slug === 'daily-adhkar-start')
   const idxBody = `${crumbsHtml(lang, trailIdx)}
 <h1>${esc(t.blog)}</h1>
 <p class="lead">${esc(t.blogLead)}</p>
 ${lang === 'fa' ? `<nav class="reading-links" aria-label="شروع مطالعه"><a href="/adhkar/sobhgahi">متن اذکار صبحگاهی</a><a href="/adhkar/shamgahi">متن اذکار شامگاهی</a>${guide ? `<a href="/blog/${esc(guide.slug)}">از کجا شروع کنیم؟</a>` : ''}</nav>` : ''}
-${own.length ? own.map(p => card(p, lang)).join('\n') : persianOnly.length ? '' : `<p>${esc(t.blogEmpty)}</p>`}
-${persianOnly.length ? `<h2>${esc(t.blogOnlyFa)}</h2>\n${persianOnly.map(p => card(p, 'fa')).join('\n')}` : ''}
+${own.length ? own.map(card).join('\n') : `<p>${esc(t.blogEmpty)}</p>`}
 ${ctaBlock(lang)}`
   emit(idx, layout({
     lang, title: t.blogTitle, description: t.blogDesc, path: idx, alts: allLangs('/blog'), body: idxBody,
     schema: [crumbs(trailIdx), { '@context': 'https://schema.org', '@type': 'Blog', name: t.blogTitle.replace(/ \| .*$/, ''), url: SITE + idx, inLanguage: lang, publisher: publisher(lang) }]
-  }), { lastmod: isoDay(maxDate(posts)), priority: lang === 'fa' ? '0.7' : '0.5', changefreq: 'weekly' })
+  }), { lastmod: isoDay(maxDate(own)), priority: lang === 'fa' ? '0.7' : '0.5', changefreq: 'weekly' })
 
   for (const post of own) {
     const p = lp(lang, `/blog/${post.slug}`)
@@ -522,7 +554,8 @@ ${ctaBlock(lang)}`
     const desc = clip(post.meta_description || post.excerpt || post.title, 155)
     const trail = [[t.home, '/'], [t.blog, idx], [post.title, p]]
     const more = own.filter(x => x.slug !== post.slug).slice(0, 3)
-    const alts = Object.fromEntries(LANGS.map(l => [l, postIn(post, l) ? lp(l, `/blog/${post.slug}`) : lp(l, '/blog')]))
+    const variants = byGroup.get(post.translation_group) || new Map()
+    const alts = Object.fromEntries([...variants].map(([l, variant]) => [l, articleUrl(l, variant.slug)]))
     const morning = collectionText(COLLECTION_PAGES[0], lang)
     const night = collectionText(COLLECTION_PAGES[1], lang)
     const meta = [t.published(fmtDate(lang, post.published_at))]
@@ -547,7 +580,7 @@ ${more.length ? `<h2>${esc(t.moreArticles)}</h2><div class="cards">${more.map(m 
       author: { '@type': 'Person', name: authorName, ...(authorUrl ? { url: authorUrl } : {}) }, publisher: publisher(lang),
       mainEntityOfPage: { '@type': 'WebPage', '@id': SITE + p }, image: [OG_IMAGE]
     }]
-    emit(p, layout({ lang, title, description: desc, path: p, alts, missing: '/blog', body, schema, ogType: 'article' }), { lastmod: isoDay(post.updated_at || post.published_at), priority: lang === 'fa' ? '0.6' : '0.5' })
+    emit(p, layout({ lang, title, description: desc, path: p, alts, body, schema, ogType: 'article' }), { lastmod: isoDay(post.updated_at || post.published_at), priority: lang === 'fa' ? '0.6' : '0.5' })
   }
 }
 

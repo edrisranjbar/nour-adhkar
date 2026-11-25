@@ -14,6 +14,28 @@
 <form class="card" method="POST" action="{{ $article ? route('panel.articles.update', $article->id) : route('panel.articles.store') }}" style="max-width:820px">
     @csrf
     @if ($article) @method('PUT') @endif
+    <input type="hidden" name="translation_group" value="{{ old('translation_group', $article->translation_group ?? $group) }}">
+
+    @if (!empty($source))
+        <div class="alert">ترجمهٔ «{{ $source->title }}» ساخته می‌شود. نسخه‌ها در یک گروه مقاله نگهداری می‌شوند.</div>
+    @endif
+
+    @if (!empty($translations) && $translations->count())
+        <div class="field"><span class="muted">نسخه‌های همین مقاله:</span>
+            @foreach ($translations as $translation)
+                <span class="badge">{{ ['fa' => 'فارسی', 'ar' => 'العربية', 'ckb' => 'کوردی'][$translation->locale ?? 'fa'] ?? $translation->locale }}: {{ $translation->title }}</span>
+            @endforeach
+        </div>
+    @endif
+
+    <div class="field">
+        <label for="locale">زبان مقاله</label>
+        <select id="locale" name="locale" required>
+            @foreach (['fa' => 'فارسی', 'ar' => 'العربية', 'ckb' => 'کوردی (سورانی)'] as $code => $label)
+                <option value="{{ $code }}" @selected(old('locale', $locale) === $code)>{{ $label }}</option>
+            @endforeach
+        </select>
+    </div>
 
     <div class="field">
         <label for="title">عنوان</label>
