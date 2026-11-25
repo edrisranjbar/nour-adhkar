@@ -12,6 +12,7 @@
           <li><a href="#features">{{ t.navFeatures }}</a></li>
           <li><a :href="link('/adhkar')">{{ t.navAdhkar }}</a></li>
           <li><a :href="link('/blog')">{{ t.navBlog }}</a></li>
+          <li v-if="lang === 'fa'"><a href="/lectures">سخنرانی‌ها</a></li>
           <li><a href="#privacy">{{ t.navPrivacy }}</a></li>
           <li><a href="#support">{{ t.navSupport }}</a></li>
           <li><a href="#download">{{ t.navDownload }}</a></li>
