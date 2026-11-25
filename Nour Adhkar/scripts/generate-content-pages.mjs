@@ -155,7 +155,7 @@ const CSS = `
 :root{--bg:#f7faf3;--fg:#1d2a1f;--mut:#58665a;--pri:#2f6b3a;--card:#fff;--line:#dfe8da}
 @media (prefers-color-scheme:dark){:root{--bg:#141c16;--fg:#e8efe6;--mut:#9fb0a2;--pri:#7cc58a;--card:#1c261e;--line:#2b392e}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.9 "Vazirmatn FD",Vazirmatn,Tahoma,system-ui,sans-serif}
-a{color:var(--pri);text-decoration:none}a:hover{opacity:.8}a:focus-visible{outline:2px solid var(--pri);outline-offset:2px;border-radius:4px}.wrap{max-width:46rem;margin:0 auto;padding:0 1rem}
+a{color:var(--pri);text-decoration:none!important;text-decoration-line:none!important}a:hover{opacity:.8;text-decoration:none!important}a:focus-visible{outline:2px solid var(--pri);outline-offset:2px;border-radius:4px}.wrap{max-width:46rem;margin:0 auto;padding:0 1rem}
 header.top{border-bottom:1px solid var(--line);background:var(--card)}
 header.top .wrap{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:.6rem 1rem}
 .brand{display:flex;align-items:center;gap:.5rem;font-weight:700;text-decoration:none;color:var(--fg)}
@@ -176,7 +176,7 @@ blockquote.ar{border-inline-start:3px solid var(--pri);padding:.2rem 1rem;margin
 footer.foot{border-top:1px solid var(--line);padding:1.2rem 0;color:var(--mut);font-size:.9rem}
 footer.foot .wrap{display:flex;gap:1rem;flex-wrap:wrap}footer.foot a{color:var(--mut)}
 .meta{color:var(--mut);font-size:.88rem}ul{padding-inline-start:1.3rem}
-.toc ul{display:flex;flex-wrap:wrap;gap:.35rem 1.1rem;list-style:none;padding:0}.toc a{display:inline-block;padding:.25rem 0}.item{scroll-margin-top:1rem}.item h2{margin:0 0 .3rem;font-size:1.05rem}.source a,article p a,article li a{overflow-wrap:anywhere;text-decoration:underline;text-underline-offset:.2em}.reading-links{display:flex;flex-wrap:wrap;gap:.5rem 1rem}html{scroll-behavior:smooth}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.toc ul{display:flex;flex-wrap:wrap;gap:.35rem 1.1rem;list-style:none;padding:0}.toc a{display:inline-block;padding:.25rem 0}.item{scroll-margin-top:1rem}.item h2{margin:0 0 .3rem;font-size:1.05rem}.source a,article p a,article li a{overflow-wrap:anywhere;text-decoration:none!important;text-decoration-line:none!important}.reading-links{display:flex;flex-wrap:wrap;gap:.5rem 1rem}html{scroll-behavior:smooth}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 `
 
 // Path of a page in a language: Persian at the root, Arabic under /ar, Kurdish under /ckb.
