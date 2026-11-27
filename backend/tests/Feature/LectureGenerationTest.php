@@ -127,3 +127,30 @@ it('does not save a summary that actually hit its output limit', function () {
     $this->postJson($this->url)->assertStatus(422);
     expect(DB::table('lectures')->find($this->lecture)->description)->toBe('Original');
 });
+
+it('gives each AJAX phase its own request and reuses transcription after summary failure', function () {
+    Http::fakeSequence()->push(['text'=>'Cached transcript'])->push('',500)
+        ->push(['choices'=>[['message'=>['content'=>'Summary']]]]);
+    $this->postJson($this->url,['phase'=>'transcribe'])->assertOk()->assertJsonPath('next_phase','summary');
+    expect(DB::table('lectures')->find($this->lecture)->description)->toBe('Original');
+    $this->postJson($this->url,['phase'=>'summary'])->assertStatus(422);
+    $this->postJson($this->url,['phase'=>'transcribe'])->assertOk();
+    $this->postJson($this->url,['phase'=>'summary'])->assertOk();
+    Http::assertSentCount(3);
+    expect(DB::table('lectures')->find($this->lecture)->transcript)->toBe('Cached transcript');
+});
+
+it('reports summary timeouts specifically and retries without transcribing again', function () {
+    $calls=0;
+    Http::fake(function ($request) use (&$calls) {
+        $calls++;
+        if ($calls === 1) return Http::response(['text'=>'Cached']);
+        if ($calls === 2) throw new \Illuminate\Http\Client\ConnectionException('timeout');
+        return Http::response(['choices'=>[['message'=>['content'=>'Summary']]]]);
+    });
+    $this->postJson($this->url,['phase'=>'transcribe'])->assertOk();
+    $this->postJson($this->url,['phase'=>'summary'])->assertStatus(422)->assertJsonPath('message', fn ($message) => str_contains($message, 'خلاصه'));
+    $this->postJson($this->url,['phase'=>'transcribe'])->assertOk();
+    $this->postJson($this->url,['phase'=>'summary'])->assertOk();
+    expect($calls)->toBe(3);
+});

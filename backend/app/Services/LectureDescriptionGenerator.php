@@ -7,15 +7,18 @@ use Illuminate\Support\Facades\Storage;
 
 class LectureDescriptionGenerator
 {
-    public function generate(object $lecture): array
+    public function generate(object $lecture, ?string $transcript = null, bool $transcribeOnly = false): array
     {
-        $deadline = microtime(true) + 50;
+        $started = microtime(true);
+        $deadline = $started + 50;
+        $phase = $transcript === null ? 'transcription' : 'summary';
         try { $config = app(LectureAiSettings::class)->worker(); }
         catch (\Throwable) { throw new LectureGenerationException('ابتدا کلید و مدل‌ها را در تنظیمات هوش مصنوعی بررسی کنید.'); }
         if (!$config) throw new LectureGenerationException('ابتدا تنظیمات هوش مصنوعی و مدل‌ها را در پنل تکمیل کنید.');
         $temporary = null;
         $chunksDirectory = null;
         try {
+            if ($transcript === null) {
             if (str_contains(strtolower($config['transcription_model']), 'mimo-v2.6')) {
                 $url = \App\Http\Controllers\ScholarController::audioUrl($lecture);
                 if (!$url || !str_starts_with($url, 'https://')) throw new LectureGenerationException('برای MiMo لینک عمومی HTTPS فایل صوتی لازم است.');
@@ -88,8 +91,11 @@ class LectureDescriptionGenerator
                 $text = trim((string)$response->json('text'));
             }
             }
+            } else { $text = $transcript; }
             $client = fn () => Http::withToken($config['api_key'])->withoutRedirecting()->connectTimeout(5)->timeout(max(1, (int)($deadline - microtime(true))));
             if ($text === '') throw new LectureGenerationException('سرویس متن سخنرانی را برنگرداند.');
+            if ($transcribeOnly) return ['transcript' => $text];
+            $phase = 'summary';
             if (microtime(true) >= $deadline) throw new LectureGenerationException('زمان پردازش تمام شد. دوباره تلاش کنید یا فایل کوتاه‌تری انتخاب کنید.');
             $response = $client()->post(rtrim($config['base_url'], '/').'/chat/completions', [
                 'model' => $config['summary_model'], 'messages' => [
@@ -105,7 +111,13 @@ class LectureDescriptionGenerator
             if ($summary === '') throw new LectureGenerationException('سرویس خلاصه‌ای برنگرداند.');
             return ['transcript' => $text, 'summary' => $summary, 'description' => "خلاصه\n{$summary}\n\nمتن کامل سخنرانی\n{$text}"];
         } catch (\Illuminate\Http\Client\ConnectionException) {
-            throw new LectureGenerationException('اتصال به سرویس برقرار نشد یا مهلت درخواست تمام شد؛ دسترسی سرور به سرویس و کوتاه‌تر بودن فایل را بررسی کنید.');
+            \Illuminate\Support\Facades\Log::warning('Lecture provider connection failed', [
+                'lecture_id' => $lecture->id, 'phase' => $phase,
+                'elapsed_ms' => (int)((microtime(true) - $started) * 1000),
+            ]);
+            throw new LectureGenerationException($phase === 'summary'
+                ? 'پاسخ خلاصه‌سازی در مهلت دریافت نشد. متن موفق موقتاً حفظ شده؛ دوباره تلاش کنید تا فقط خلاصه‌سازی تکرار شود.'
+                : 'پاسخ تبدیل صوت در مهلت دریافت نشد. ثبت HTTP 200 در سرویس لزوماً به معنی رسیدن پاسخ کامل به سرور ما نیست؛ دوباره تلاش کنید یا صوت کوتاه‌تری انتخاب کنید.');
         } finally {
             if ($temporary && is_file($temporary)) unlink($temporary);
             if ($chunksDirectory && is_dir($chunksDirectory)) {

@@ -71,11 +71,23 @@
             box.setAttribute('aria-busy', 'true');
             status.textContent = 'در حال ارسال صوت و ساخت خلاصه؛ لطفاً صبر کنید…';
             try {
-                var response = await fetch(form.action, {method:'POST', body:new FormData(form),
-                    headers:{Accept:'application/json'}, credentials:'same-origin', signal:controller.signal});
-                var data;
-                try { data = await response.json(); } catch (_) { throw new Error('پاسخ نامعتبر از سرور؛ اتصال یا مهلت درخواست را بررسی کنید.'); }
-                if (!response.ok) throw new Error(data.message || 'ساخت توضیح ناموفق بود.');
+                async function sendPhase(phase) {
+                    var payload = new FormData(form);
+                    payload.set('phase', phase);
+                    var response = await fetch(form.action, {method:'POST', body:payload,
+                        headers:{Accept:'application/json'}, credentials:'same-origin', signal:controller.signal});
+                    var data;
+                    try { data = await response.json(); } catch (_) { throw new Error('پاسخ نامعتبر از سرور؛ اتصال یا مهلت درخواست را بررسی کنید.'); }
+                    if (!response.ok) throw new Error(data.message || 'ساخت توضیح ناموفق بود.');
+                    return data;
+                }
+                var data = await sendPhase('transcribe');
+                if (data.next_phase === 'summary') {
+                    clearTimeout(timer);
+                    timer = setTimeout(function () { controller.abort(); }, 60000);
+                    status.textContent = 'متن دریافت شد؛ در حال ساخت خلاصه…';
+                    data = await sendPhase('summary');
+                }
                 if (field.value === original) {
                     field.value = data.description;
                     status.textContent = 'توضیح ساخته و ذخیره شد.';
@@ -84,7 +96,7 @@
                 }
             } catch (error) {
                 status.textContent = error.name === 'AbortError'
-                    ? 'پاسخ در مهلت یک دقیقه دریافت نشد؛ وضعیت سرور را بررسی و سپس دوباره تلاش کنید.'
+                    ? 'پاسخ این مرحله در مهلت دریافت نشد؛ دوباره تلاش کنید. اگر متن قبلاً دریافت شده باشد، فقط خلاصه‌سازی تکرار می‌شود.'
                     : error.message;
             } finally {
                 clearTimeout(timer);
