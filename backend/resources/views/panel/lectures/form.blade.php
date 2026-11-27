@@ -27,9 +27,9 @@
             @php($busy = in_array($lecture->ai_status, ['queued', 'processing'], true))
             <div id="ai-generate" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px"
                  data-status-url="{{ route('panel.lectures.ai-status', [$scholar->id, $lecture->id]) }}" data-busy="{{ $busy ? 1 : 0 }}">
-                <button class="btn sm" type="submit" form="generate-form" @disabled($busy)>ساخت توضیح از روی صوت</button>
+                <button class="btn sm" type="submit" form="generate-form" >ساخت توضیح از روی صوت</button>
                 <span class="muted" id="ai-generate-status" role="status" aria-live="polite">
-                    @if ($busy)
+                    @if (false)
                         در حال تبدیل صوت به متن…
                     @elseif ($lecture->ai_status === 'failed')
                         ساخت توضیح ناموفق بود: <span dir="auto">{{ $lecture->ai_error }}</span>
@@ -51,35 +51,49 @@
 </form>
 
 @if ($lecture && ($lecture->audio_path || $lecture->audio_url))
-    <form id="generate-form" method="POST" action="{{ route('panel.lectures.generate', [$scholar->id, $lecture->id]) }}" hidden
-          onsubmit="return document.getElementById('description').value.trim() === '' || confirm('توضیح فعلی با متن کامل سخنرانی جایگزین شود؟')">
-        @csrf
-    </form>
+    <form id="generate-form" method="POST" action="{{ route('panel.lectures.generate', [$scholar->id, $lecture->id]) }}" hidden>@csrf</form>
     <script>
-        // While a description is being generated, check every 15 seconds and drop the result into the field.
-        (function () {
-            var box = document.getElementById('ai-generate');
-            if (!box || box.dataset.busy !== '1') return;
-            var status = document.getElementById('ai-generate-status');
-            var button = box.querySelector('button');
-            var timer = setInterval(async function () {
-                try {
-                    var response = await fetch(box.dataset.statusUrl, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
-                    if (!response.ok) return;
-                    var data = await response.json();
-                    if (data.status === 'done') {
-                        clearInterval(timer);
-                        document.getElementById('description').value = data.description || '';
-                        status.textContent = 'توضیح ساخته و ذخیره شد. در صورت نیاز ویرایش کنید.';
-                        button.disabled = false;
-                    } else if (data.status === 'failed') {
-                        clearInterval(timer);
-                        status.textContent = 'ساخت توضیح ناموفق بود: ' + (data.error || '');
-                        button.disabled = false;
-                    }
-                } catch (e) { /* network blip; try again next tick */ }
-            }, 15000);
-        })();
+    (function () {
+        var form = document.getElementById('generate-form');
+        var box = document.getElementById('ai-generate');
+        var button = box.querySelector('button');
+        var status = document.getElementById('ai-generate-status');
+        var field = document.getElementById('description');
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            if (button.disabled) return;
+            if (field.value.trim() && !confirm('توضیح فعلی با متن تولیدشده جایگزین شود؟')) return;
+            var original = field.value;
+            var controller = new AbortController();
+            var timer = setTimeout(function () { controller.abort(); }, 60000);
+            button.disabled = true;
+            button.textContent = 'در حال ساخت توضیح…';
+            box.setAttribute('aria-busy', 'true');
+            status.textContent = 'در حال ارسال صوت و ساخت خلاصه؛ لطفاً صبر کنید…';
+            try {
+                var response = await fetch(form.action, {method:'POST', body:new FormData(form),
+                    headers:{Accept:'application/json'}, credentials:'same-origin', signal:controller.signal});
+                var data;
+                try { data = await response.json(); } catch (_) { throw new Error('پاسخ نامعتبر از سرور؛ اتصال یا مهلت درخواست را بررسی کنید.'); }
+                if (!response.ok) throw new Error(data.message || 'ساخت توضیح ناموفق بود.');
+                if (field.value === original) {
+                    field.value = data.description;
+                    status.textContent = 'توضیح ساخته و ذخیره شد.';
+                } else {
+                    status.textContent = 'نتیجه در سرور ذخیره شد؛ ویرایش فعلی شما در این کادر حفظ شده است.';
+                }
+            } catch (error) {
+                status.textContent = error.name === 'AbortError'
+                    ? 'پاسخ در مهلت یک دقیقه دریافت نشد؛ وضعیت سرور را بررسی و سپس دوباره تلاش کنید.'
+                    : error.message;
+            } finally {
+                clearTimeout(timer);
+                button.disabled = false;
+                button.textContent = 'ساخت توضیح از روی صوت';
+                box.setAttribute('aria-busy', 'false');
+            }
+        });
+    })();
     </script>
 @endif
 @endsection

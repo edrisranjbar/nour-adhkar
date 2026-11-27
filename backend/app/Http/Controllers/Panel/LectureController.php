@@ -73,19 +73,30 @@ class LectureController extends Controller
         return back()->with('status', $lecture->published ? 'سخنرانی از برنامه پنهان شد.' : 'سخنرانی در برنامه نمایش داده می‌شود.');
     }
 
-    /**
-     * «ساخت توضیح از روی صوت»: queues the lecture for the lecture-ai workflow, which transcribes it
-     * and writes the transcript into the description.
-     */
-    public function generate(int $scholarId, int $id)
+    /** Process immediately in the authenticated AJAX request, without an external queue. */
+    public function generate(Request $request, int $scholarId, int $id)
     {
-        $this->lecture($scholarId, $id);
-        DB::table('lectures')->where('id', $id)->update([
-            'ai_status' => 'queued', 'ai_error' => null, 'ai_claimed_at' => null, 'updated_at' => now(),
-        ]);
-        return back()->with('status', 'تبدیل صوت به متن شروع شد؛ این صفحه را باز نگه دارید تا متن خودکار در توضیح قرار بگیرد.');
+        $lecture = $this->lecture($scholarId, $id);
+        $lock = \Illuminate\Support\Facades\Cache::lock('lecture-description:'.$id, 70);
+        if (!$lock->get()) return response()->json(['message' => 'این سخنرانی در حال پردازش است.'], 409);
+        try {
+            @set_time_limit(65);
+            DB::table('lectures')->where('id', $id)->update(['ai_status' => 'processing', 'ai_error' => null, 'ai_claimed_at' => now()]);
+            $result = app(\App\Services\LectureDescriptionGenerator::class)->generate($lecture);
+            $updated = DB::table('lectures')->where('id', $id)->where('audio_path', $lecture->audio_path)
+                ->where('audio_url', $lecture->audio_url)->update($result + [
+                    'ai_status' => 'done', 'ai_error' => null, 'ai_claimed_at' => null,
+                    'ai_processed_at' => now(), 'updated_at' => now(),
+                ]);
+            if (!$updated) throw new \App\Services\LectureGenerationException('فایل صوتی هنگام پردازش تغییر کرد؛ دوباره تلاش کنید.');
+            return response()->json(['description' => $result['description']]);
+        } catch (\Throwable $e) {
+            $message = $e instanceof \App\Services\LectureGenerationException
+                ? $e->getMessage() : 'ساخت توضیح ناموفق بود؛ تنظیمات سرویس و فایل صوتی را بررسی کنید.';
+            DB::table('lectures')->where('id', $id)->update(['ai_status' => 'failed', 'ai_error' => mb_substr($message, 0, 500), 'ai_claimed_at' => null]);
+            return response()->json(['message' => $message], 422);
+        } finally { $lock->release(); }
     }
-
     /** Polled by the edit form while a description is being generated. */
     public function aiStatus(int $scholarId, int $id)
     {

@@ -38,9 +38,6 @@ Route::post('app-notices/{id}/read', [AppInboxController::class, 'markRead'])->m
 // Google sign-in keys pushed by the Nour-Adhkar-App GitHub workflow (server cannot reach Google).
 Route::post('internal/google-jwks', [GoogleJwksController::class, 'store'])->middleware('throttle:10,1');
 // Lecture transcripts and summaries, produced by the nour-adhkar lecture-ai GitHub workflow.
-Route::get('internal/lectures/claim', [LectureAiController::class, 'claim'])->middleware('throttle:30,1');
-Route::get('internal/lectures/config', [LectureAiController::class, 'configuration'])->middleware('throttle:30,1');
-Route::post('internal/lectures/{id}/ai', [LectureAiController::class, 'report'])->middleware('throttle:30,1');
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');

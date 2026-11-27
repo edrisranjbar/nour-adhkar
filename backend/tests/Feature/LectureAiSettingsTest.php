@@ -32,8 +32,8 @@ it('fetches the provider model catalog and permits paid and unknown price models
     $this->put('/admin/settings/lecture-ai', ['base_url'=>'https://ai.manageit.dev/api/v1','transcription_model'=>'paid','summary_model'=>'unknown'])->assertRedirect();
     $this->get('/admin/settings/lecture-ai')->assertOk()->assertDontSee('disabled', false);
     config(['services.lecture_ai.token'=>'worker-token']);
-    $this->getJson('/api/internal/lectures/config')->assertUnauthorized();
-    $this->withToken('worker-token')->getJson('/api/internal/lectures/config')->assertOk()->assertJsonPath('data.summary_model','unknown')->assertJsonPath('data.transcription_model','paid')->assertHeader('Cache-Control','no-store, private');
+    $this->getJson('/api/internal/lectures/config')->assertNotFound();
+    expect(app(LectureAiSettings::class)->worker()['summary_model'])->toBe('unknown');
 });
 
 it('does not classify unknown pricing or paid audio as free', function () {
