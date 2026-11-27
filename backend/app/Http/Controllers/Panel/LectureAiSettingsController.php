@@ -41,10 +41,10 @@ class LectureAiSettingsController extends Controller
         if ($changed && empty($data['api_key'])) return back()->withErrors(['api_key' => 'برای سرویس جدید کلید را وارد کنید.']);
         $models = $changed ? [] : json_decode($old?->models ?? '[]', true);
         if ($changed) $data['transcription_model'] = $data['summary_model'] = null;
-        $free = array_column(array_filter($models, fn ($m) => $m['free']), 'id');
+        $available = array_column($models, 'id');
         foreach (['transcription_model', 'summary_model'] as $field) {
-            if (!empty($data[$field]) && !in_array($data[$field], $free, true)) {
-                return back()->withErrors([$field => 'مدل رایگان را از فهرست دریافت‌شده انتخاب کنید.']);
+            if (!empty($data[$field]) && !in_array($data[$field], $available, true)) {
+                return back()->withErrors([$field => 'مدل را از فهرست دریافت‌شده انتخاب کنید.']);
             }
         }
         if (empty($data['api_key'])) unset($data['api_key']);
@@ -59,7 +59,7 @@ class LectureAiSettingsController extends Controller
         try {
             if (!$settings->row()?->api_key) throw new \RuntimeException();
             DB::table('lecture_ai_settings')->where('id', 1)->update(['models' => json_encode($settings->fetch()), 'updated_at' => now()]);
-            return back()->with('status', 'فهرست مدل‌ها دریافت شد. مدل‌های بدون قیمت مشخص قابل انتخاب نیستند.');
+            return back()->with('status', 'فهرست مدل‌ها دریافت شد. همهٔ مدل‌ها قابل انتخاب‌اند.');
         } catch (\Throwable) {
             return back()->withErrors(['models' => 'دریافت مدل‌ها ناموفق بود؛ آدرس سرویس و کلید را بررسی کنید.']);
         }

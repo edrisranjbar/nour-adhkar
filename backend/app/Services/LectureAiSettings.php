@@ -52,9 +52,9 @@ class LectureAiSettings
         if (!$row->transcription_model || !$row->summary_model || !$row->api_key) {
             throw new \RuntimeException('Configure lecture AI in admin settings');
         }
-        $free = array_column(array_filter(json_decode($row->models ?? '[]', true), fn ($m) => $m['free']), 'id');
-        if (!in_array($row->transcription_model, $free, true) || !in_array($row->summary_model, $free, true)) {
-            throw new \RuntimeException('Select confirmed free models');
+        $models = array_column(json_decode($row->models ?? '[]', true), 'id');
+        if (!in_array($row->transcription_model, $models, true) || !in_array($row->summary_model, $models, true)) {
+            throw new \RuntimeException('Select models from the provider catalog');
         }
         return ['base_url' => $row->base_url, 'api_key' => $this->key(),
             'transcription_model' => $row->transcription_model, 'summary_model' => $row->summary_model];
