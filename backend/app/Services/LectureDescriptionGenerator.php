@@ -7,6 +7,24 @@ use Illuminate\Support\Facades\Storage;
 
 class LectureDescriptionGenerator
 {
+    private function transcribeChunk(string $path, array $config, callable $client, float $deadline): string
+    {
+        $bytes = file_get_contents($path);
+        if ($bytes === false || $bytes === '') throw new LectureGenerationException('بخش صوتی خالی بود؛ متن ناقص ذخیره نشد.');
+        $response = $client()->post(rtrim($config['base_url'], '/').'/chat/completions', [
+            'model' => $config['transcription_model'],
+            'messages' => [['role' => 'user', 'content' => [
+                ['type' => 'input_audio', 'input_audio' => ['data' => 'data:audio/mpeg;base64,'.base64_encode($bytes)]],
+                ['type' => 'text', 'text' => 'فقط متن کامل و دقیق این بخش صوتی را به زبان اصلی پیاده کن؛ خلاصه نکن و چیزی اضافه نکن.'],
+            ]]],
+        ]);
+        if (!$response->successful()) throw new LectureGenerationException('تبدیل بخشی از صوت ناموفق بود (HTTP '.$response->status().')؛ متن ناقص ذخیره نشد.');
+        if ($response->json('choices.0.finish_reason') === 'length') throw new LectureGenerationException('متن یکی از بخش‌های صوتی ناقص بود؛ متن ناقص ذخیره نشد.');
+        $text = trim((string) $response->json('choices.0.message.content'));
+        if ($text === '') throw new LectureGenerationException('سرویس متن یکی از بخش‌ها را برنگرداند؛ متن ناقص ذخیره نشد.');
+        return $text;
+    }
+
     public function generate(object $lecture, ?string $transcript = null, bool $transcribeOnly = false): array
     {
         $started = microtime(true);
@@ -65,7 +83,7 @@ class LectureDescriptionGenerator
                         'model' => $config['transcription_model'], 'language' => 'fa', 'response_format' => 'json',
                     ]);
             } finally { fclose($file); }
-            if ($response->status() === 413) {
+            if (in_array($response->status(), [404, 413], true)) {
                 $chunksDirectory = sys_get_temp_dir().'/lecture-chunks-'.bin2hex(random_bytes(12));
                 mkdir($chunksDirectory, 0700);
                 $parts = app(LectureAudioChunks::class)->prepare($path, $chunksDirectory, $deadline - microtime(true));
@@ -79,6 +97,10 @@ class LectureDescriptionGenerator
                                 'model' => $config['transcription_model'], 'language' => 'fa', 'response_format' => 'json',
                             ]);
                     } finally { fclose($stream); }
+                    if ($partResponse->status() === 404) {
+                        $texts[] = $this->transcribeChunk($part, $config, $client, $deadline);
+                        continue;
+                    }
                     if ($partResponse->status() === 413) throw new LectureGenerationException('حتی بخش فشردهٔ دو دقیقه‌ای از سقف سرویس بزرگ‌تر است (HTTP 413)؛ محدودیت بارگذاری سرویس را بررسی کنید.');
                     if (!$partResponse->successful()) throw new LectureGenerationException('تبدیل بخشی از صوت ناموفق بود (HTTP '.$partResponse->status().')؛ متن ناقص ذخیره نشد.');
                     $partText = $partResponse->json('text');
@@ -94,6 +116,7 @@ class LectureDescriptionGenerator
             } else { $text = $transcript; }
             $client = fn () => Http::withToken($config['api_key'])->withoutRedirecting()->connectTimeout(5)->timeout(max(1, (int)($deadline - microtime(true))));
             if ($text === '') throw new LectureGenerationException('سرویس متن سخنرانی را برنگرداند.');
+
             if ($transcribeOnly) return ['transcript' => $text];
             $phase = 'summary';
             if (microtime(true) >= $deadline) throw new LectureGenerationException('زمان پردازش تمام شد. دوباره تلاش کنید یا فایل کوتاه‌تری انتخاب کنید.');
@@ -109,6 +132,7 @@ class LectureDescriptionGenerator
             }
             $summary = trim((string)$response->json('choices.0.message.content'));
             if ($summary === '') throw new LectureGenerationException('سرویس خلاصه‌ای برنگرداند.');
+
             return ['transcript' => $text, 'summary' => $summary, 'description' => "خلاصه\n{$summary}\n\nمتن کامل سخنرانی\n{$text}"];
         } catch (\Illuminate\Http\Client\ConnectionException) {
             \Illuminate\Support\Facades\Log::warning('Lecture provider connection failed', [
@@ -126,4 +150,5 @@ class LectureDescriptionGenerator
             }
         }
     }
+
 }
