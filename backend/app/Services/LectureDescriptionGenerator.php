@@ -32,8 +32,10 @@ class LectureDescriptionGenerator
                     $requestId = preg_replace('/[^a-zA-Z0-9_.:-]/', '', substr($response->header('x-request-id') ?? '', 0, 100));
                     throw new LectureGenerationException('تبدیل صوت با MiMo از مسیر chat/completions ناموفق بود (HTTP '.$response->status().'). شناسه درخواست: '.($requestId ?: 'ارائه نشده').'. شناسه دقیق مدل، دسترسی کلید و پشتیبانی درگاه از ورودی صوت را بررسی کنید.');
                 }
-                if ($response->json('choices.0.finish_reason') === 'length' || $response->header('x-manageit-output-capped')) {
-                    throw new LectureGenerationException('خروجی متن به سقف سرویس رسید؛ متن ناقص ذخیره نشد.');
+                // A lowered output allowance does not mean the model used it all. Only
+                // finish_reason=length indicates actual truncation in this response.
+                if ($response->json('choices.0.finish_reason') === 'length') {
+                    throw new LectureGenerationException('تولید متن واقعاً با رسیدن به سقف خروجی قطع شد (finish_reason=length). سقف خروجی یا اعتبار کلید را در سرویس بررسی کنید؛ متن ناقص ذخیره نشد.');
                 }
                 $text = trim((string)$response->json('choices.0.message.content'));
             } else {
@@ -96,6 +98,9 @@ class LectureDescriptionGenerator
                 ],
             ]);
             if (!$response->successful()) throw new LectureGenerationException('خلاصه‌سازی ناموفق بود (HTTP '.$response->status().'). تنظیمات مدل را بررسی کنید.');
+            if ($response->json('choices.0.finish_reason') === 'length') {
+                throw new LectureGenerationException('خلاصه با رسیدن به سقف خروجی قطع شد؛ سقف خروجی یا اعتبار کلید را در سرویس بررسی کنید. توضیح قبلی حفظ شد.');
+            }
             $summary = trim((string)$response->json('choices.0.message.content'));
             if ($summary === '') throw new LectureGenerationException('سرویس خلاصه‌ای برنگرداند.');
             return ['transcript' => $text, 'summary' => $summary, 'description' => "خلاصه\n{$summary}\n\nمتن کامل سخنرانی\n{$text}"];

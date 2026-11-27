@@ -62,3 +62,8 @@ Live authenticated forwarding of input_audio through ManageIt remains unverified
 
 Sources: https://ai.manageit.dev/llms-full.txt
 https://mimo.mi.com/docs/en-US/quick-start/usage-guide/multimodal-understanding/audio-understanding
+
+The x-manageit-output-capped header only reports that an output allowance was lowered; it is
+not evidence that the response was truncated. Completed responses with finish_reason=stop
+are accepted even with that header. Actual finish_reason=length in either transcription or
+summary prevents replacement of the existing description and reports the output-limit failure.

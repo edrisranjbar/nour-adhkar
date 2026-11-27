@@ -99,3 +99,31 @@ it('shows the provider request ID when MiMo chat audio is rejected', function ()
     $this->postJson($this->url)->assertStatus(422)->assertSee('request-123')->assertDontSee('private provider error');
     expect(DB::table('lectures')->find($this->lecture)->description)->toBe('Original');
 });
+
+it('accepts completed MiMo output even when the gateway lowered its token allowance', function () {
+    DB::table('lecture_ai_settings')->where('id',1)->update(['transcription_model'=>'manageit/mimo-v2.6-flash',
+        'models'=>json_encode([['id'=>'manageit/mimo-v2.6-flash'],['id'=>'text']])]);
+    DB::table('lectures')->where('id',$this->lecture)->update(['audio_path'=>null,'audio_url'=>'https://audio.example/lecture.mp3']);
+    Http::fakeSequence()
+        ->push(['choices'=>[['message'=>['content'=>'Complete transcript'],'finish_reason'=>'stop']]],200,['x-manageit-output-capped'=>'1024'])
+        ->push(['choices'=>[['message'=>['content'=>'Complete summary'],'finish_reason'=>'stop']]],200,['x-manageit-output-capped'=>'1024']);
+    $this->postJson($this->url)->assertOk();
+    expect(DB::table('lectures')->find($this->lecture)->transcript)->toBe('Complete transcript');
+});
+
+it('rejects actual truncation without replacing the saved description', function () {
+    DB::table('lecture_ai_settings')->where('id',1)->update(['transcription_model'=>'manageit/mimo-v2.6-flash',
+        'models'=>json_encode([['id'=>'manageit/mimo-v2.6-flash'],['id'=>'text']])]);
+    DB::table('lectures')->where('id',$this->lecture)->update(['audio_path'=>null,'audio_url'=>'https://audio.example/lecture.mp3']);
+    Http::fakeSequence()->push(['choices'=>[['message'=>['content'=>'Partial'],'finish_reason'=>'length']]]);
+    $this->postJson($this->url)->assertStatus(422)->assertSee('finish_reason=length');
+    expect(DB::table('lectures')->find($this->lecture)->description)->toBe('Original');
+    Http::assertSentCount(1);
+});
+
+it('does not save a summary that actually hit its output limit', function () {
+    Http::fakeSequence()->push(['text'=>'Complete transcript'])
+        ->push(['choices'=>[['message'=>['content'=>'Partial summary'],'finish_reason'=>'length']]]);
+    $this->postJson($this->url)->assertStatus(422);
+    expect(DB::table('lectures')->find($this->lecture)->description)->toBe('Original');
+});
