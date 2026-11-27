@@ -1,47 +1,35 @@
 # Lecture descriptions from audio
 
-In `/admin`, open a lecture and press «ساخت توضیح از روی صوت». The workflow `.github/workflows/lecture-ai.yml` transcribes the audio with Groq's free `whisper-large-v3` (Persian). It cuts the audio into 5-minute parts and transcribes six at a time. The backend then replaces the lecture description with the transcript. The edit page checks every 15 seconds and fills in the field when it's ready.
+The admin edit button now POSTs directly to its authenticated generation endpoint using AJAX.
+There is no GitHub Action or external worker queue. The scheduled lecture-ai workflow and its
+internal claim/config/report routes have been removed. Old queued lectures can be retried from
+their edit screen without waiting for an external worker.
 
-Each run watches the queue for about 28 minutes, checking every 20 seconds, and a new run starts every 30 minutes. While a run is alive, a click is picked up within seconds. You can also start a run by hand with "Run workflow".
+The button disables immediately, shows progress text, then puts the saved description into the
+textarea without reloading. If the textarea was edited during processing, that edit is retained
+and the user is told that the generated version was saved on the server. Errors are displayed,
+the previous description stays intact on failure, and retry becomes available.
+Generation automatically saves transcript, summary and description; other unsaved form fields
+are not saved. A per-lecture lock prevents concurrent duplicate requests.
 
-The API server in Iran cannot reach Groq, which is why this runs on GitHub Actions. It uses `GET /api/internal/lectures/claim` and `POST /api/internal/lectures/{id}/ai`, both protected by `LECTURE_AI_TOKEN`.
+Configure the HTTPS provider URL, encrypted API key and separate audio/text models at
+/admin/settings/lecture-ai. All fetched models can be selected regardless of pricing. The
+provider must support multipart /audio/transcriptions and JSON /chat/completions.
+A text-only model cannot handle audio/transcriptions. Changing provider clears model selection.
+Blank key retains the existing key. No key is populated into the HTML or flashed to session input.
 
-## Setup
+The PHP server itself must reach the provider. Requests have a 50-second combined processing
+budget, with a 60-second browser timeout. This is a response/error budget, not a guarantee that
+long lectures complete in under a minute. Direct audio input is limited to 25 MB. Remote audio
+download has a 12-second timeout; uploaded audio is read locally without a self-HTTP download.
+The web server/PHP proxy timeout must allow the request budget. Connection, HTTP and empty-output
+errors are reported without exposing provider response bodies or keys.
 
-- Repository secrets: `GROQ_API_KEY` (free key from console.groq.com) and `LECTURE_AI_TOKEN`.
-- The backend `.env` needs the same `LECTURE_AI_TOKEN`. Run `php artisan config:cache` after changing it.
+Summary failure does not silently mark the lecture complete. Audio changes during generation
+prevent the old result from replacing the new audio's description. Public comment and store-stat
+refreshes are unaffected.
 
-## Limits
-
-The free tier caps audio minutes per hour and per day. When a lecture hits a limit, the workflow waits up to 15 minutes, then keeps the lecture queued for a later run.
-
-## Configurable provider (admin)
-
-Open /admin/settings/lecture-ai. Save the HTTPS OpenAI-compatible API base (default
-https://ai.manageit.dev/api/v1) and API key, fetch the catalog, then select separate transcription
-and summary models. Keys are encrypted with Laravel APP_KEY, never populated in the password
-field or flashed into validation input. Blank key retains the saved key. Changing provider
-requires a replacement key and clears model/catalog selections; preserve APP_KEY and backups.
-
-All fetched models can be selected, including paid models and models with unknown pricing.
-Pricing labels are informational and do not restrict saving or execution. Catalog access
-to manageit returned HTTP 401 without a key; its actual free audio capability remains unverified.
-No model quality, quota, pricing or speech support can be confirmed until an authorized catalog
-and a real sample are tested. /audio/transcriptions multipart and /chat/completions JSON must
-be supported. No automatic model fallback is used. A text model cannot transcribe audio by itself.
-
-Run the migration before deploying the worker. The worker retrieves settings through
-GET /api/internal/lectures/config using the existing LECTURE_AI_TOKEN, with no-store responses;
-do not expose this token. Settings are loaded before claiming each lecture. Incomplete saved
-configuration blocks processing without claiming a lecture. Before any settings row exists,
-the existing GROQ_API_KEY workflow remains available for compatibility.
-
-Configured processing transcribes all five-minute parts and summarizes in bounded text chunks,
-then combines summaries in multiple stages. Both outputs are posted back to the existing report
-endpoint. Summary failures fail/requeue the job instead of silently reporting completion.
-The workflow only requires LECTURE_AI_TOKEN when admin configuration is used; there is no need
-to copy the provider API key into GitHub secrets. Never enable request/header debug logging.
-
-Verification: PHP feature tests use mocked HTTP; Python unit tests stub requests and perform no
-external calls. Run python -m unittest discover -s tools/lecture-ai -p test_process.py.
-Live provider transcription/summary verification requires the admin-saved key and selected models.
+Tests: backend/tests/Feature/LectureGenerationTest.php and LectureAiSettingsTest.php use mocked
+provider calls; no live account request was made. Live compatibility and speed need verification
+from the deployed server with an actual compatible audio model and a sample lecture.
+The scripts under tools/lecture-ai are retained only as historical tools and are not invoked.
