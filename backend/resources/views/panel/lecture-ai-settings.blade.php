@@ -11,11 +11,11 @@
         @foreach (['transcription_model' => 'مدل تبدیل صوت به متن', 'summary_model' => 'مدل خلاصه‌سازی'] as $field => $label)
             <div class="field"><label for="{{ $field }}">{{ $label }}</label><select id="{{ $field }}" name="{{ $field }}"><option value="">انتخاب نشده</option>
                 @foreach ($models as $model)
-                    <option value="{{ $model['id'] }}" @selected(($settings?->{$field} ?? '') === $model['id']) @disabled(!$model['free'])>{{ $model['id'] }} — {{ $model['free'] ? 'رایگان' : 'غیررایگان یا قیمت نامشخص' }}</option>
+                    <option value="{{ $model['id'] }}" @selected(($settings?->{$field} ?? '') === $model['id'])>{{ $model['id'] }} — {{ $model['free'] ? 'رایگان' : 'غیررایگان یا قیمت نامشخص' }}</option>
                 @endforeach
             </select></div>
         @endforeach
-        <p class="muted">فقط مدل‌هایی با قیمت ورودی و خروجی صفر قابل انتخاب‌اند. مدل صوت باید مسیر audio/transcriptions سرویس را پشتیبانی کند؛ مدل متنی برای خلاصه‌سازی است. رایگان بودن به معنی نداشتن محدودیت مصرف نیست.</p>
+        <p class="muted">همهٔ مدل‌های دریافت‌شده، از جمله مدل‌های پولی و با قیمت نامشخص، قابل انتخاب‌اند. مدل صوت باید مسیر audio/transcriptions سرویس را پشتیبانی کند؛ مدل متنی برای خلاصه‌سازی است. رایگان بودن به معنی نداشتن محدودیت مصرف نیست.</p>
         <button class="btn primary">ذخیره تنظیمات</button>
     </form>
     <form method="post" action="{{ route('panel.lecture-ai.models') }}" style="margin-top:16px">@csrf<button class="btn">دریافت / تازه‌سازی مدل‌ها</button></form>

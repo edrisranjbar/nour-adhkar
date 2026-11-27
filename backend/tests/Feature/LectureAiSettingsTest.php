@@ -18,20 +18,22 @@ it('stores the key encrypted and never renders or flashes it', function () {
     expect(app(LectureAiSettings::class)->key())->toBe('test-private-key');
 });
 
-it('fetches the provider model catalog and permits only confirmed free models', function () {
+it('fetches the provider model catalog and permits paid and unknown price models', function () {
     $this->actingAs(User::factory()->create(['role'=>'admin','active'=>true]), 'admin');
     $this->put('/admin/settings/lecture-ai', ['base_url'=>'https://ai.manageit.dev/api/v1','api_key'=>'test-key']);
     Http::fake(['*/models'=>Http::response(['data'=>[
         ['id'=>'audio-free','pricing'=>['prompt'=>'0','completion'=>'0']],
         ['id'=>'text-free','pricing'=>['prompt'=>'0','completion'=>'0']],
         ['id'=>'paid','pricing'=>['prompt'=>'1','completion'=>'0']],
+        ['id'=>'unknown'],
     ]])]);
     $this->post('/admin/settings/lecture-ai/models')->assertRedirect();
-    $this->put('/admin/settings/lecture-ai', ['base_url'=>'https://ai.manageit.dev/api/v1','transcription_model'=>'paid'])->assertSessionHasErrors();
-    $this->put('/admin/settings/lecture-ai', ['base_url'=>'https://ai.manageit.dev/api/v1','transcription_model'=>'audio-free','summary_model'=>'text-free'])->assertRedirect();
+    $this->put('/admin/settings/lecture-ai', ['base_url'=>'https://ai.manageit.dev/api/v1','transcription_model'=>'not-in-catalog'])->assertSessionHasErrors();
+    $this->put('/admin/settings/lecture-ai', ['base_url'=>'https://ai.manageit.dev/api/v1','transcription_model'=>'paid','summary_model'=>'unknown'])->assertRedirect();
+    $this->get('/admin/settings/lecture-ai')->assertOk()->assertDontSee('disabled', false);
     config(['services.lecture_ai.token'=>'worker-token']);
     $this->getJson('/api/internal/lectures/config')->assertUnauthorized();
-    $this->withToken('worker-token')->getJson('/api/internal/lectures/config')->assertOk()->assertJsonPath('data.summary_model','text-free')->assertHeader('Cache-Control','no-store, private');
+    $this->withToken('worker-token')->getJson('/api/internal/lectures/config')->assertOk()->assertJsonPath('data.summary_model','unknown')->assertJsonPath('data.transcription_model','paid')->assertHeader('Cache-Control','no-store, private');
 });
 
 it('does not classify unknown pricing or paid audio as free', function () {

@@ -23,12 +23,12 @@ and summary models. Keys are encrypted with Laravel APP_KEY, never populated in 
 field or flashed into validation input. Blank key retains the saved key. Changing provider
 requires a replacement key and clears model/catalog selections; preserve APP_KEY and backups.
 
-Only models whose catalog explicitly reports zero prompt/completion prices (and no other
-nonzero numeric pricing) can be selected. Missing pricing is unknown, not free. Catalog access
+All fetched models can be selected, including paid models and models with unknown pricing.
+Pricing labels are informational and do not restrict saving or execution. Catalog access
 to manageit returned HTTP 401 without a key; its actual free audio capability remains unverified.
 No model quality, quota, pricing or speech support can be confirmed until an authorized catalog
 and a real sample are tested. /audio/transcriptions multipart and /chat/completions JSON must
-be supported. No paid fallback is used. A text model cannot transcribe audio by itself.
+be supported. No automatic model fallback is used. A text model cannot transcribe audio by itself.
 
 Run the migration before deploying the worker. The worker retrieves settings through
 GET /api/internal/lectures/config using the existing LECTURE_AI_TOKEN, with no-store responses;
