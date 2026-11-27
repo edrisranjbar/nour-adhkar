@@ -33,6 +33,15 @@ fi
 php artisan down --retry=15 || true
 trap 'php artisan up || true' EXIT
 php artisan migrate --force
+# Audio transcription falls back to ffmpeg when the provider rejects the original upload.
+# Keep this explicit because PHP-FPM commonly has a narrower PATH than an interactive shell.
+FFMPEG_BIN="${FFMPEG_BINARY:-/usr/bin/ffmpeg}"
+if [ ! -x "$FFMPEG_BIN" ]; then FFMPEG_BIN="$(command -v ffmpeg || true)"; fi
+if [ -z "$FFMPEG_BIN" ] || [ ! -x "$FFMPEG_BIN" ]; then
+  echo 'ffmpeg is required for oversized lecture audio (HTTP 413). Install it with: sudo apt-get update && sudo apt-get install -y ffmpeg' >&2
+  exit 1
+fi
+echo "Using ffmpeg: $FFMPEG_BIN"
 # Uploaded lecture audio is served from public/storage.
 [ -e public/storage ] || php artisan storage:link
 php artisan optimize:clear
