@@ -57,11 +57,12 @@ it('recovers from 413 with ordered compressed parts and saves only the complete 
             return [$directory.'/part-00000.mp3', $directory.'/part-00001.mp3'];
         });
     });
-    Http::fakeSequence()->push('', 413)->push(['text'=>'First'])->push(['text'=>'Second'])
+    Http::fakeSequence()->push('', 413)->push('', 404)->push(['choices'=>[['message'=>['content'=>'First']]]])
+        ->push('', 404)->push(['choices'=>[['message'=>['content'=>'Second']]]])
         ->push(['choices'=>[['message'=>['content'=>'Summary']]]]);
     $this->postJson($this->url)->assertOk();
     expect(DB::table('lectures')->find($this->lecture)->transcript)->toBe("First\n\nSecond");
-    Http::assertSentCount(4);
+    Http::assertSentCount(6);
 });
 
 it('keeps the description if a compressed part is still rejected', function () {
