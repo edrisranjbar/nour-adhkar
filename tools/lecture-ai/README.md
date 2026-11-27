@@ -67,3 +67,20 @@ The x-manageit-output-capped header only reports that an output allowance was lo
 not evidence that the response was truncated. Completed responses with finish_reason=stop
 are accepted even with that header. Actual finish_reason=length in either transcription or
 summary prevents replacement of the existing description and reports the output-limit failure.
+
+### Separate AJAX phase budgets and resumable summaries
+
+The UI now POSTs phase=transcribe, then phase=summary. Each request has its own 50-second
+server deadline and 60-second browser timeout; the total operation may therefore exceed one
+minute. This removes the previous shared deadline that starved summarization after a long
+successful transcription. It does not guarantee completion of any individual provider call.
+
+Completed transcripts are cached for 15 minutes, keyed by lecture ID, audio source and saved
+provider/model configuration. Retries reuse this transcript for the summary phase. Existing
+descriptions are only replaced after summary success. Audio/configuration changes invalidate
+the resume key. Cache eviction or expiry requires a new transcription. The phases are protected
+by the same authenticated route and per-lecture lock. No GitHub job or background worker is used.
+
+Connection diagnostics identify transcription versus summary and log only lecture ID, phase
+and elapsed milliseconds (no keys, transcript or audio). Provider HTTP 200 in an upstream
+dashboard alone does not prove full delivery to our client or success of the second call.

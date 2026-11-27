@@ -82,13 +82,28 @@ class LectureController extends Controller
         try {
             @set_time_limit(65);
             DB::table('lectures')->where('id', $id)->update(['ai_status' => 'processing', 'ai_error' => null, 'ai_claimed_at' => now()]);
-            $result = app(\App\Services\LectureDescriptionGenerator::class)->generate($lecture);
+            $settings = app(\App\Services\LectureAiSettings::class)->row();
+            $cacheKey = 'lecture-transcript:'.$id.':'.hash('sha256', json_encode([
+                $lecture->audio_path, $lecture->audio_url, $settings,
+            ]));
+            $phase = $request->input('phase', 'all');
+            $cache = \Illuminate\Support\Facades\Cache::get($cacheKey);
+            if ($phase === 'transcribe') {
+                if (!$cache) {
+                    $output = app(\App\Services\LectureDescriptionGenerator::class)->generate($lecture, null, true);
+                    \Illuminate\Support\Facades\Cache::put($cacheKey, $output['transcript'], now()->addMinutes(15));
+                }
+                return response()->json(['next_phase' => 'summary']);
+            }
+            if ($phase === 'summary' && !$cache) throw new \App\Services\LectureGenerationException('متن موقت منقضی شد؛ دوباره ساخت توضیح را بزنید.');
+            $result = app(\App\Services\LectureDescriptionGenerator::class)->generate($lecture, $phase === 'summary' ? $cache : null);
             $updated = DB::table('lectures')->where('id', $id)->where('audio_path', $lecture->audio_path)
                 ->where('audio_url', $lecture->audio_url)->update($result + [
                     'ai_status' => 'done', 'ai_error' => null, 'ai_claimed_at' => null,
                     'ai_processed_at' => now(), 'updated_at' => now(),
                 ]);
             if (!$updated) throw new \App\Services\LectureGenerationException('فایل صوتی هنگام پردازش تغییر کرد؛ دوباره تلاش کنید.');
+            \Illuminate\Support\Facades\Cache::forget($cacheKey);
             return response()->json(['description' => $result['description']]);
         } catch (\Throwable $e) {
             $message = $e instanceof \App\Services\LectureGenerationException
