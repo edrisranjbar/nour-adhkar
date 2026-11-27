@@ -135,6 +135,7 @@
             </button>
         </div>
         <nav>
+            <a href="{{ route('panel.lecture-ai.edit') }}" @class(['active' => request()->routeIs('panel.lecture-ai.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M5 5l14 14M5 19 19 5"/></svg><span>تنظیمات هوش مصنوعی</span></a>
             <a href="{{ route('panel.dashboard') }}" @class(['active' => request()->routeIs('panel.dashboard')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg><span>داشبورد</span></a>
             <a href="{{ route('panel.analytics') }}" @class(['active' => request()->routeIs('panel.analytics')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>آمار</span></a>
             <a href="{{ route('panel.notices.index') }}" @class(['active' => request()->routeIs('panel.notices.*')])><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>پیام‌ها</span></a>

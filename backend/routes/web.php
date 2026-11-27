@@ -15,6 +15,9 @@ Route::prefix('admin')->name('panel.')->group(function () {
 
     Route::middleware(PanelAdmin::class)->group(function () {
         Route::post('logout', [Panel\AuthController::class, 'logout'])->name('logout');
+        Route::get('settings/lecture-ai', [Panel\LectureAiSettingsController::class, 'edit'])->name('lecture-ai.edit');
+        Route::put('settings/lecture-ai', [Panel\LectureAiSettingsController::class, 'save'])->name('lecture-ai.save');
+        Route::post('settings/lecture-ai/models', [Panel\LectureAiSettingsController::class, 'models'])->middleware('throttle:6,1')->name('lecture-ai.models');
         Route::get('/', Panel\DashboardController::class)->name('dashboard');
         Route::get('analytics', Panel\AnalyticsController::class)->name('analytics');
         Route::get('installs', Panel\InstallStatsController::class)->middleware('throttle:60,1')->name('installs');

@@ -36,8 +36,8 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           LECTURE_AI_TOKEN: ${{ secrets.LECTURE_AI_TOKEN }}
         run: |
-          if [ -z "$GROQ_API_KEY" ] || [ -z "$LECTURE_AI_TOKEN" ]; then
-            echo "::warning::GROQ_API_KEY or LECTURE_AI_TOKEN is not set; skipping."
+          if [ -z "$LECTURE_AI_TOKEN" ]; then
+            echo "::warning::LECTURE_AI_TOKEN is not set; skipping."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
