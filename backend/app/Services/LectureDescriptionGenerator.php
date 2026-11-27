@@ -14,6 +14,7 @@ class LectureDescriptionGenerator
         catch (\Throwable) { throw new LectureGenerationException('ابتدا کلید و مدل‌ها را در تنظیمات هوش مصنوعی بررسی کنید.'); }
         if (!$config) throw new LectureGenerationException('ابتدا تنظیمات هوش مصنوعی و مدل‌ها را در پنل تکمیل کنید.');
         $temporary = null;
+        $chunksDirectory = null;
         try {
             if ($lecture->audio_path) {
                 $path = Storage::disk('public')->path($lecture->audio_path);
@@ -38,8 +39,31 @@ class LectureDescriptionGenerator
                         'model' => $config['transcription_model'], 'language' => 'fa', 'response_format' => 'json',
                     ]);
             } finally { fclose($file); }
-            if (!$response->successful()) throw new LectureGenerationException('تبدیل صوت به متن ناموفق بود (HTTP '.$response->status().'). مدل صوت و پشتیبانی سرویس از audio/transcriptions را بررسی کنید.');
-            $text = trim((string)$response->json('text'));
+            if ($response->status() === 413) {
+                $chunksDirectory = sys_get_temp_dir().'/lecture-chunks-'.bin2hex(random_bytes(12));
+                mkdir($chunksDirectory, 0700);
+                $parts = app(LectureAudioChunks::class)->prepare($path, $chunksDirectory, $deadline - microtime(true));
+                $texts = [];
+                foreach ($parts as $part) {
+                    if (microtime(true) >= $deadline) throw new LectureGenerationException('بخش‌بندی انجام شد، اما سرویس در مهلت پردازش پاسخ کامل نداد؛ هیچ متن ناقصی ذخیره نشد.');
+                    $stream = fopen($part, 'rb');
+                    try {
+                        $partResponse = $client()->attach('file', $stream, basename($part), ['Content-Type' => 'audio/mpeg'])
+                            ->post(rtrim($config['base_url'], '/').'/audio/transcriptions', [
+                                'model' => $config['transcription_model'], 'language' => 'fa', 'response_format' => 'json',
+                            ]);
+                    } finally { fclose($stream); }
+                    if ($partResponse->status() === 413) throw new LectureGenerationException('حتی بخش فشردهٔ دو دقیقه‌ای از سقف سرویس بزرگ‌تر است (HTTP 413)؛ محدودیت بارگذاری سرویس را بررسی کنید.');
+                    if (!$partResponse->successful()) throw new LectureGenerationException('تبدیل بخشی از صوت ناموفق بود (HTTP '.$partResponse->status().')؛ متن ناقص ذخیره نشد.');
+                    $partText = $partResponse->json('text');
+                    if (!is_string($partText) || trim($partText) === '') throw new LectureGenerationException('سرویس متن یکی از بخش‌ها را برنگرداند؛ متن ناقص ذخیره نشد.');
+                    $texts[] = trim($partText);
+                }
+                $text = implode("\n\n", $texts);
+            } else {
+                if (!$response->successful()) throw new LectureGenerationException('تبدیل صوت به متن ناموفق بود (HTTP '.$response->status().'). تنظیمات مدل را بررسی کنید.');
+                $text = trim((string)$response->json('text'));
+            }
             if ($text === '') throw new LectureGenerationException('سرویس متن سخنرانی را برنگرداند.');
             if (microtime(true) >= $deadline) throw new LectureGenerationException('زمان پردازش تمام شد. دوباره تلاش کنید یا فایل کوتاه‌تری انتخاب کنید.');
             $response = $client()->post(rtrim($config['base_url'], '/').'/chat/completions', [
@@ -56,6 +80,10 @@ class LectureDescriptionGenerator
             throw new LectureGenerationException('اتصال به سرویس برقرار نشد یا مهلت درخواست تمام شد؛ دسترسی سرور به سرویس و کوتاه‌تر بودن فایل را بررسی کنید.');
         } finally {
             if ($temporary && is_file($temporary)) unlink($temporary);
+            if ($chunksDirectory && is_dir($chunksDirectory)) {
+                foreach (glob($chunksDirectory.'/*') as $part) unlink($part);
+                rmdir($chunksDirectory);
+            }
         }
     }
 }

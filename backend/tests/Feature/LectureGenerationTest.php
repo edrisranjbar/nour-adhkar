@@ -48,3 +48,30 @@ it('requires admin login and prevents simultaneous generation', function () {
     try { $this->postJson($this->url)->assertStatus(409); } finally { $lock->release(); }
     Http::assertNothingSent();
 });
+
+it('recovers from 413 with ordered compressed parts and saves only the complete transcript', function () {
+    $this->mock(\App\Services\LectureAudioChunks::class, function ($mock) {
+        $mock->shouldReceive('prepare')->once()->andReturnUsing(function ($source, $directory) {
+            file_put_contents($directory.'/part-00000.mp3', 'part1');
+            file_put_contents($directory.'/part-00001.mp3', 'part2');
+            return [$directory.'/part-00000.mp3', $directory.'/part-00001.mp3'];
+        });
+    });
+    Http::fakeSequence()->push('', 413)->push(['text'=>'First'])->push(['text'=>'Second'])
+        ->push(['choices'=>[['message'=>['content'=>'Summary']]]]);
+    $this->postJson($this->url)->assertOk();
+    expect(DB::table('lectures')->find($this->lecture)->transcript)->toBe("First\n\nSecond");
+    Http::assertSentCount(4);
+});
+
+it('keeps the description if a compressed part is still rejected', function () {
+    $this->mock(\App\Services\LectureAudioChunks::class, function ($mock) {
+        $mock->shouldReceive('prepare')->andReturnUsing(function ($source, $directory) {
+            file_put_contents($directory.'/part-00000.mp3', 'part');
+            return [$directory.'/part-00000.mp3'];
+        });
+    });
+    Http::fakeSequence()->push('', 413)->push('', 413);
+    $this->postJson($this->url)->assertStatus(422)->assertSee('413');
+    expect(DB::table('lectures')->find($this->lecture)->description)->toBe('Original');
+});

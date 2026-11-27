@@ -33,3 +33,13 @@ Tests: backend/tests/Feature/LectureGenerationTest.php and LectureAiSettingsTest
 provider calls; no live account request was made. Live compatibility and speed need verification
 from the deployed server with an actual compatible audio model and a sample lecture.
 The scripts under tools/lecture-ai are retained only as historical tools and are not invoked.
+
+### HTTP 413 recovery
+
+A provider 413 triggers local ffmpeg conversion into two-minute mono 16 kHz / 16 kbps MP3
+parts. Every part must produce text; transcripts are concatenated in order before one summary.
+No partial result replaces the saved description. Temporary parts are removed on success/failure.
+The existing 50-second deadline still applies, including conversion and all provider calls.
+ffmpeg with libmp3lame must be installed and executable by PHP-FPM on the server. It is not
+installed by this code. A missing/failed binary, repeated 413 or timeout shows a specific error.
+The server's ffmpeg availability and actual provider size limit still need live verification.
