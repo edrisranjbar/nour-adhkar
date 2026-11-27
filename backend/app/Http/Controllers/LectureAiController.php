@@ -16,6 +16,16 @@ class LectureAiController extends Controller
     /** A claim older than this is treated as abandoned (runner timeout or crash) and offered again. */
     private const CLAIM_MINUTES = 120;
 
+    public function configuration(Request $request, \App\Services\LectureAiSettings $settings)
+    {
+        if ($denied = $this->deny($request)) return $denied;
+        try {
+            return response()->json(['data' => $settings->worker()])->header('Cache-Control', 'no-store');
+        } catch (\Throwable) {
+            return response()->json(['message' => 'تنظیمات هوش مصنوعی کامل نیست.'], 409)->header('Cache-Control', 'no-store');
+        }
+    }
+
     public function claim(Request $request)
     {
         if ($denied = $this->deny($request)) {
