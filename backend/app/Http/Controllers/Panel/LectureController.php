@@ -83,7 +83,7 @@ class LectureController extends Controller
             @set_time_limit(65);
             DB::table('lectures')->where('id', $id)->update(['ai_status' => 'processing', 'ai_error' => null, 'ai_claimed_at' => now()]);
             $settings = app(\App\Services\LectureAiSettings::class)->row();
-            $cacheKey = 'lecture-transcript:'.$id.':'.hash('sha256', json_encode([
+            $cacheKey = 'lecture-transcript:v3:'.$id.':'.hash('sha256', json_encode([
                 $lecture->audio_path, $lecture->audio_url, $settings,
             ]));
             $phase = $request->input('phase', 'all');
