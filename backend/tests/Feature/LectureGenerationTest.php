@@ -32,7 +32,7 @@ it('sends provider calls immediately and returns the saved description without a
     expect(DB::table('lectures')->find($this->lecture)->ai_status)->toBe('done');
     Http::assertSentCount(2);
     $this->get("/admin/scholars/{$this->scholar}/lectures/{$this->lecture}/edit")->assertOk()
-        ->assertSee("form.addEventListener('submit'", false)->assertDontSee('setInterval', false);
+        ->assertSee("runPhase('transcribe')", false)->assertSee('ai-summarize', false)->assertDontSee('setInterval', false);
 });
 
 it('surfaces provider failures without leaking response bodies or losing the description', function () {

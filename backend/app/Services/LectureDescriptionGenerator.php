@@ -28,7 +28,8 @@ class LectureDescriptionGenerator
     public function generate(object $lecture, ?string $transcript = null, bool $transcribeOnly = false): array
     {
         $started = microtime(true);
-        $deadline = $started + 50;
+        // Transcription may contain several compressed chunks; summary is kept short.
+        $deadline = $started + ($transcribeOnly ? 180 : 50);
         $phase = $transcript === null ? 'transcription' : 'summary';
         try { $config = app(LectureAiSettings::class)->worker(); }
         catch (\Throwable) { throw new LectureGenerationException('ابتدا کلید و مدل‌ها را در تنظیمات هوش مصنوعی بررسی کنید.'); }

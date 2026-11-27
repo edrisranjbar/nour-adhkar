@@ -77,10 +77,10 @@ class LectureController extends Controller
     public function generate(Request $request, int $scholarId, int $id)
     {
         $lecture = $this->lecture($scholarId, $id);
-        $lock = \Illuminate\Support\Facades\Cache::lock('lecture-description:'.$id, 70);
+        $lock = \Illuminate\Support\Facades\Cache::lock('lecture-description:'.$id, 240);
         if (!$lock->get()) return response()->json(['message' => 'این سخنرانی در حال پردازش است.'], 409);
         try {
-            @set_time_limit(65);
+            @set_time_limit(200);
             DB::table('lectures')->where('id', $id)->update(['ai_status' => 'processing', 'ai_error' => null, 'ai_claimed_at' => now()]);
             $settings = app(\App\Services\LectureAiSettings::class)->row();
             $cacheKey = 'lecture-transcript:v3:'.$id.':'.hash('sha256', json_encode([
