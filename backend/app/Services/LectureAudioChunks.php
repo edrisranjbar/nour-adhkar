@@ -9,7 +9,9 @@ class LectureAudioChunks
     public function prepare(string $source, string $directory, float $remaining): array
     {
         if ($remaining < 3) throw new LectureGenerationException('زمان کافی برای بخش‌بندی صوت باقی نماند؛ دوباره تلاش کنید.');
-        $process = new Process(['ffmpeg', '-nostdin', '-hide_banner', '-loglevel', 'error', '-i', $source,
+        $binary = (string) env('FFMPEG_BINARY', '/usr/bin/ffmpeg');
+        if (!is_executable($binary)) $binary = 'ffmpeg';
+        $process = new Process([$binary, '-nostdin', '-hide_banner', '-loglevel', 'error', '-i', $source,
             '-vn', '-ac', '1', '-ar', '16000', '-c:a', 'libmp3lame', '-b:a', '16k',
             '-f', 'segment', '-segment_time', '120', $directory.'/part-%05d.mp3']);
         $process->setTimeout(min(15, $remaining));
