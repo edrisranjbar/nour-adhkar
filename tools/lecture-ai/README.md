@@ -43,3 +43,22 @@ The existing 50-second deadline still applies, including conversion and all prov
 ffmpeg with libmp3lame must be installed and executable by PHP-FPM on the server. It is not
 installed by this code. A missing/failed binary, repeated 413 or timeout shows a specific error.
 The server's ffmpeg availability and actual provider size limit still need live verification.
+
+### MiMo V2.6 audio via chat completions
+
+MiMo V2.6 models use POST /chat/completions with a user input_audio content block whose
+input_audio.data is the public HTTPS audio URL, as documented by Xiaomi. Model IDs containing
+mimo-v2.6 select this transport; the exact catalog ID is forwarded unchanged. No audio file
+is uploaded to the gateway and no /audio/transcriptions call is made for these models.
+The provider must be able to download the public lecture URL. Transcription and summary remain
+two calls using the configured respective models and one shared deadline. Truncated transcription
+is rejected. Error messages include a sanitized x-request-id when the gateway supplies it.
+
+ManageIt returned "The route api/v1/audio/transcriptions could not be found" on a direct
+unauthenticated POST, while /chat/completions reached authentication (401). Their published
+guide lists chat/completions but no audio/transcriptions route. A gateway route rejection
+does not establish whether a model invocation occurred or what the account dashboard logs.
+Live authenticated forwarding of input_audio through ManageIt remains unverified.
+
+Sources: https://ai.manageit.dev/llms-full.txt
+https://mimo.mi.com/docs/en-US/quick-start/usage-guide/multimodal-understanding/audio-understanding

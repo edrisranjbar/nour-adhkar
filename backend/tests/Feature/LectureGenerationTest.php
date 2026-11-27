@@ -75,3 +75,27 @@ it('keeps the description if a compressed part is still rejected', function () {
     $this->postJson($this->url)->assertStatus(422)->assertSee('413');
     expect(DB::table('lectures')->find($this->lecture)->description)->toBe('Original');
 });
+
+it('sends MiMo audio through chat completions with the public URL and no multipart upload', function () {
+    DB::table('lecture_ai_settings')->where('id',1)->update(['transcription_model'=>'manageit/mimo-v2.6-flash',
+        'models'=>json_encode([['id'=>'manageit/mimo-v2.6-flash'],['id'=>'text']])]);
+    DB::table('lectures')->where('id',$this->lecture)->update(['audio_path'=>null,'audio_url'=>'https://audio.example/lecture.mp3']);
+    Http::fakeSequence()
+        ->push(['choices'=>[['message'=>['content'=>'Transcript'],'finish_reason'=>'stop']]])
+        ->push(['choices'=>[['message'=>['content'=>'Summary']]]]);
+    $this->postJson($this->url)->assertOk();
+    Http::assertSent(fn ($r) => $r->url() === 'https://provider.example/v1/chat/completions'
+        && $r['model'] === 'manageit/mimo-v2.6-flash'
+        && $r['messages'][0]['content'][0]['input_audio']['data'] === 'https://audio.example/lecture.mp3');
+    Http::assertNotSent(fn ($r) => str_contains($r->url(),'/audio/transcriptions'));
+    Http::assertSentCount(2);
+});
+
+it('shows the provider request ID when MiMo chat audio is rejected', function () {
+    DB::table('lecture_ai_settings')->where('id',1)->update(['transcription_model'=>'manageit/mimo-v2.6-flash',
+        'models'=>json_encode([['id'=>'manageit/mimo-v2.6-flash'],['id'=>'text']])]);
+    DB::table('lectures')->where('id',$this->lecture)->update(['audio_path'=>null,'audio_url'=>'https://audio.example/lecture.mp3']);
+    Http::fakeSequence()->push('private provider error',404,['x-request-id'=>'request-123']);
+    $this->postJson($this->url)->assertStatus(422)->assertSee('request-123')->assertDontSee('private provider error');
+    expect(DB::table('lectures')->find($this->lecture)->description)->toBe('Original');
+});

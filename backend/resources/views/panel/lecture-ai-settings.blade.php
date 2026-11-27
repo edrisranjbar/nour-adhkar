@@ -15,7 +15,7 @@
                 @endforeach
             </select></div>
         @endforeach
-        <p class="muted">همهٔ مدل‌های دریافت‌شده، از جمله مدل‌های پولی و با قیمت نامشخص، قابل انتخاب‌اند. مدل صوت باید مسیر audio/transcriptions سرویس را پشتیبانی کند؛ مدل متنی برای خلاصه‌سازی است. رایگان بودن به معنی نداشتن محدودیت مصرف نیست.</p>
+        <p class="muted">همهٔ مدل‌های دریافت‌شده، از جمله مدل‌های پولی و با قیمت نامشخص، قابل انتخاب‌اند. MiMo V2.6 با لینک صوت از مسیر chat/completions استفاده می‌شود؛ سایر مدل‌های صوتی باید audio/transcriptions را پشتیبانی کنند. مدل متنی برای خلاصه‌سازی است. رایگان بودن به معنی نداشتن محدودیت مصرف نیست.</p>
         <button class="btn primary">ذخیره تنظیمات</button>
     </form>
     <form method="post" action="{{ route('panel.lecture-ai.models') }}" style="margin-top:16px">@csrf<button class="btn">دریافت / تازه‌سازی مدل‌ها</button></form>
