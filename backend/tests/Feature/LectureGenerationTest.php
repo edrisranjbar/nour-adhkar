@@ -49,6 +49,27 @@ it('requires admin login and prevents simultaneous generation', function () {
     Http::assertNothingSent();
 });
 
+it('discards a queued lecture without contacting the provider', function () {
+    $this->post(str_replace('/generate', '/discard', $this->url))->assertRedirect();
+    expect(DB::table('lectures')->find($this->lecture)->ai_status)->toBe('idle');
+    Http::assertNothingSent();
+});
+
+it('ignores a summary returned after the dashboard discarded its request', function () {
+    Http::fake(function ($request) {
+        if (str_ends_with($request->url(), '/audio/transcriptions')) {
+            return Http::response(['text' => 'Transcript']);
+        }
+        app(\App\Http\Controllers\Panel\LectureController::class)->discard($this->scholar, $this->lecture);
+
+        return Http::response(['choices' => [['message' => ['content' => 'Late summary']]]]);
+    });
+    $this->postJson($this->url, ['phase' => 'transcribe'])->assertOk();
+    $this->postJson($this->url, ['phase' => 'summary'])->assertStatus(422);
+    $lecture = DB::table('lectures')->find($this->lecture);
+    expect($lecture->ai_status)->toBe('idle')->and($lecture->description)->toBe('Original');
+});
+
 it('recovers from 413 with ordered compressed parts and saves only the complete transcript', function () {
     $this->mock(\App\Services\LectureAudioChunks::class, function ($mock) {
         $mock->shouldReceive('prepare')->once()->andReturnUsing(function ($source, $directory) {

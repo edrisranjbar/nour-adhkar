@@ -161,11 +161,17 @@
                 </div>
                 <div style="text-align:end;flex:none">
                     @switch($lecture->ai_status)
-                        @case('processing') <span class="badge draft">تبدیل به متن</span> @break
+                        @case('processing') <span class="badge draft">در حال پردازش</span> @break
                         @case('queued') <span class="badge">در صف</span> @break
                         @default <span class="badge off">ناموفق</span>
                     @endswitch
                     <div class="muted">{{ F::date($lecture->ai_claimed_at ?? $lecture->updated_at) }}</div>
+                    @if (in_array($lecture->ai_status, ['queued', 'processing'], true))
+                        <form method="POST" action="{{ route('panel.lectures.discard', [$lecture->scholar_id, $lecture->id]) }}">
+                            @csrf
+                            <button type="submit" class="btn sm danger">لغو پردازش</button>
+                        </form>
+                    @endif
                 </div>
             </div>
         @empty
