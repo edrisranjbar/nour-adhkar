@@ -81,36 +81,74 @@ class LectureController extends Controller
         if (!$lock->get()) return response()->json(['message' => 'این سخنرانی در حال پردازش است.'], 409);
         try {
             @set_time_limit(200);
-            DB::table('lectures')->where('id', $id)->update(['ai_status' => 'processing', 'ai_error' => null, 'ai_claimed_at' => now()]);
-            $settings = app(\App\Services\LectureAiSettings::class)->row();
-            $cacheKey = 'lecture-transcript:v3:'.$id.':'.hash('sha256', json_encode([
-                $lecture->audio_path, $lecture->audio_url, $settings,
-            ]));
+            $claimedAt = now()->toDateTimeString();
+            DB::table('lectures')->where('id', $id)->update(['ai_status' => 'processing', 'ai_error' => null, 'ai_claimed_at' => $claimedAt]);
+            $active = fn () => DB::table('lectures')->where('id', $id)
+                ->where('ai_status', 'processing')->where('ai_claimed_at', $claimedAt);
+            $ensureActive = function () use ($active) {
+                if (!$active()->exists()) {
+                    throw new \App\Services\LectureGenerationException('پردازش لغو شد یا فایل صوتی تغییر کرد.');
+                }
+            };
+            $cacheKey = $this->transcriptCacheKey($lecture);
             $phase = $request->input('phase', 'all');
             $cache = \Illuminate\Support\Facades\Cache::get($cacheKey);
             if ($phase === 'transcribe') {
                 if (!$cache) {
-                    $output = app(\App\Services\LectureDescriptionGenerator::class)->generate($lecture, null, true);
-                    \Illuminate\Support\Facades\Cache::put($cacheKey, $output['transcript'], now()->addMinutes(15));
+                    $output = app(\App\Services\LectureDescriptionGenerator::class)->generate($lecture, null, true, $ensureActive);
+                    DB::transaction(function () use ($active, $cacheKey, $output) {
+                        if (!$active()->lockForUpdate()->first()) {
+                            throw new \App\Services\LectureGenerationException('پردازش لغو شد یا فایل صوتی تغییر کرد.');
+                        }
+                        \Illuminate\Support\Facades\Cache::put($cacheKey, $output['transcript'], now()->addMinutes(15));
+                    });
                 }
+                $ensureActive();
                 return response()->json(['next_phase' => 'summary']);
             }
             if ($phase === 'summary' && !$cache) throw new \App\Services\LectureGenerationException('متن موقت منقضی شد؛ دوباره ساخت توضیح را بزنید.');
-            $result = app(\App\Services\LectureDescriptionGenerator::class)->generate($lecture, $phase === 'summary' ? $cache : null);
-            $updated = DB::table('lectures')->where('id', $id)->where('audio_path', $lecture->audio_path)
+            $result = app(\App\Services\LectureDescriptionGenerator::class)->generate($lecture, $phase === 'summary' ? $cache : null, ensureActive: $ensureActive);
+            $updated = $active()->where('audio_path', $lecture->audio_path)
                 ->where('audio_url', $lecture->audio_url)->update($result + [
                     'ai_status' => 'done', 'ai_error' => null, 'ai_claimed_at' => null,
                     'ai_processed_at' => now(), 'updated_at' => now(),
                 ]);
-            if (!$updated) throw new \App\Services\LectureGenerationException('فایل صوتی هنگام پردازش تغییر کرد؛ دوباره تلاش کنید.');
+            if (!$updated) throw new \App\Services\LectureGenerationException('پردازش لغو شد یا فایل صوتی تغییر کرد.');
             \Illuminate\Support\Facades\Cache::forget($cacheKey);
             return response()->json(['description' => $result['description']]);
         } catch (\Throwable $e) {
             $message = $e instanceof \App\Services\LectureGenerationException
                 ? $e->getMessage() : 'ساخت توضیح ناموفق بود؛ تنظیمات سرویس و فایل صوتی را بررسی کنید.';
-            DB::table('lectures')->where('id', $id)->update(['ai_status' => 'failed', 'ai_error' => mb_substr($message, 0, 500), 'ai_claimed_at' => null]);
+            if (isset($active)) {
+                $active()->update(['ai_status' => 'failed', 'ai_error' => mb_substr($message, 0, 500), 'ai_claimed_at' => null]);
+            }
             return response()->json(['message' => $message], 422);
         } finally { $lock->release(); }
+    }
+
+    public function discard(int $scholarId, int $id)
+    {
+        $discarded = DB::transaction(function () use ($scholarId, $id) {
+            $lecture = DB::table('lectures')->where('scholar_id', $scholarId)
+                ->where('id', $id)->lockForUpdate()->first();
+            abort_unless($lecture, 404);
+            if (!in_array($lecture->ai_status, ['queued', 'processing'], true)) return false;
+
+            DB::table('lectures')->where('id', $id)->update([
+                'ai_status' => 'idle', 'ai_error' => null, 'ai_claimed_at' => null,
+            ]);
+            \Illuminate\Support\Facades\Cache::forget($this->transcriptCacheKey($lecture));
+            return true;
+        });
+        return back()->with('status', $discarded ? 'درخواست پردازش لغو شد.' : 'این درخواست دیگر فعال نیست.');
+    }
+
+    private function transcriptCacheKey(object $lecture): string
+    {
+        $settings = app(\App\Services\LectureAiSettings::class)->row();
+        return 'lecture-transcript:v3:'.$lecture->id.':'.hash('sha256', json_encode([
+            $lecture->audio_path, $lecture->audio_url, $settings,
+        ]));
     }
     /** Polled by the edit form while a description is being generated. */
     public function aiStatus(int $scholarId, int $id)

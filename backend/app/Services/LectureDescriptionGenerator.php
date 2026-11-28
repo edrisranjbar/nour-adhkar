@@ -28,7 +28,7 @@ class LectureDescriptionGenerator
         return $text;
     }
 
-    public function generate(object $lecture, ?string $transcript = null, bool $transcribeOnly = false): array
+    public function generate(object $lecture, ?string $transcript = null, bool $transcribeOnly = false, ?callable $ensureActive = null): array
     {
         $started = microtime(true);
         // Transcription may contain several compressed chunks; summary is kept short.
@@ -40,6 +40,7 @@ class LectureDescriptionGenerator
         $temporary = null;
         $chunksDirectory = null;
         try {
+            $ensureActive?->__invoke();
             if ($transcript === null) {
             if (str_contains(strtolower($config['transcription_model']), 'mimo-v2.6')) {
                 $url = \App\Http\Controllers\ScholarController::audioUrl($lecture);
@@ -83,6 +84,7 @@ class LectureDescriptionGenerator
             $chatAudio = $config['transcription_model'] === 'manageit/gemini-3.8-flash';
             $response = null;
             if (!$chatAudio) {
+                $ensureActive?->__invoke();
                 $file = fopen($path, 'rb');
                 try {
                     $response = $client()->attach('file', $file, $lecture->audio_path ? basename($path) : 'lecture.mp3')
@@ -92,11 +94,13 @@ class LectureDescriptionGenerator
                 } finally { fclose($file); }
             }
             if ($chatAudio || in_array($response->status(), [404, 413], true)) {
+                $ensureActive?->__invoke();
                 $chunksDirectory = sys_get_temp_dir().'/lecture-chunks-'.bin2hex(random_bytes(12));
                 mkdir($chunksDirectory, 0700);
                 $parts = app(LectureAudioChunks::class)->prepare($path, $chunksDirectory, $deadline - microtime(true));
                 $texts = [];
                 foreach ($parts as $part) {
+                    $ensureActive?->__invoke();
                     if (microtime(true) >= $deadline) throw new LectureGenerationException('بخش‌بندی انجام شد، اما سرویس در مهلت پردازش پاسخ کامل نداد؛ هیچ متن ناقصی ذخیره نشد.');
                     if ($chatAudio) {
                         $texts[] = $this->transcribeChunk($part, $config, $client, $deadline);
@@ -129,6 +133,7 @@ class LectureDescriptionGenerator
             $client = fn () => Http::withToken($config['api_key'])->withoutRedirecting()->connectTimeout(5)->timeout(max(1, (int)($deadline - microtime(true))));
             if ($text === '') throw new LectureGenerationException('سرویس متن سخنرانی را برنگرداند.');
 
+            $ensureActive?->__invoke();
             if ($transcribeOnly) return ['transcript' => $text];
             $phase = 'summary';
             if (microtime(true) >= $deadline) throw new LectureGenerationException('زمان پردازش تمام شد. دوباره تلاش کنید یا فایل کوتاه‌تری انتخاب کنید.');

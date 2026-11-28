@@ -59,6 +59,7 @@ Route::prefix('admin')->name('panel.')->group(function () {
         Route::put('scholars/{scholar}/lectures/{id}', [Panel\LectureController::class, 'update'])->name('lectures.update');
         Route::patch('scholars/{scholar}/lectures/{id}/toggle', [Panel\LectureController::class, 'toggle'])->name('lectures.toggle');
         Route::post('scholars/{scholar}/lectures/{id}/generate', [Panel\LectureController::class, 'generate'])->name('lectures.generate');
+        Route::post('scholars/{scholar}/lectures/{id}/discard', [Panel\LectureController::class, 'discard'])->name('lectures.discard');
         Route::get('scholars/{scholar}/lectures/{id}/ai-status', [Panel\LectureController::class, 'aiStatus'])->name('lectures.ai-status');
         Route::patch('scholars/{scholar}/lectures/{id}/move/{direction}', [Panel\LectureController::class, 'move'])->name('lectures.move');
         Route::delete('scholars/{scholar}/lectures/{id}', [Panel\LectureController::class, 'destroy'])->name('lectures.destroy');
