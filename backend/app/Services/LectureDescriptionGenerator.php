@@ -14,10 +14,13 @@ class LectureDescriptionGenerator
         $response = $client()->post(rtrim($config['base_url'], '/').'/chat/completions', [
             'model' => $config['transcription_model'],
             'messages' => [['role' => 'user', 'content' => [
-                ['type' => 'input_audio', 'input_audio' => ['data' => 'data:audio/mpeg;base64,'.base64_encode($bytes)]],
+                ['type' => 'input_audio', 'input_audio' => ['data' => base64_encode($bytes), 'format' => 'mp3']],
                 ['type' => 'text', 'text' => 'فقط متن کامل و دقیق این بخش صوتی را به زبان اصلی پیاده کن؛ خلاصه نکن و چیزی اضافه نکن.'],
             ]]],
         ]);
+        if ($response->status() === 402) {
+            throw new LectureGenerationException('اعتبار سرویس برای تبدیل صوت کافی نیست (HTTP 402)؛ متن ناقص ذخیره نشد.');
+        }
         if (!$response->successful()) throw new LectureGenerationException('تبدیل بخشی از صوت ناموفق بود (HTTP '.$response->status().')؛ متن ناقص ذخیره نشد.');
         if ($response->json('choices.0.finish_reason') === 'length') throw new LectureGenerationException('متن یکی از بخش‌های صوتی ناقص بود؛ متن ناقص ذخیره نشد.');
         $text = trim((string) $response->json('choices.0.message.content'));
@@ -77,20 +80,28 @@ class LectureDescriptionGenerator
             }
             $client = fn () => Http::withToken($config['api_key'])->withoutRedirecting()->connectTimeout(5)
                 ->timeout(max(1, (int)($deadline - microtime(true))));
-            $file = fopen($path, 'rb');
-            try {
-                $response = $client()->attach('file', $file, $lecture->audio_path ? basename($path) : 'lecture.mp3')
-                    ->post(rtrim($config['base_url'], '/').'/audio/transcriptions', [
-                        'model' => $config['transcription_model'], 'language' => 'fa', 'response_format' => 'json',
-                    ]);
-            } finally { fclose($file); }
-            if (in_array($response->status(), [404, 413], true)) {
+            $chatAudio = $config['transcription_model'] === 'manageit/gemini-3.8-flash';
+            $response = null;
+            if (!$chatAudio) {
+                $file = fopen($path, 'rb');
+                try {
+                    $response = $client()->attach('file', $file, $lecture->audio_path ? basename($path) : 'lecture.mp3')
+                        ->post(rtrim($config['base_url'], '/').'/audio/transcriptions', [
+                            'model' => $config['transcription_model'], 'language' => 'fa', 'response_format' => 'json',
+                        ]);
+                } finally { fclose($file); }
+            }
+            if ($chatAudio || in_array($response->status(), [404, 413], true)) {
                 $chunksDirectory = sys_get_temp_dir().'/lecture-chunks-'.bin2hex(random_bytes(12));
                 mkdir($chunksDirectory, 0700);
                 $parts = app(LectureAudioChunks::class)->prepare($path, $chunksDirectory, $deadline - microtime(true));
                 $texts = [];
                 foreach ($parts as $part) {
                     if (microtime(true) >= $deadline) throw new LectureGenerationException('بخش‌بندی انجام شد، اما سرویس در مهلت پردازش پاسخ کامل نداد؛ هیچ متن ناقصی ذخیره نشد.');
+                    if ($chatAudio) {
+                        $texts[] = $this->transcribeChunk($part, $config, $client, $deadline);
+                        continue;
+                    }
                     $stream = fopen($part, 'rb');
                     try {
                         $partResponse = $client()->attach('file', $stream, basename($part), ['Content-Type' => 'audio/mpeg'])
