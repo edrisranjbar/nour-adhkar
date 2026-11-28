@@ -29,7 +29,12 @@
                  data-status-url="{{ route('panel.lectures.ai-status', [$scholar->id, $lecture->id]) }}" data-busy="{{ $busy ? 1 : 0 }}">
                 <button class="btn sm" type="button" id="ai-transcribe">تبدیل صوت به متن</button>
                 <button class="btn sm" type="button" id="ai-summarize" @disabled(!empty($lecture->transcript))>خلاصه‌سازی متن</button>
-                <span id="ai-progress" hidden aria-hidden="true" style="display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:12px;height:12px;border:2px solid currentColor;border-left-color:transparent;border-radius:50%;display:inline-block;animation:ai-spin .7s linear infinite"></span><span id="ai-progress-label">در حال پردازش…</span></span>
+                <span id="ai-progress" hidden aria-hidden="true">
+                    <span style="display:inline-flex;align-items:center;gap:6px">
+                        <span aria-hidden="true" style="width:12px;height:12px;border:2px solid currentColor;border-left-color:transparent;border-radius:50%;display:inline-block;animation:ai-spin .7s linear infinite"></span>
+                        <span id="ai-progress-label"></span>
+                    </span>
+                </span>
                 <span class="muted" id="ai-generate-status" role="status" aria-live="polite">
                     @if (false)
                         در حال تبدیل صوت به متن…
